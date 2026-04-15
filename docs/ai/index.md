@@ -16,14 +16,16 @@
 
 ## 当前建议阅读顺序
 
-1. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
-2. [中型项目发现总结](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/medium-project-documentation-findings.md)
-3. [轻量版大项目治理方案](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/lightweight-large-project-doc-governance.md)
+1. [项目规则 AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
+2. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
+3. [中型项目发现总结](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/medium-project-documentation-findings.md)
+4. [轻量版大项目治理方案](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/lightweight-large-project-doc-governance.md)
 
 ## 当前活跃文档
 
 ### 全局文档
 
+- [项目规则 AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [中型项目发现总结](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/medium-project-documentation-findings.md)
 - [轻量版大项目治理方案](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/lightweight-large-project-doc-governance.md)
