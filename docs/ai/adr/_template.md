@@ -1,0 +1,31 @@
+# ADR 模板
+
+更新时间：YYYY-MM-DD
+编号：ADR-XXX
+标题：决策标题
+状态：提议中 | 已采纳 | 已废弃
+
+## 背景
+
+- 说明这个决策要解决什么问题
+
+## 决策
+
+- 清晰写出最终采用的方案
+
+## 备选方案
+
+- 记录评估过但未采用的方案
+
+## 决策理由
+
+- 说明为什么选择当前方案
+
+## 影响
+
+- 对架构、开发、测试、部署的影响
+
+## 关联文档
+
+- [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
+- [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
