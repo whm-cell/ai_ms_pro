@@ -349,6 +349,8 @@ Codex 下更合适的治理落点是：
 当前仓库已增加：
 
 - `python3 scripts/check_ai_docs.py`
+- `.codex/hooks.json`
+- `.codex/hooks/stop_ai_docs_check.py`
 
 它当前负责：
 
@@ -365,6 +367,7 @@ Codex 下更合适的治理落点是：
 短期：
 
 - 由 Codex 按 `AGENTS.md` 规则主动调用
+- 并由 repo-local `Stop` hook 自动兜底
 
 中期：
 
@@ -387,6 +390,21 @@ Codex 下更合适的治理落点是：
 - 最终在 CI 中强制执行
 
 也就是说，当前阶段可以先让 Codex 主动调用，但目标状态应是“流程绑定”，而不是“记忆绑定”。
+
+## Codex 化后的结构变化
+
+从“以 skill 为中心的提醒式治理”切换到“Codex 执行行为 + 验证层”后，以下结构仍然保留：
+
+- `docs/ai/index.md`
+- `plan / handoff / status / changelog / adr`
+- 按需使用的 skill
+
+真正发生变化的是治理重心：
+
+- 从“希望 skill 或模型记得更新文档”
+- 变成“由 `AGENTS.md` + `Stop hook` + 验证脚本`共同约束`”
+
+因此，不再适用的通常不是文档分层本身，而是那些脱离当前入口体系的旧草稿、重复稿或过渡目录。
 
 ## 官方来源
 

@@ -92,6 +92,8 @@ Preferred command:
 
 `python3 scripts/check_ai_docs.py`
 
+This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
+
 ### Phase 0: project start
 
 Use manual verification only:
@@ -130,6 +132,7 @@ Use this division:
 - `docs/ai/*`: persistent project memory
 - skills: task-specific execution guidance
 - scripts/checks: enforcement and drift detection
+- `.codex/hooks.json`: Codex lifecycle enforcement
 
 ## Completion Condition
 
