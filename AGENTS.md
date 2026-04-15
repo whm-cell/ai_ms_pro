@@ -8,11 +8,14 @@ The goal is to keep AI work resumable, compressible, and auditable across multip
 
 ## Document System
 
-All project-progress and AI-handoff documents live under `docs/ai/`.
+Project-progress and AI-handoff documents live under `docs/ai/`.
+
+Requirement-source and requirement-normalization documents live under `docs/requirements/`.
 
 Primary entrypoint:
 
 - `docs/ai/index.md`
+- `docs/requirements/index.md`
 
 Core documents:
 
@@ -21,6 +24,10 @@ Core documents:
 - `docs/ai/status/*.md`
 - `docs/ai/changelog/*.md`
 - `docs/ai/adr/*.md`
+- `docs/requirements/source/*.md`
+- `docs/requirements/normalized/*.md`
+- `docs/requirements/workstreams/*.md`
+- `docs/requirements/traceability-matrix.md`
 
 ## Required Workflow
 
@@ -68,11 +75,12 @@ Always check `docs/ai/index.md` after adding or changing:
 At the start of a new Codex task, prefer this order:
 
 1. `docs/ai/index.md`
-2. `docs/ai/plan.md`
-3. latest relevant `docs/ai/status/*.md`
-4. active relevant `docs/ai/handoffs/active/*.md`
-5. relevant `docs/ai/adr/*.md`
-6. archive only if necessary
+2. `docs/requirements/index.md` when the task is requirement-driven
+3. `docs/ai/plan.md`
+4. latest relevant `docs/ai/status/*.md`
+5. active relevant `docs/ai/handoffs/active/*.md`
+6. relevant `docs/ai/adr/*.md`
+7. archive only if necessary
 
 ## Compression Rule
 
@@ -130,9 +138,73 @@ Use this division:
 
 - `AGENTS.md`: always-on project rules
 - `docs/ai/*`: persistent project memory
+- `docs/requirements/*`: requirement source, normalization, and workstream tracking
 - skills: task-specific execution guidance
 - scripts/checks: enforcement and drift detection
 - `.codex/hooks.json`: Codex lifecycle enforcement
+
+## Skill Coordination
+
+Skills do not coordinate themselves. Codex coordinates them using repository rules and document layers.
+
+Use these rules:
+
+1. Existing skills are not "always running". They are loaded when relevant to the current task.
+2. New skills may be introduced mid-project, but they must write their results into the existing document system.
+3. Repository rules and `docs/ai/index.md` remain the stable control plane even when skills change.
+
+When adding new skills in a later stage:
+
+- keep `AGENTS.md` as the persistent source of workflow rules
+- use `plan`, `handoff`, `status`, `changelog`, and `adr` as the shared memory surface
+- let task skills produce task outputs, not governance decisions
+- update `adr` if a new skill changes a long-lived workflow or architecture decision
+
+If a new skill supersedes an old approach:
+
+- record the change in `status` or `adr`
+- archive old task-specific notes if they are no longer active
+- do not keep two conflicting active workflows in parallel
+
+## Skill Escalation Policy
+
+When a new skill is introduced, decide where it should be recorded based on scope and persistence.
+
+### Task prompt only
+
+Keep the skill only in the current task prompt when all of the following are true:
+
+- it is one-off or narrowly scoped
+- it does not change the repository's default workflow
+- future tasks do not need to assume it by default
+
+### Stage `status`
+
+Record the skill usage in the current stage `status` when:
+
+- it changes how the current stage is being executed
+- several tasks in the same stage depend on it
+- later work in the same stage would be confusing without noting the change
+
+### `AGENTS.md`
+
+Promote the skill usage pattern into `AGENTS.md` only when:
+
+- it becomes a recurring default for this repository
+- future Codex tasks should assume it without being reminded every time
+- it is a stable workflow preference rather than a temporary tactic
+
+### `ADR`
+
+Record the skill-related decision in an `adr` when:
+
+- it changes a long-lived workflow
+- it changes architecture, testing, deployment, review, or delivery strategy in a lasting way
+- the decision should remain true beyond the current stage
+
+### Conflict rule
+
+Do not keep a skill in both temporary task use and default repository rule without explicitly deciding which one is active.
 
 ## Completion Condition
 
