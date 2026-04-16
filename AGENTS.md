@@ -110,6 +110,22 @@ Use these rules:
 5. Subagents may return structured results or handoff drafts, but the main agent publishes the canonical shared documents.
 6. If a runtime finding remains relevant beyond the current local session, promote it into `handoff`, `status`, `adr`, `plan`, or requirements documents.
 
+## Session Promotion
+
+Runtime session files under `.codex/runtime/sessions/` are local recovery material and should follow the session template.
+
+Promote a session into a `handoff` when any of the following are true:
+
+- a subtask has completed
+- a task is being paused and should be resumed later
+- implementation changed in a way the next agent must understand
+- the session established durable valid/invalid approaches or risks that should be shared by default
+- the session created a change that should affect `status`, `adr`, `plan`, or requirements tracking
+
+Do not promote a session when it only contains local scratch work, personal prompt experimentation, or exploratory notes without repo-level reuse value.
+
+The main agent is responsible for deciding whether promotion is required and for publishing the canonical `handoff`.
+
 ## Compression Rule
 
 Project docs follow this lifecycle:

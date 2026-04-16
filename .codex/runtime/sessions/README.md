@@ -13,3 +13,8 @@
 - 优先追加或新建，不要把多个并发 session 写入同一文件
 - 内容仅供恢复本地上下文，不作为项目共享真相
 - 若结论需要被下一位 Agent 默认读取，应同步提升到 `docs/ai/`
+
+模板：
+
+- 使用 [session 模板](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/_template.md) 作为最小结构
+- 模板中的“需提升到共享治理层的内容”与“是否需要提升为 Handoff”用于判断是否必须进入 `docs/ai/handoffs/active/*.md`

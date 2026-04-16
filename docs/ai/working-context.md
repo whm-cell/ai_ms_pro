@@ -37,6 +37,7 @@
 - [需求文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/index.md)
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
+- [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 
 ## 下一次会话先读
 
@@ -45,6 +46,7 @@
 3. [需求文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/index.md)
 4. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 5. [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
+6. [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 
 ## 最近已固化的决策
 
@@ -56,6 +58,7 @@
 - `handoff` 模板已强化为“任务结果 + 有效路线 + 无效路线 + 候选路线”的接力结构
 - 治理脚本已新增 Phase-1 级 diff-aware warning，用于提示实现改动后未同步更新 `docs/ai/` 或 `docs/requirements/`
 - 治理脚本已新增 runtime state 防误提交规则，并对 `working-context` 新鲜度和 `handoff -> status` 压缩节奏给出 warning
+- 项目已定义 runtime session 最小模板，并已固化 “session 作为本地原料、handoff 作为共享交付物” 的提升规则
 
 ## 更新规则
 
