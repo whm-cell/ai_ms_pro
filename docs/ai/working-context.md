@@ -28,7 +28,7 @@
 - 当前仓库仍处于治理骨架阶段，尚未导入真实需求内容
 - `plan.md` 仍然是占位版，未进入项目真实规划状态
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
-- verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；但尚未接入真正的 runtime session 自动写入与恢复
+- verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime session best-effort 自动写入，但尚未接入 `SessionStart / Resume` 自动读取
 
 ## 当前真实入口
 
@@ -38,6 +38,7 @@
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+- [Runtime Stop Session Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 下一次会话先读
 
@@ -47,6 +48,7 @@
 4. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 5. [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 6. [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+7. [Runtime Stop Session Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -60,6 +62,8 @@
 - 治理脚本已新增 runtime state 防误提交规则，并对 `working-context` 新鲜度和 `handoff -> status` 压缩节奏给出 warning
 - 项目已定义 runtime session 最小模板，并已固化 “session 作为本地原料、handoff 作为共享交付物” 的提升规则
 - Stop hook 分级策略已上线：普通实现变更缺文档更新时给 warning，核心治理实现变更缺 `working-context` 或 `ADR` 更新时直接失败
+- `Stop` hook 已新增本地 runtime session 快照写入能力，产物仅进入 `.codex/runtime/sessions/`，不会自动改写共享治理文档
+- 当前活跃 `handoff` 已切换为 runtime Stop session 接力，下一步目标是补上 `SessionStart / Resume` 读取最近 session 的最小链路
 
 ## 更新规则
 

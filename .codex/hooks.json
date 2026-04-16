@@ -5,6 +5,12 @@
         "hooks": [
           {
             "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/stop_runtime_session.py\"",
+            "statusMessage": "Persisting runtime session snapshot",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/stop_ai_docs_check.py\"",
             "statusMessage": "Checking AI docs governance",
             "timeout": 30

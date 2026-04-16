@@ -15,6 +15,7 @@
 - hook 只能在本目录写入本地 runtime 状态
 - 不要把本目录文件加入 `docs/ai/index.md` 的默认阅读入口
 - 若某条信息需要跨 agent、跨阶段稳定共享，应提升到 `handoff`、`status`、`adr` 或需求文档
+- 当前已启用 `Stop` hook 的 best-effort session 快照写入；该快照只更新本地 runtime 层，不会自动改写共享治理文档
 
 子目录：
 
