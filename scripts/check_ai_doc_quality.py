@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AI_DIR = ROOT / "docs" / "ai"
 REQ_DIR = ROOT / "docs" / "requirements"
+RUNTIME_SESSION_TEMPLATE = ROOT / ".codex" / "runtime" / "sessions" / "_template.md"
 
 PLACEHOLDER_MARKERS = [
     "待补充",
@@ -72,6 +73,7 @@ def main() -> int:
         check_required_sections(
             path,
             [
+                "## 需求与工作流标识",
                 "## 本任务目标",
                 "## 已完成内容",
                 "## 修改文件",
@@ -92,6 +94,7 @@ def main() -> int:
         check_required_sections(
             template_path,
             [
+                "## 需求与工作流标识",
                 "## 本任务目标",
                 "## 已完成内容",
                 "## 修改文件",
@@ -110,6 +113,7 @@ def main() -> int:
         check_required_sections(
             path,
             [
+                "## 需求与工作流标识",
                 "## 当前阶段目标",
                 "## 当前完成度",
                 "## 本阶段关键成果",
@@ -120,6 +124,39 @@ def main() -> int:
             errors,
         )
         check_placeholder_markers(path, warnings)
+
+    status_template_path = AI_DIR / "status" / "_template.md"
+    if status_template_path.exists():
+        check_required_sections(
+            status_template_path,
+            [
+                "## 需求与工作流标识",
+                "## 当前阶段目标",
+                "## 当前完成度",
+                "## 本阶段关键成果",
+                "## 风险与阻塞",
+                "## 下一阶段重点",
+                "## 验收判断",
+            ],
+            errors,
+        )
+
+    if RUNTIME_SESSION_TEMPLATE.exists():
+        check_required_sections(
+            RUNTIME_SESSION_TEMPLATE,
+            [
+                "## 需求与工作流标识",
+                "## 当前目标",
+                "## 会话范围与触发背景",
+                "## 已做动作",
+                "## 触碰文件",
+                "## 当前 Open Loops",
+                "## 需提升到共享治理层的内容",
+                "## 下次 Resume 提示",
+                "## 是否需要提升为 Handoff",
+            ],
+            errors,
+        )
 
     for path in iter_docs(AI_DIR / "changelog"):
         check_required_sections(

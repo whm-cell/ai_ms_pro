@@ -35,6 +35,18 @@ TRANSCRIPT_KEYS = (
     "transcript_path",
     "transcriptPath",
 )
+REQUIREMENT_ID_KEYS = (
+    "requirement_ids",
+    "requirementIds",
+    "requirement_id",
+    "requirementId",
+)
+WORKSTREAM_ID_KEYS = (
+    "workstream_ids",
+    "workstreamIds",
+    "workstream_id",
+    "workstreamId",
+)
 RESUME_KEYS = (
     "resumed",
     "is_resume",
@@ -49,6 +61,14 @@ SUBAGENT_KEYS = (
 ENV_SESSION_ID_KEYS = (
     "CODEX_SESSION_ID",
     "SESSION_ID",
+)
+ENV_REQUIREMENT_ID_KEYS = (
+    "CODEX_REQUIREMENT_IDS",
+    "REQUIREMENT_IDS",
+)
+ENV_WORKSTREAM_ID_KEYS = (
+    "CODEX_WORKSTREAM_IDS",
+    "WORKSTREAM_IDS",
 )
 ENV_AGENT_KEYS = (
     "CODEX_AGENT_TYPE",
@@ -81,6 +101,12 @@ def append_observation(payload: dict[str, Any]) -> None:
     session_id = first_value(payload, SESSION_ID_KEYS) or first_env_value(ENV_SESSION_ID_KEYS) or "unknown-session"
     changed_paths = git_status_paths()
     promote = should_promote(changed_paths)
+    requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
+    workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
+    if not requirement_ids:
+        requirement_ids = collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
+    if not workstream_ids:
+        workstream_ids = collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
 
     observation = {
         "timestamp": now.isoformat(),
@@ -97,6 +123,8 @@ def append_observation(payload: dict[str, Any]) -> None:
         "changed_path_count": len(changed_paths),
         "docs_changed": any(is_under_doc_root(path_text) for path_text in changed_paths),
         "runtime_only_changes": has_runtime_only_changes(changed_paths),
+        "requirement_ids": requirement_ids,
+        "workstream_ids": workstream_ids,
         "needs_governance_promotion": promote,
         "promotion_reason": infer_promotion_reason(promote, changed_paths),
     }
@@ -242,6 +270,59 @@ def first_value(data: Any, keys: tuple[str, ...]) -> Any:
             if is_meaningful(found):
                 return found
     return None
+
+
+def collect_identifier_values(data: Any, keys: tuple[str, ...]) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+
+    def add(candidate: str) -> None:
+        normalized = candidate.strip()
+        if not normalized or normalized in seen:
+            return
+        seen.add(normalized)
+        values.append(normalized)
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key in keys:
+                    extract_from_value(value)
+                else:
+                    visit(value)
+        elif isinstance(node, list):
+            for item in node:
+                visit(item)
+
+    def extract_from_value(value: Any) -> None:
+        if isinstance(value, str):
+            for piece in value.split(","):
+                add(piece)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, str):
+                    add(item)
+        elif isinstance(value, dict):
+            visit(value)
+
+    visit(data)
+    return values
+
+
+def collect_env_identifiers(keys: tuple[str, ...]) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+    for key in keys:
+        raw = os.environ.get(key, "")
+        if not raw:
+            continue
+        for piece in raw.split(","):
+            normalized = piece.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(normalized)
+    return values
 
 
 def is_meaningful(value: Any) -> bool:

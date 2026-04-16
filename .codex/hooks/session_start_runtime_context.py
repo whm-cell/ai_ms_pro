@@ -52,6 +52,7 @@ def build_additional_context(payload: dict[str, Any]) -> str:
         return ""
 
     sections = parse_sections(session_file)
+    traceability = compact(sections.get("需求与工作流标识", ""))
     current_goal = compact(sections.get("当前目标", ""))
     open_loops = compact(sections.get("当前 Open Loops", ""))
     resume_tips = compact(sections.get("下次 Resume 提示", ""))
@@ -61,6 +62,8 @@ def build_additional_context(payload: dict[str, Any]) -> str:
         f"本地 runtime session 恢复材料：`{session_file.relative_to(ROOT)}`",
         f"启动来源：`{source}`",
     ]
+    if traceability:
+        lines.append(f"Requirement/Workstream 绑定：{traceability}")
     if current_goal:
         lines.append(f"最近目标：{current_goal}")
     if open_loops:

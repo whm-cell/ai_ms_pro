@@ -126,6 +126,17 @@ Do not promote a session when it only contains local scratch work, personal prom
 
 The main agent is responsible for deciding whether promotion is required and for publishing the canonical `handoff`.
 
+## Requirement Traceability
+
+When a task is already mapped to normalized requirements or workstreams, include those identifiers in runtime and governance artifacts.
+
+Use these rules:
+
+1. `handoff`, `status`, runtime session files, and observation-derived handoff drafts should carry `Requirement IDs` and `Workstream IDs` when the mapping is known.
+2. If the mapping is not known yet, write `未绑定` instead of inventing IDs.
+3. The canonical mapping still lives in `docs/requirements/traceability-matrix.md` and related workstream docs; AI-side metadata references that mapping and must not drift from it.
+4. When a task is newly bound to a requirement or workstream, update both the AI-side artifact and the requirements-side traceability docs in the same change whenever feasible.
+
 ## Observation Reduction
 
 Runtime observation files under `.codex/runtime/observations/*.jsonl` are local reduction inputs, not shared truth.

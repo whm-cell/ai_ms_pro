@@ -5,6 +5,12 @@
 任务：task-name
 状态：进行中 | 待接力 | 已完成
 
+## 需求与工作流标识
+
+- Requirement IDs：未绑定
+- Workstream IDs：未绑定
+- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 和相关 workstream 文档一致
+
 ## 本任务目标
 
 - 说明当前任务要完成什么

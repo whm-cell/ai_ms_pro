@@ -1,6 +1,6 @@
 # 需求文档入口索引
 
-更新时间：2026-04-15
+更新时间：2026-04-16
 当前状态：初始化
 
 ## 目的
@@ -34,6 +34,7 @@
 - `normalized/` 将原始需求统一整理成一致结构
 - `workstreams/` 将多个需求映射成可开发的业务工作流
 - `traceability-matrix.md` 负责串联 `需求 -> 工作流 -> 阶段 -> 实现/测试`
+- 当 `docs/ai/` 下的 `handoff`、`status` 或 reducer 草稿已经绑定需求时，应显式写出 `Requirement IDs` / `Workstream IDs`，并与本目录中的追踪关系保持一致
 
 ## 当前活跃内容
 

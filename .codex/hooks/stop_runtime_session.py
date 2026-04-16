@@ -32,6 +32,18 @@ TRANSCRIPT_KEYS = (
     "transcript_path",
     "transcriptPath",
 )
+REQUIREMENT_ID_KEYS = (
+    "requirement_ids",
+    "requirementIds",
+    "requirement_id",
+    "requirementId",
+)
+WORKSTREAM_ID_KEYS = (
+    "workstream_ids",
+    "workstreamIds",
+    "workstream_id",
+    "workstreamId",
+)
 RESUME_KEYS = (
     "resumed",
     "is_resume",
@@ -46,6 +58,14 @@ SUBAGENT_KEYS = (
 ENV_SESSION_ID_KEYS = (
     "CODEX_SESSION_ID",
     "SESSION_ID",
+)
+ENV_REQUIREMENT_ID_KEYS = (
+    "CODEX_REQUIREMENT_IDS",
+    "REQUIREMENT_IDS",
+)
+ENV_WORKSTREAM_ID_KEYS = (
+    "CODEX_WORKSTREAM_IDS",
+    "WORKSTREAM_IDS",
 )
 ENV_AGENT_KEYS = (
     "CODEX_AGENT_TYPE",
@@ -82,6 +102,12 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
     session_type = infer_session_type(payload, session_file)
     prompt_preview = compact_text(first_value(payload, TEXT_KEYS))
     transcript_path = compact_text(first_value(payload, TRANSCRIPT_KEYS))
+    requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
+    workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
+    if not requirement_ids:
+        requirement_ids = collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
+    if not workstream_ids:
+        workstream_ids = collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
     changed_paths = git_status_paths()
     now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
@@ -98,6 +124,12 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
             f"Session 类型：{session_type}",
             f"分支或线程：{branch_or_thread}",
             f"Session ID：{session_id}",
+            "",
+            "## 需求与工作流标识",
+            "",
+            f"- Requirement IDs：{format_identifiers(requirement_ids)}",
+            f"- Workstream IDs：{format_identifiers(workstream_ids)}",
+            "- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 保持一致",
             "",
             "## 当前目标",
             "",
@@ -291,6 +323,59 @@ def first_value(data: Any, keys: tuple[str, ...]) -> Any:
     return None
 
 
+def collect_identifier_values(data: Any, keys: tuple[str, ...]) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+
+    def add(candidate: str) -> None:
+        normalized = candidate.strip()
+        if not normalized or normalized in seen:
+            return
+        seen.add(normalized)
+        values.append(normalized)
+
+    def visit(node: Any) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key in keys:
+                    extract_from_value(value)
+                else:
+                    visit(value)
+        elif isinstance(node, list):
+            for item in node:
+                visit(item)
+
+    def extract_from_value(value: Any) -> None:
+        if isinstance(value, str):
+            for piece in value.split(","):
+                add(piece)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, str):
+                    add(item)
+        elif isinstance(value, dict):
+            visit(value)
+
+    visit(data)
+    return values
+
+
+def collect_env_identifiers(keys: tuple[str, ...]) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+    for key in keys:
+        raw = os.environ.get(key, "")
+        if not raw:
+            continue
+        for piece in raw.split(","):
+            normalized = piece.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(normalized)
+    return values
+
+
 def is_meaningful(value: Any) -> bool:
     if value is None:
         return False
@@ -304,6 +389,12 @@ def compact_text(value: Any) -> str:
         return ""
     compact = " ".join(value.split())
     return compact[:MAX_FIELD_LENGTH].strip()
+
+
+def format_identifiers(values: list[str]) -> str:
+    if not values:
+        return "未绑定"
+    return ", ".join(values)
 
 
 def bullet(value: str, fallback: str) -> str:

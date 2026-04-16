@@ -5,6 +5,12 @@
 任务：runtime-hooks
 状态：进行中
 
+## 需求与工作流标识
+
+- Requirement IDs：未绑定
+- Workstream IDs：未绑定
+- 当前仍处于治理骨架阶段，尚未导入真实 requirement/workstream 绑定
+
 ## 本任务目标
 
 - 为当前仓库补上最小可用的 runtime harness 自动化链路：`Stop` 写本地 observation 与 session 快照，`SessionStart` 读取最近 session 摘要

@@ -17,6 +17,7 @@
 - `prompt_preview`：本次 Stop 事件可提取到的精简用户意图
 - `changed_paths` / `changed_path_count`：当前工作区触碰范围
 - `needs_governance_promotion` / `promotion_reason`：供后续 reducer 或主 Agent 判断是否要升格为 `handoff`
+- `requirement_ids` / `workstream_ids`：如 payload 或环境显式提供，则一并写入 observation 原料，供 reducer 聚合
 
 Reducer 用法：
 
@@ -24,6 +25,8 @@ Reducer 用法：
   默认读取最近一个 observation JSONL，并输出 handoff-compatible 草稿到 stdout
 - `python3 scripts/reduce_runtime_observations.py --input /path/to/observations.jsonl --output /tmp/observation-draft.md`
   显式指定输入文件和输出路径
+- `python3 scripts/reduce_runtime_observations.py --requirement-id REQ-001 --workstream-id WS-01`
+  为生成草稿显式补齐 requirement/workstream metadata
 - 默认提升顺序是 `observations -> handoff draft -> 主 Agent 审核 -> status/ADR`
 
 规则：

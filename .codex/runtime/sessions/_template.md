@@ -5,6 +5,12 @@ Agent：main | subagent
 Session 类型：new | resume | pause-before-exit
 分支或线程：branch-name | thread-id
 
+## 需求与工作流标识
+
+- Requirement IDs：未绑定
+- Workstream IDs：未绑定
+- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 保持一致
+
 ## 当前目标
 
 - 用一句话说明本次 session 试图推进什么

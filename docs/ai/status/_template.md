@@ -4,6 +4,12 @@
 阶段：stage-XX
 状态：进行中 | 阶段完成 | 阻塞
 
+## 需求与工作流标识
+
+- Requirement IDs：未绑定
+- Workstream IDs：未绑定
+- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 和相关 workstream 文档一致
+
 ## 当前阶段目标
 
 - 说明本阶段的主要交付目标

@@ -5,6 +5,12 @@
 任务：observation-reducer
 状态：进行中
 
+## 需求与工作流标识
+
+- Requirement IDs：未绑定
+- Workstream IDs：未绑定
+- 当前 reducer 已支持 metadata 位点，但项目尚未导入真实需求绑定
+
 ## 本任务目标
 
 - 为 runtime observations 补上一个显式触发的 reducer，形成从本地 observation 原料到共享治理层的最小闭环
@@ -15,15 +21,17 @@
 
 - 新增 reducer 脚本 [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)，会读取 observation JSONL 并输出 handoff-compatible markdown 草稿
 - reducer 默认优先处理 `needs_governance_promotion=true` 的 observation；如果没有 promotable 记录，则回退到最近 observations
-- reducer 支持 `--input`、`--output`、`--limit`、`--stage`、`--task`、`--title` 参数，便于按需生成草稿
+- reducer 支持 `--input`、`--output`、`--limit`、`--stage`、`--task`、`--title`、`--requirement-id`、`--workstream-id` 参数，便于按需生成草稿
 - 新增 [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)，正式采纳 “observations -> handoff draft -> 主 Agent 审核 -> status/ADR” 的默认顺序
-- 更新 [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)、[working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[index.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md) 和 runtime observations README，同步 reducer 的职责边界
+- 新增 [ADR-004-requirement-workstream-metadata.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)，正式采纳 requirement/workstream metadata 的统一位点和绑定规则
+- 更新 [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)、[working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[index.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md) 和 runtime observations README，同步 reducer 的职责边界与 metadata 规则
 - 已用临时 observation JSONL 样本手工验证 reducer 输出结构，确认生成结果可直接作为 handoff 草稿起点
 
 ## 修改文件
 
 - [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)
 - [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
+- [ADR-004-requirement-workstream-metadata.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 - [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
 - [observations/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/observations/README.md)
 - [working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
@@ -33,15 +41,15 @@
 
 - observation reducer 作为显式脚本运行，不接入 hook 自动执行
 - reducer 默认输出 handoff-compatible 草稿，而不是直接输出 canonical `status` 或 `ADR`
-- reducer 只根据 observation 中的 promotion flag、共享层 changed paths、prompt preview 和 promotion reason 生成候选摘要，最终发布仍由主 Agent 审核决定
+- reducer 只根据 observation 中的 promotion flag、共享层 changed paths、prompt preview、promotion reason 和显式 requirement/workstream metadata 生成候选摘要，最终发布仍由主 Agent 审核决定
 - 当 observations 中没有 promotable 记录时，reducer 允许回退到最近 observations，以便生成 review 起点，但这类草稿默认不应直接发布
 
 ## 当前未完成项
 
 - 尚未把 reducer 输出与 session 文件自动关联
 - 尚未定义 reducer 何时应直接建议 `status` 或 `ADR` 候选
-- 尚未把 requirement/workstream metadata 接入 reducer 输出
 - 尚未在真实长期 observation 数据上验证 reducer 的噪音水平
+- 尚未验证真实任务绑定进入后，metadata 与 `traceability-matrix.md` 的同步流程是否顺滑
 
 ## 已知风险与注意事项
 
@@ -66,7 +74,7 @@
 
 - 为 reducer 接入 session 文件引用，提升草稿对上下文的还原能力
 - 在 reducer 中增加重复模式识别，只有跨 session 稳定出现时才建议压缩到 `status` 或 `ADR`
-- 为 reducer 输出补 requirement/workstream metadata，提升后续需求追踪能力
+- 在真实需求导入后，用 `--requirement-id` / `--workstream-id` 运行 reducer，验证 metadata 是否足够支撑后续追踪
 
 ## 下一位 Agent 的第一步动作
 

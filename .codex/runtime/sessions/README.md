@@ -15,6 +15,7 @@
 - 若结论需要被下一位 Agent 默认读取，应同步提升到 `docs/ai/`
 - 当前 `Stop` hook 会按 session 维度 best-effort 刷新同一个本地快照文件；它不会自动发布 `handoff`
 - 当前 `SessionStart` hook 会在 `startup|resume` 时 best-effort 读取最近 session 文件，并把精简摘要注入额外 developer context
+- 若当前任务已绑定真实需求，应在 session 文件中填写 `Requirement IDs` / `Workstream IDs`，并与 `docs/requirements/traceability-matrix.md` 保持一致
 
 模板：
 

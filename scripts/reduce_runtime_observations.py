@@ -32,6 +32,8 @@ def main() -> int:
         stage=args.stage,
         task=args.task,
         title=args.title,
+        requirement_ids=args.requirement_ids,
+        workstream_ids=args.workstream_ids,
     )
 
     if args.output:
@@ -78,6 +80,20 @@ def parse_args() -> argparse.Namespace:
         "--title",
         default="Runtime Observation Reducer Draft",
         help="Markdown title for the generated draft.",
+    )
+    parser.add_argument(
+        "--requirement-id",
+        action="append",
+        default=[],
+        dest="requirement_ids",
+        help="Requirement ID to attach to the generated draft. Repeat for multiple IDs.",
+    )
+    parser.add_argument(
+        "--workstream-id",
+        action="append",
+        default=[],
+        dest="workstream_ids",
+        help="Workstream ID to attach to the generated draft. Repeat for multiple IDs.",
     )
     return parser.parse_args()
 
@@ -141,12 +157,18 @@ def render_handoff_draft(
     stage: str,
     task: str,
     title: str,
+    requirement_ids: list[str],
+    workstream_ids: list[str],
 ) -> str:
     now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
     selected_sessions = unique_strings(selected, "session_id")
     shared_paths = count_shared_paths(selected)
     prompt_previews = ordered_unique_texts(selected, "prompt_preview")
     promotion_reasons = ordered_unique_texts(selected, "promotion_reason")
+    observed_requirement_ids = aggregate_identifier_lists(selected, "requirement_ids")
+    observed_workstream_ids = aggregate_identifier_lists(selected, "workstream_ids")
+    merged_requirement_ids = merge_identifier_lists(requirement_ids, observed_requirement_ids)
+    merged_workstream_ids = merge_identifier_lists(workstream_ids, observed_workstream_ids)
     runtime_only_count = sum(1 for entry in selected if entry.get("runtime_only_changes") is True)
     promotable_count = sum(1 for entry in entries if entry.get("needs_governance_promotion") is True)
     top_paths = [path for path, _ in shared_paths.most_common(MAX_SECTION_ITEMS)]
@@ -160,6 +182,12 @@ def render_handoff_draft(
             f"阶段：{stage}",
             f"任务：{task}",
             "状态：草稿",
+            "",
+            "## 需求与工作流标识",
+            "",
+            f"- Requirement IDs：{format_identifiers(merged_requirement_ids)}",
+            f"- Workstream IDs：{format_identifiers(merged_workstream_ids)}",
+            "- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 和相关 workstream 文档保持一致",
             "",
             "## 本任务目标",
             "",
@@ -190,12 +218,20 @@ def render_handoff_draft(
                 prefixed_preview("当前 observation 提升理由聚类", promotion_reasons, 2),
                 "当前样本中尚未形成稳定的提升理由聚类",
             ),
+            bullet(
+                prefixed_preview("从 observation 中聚合到的 Requirement IDs", merged_requirement_ids, 4),
+                "当前 observations 尚未绑定 Requirement IDs",
+            ),
+            bullet(
+                prefixed_preview("从 observation 中聚合到的 Workstream IDs", merged_workstream_ids, 4),
+                "当前 observations 尚未绑定 Workstream IDs",
+            ),
             "",
             "## 当前未完成项",
             "",
             "- 需要主 Agent 审核本草稿，确认是否应该发布或更新 canonical handoff",
             "- 若同类 observation 已跨多次 session 稳定出现，再决定是否压缩到 status 或 ADR",
-            "- 尚未把 reducer 输出接入 requirement/workstream metadata",
+            "- 若当前任务已正式绑定需求或 workstream，需要把同一组 IDs 同步回 traceability matrix 和相关 workstream 文档",
             "",
             "## 已知风险与注意事项",
             "",
@@ -220,7 +256,7 @@ def render_handoff_draft(
             "",
             "- 将本草稿与相关 session 文件、active handoff 和 working-context 一起对读，再决定是否发布 canonical handoff",
             "- 如果同类 observation 在多个 session 中重复出现，可增加 status 或 ADR 候选压缩",
-            "- 后续可在 reducer 中接入 requirement/workstream metadata，以提高追踪能力",
+            "- 若真实项目需求已经导入，运行 reducer 时显式补齐 `--requirement-id` / `--workstream-id`，减少后续追踪断点",
             "",
             "## 下一位 Agent 的第一步动作",
             "",
@@ -266,6 +302,37 @@ def ordered_unique_texts(entries: list[dict[str, Any]], key: str) -> list[str]:
     return values
 
 
+def aggregate_identifier_lists(entries: list[dict[str, Any]], key: str) -> list[str]:
+    values: list[str] = []
+    seen: set[str] = set()
+    for entry in entries:
+        raw = entry.get(key)
+        if not isinstance(raw, list):
+            continue
+        for item in raw:
+            if not isinstance(item, str):
+                continue
+            normalized = item.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(normalized)
+    return values
+
+
+def merge_identifier_lists(*groups: list[str]) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for group in groups:
+        for item in group:
+            normalized = item.strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            merged.append(normalized)
+    return merged
+
+
 def count_shared_paths(entries: list[dict[str, Any]]) -> Counter[str]:
     counter: Counter[str] = Counter()
     for entry in entries:
@@ -309,6 +376,12 @@ def bullets_or_fallback(values: list[str], fallback: str) -> str:
 def bullet(value: str, fallback: str) -> str:
     text = value or fallback
     return f"- {text}"
+
+
+def format_identifiers(values: list[str]) -> str:
+    if not values:
+        return "未绑定"
+    return ", ".join(values)
 
 
 def compact_text(value: Any) -> str:
