@@ -15,9 +15,11 @@
 - hook 只能在本目录写入本地 runtime 状态
 - 不要把本目录文件加入 `docs/ai/index.md` 的默认阅读入口
 - 若某条信息需要跨 agent、跨阶段稳定共享，应提升到 `handoff`、`status`、`adr` 或需求文档
+- 当前已启用 `Stop` hook 的 best-effort observation 采集；原始 observation 只追加到 `.codex/runtime/observations/*.jsonl`
 - 当前已启用 `Stop` hook 的 best-effort session 快照写入；该快照只更新本地 runtime 层，不会自动改写共享治理文档
+- 当前已启用 `SessionStart` hook 的 best-effort 最近 session 摘要读取；它只注入额外 developer context，不会替代 `docs/ai/` 共享治理文档
 
 子目录：
 
 - `sessions/`：单次会话的本地恢复材料
-- `observations/`：运行过程中的本地观察材料
+- `observations/`：运行过程中的本地观察材料与 reducer 输入原料

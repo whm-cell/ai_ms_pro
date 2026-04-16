@@ -18,17 +18,19 @@
 
 ## 当前活跃队列
 
-1. 把真实需求文档录入 `docs/requirements/source/`
-2. 将原始需求整理为 `normalized/` 文档
-3. 将标准化需求归并为 `workstreams/`
-4. 把工作流映射回 `plan.md` 与后续阶段文档
+1. 继续补齐 runtime harness 的最小自动化链路，确保 `session -> observation -> 后续提炼` 边界清晰
+2. 评估 observation reducer 应先接 `handoff` 还是先做长期经验提炼
+3. 把真实需求文档录入 `docs/requirements/source/`
+4. 将原始需求整理为 `normalized/` 文档
+5. 将标准化需求归并为 `workstreams/`
+6. 把工作流映射回 `plan.md` 与后续阶段文档
 
 ## 当前风险与阻塞
 
 - 当前仓库仍处于治理骨架阶段，尚未导入真实需求内容
 - `plan.md` 仍然是占位版，未进入项目真实规划状态
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
-- verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime session best-effort 自动写入，但尚未接入 `SessionStart / Resume` 自动读取
+- verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime observation append-only 采集与 runtime session best-effort 自动写入，以及 `SessionStart / Resume` 时的最近 session 精简摘要读取
 
 ## 当前真实入口
 
@@ -38,7 +40,7 @@
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
-- [Runtime Stop Session Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+- [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 下一次会话先读
 
@@ -48,7 +50,7 @@
 4. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 5. [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 6. [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
-7. [Runtime Stop Session Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+7. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -62,8 +64,10 @@
 - 治理脚本已新增 runtime state 防误提交规则，并对 `working-context` 新鲜度和 `handoff -> status` 压缩节奏给出 warning
 - 项目已定义 runtime session 最小模板，并已固化 “session 作为本地原料、handoff 作为共享交付物” 的提升规则
 - Stop hook 分级策略已上线：普通实现变更缺文档更新时给 warning，核心治理实现变更缺 `working-context` 或 `ADR` 更新时直接失败
+- `Stop` hook 已新增本地 runtime observation 采集能力，产物只追加到 `.codex/runtime/observations/*.jsonl`，用于后续 reducer 或手工提炼
 - `Stop` hook 已新增本地 runtime session 快照写入能力，产物仅进入 `.codex/runtime/sessions/`，不会自动改写共享治理文档
-- 当前活跃 `handoff` 已切换为 runtime Stop session 接力，下一步目标是补上 `SessionStart / Resume` 读取最近 session 的最小链路
+- 当前活跃 `handoff` 已切换为 Runtime Hooks 接力；`Stop observation + Stop session + SessionStart` 的最小链路已齐，下一步应决定 observation reducer / promotion 自动化的边界
+- `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
 ## 更新规则
 

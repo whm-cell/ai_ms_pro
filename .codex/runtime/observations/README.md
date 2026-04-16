@@ -6,6 +6,18 @@
 - 压缩前快照
 - 需后续提炼的临时发现
 
+当前最小实现：
+
+- `Stop` hook 会 best-effort 追加 observation 到 `YYYY-MM-DD.jsonl`
+- 每条记录都是 append-only 原料，不直接替代 `handoff`、`status`、`adr`
+- observation 会记录时间戳、session id、agent、当前分支/线程、工作区变更、是否建议提升到共享治理层
+
+当前字段侧重点：
+
+- `prompt_preview`：本次 Stop 事件可提取到的精简用户意图
+- `changed_paths` / `changed_path_count`：当前工作区触碰范围
+- `needs_governance_promotion` / `promotion_reason`：供后续 reducer 或主 Agent 判断是否要升格为 `handoff`
+
 规则：
 
 - 只保存本地 runtime 原料
