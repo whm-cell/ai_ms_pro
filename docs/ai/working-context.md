@@ -18,8 +18,8 @@
 
 ## 当前活跃队列
 
-1. 继续补齐 runtime harness 的最小自动化链路，确保 `session -> observation -> 后续提炼` 边界清晰
-2. 评估 observation reducer 应先接 `handoff` 还是先做长期经验提炼
+1. 用真实 observation 数据验证 reducer 输出质量，确认 handoff-first 路径在真实 session 中是否足够稳定
+2. 决定 observation reducer 何时应建议继续压缩到 `status` 或 `ADR`
 3. 把真实需求文档录入 `docs/requirements/source/`
 4. 将原始需求整理为 `normalized/` 文档
 5. 将标准化需求归并为 `workstreams/`
@@ -40,7 +40,9 @@
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+- [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+- [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 
 ## 下一次会话先读
 
@@ -50,7 +52,9 @@
 4. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 5. [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 6. [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
-7. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+7. [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
+8. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
+9. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -66,7 +70,8 @@
 - Stop hook 分级策略已上线：普通实现变更缺文档更新时给 warning，核心治理实现变更缺 `working-context` 或 `ADR` 更新时直接失败
 - `Stop` hook 已新增本地 runtime observation 采集能力，产物只追加到 `.codex/runtime/observations/*.jsonl`，用于后续 reducer 或手工提炼
 - `Stop` hook 已新增本地 runtime session 快照写入能力，产物仅进入 `.codex/runtime/sessions/`，不会自动改写共享治理文档
-- 当前活跃 `handoff` 已切换为 Runtime Hooks 接力；`Stop observation + Stop session + SessionStart` 的最小链路已齐，下一步应决定 observation reducer / promotion 自动化的边界
+- Observation reducer 已上线，默认顺序是 `observations -> handoff draft -> 主 Agent 审核 -> status/ADR`，并通过显式脚本而不是 hook 自动运行
+- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer` 两个子任务；下一步应基于真实 observations 验证 reducer 噪音和压缩阈值
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
 ## 更新规则

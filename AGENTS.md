@@ -33,7 +33,7 @@ Core documents:
 Local runtime memory:
 
 - `.codex/runtime/sessions/*.md`
-- `.codex/runtime/observations/*.md`
+- `.codex/runtime/observations/*.jsonl`
 
 These runtime files are local recovery artifacts. They are not canonical project memory and do not replace `docs/ai/*` or `docs/requirements/*`.
 
@@ -125,6 +125,17 @@ Promote a session into a `handoff` when any of the following are true:
 Do not promote a session when it only contains local scratch work, personal prompt experimentation, or exploratory notes without repo-level reuse value.
 
 The main agent is responsible for deciding whether promotion is required and for publishing the canonical `handoff`.
+
+## Observation Reduction
+
+Runtime observation files under `.codex/runtime/observations/*.jsonl` are local reduction inputs, not shared truth.
+
+Use these rules:
+
+1. Reduce observations explicitly with `python3 scripts/reduce_runtime_observations.py` when local observation material should be reviewed for promotion.
+2. The default reduction order is `observations -> handoff draft -> main agent review -> status/adr if warranted`.
+3. Reducer output is a candidate artifact. It does not replace the main agent's responsibility to decide whether canonical shared docs should change.
+4. Only promote to `status` or `adr` when the reducer output has already been reviewed and the conclusion is stable beyond a single local observation batch.
 
 ## Compression Rule
 

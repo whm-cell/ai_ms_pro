@@ -18,6 +18,14 @@
 - `changed_paths` / `changed_path_count`：当前工作区触碰范围
 - `needs_governance_promotion` / `promotion_reason`：供后续 reducer 或主 Agent 判断是否要升格为 `handoff`
 
+Reducer 用法：
+
+- `python3 scripts/reduce_runtime_observations.py`
+  默认读取最近一个 observation JSONL，并输出 handoff-compatible 草稿到 stdout
+- `python3 scripts/reduce_runtime_observations.py --input /path/to/observations.jsonl --output /tmp/observation-draft.md`
+  显式指定输入文件和输出路径
+- 默认提升顺序是 `observations -> handoff draft -> 主 Agent 审核 -> status/ADR`
+
 规则：
 
 - 只保存本地 runtime 原料
