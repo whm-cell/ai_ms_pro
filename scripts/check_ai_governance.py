@@ -10,12 +10,22 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AI_DOC_ROOT = ROOT / "docs" / "ai"
 REQ_DOC_ROOT = ROOT / "docs" / "requirements"
+ADR_DIR = AI_DOC_ROOT / "adr"
 WORKING_CONTEXT_PATH = AI_DOC_ROOT / "working-context.md"
 ACTIVE_HANDOFF_DIR = AI_DOC_ROOT / "handoffs" / "active"
 STATUS_DIR = AI_DOC_ROOT / "status"
 RUNTIME_SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
 RUNTIME_OBSERVATION_DIR = ROOT / ".codex" / "runtime" / "observations"
 RUNTIME_STATE_ROOTS = (RUNTIME_SESSION_DIR, RUNTIME_OBSERVATION_DIR)
+GOVERNANCE_IMPLEMENTATION_ROOTS = (
+    ROOT / "scripts",
+    ROOT / ".codex" / "hooks",
+    ROOT / ".githooks",
+)
+GOVERNANCE_IMPLEMENTATION_FILES = {
+    ROOT / ".codex" / "hooks.json",
+    ROOT / ".codex" / "config.toml",
+}
 CHECKS = [
     ("structure", ROOT / "scripts" / "check_ai_docs.py"),
     ("quality", ROOT / "scripts" / "check_ai_doc_quality.py"),
@@ -44,6 +54,12 @@ def main() -> int:
             warnings.append(
                 "Implementation changes detected outside docs/ai and docs/requirements, "
                 "but no docs updates were found."
+            )
+        governance_impl_changed = any(is_governance_implementation_path(path) for path in changed_paths)
+        if governance_impl_changed and not has_governance_sync_docs(changed_paths):
+            errors.append(
+                "Core governance implementation changed, but neither working-context.md nor an ADR "
+                "was updated. Sync current-state or decision docs before completing the task."
             )
 
     staged_paths = load_staged_paths()
@@ -177,7 +193,22 @@ def is_under_root(path: Path, roots: tuple[Path, ...]) -> bool:
 def is_runtime_state_file(path: Path) -> bool:
     if not is_under_root(path, RUNTIME_STATE_ROOTS):
         return False
-    return path.name != "README.md"
+    return path.name != "README.md" and not path.name.startswith("_")
+
+
+def is_governance_implementation_path(path: Path) -> bool:
+    if path in GOVERNANCE_IMPLEMENTATION_FILES:
+        return True
+    return is_under_root(path, GOVERNANCE_IMPLEMENTATION_ROOTS)
+
+
+def has_governance_sync_docs(paths: list[Path]) -> bool:
+    for path in paths:
+        if path == WORKING_CONTEXT_PATH:
+            return True
+        if is_under_root(path, (ADR_DIR,)):
+            return True
+    return False
 
 
 def is_implementation_candidate(path: Path) -> bool:
