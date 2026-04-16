@@ -27,7 +27,7 @@
 
 - 当前仓库仍处于治理骨架阶段，尚未导入真实需求内容
 - `plan.md` 仍然是占位版，未进入项目真实规划状态
-- 文档质量检查已上线，但当前只覆盖结构完整性和关键章节完整性，尚未做更深的内容语义评估
+- 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；但当前 diff-aware 文档漂移检查仍以 warning 为主，尚未升级为强阻断
 
 ## 当前真实入口
 
@@ -52,6 +52,8 @@
 - 新增 skill 的记录位置由 scope 决定，而不是全部写入 `AGENTS.md`
 - 项目采用 `Runtime Harness + Governance Harness + Verification Harness` 的三层分工
 - `.codex/runtime/` 只保存本地 session/observation 原料，不替代 `docs/ai/` 共享治理文档
+- `handoff` 模板已强化为“任务结果 + 有效路线 + 无效路线 + 候选路线”的接力结构
+- 治理脚本已新增 Phase-1 级 diff-aware warning，用于提示实现改动后未同步更新 `docs/ai/` 或 `docs/requirements/`
 
 ## 更新规则
 

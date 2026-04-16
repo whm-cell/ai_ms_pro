@@ -78,11 +78,33 @@ def main() -> int:
                 "## 关键实现决策",
                 "## 当前未完成项",
                 "## 已知风险与注意事项",
+                "## 已验证有效的路线",
+                "## 已验证无效的路线",
+                "## 尚未尝试但建议的路线",
                 "## 下一位 Agent 的第一步动作",
             ],
             errors,
         )
         check_placeholder_markers(path, warnings)
+
+    template_path = AI_DIR / "handoffs" / "active" / "_template.md"
+    if template_path.exists():
+        check_required_sections(
+            template_path,
+            [
+                "## 本任务目标",
+                "## 已完成内容",
+                "## 修改文件",
+                "## 关键实现决策",
+                "## 当前未完成项",
+                "## 已知风险与注意事项",
+                "## 已验证有效的路线",
+                "## 已验证无效的路线",
+                "## 尚未尝试但建议的路线",
+                "## 下一位 Agent 的第一步动作",
+            ],
+            errors,
+        )
 
     for path in iter_docs(AI_DIR / "status"):
         check_required_sections(
