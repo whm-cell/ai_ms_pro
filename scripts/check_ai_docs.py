@@ -10,6 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AI_DIR = ROOT / "docs" / "ai"
 INDEX_PATH = AI_DIR / "index.md"
+REQ_DIR = ROOT / "docs" / "requirements"
+REQ_INDEX_PATH = REQ_DIR / "index.md"
 
 LINK_RE = re.compile(r"\[[^\]]+\]\((/[^)]+)\)")
 
@@ -52,30 +54,58 @@ def main() -> int:
         print("ERROR: docs/ai/index.md does not exist.", file=sys.stderr)
         return 1
 
-    index_text = load_text(INDEX_PATH)
-    targets = link_targets(index_text)
+    if not REQ_DIR.exists():
+        print("ERROR: docs/requirements directory does not exist.", file=sys.stderr)
+        return 1
 
-    required_docs = [
+    if not REQ_INDEX_PATH.exists():
+        print("ERROR: docs/requirements/index.md does not exist.", file=sys.stderr)
+        return 1
+
+    index_text = load_text(INDEX_PATH)
+    req_index_text = load_text(REQ_INDEX_PATH)
+    targets = link_targets(index_text)
+    req_targets = link_targets(req_index_text)
+
+    required_ai_docs = [
         ROOT / "AGENTS.md",
         AI_DIR / "plan.md",
+        AI_DIR / "working-context.md",
         AI_DIR / "medium-project-documentation-findings.md",
         AI_DIR / "lightweight-large-project-doc-governance.md",
     ]
 
-    for path in required_docs:
+    required_req_docs = [
+        REQ_DIR / "traceability-matrix.md",
+    ]
+
+    for path in required_ai_docs:
         if not path.exists():
             errors.append(f"Required document is missing: {path.relative_to(ROOT)}")
             continue
         add_missing_doc_error(errors, index_text, path, "Required document")
 
+    for path in required_req_docs:
+        if not path.exists():
+            errors.append(f"Required document is missing: {path.relative_to(ROOT)}")
+            continue
+        add_missing_doc_error(errors, req_index_text, path, "Required document")
+
     for target in targets:
         if str(target).startswith(str(ROOT)) and not target.exists():
             errors.append(f"Index links to missing path: {target}")
+
+    for target in req_targets:
+        if str(target).startswith(str(ROOT)) and not target.exists():
+            errors.append(f"Requirements index links to missing path: {target}")
 
     active_handoffs = iter_docs(AI_DIR / "handoffs" / "active")
     status_docs = iter_docs(AI_DIR / "status")
     changelog_docs = iter_docs(AI_DIR / "changelog")
     adr_docs = iter_docs(AI_DIR / "adr")
+    source_docs = iter_docs(REQ_DIR / "source")
+    normalized_docs = iter_docs(REQ_DIR / "normalized")
+    workstream_docs = iter_docs(REQ_DIR / "workstreams")
 
     if active_handoffs:
         if "暂无活跃 `handoff`" in index_text:
@@ -112,6 +142,18 @@ def main() -> int:
 
     if not adr_docs and "暂无正式 `adr`" not in index_text:
         warnings.append("No ADR files found. Consider updating index wording if this is intentional.")
+
+    if source_docs:
+        for path in source_docs:
+            add_missing_doc_error(errors, req_index_text, path, "Source requirement document")
+
+    if normalized_docs:
+        for path in normalized_docs:
+            add_missing_doc_error(errors, req_index_text, path, "Normalized requirement document")
+
+    if workstream_docs:
+        for path in workstream_docs:
+            add_missing_doc_error(errors, req_index_text, path, "Workstream document")
 
     if errors:
         print("AI docs governance check: FAILED")

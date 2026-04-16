@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CHECK_SCRIPT = ROOT / "scripts" / "check_ai_docs.py"
+CHECK_SCRIPT = ROOT / "scripts" / "check_ai_governance.py"
 
 
 def main() -> int:
@@ -29,7 +29,7 @@ def main() -> int:
         return 0
 
     details = (result.stdout or result.stderr).strip()
-    system_message = "AI docs governance check failed. Update docs/ai and index.md, then retry."
+    system_message = "AI governance check failed. Update docs/ai, docs/requirements, or index files, then retry."
     if details:
         compact = " ".join(details.splitlines())
         system_message = f"{system_message} {compact}"

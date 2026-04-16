@@ -60,6 +60,13 @@ docs/
 - `plan.md`
 - 项目目标、范围、阶段、风险、验收标准
 
+### 0. 当前工作上下文层
+
+- `working-context.md`
+- 当前阶段的短期真相、活跃队列、阻塞和下一次会话入口
+
+它的生命周期短于 `plan`，但优先级高于阶段归档文档。
+
 ### 2. 阶段状态层
 
 - `status/*.md`
@@ -438,6 +445,8 @@ Codex 下更合适的治理落点是：
 当前仓库已增加：
 
 - `python3 scripts/check_ai_docs.py`
+- `python3 scripts/check_ai_doc_quality.py`
+- `python3 scripts/check_ai_governance.py`
 - `.codex/hooks.json`
 - `.codex/hooks/stop_ai_docs_check.py`
 
@@ -447,7 +456,14 @@ Codex 下更合适的治理落点是：
 - 检查活跃 `handoff` / `status` / `changelog` / `adr` 是否已在 `index.md` 中出现
 - 检查 `index.md` 中的本地路径链接是否存在
 
-它当前不负责自动改文档，只负责发现漂移。
+质量检查当前负责：
+
+- 检查 `working-context.md` 是否具备核心章节
+- 检查活跃 `handoff` / `status` / `changelog` / `adr` 是否具备核心章节
+- 检查标准化需求和工作流文档是否具备关键章节
+- 对活跃文档中的明显占位符给出警告
+
+这些脚本都不负责自动改文档，只负责发现漂移或质量缺口。
 
 这是刻意设计的，因为“验证”和“修改”最好分开。
 

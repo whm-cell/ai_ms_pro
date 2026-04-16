@@ -5,4 +5,4 @@ set -eu
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 echo "Running AI docs governance check..."
-/usr/bin/python3 "$REPO_ROOT/scripts/check_ai_docs.py"
+/usr/bin/python3 "$REPO_ROOT/scripts/check_ai_governance.py"

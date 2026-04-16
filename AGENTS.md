@@ -20,6 +20,7 @@ Primary entrypoint:
 Core documents:
 
 - `docs/ai/plan.md`
+- `docs/ai/working-context.md`
 - `docs/ai/handoffs/active/*.md`
 - `docs/ai/status/*.md`
 - `docs/ai/changelog/*.md`
@@ -75,12 +76,13 @@ Always check `docs/ai/index.md` after adding or changing:
 At the start of a new Codex task, prefer this order:
 
 1. `docs/ai/index.md`
-2. `docs/requirements/index.md` when the task is requirement-driven
-3. `docs/ai/plan.md`
-4. latest relevant `docs/ai/status/*.md`
-5. active relevant `docs/ai/handoffs/active/*.md`
-6. relevant `docs/ai/adr/*.md`
-7. archive only if necessary
+2. `docs/ai/working-context.md`
+3. `docs/requirements/index.md` when the task is requirement-driven
+4. `docs/ai/plan.md`
+5. latest relevant `docs/ai/status/*.md`
+6. active relevant `docs/ai/handoffs/active/*.md`
+7. relevant `docs/ai/adr/*.md`
+8. archive only if necessary
 
 ## Compression Rule
 
@@ -98,7 +100,7 @@ Verification is required, but it scales by project maturity.
 
 Preferred command:
 
-`python3 scripts/check_ai_docs.py`
+`python3 scripts/check_ai_governance.py`
 
 This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
 
@@ -109,7 +111,7 @@ Use manual verification only:
 - after meaningful changes, check whether docs changed
 - after doc creation, check whether `docs/ai/index.md` points to the right files
 
-Codex should still run `python3 scripts/check_ai_docs.py` whenever the repository has enough structure for the script to be meaningful.
+Codex should still run `python3 scripts/check_ai_governance.py` whenever the repository has enough structure for the script to be meaningful.
 
 ### Phase 1: early active development
 
@@ -213,4 +215,4 @@ A task that materially changed the project is not fully complete until:
 1. implementation is updated
 2. affected project docs are updated if needed
 3. `docs/ai/index.md` is still accurate
-4. `python3 scripts/check_ai_docs.py` passes when applicable
+4. `python3 scripts/check_ai_governance.py` passes when applicable
