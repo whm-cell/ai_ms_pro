@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
 更新时间：2026-04-16
-当前状态：初始化
+当前状态：已导入首个真实验证场景
 
 ## 目的
 
@@ -38,7 +38,9 @@
 
 ## 当前活跃内容
 
-- 暂无已录入的原始需求文档
-- 暂无标准化需求文档
-- 暂无工作流文档
-- 暂无需求到开发阶段的正式追踪关系
+- [REQDOC-001 Three.js 贪吃蛇 Harness 验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
+- [REQ-001 Three.js 贪吃蛇核心玩法](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
+- [REQ-002 Three.js 贪吃蛇三维呈现与交互反馈](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
+- [REQ-003 用真实任务验证 Harness Traceability](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-003-harness-traceability-validation.md)
+- [WS-01 Three.js Snake MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)
+- 追踪关系已建立于 [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)

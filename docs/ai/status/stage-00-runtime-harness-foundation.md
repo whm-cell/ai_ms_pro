@@ -6,9 +6,9 @@
 
 ## 需求与工作流标识
 
-- Requirement IDs：未绑定
-- Workstream IDs：未绑定
-- 当前仍处于治理骨架与需求接入前阶段，尚未绑定真实 requirement/workstream
+- Requirement IDs：REQ-001, REQ-002, REQ-003
+- Workstream IDs：WS-01
+- 当前阶段已通过 `WS-01` 完成首个真实场景的 requirements traceability 与实现验证
 
 ## 当前阶段目标
 
@@ -24,9 +24,10 @@
   - observation handoff-first reducer
   - requirement/workstream metadata 位点与 ADR 规则
   - runtime staged 阻断、working-context 新鲜度检查、handoff 堆积 warning
+  - 首个真实场景 `WS-01 / Three.js Snake MVP` 的 requirements 导入、实现落地与 handoff/status 压缩
 - 进行中：
-  - 使用真实 observation 样本验证 reducer 噪音和压缩阈值
-  - 等待第一批真实需求导入后验证 metadata 与 traceability matrix 的同步流程
+  - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
+  - 评估这套流程在第二个真实 workstream 上的复用性
 - 未开始：
   - CI 强校验接入
   - reducer 到 `status` / `ADR` 的更强自动压缩策略
@@ -38,29 +39,31 @@
 - governance 层已经明确采用 `handoff -> status -> adr/changelog` 压缩链路，并新增 handoff-first reducer
 - requirements traceability 规则已经进入 handoff、status、session 和 reducer 输出，且 canonical mapping 保持在 `docs/requirements/traceability-matrix.md`
 - quality / governance 检查已经能识别 metadata section 缺失，并继续阻断 runtime state 误提交
+- `WS-01 / Three.js Snake MVP` 已作为首个真实场景落地，证明当前 harness 能支撑从 requirements 到代码实现的完整闭环
 
 ## 风险与阻塞
 
-- 当前还没有真实 `REQ` / `WS` 文档，metadata 只能以 `未绑定` 形式存在，尚未经历真实绑定验证
 - observation 与 session 仍依赖 best-effort hook payload，真实运行时字段可能需要继续适配
 - reducer 目前只做轻量聚合，尚未在真实长期 observation 数据上验证压缩质量
+- 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
 
 ## 下一阶段重点
 
-- 导入第一批真实需求文档，并建立 `REQDOC -> REQ -> WS -> STAGE` 的最小 traceability 实例
 - 用真实 observation 数据验证 reducer 输出，并明确何时应进一步压缩到 `status` 或 `ADR`
+- 判断 `WS-01` 是否应归档为已验证样板，或继续演化成更完整的前端示例
 - 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
 
 ## 验收判断
 
 - 当前阶段的“runtime harness foundation”目标基本达成：三层 harness 与基础 traceability 位点均已落地
-- 尚未达到下一阶段验收条件，因为真实 requirements 还未导入，metadata 与 reducer 还缺少真实任务样本验证
+- 尚未完全进入下一阶段，因为 reducer 压缩阈值、CI 接入和第二个真实 workstream 复用还未验证
 
 ## 关联文档
 
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 - 相关 `handoff`：
+  - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
   - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
   - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
   - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)

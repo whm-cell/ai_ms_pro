@@ -12,25 +12,22 @@
 
 ## 当前主目标
 
-- 把项目从“文档和规则初始化”推进到“可持续接入真实需求并开始开发”
+- 用 `WS-01 / Three.js Snake MVP` 证明当前 harness 已能支撑首个真实需求场景
 - 保持 `docs/ai/` 与 `docs/requirements/` 的入口、模板、验证层一致
-- 为后续真实需求导入预留稳定的 requirements ingestion 流程
+- 为第二个真实 workstream 和更强校验能力预留稳定的复用路径
 
 ## 当前活跃队列
 
-1. 导入第一批真实 requirement/workstream 文档，并验证 metadata 能否从 requirements 侧顺畅传播到 handoff/session/reducer
-2. 用真实 observation 数据验证 reducer 输出质量，确认 handoff-first 路径在真实 session 中是否足够稳定
-3. 决定 observation reducer 何时应建议继续压缩到 `status` 或 `ADR`
-4. 将原始需求整理为 `normalized/` 文档
-5. 将标准化需求归并为 `workstreams/`
-6. 把工作流映射回 `plan.md` 与后续阶段文档
+1. 用 `WS-01` 的真实 observation 数据验证 reducer 输出质量，确认 handoff-first 路径在真实 session 中是否足够稳定
+2. 决定 `WS-01` 是作为已验证样板归档，还是继续演化为更完整的前端示例
+3. 评估何时把治理检查接入 CI，以及是否增加 metadata 与 traceability matrix 的一致性校验
+4. 规划第二个真实 workstream，验证当前 harness 的复用性
 
 ## 当前风险与阻塞
 
-- 当前仓库仍处于治理骨架阶段，尚未导入真实需求内容
-- `plan.md` 仍然是占位版，未进入项目真实规划状态
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
 - verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime observation append-only 采集与 runtime session best-effort 自动写入，以及 `SessionStart / Resume` 时的最近 session 精简摘要读取
+- 真实前端场景已经落地，但浏览器侧仍只做了基础 smoke test，未覆盖完整玩法自动化验证
 
 ## 当前真实入口
 
@@ -43,6 +40,7 @@
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 - [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+- [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
@@ -58,9 +56,10 @@
 7. [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 8. [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 9. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
-10. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
-11. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
-12. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+10. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
+11. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+12. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
+13. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -80,7 +79,8 @@
 - Requirement/workstream metadata 已进入 handoff、status、runtime session 和 reducer 输出；当前 canonical mapping 仍以 `docs/requirements/traceability-matrix.md` 为准
 - `SessionStart` 恢复摘要在 session metadata 已知时，会一并带回 requirement/workstream 绑定，减少 resume 后的追踪断点
 - Stage-00 已新增阶段级 status，用于压缩 `Runtime Hooks + Observation Reducer + Requirement Metadata` 的稳定成果
-- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata` 三个子任务；下一步应导入第一批真实 requirements 并验证追踪链路
+- `WS-01 / Three.js Snake MVP` 已完成首轮 requirements、implementation、handoff/status 闭环，证明当前 harness 可支撑真实场景
+- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP` 四个子任务；下一步应验证这套流程在第二个真实 workstream 上的复用性
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
 ## 更新规则

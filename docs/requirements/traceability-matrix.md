@@ -19,4 +19,6 @@
 
 | 原始文档 | 标准化需求 | 工作流 | 开发阶段 | 当前状态 | 验收/测试 |
 | --- | --- | --- | --- | --- | --- |
-| 待补充 | 待补充 | 待补充 | 待补充 | 待补充 | 待补充 |
+| REQDOC-001 | REQ-001 | WS-01 | STAGE-00 | 已完成 | Three.js 贪吃蛇可运行、可移动、可吃食物、可失败并可重开 |
+| REQDOC-001 | REQ-002 | WS-01 | STAGE-00 | 已完成 | Three.js 场景可见，包含分数/提示等基础反馈 |
+| REQDOC-001 | REQ-003 | WS-01 | STAGE-00 | 已完成 | requirements -> implementation -> handoff/status 链路完成一次真实验证 |
