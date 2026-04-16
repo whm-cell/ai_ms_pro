@@ -30,6 +30,13 @@ Core documents:
 - `docs/requirements/workstreams/*.md`
 - `docs/requirements/traceability-matrix.md`
 
+Local runtime memory:
+
+- `.codex/runtime/sessions/*.md`
+- `.codex/runtime/observations/*.md`
+
+These runtime files are local recovery artifacts. They are not canonical project memory and do not replace `docs/ai/*` or `docs/requirements/*`.
+
 ## Required Workflow
 
 When work causes meaningful project progress, Codex must check whether documentation also needs to be updated.
@@ -83,6 +90,25 @@ At the start of a new Codex task, prefer this order:
 6. active relevant `docs/ai/handoffs/active/*.md`
 7. relevant `docs/ai/adr/*.md`
 8. archive only if necessary
+
+Runtime session files under `.codex/runtime/sessions/` are optional recovery inputs and should only be read when local session detail is needed.
+
+## Harness Layers
+
+This repository uses three harness layers:
+
+- Runtime Harness: local session and observation state under `.codex/runtime/`
+- Governance Harness: shared project memory under `docs/ai/*` and `docs/requirements/*`
+- Verification Harness: lifecycle enforcement under `.codex/hooks.json`, `.githooks/*`, and `scripts/check_*`
+
+Use these rules:
+
+1. Runtime files are local-only recovery artifacts, not the canonical project truth.
+2. Hooks may write `.codex/runtime/*`, but must not auto-edit `working-context.md`, `index.md`, `handoff`, `status`, `changelog`, or `adr`.
+3. Shared governance documents are authored at explicit semantic checkpoints such as subtask completion, pause/resume boundaries, stage compression, and long-lived decisions.
+4. The main agent owns canonical writes to `docs/ai/*` and `docs/requirements/*`.
+5. Subagents may return structured results or handoff drafts, but the main agent publishes the canonical shared documents.
+6. If a runtime finding remains relevant beyond the current local session, promote it into `handoff`, `status`, `adr`, `plan`, or requirements documents.
 
 ## Compression Rule
 
@@ -139,6 +165,7 @@ Skills are allowed and useful, but they do not replace repository rules.
 Use this division:
 
 - `AGENTS.md`: always-on project rules
+- `.codex/runtime/*`: local runtime harness memory
 - `docs/ai/*`: persistent project memory
 - `docs/requirements/*`: requirement source, normalization, and workstream tracking
 - skills: task-specific execution guidance

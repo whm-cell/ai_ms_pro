@@ -35,6 +35,7 @@
 - [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 - [需求文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/index.md)
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
+- [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 
 ## 下一次会话先读
 
@@ -42,12 +43,15 @@
 2. [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
 3. [需求文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/index.md)
 4. [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
+5. [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 
 ## 最近已固化的决策
 
 - 项目采用 `AGENTS.md + Codex Stop hook + pre-commit + 脚本校验` 的治理方式
 - 项目采用 `docs/requirements/` 与 `docs/ai/` 分层管理需求与执行上下文
 - 新增 skill 的记录位置由 scope 决定，而不是全部写入 `AGENTS.md`
+- 项目采用 `Runtime Harness + Governance Harness + Verification Harness` 的三层分工
+- `.codex/runtime/` 只保存本地 session/observation 原料，不替代 `docs/ai/` 共享治理文档
 
 ## 更新规则
 

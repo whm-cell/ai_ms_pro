@@ -1,0 +1,5 @@
+.codex/hooks/__pycache__/
+.codex/runtime/sessions/*
+!.codex/runtime/sessions/README.md
+.codex/runtime/observations/*
+!.codex/runtime/observations/README.md
