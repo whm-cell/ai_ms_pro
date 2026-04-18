@@ -26,6 +26,7 @@
   - runtime staged 阻断、working-context 新鲜度检查、handoff 堆积 warning
   - 首个真实场景 `WS-01 / Three.js Snake MVP` 的 requirements 导入、实现落地与 handoff/status 压缩
   - `WS-01` 的 repo-level deterministic smoke runner，覆盖 `load -> eat -> game over -> restart`
+  - `plan/workstream` projection surface boundary 与显式状态字段 freshness 校验
 - 进行中：
   - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
   - 评估这套流程在第二个真实 workstream 上的复用性
@@ -42,6 +43,8 @@
 - quality / governance 检查已经能识别 metadata section 缺失，并继续阻断 runtime state 误提交
 - `WS-01 / Three.js Snake MVP` 已作为首个真实场景落地，证明当前 harness 能支撑从 requirements 到代码实现的完整闭环
 - `WS-01` 已新增 repo 内可直接运行的浏览器 smoke 入口，不再只依赖一次性手工打开页面验证
+- `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
+- governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
 
 ## 风险与阻塞
 
@@ -70,8 +73,10 @@
   - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
   - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
   - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+  - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
 - 相关 `adr`：
   - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
   - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
   - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
   - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
+  - [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)

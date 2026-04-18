@@ -1,9 +1,14 @@
 # 工作流：Three.js Snake MVP
 
-更新时间：2026-04-16
+更新时间：2026-04-18
 工作流编号：WS-01
 工作流名称：Three.js Snake MVP
-状态：已完成
+状态来源：当前完成度与验收证据以 `docs/requirements/traceability-matrix.md`、阶段 `status` 和相关 `handoff` 为准
+
+## 使用边界
+
+- 本文件只保留工作流目标、覆盖需求、阶段建议和验收模型。
+- 当前状态、最新验证结论和 smoke 证据不在这里重复承载，避免与主真相文档漂移。
 
 ## 业务目标
 

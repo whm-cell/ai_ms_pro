@@ -20,7 +20,7 @@
 
 1. 用 `WS-01` 的真实 observation 数据验证 reducer 输出质量，确认 handoff-first 路径在真实 session 中是否足够稳定
 2. 决定 `WS-01` 是作为已验证样板归档，还是继续演化为更完整的前端示例
-3. 评估何时把治理检查接入 CI，以及是否增加 metadata 与 traceability matrix 的一致性校验
+3. 评估何时把治理检查接入 CI，并继续增加 metadata 与 traceability matrix 的一致性校验
 4. 规划第二个真实 workstream，验证当前 harness 的复用性
 
 ## 当前风险与阻塞
@@ -28,6 +28,7 @@
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
 - verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime observation append-only 采集与 runtime session best-effort 自动写入，以及 `SessionStart / Resume` 时的最近 session 精简摘要读取
 - `WS-01` 已具备 repo 内可复现的 deterministic smoke runner，能覆盖 `load -> eat -> game over -> restart`；但仍未覆盖自由输入路径、渲染质量、多尺寸和 CI 级自动执行
+- `plan` 与 `workstream` 的 projection boundary 已明确，但 metadata 与 traceability matrix 的字段级一致性校验仍未自动化
 
 ## 当前真实入口
 
@@ -39,11 +40,13 @@
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
+- [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
 - [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+- [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
 
 ## 下一次会话先读
 
@@ -55,11 +58,13 @@
 6. [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 7. [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 8. [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
-9. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
-10. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
-11. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
-12. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
-13. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+9. [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
+10. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+11. [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
+12. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
+13. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+14. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
+15. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -81,7 +86,10 @@
 - Stage-00 已新增阶段级 status，用于压缩 `Runtime Hooks + Observation Reducer + Requirement Metadata` 的稳定成果
 - `WS-01 / Three.js Snake MVP` 已完成首轮 requirements、implementation、handoff/status 闭环，证明当前 harness 可支撑真实场景
 - `WS-01` 已新增 `python3 scripts/threejs_snake_smoke.py` 浏览器 smoke 入口，并通过 `?smoke=1` 下的 `window.__THREEJS_SNAKE_TEST__` namespaced API 提供低侵入、可重复的玩法断言
-- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP` 四个子任务；下一步应验证这套流程在第二个真实 workstream 上的复用性
+- 项目已明确 `plan/workstream` 作为 projection surface 的边界，当前完成度与验证证据默认集中到 `working-context`、`handoff`、`status`、`traceability-matrix`
+- governance check 已新增 projection freshness 规则，但只针对显式状态字段，不做自由文本语义判断
+- 当前 `working-context` 已与最新 stage status 对齐，后续应继续把新增治理能力优先回收到 primary truth surface
+- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP + Projection Freshness` 五个子任务；下一步应验证这套流程在第二个真实 workstream 上的复用性
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
 ## 更新规则

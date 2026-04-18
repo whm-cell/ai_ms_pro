@@ -54,6 +54,12 @@ def main() -> int:
     warnings: list[str] = []
 
     required_section_map: dict[Path, list[str]] = {
+        AI_DIR / "plan.md": [
+            "## 使用边界",
+            "## 项目目标",
+            "## 范围定义",
+            "## 阶段规划",
+        ],
         AI_DIR / "working-context.md": [
             "## 当前主目标",
             "## 当前活跃队列",
@@ -204,6 +210,7 @@ def main() -> int:
         check_required_sections(
             path,
             [
+                "## 使用边界",
                 "## 业务目标",
                 "## 覆盖需求",
                 "## 主要模块",

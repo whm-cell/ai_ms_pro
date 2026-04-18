@@ -158,6 +158,18 @@ More explicitly:
 
 `handoff -> status -> changelog / adr -> archive old handoffs`
 
+## Projection Surface Boundary
+
+Not every document should carry current-state truth.
+
+Use these rules:
+
+1. `docs/ai/working-context.md`, active `handoff`, `status`, `adr`, `docs/requirements/normalized/*.md`, and `docs/requirements/traceability-matrix.md` are the primary truth surfaces.
+2. `docs/ai/plan.md` is a projection document. It should keep goals, scope, stage breakdown, and acceptance framing, but should not repeat fast-changing completion state, latest validation results, or transient evidence.
+3. `docs/requirements/workstreams/*.md` are projection documents. They should keep workflow goal, covered requirements, stage suggestions, and acceptance model, but should not become a second copy of the latest execution status or smoke evidence.
+4. When current-state text appears in a projection document, it must either be removed or be explicitly synchronized with its primary truth source in the same change.
+5. Current completion state, latest validation result, and canonical acceptance evidence should default to `working-context`, `handoff`, `status`, and `traceability-matrix.md`, not to `plan` or `workstream` docs.
+
 ## Verification Layer
 
 Verification is required, but it scales by project maturity.

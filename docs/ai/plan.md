@@ -1,7 +1,13 @@
 # 项目计划
 
-更新时间：2026-04-16
-项目状态：进入真实场景验证
+更新时间：2026-04-18
+文档定位：阶段规划与范围控制视图
+
+## 使用边界
+
+- 本文件只承载阶段目标、范围、模块划分和阶段验收口径。
+- 当前完成度、最新验证结论和 smoke 证据以 `working-context`、`status`、`handoff` 与 `docs/requirements/traceability-matrix.md` 为准。
+- 若阶段目标或范围变化，更新本文件；若只是完成度或验证结果变化，优先更新主真相文档。
 
 ## 项目目标
 
@@ -68,9 +74,9 @@
 
 ## 风险与约束
 
-- 当前仓库没有既有应用工程，真实场景接入路径仍需在本轮验证
-- requirement/workstream metadata 规则已建立，但还缺真实任务样本验证
-- reducer 目前以 handoff-first 为主，status/ADR 压缩阈值仍需用真实 observation 数据校正
+- 当前仓库仍以轻量真实样例驱动 harness 验证，后续是否引入更完整工程化能力取决于复用结果
+- requirement/workstream metadata 规则已建立，下一步重点是继续收紧一致性校验与 traceability freshness
+- reducer 目前以 handoff-first 为主，status/ADR 压缩阈值仍需继续用真实 observation 数据校正
 
 ## 文档治理约定
 
