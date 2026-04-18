@@ -1,7 +1,7 @@
 # 需求追踪矩阵
 
 更新时间：2026-04-18
-当前状态：已建立首个真实场景追踪
+当前状态：已建立两个真实场景追踪
 
 ## 目的
 
@@ -22,3 +22,6 @@
 | REQDOC-001 | REQ-001 | WS-01 | STAGE-00 | 已完成 | `python3 scripts/threejs_snake_smoke.py` 已覆盖 `load -> eat -> game over -> restart` |
 | REQDOC-001 | REQ-002 | WS-01 | STAGE-00 | 已完成 | Three.js 场景可见，包含分数/提示等基础反馈；smoke 已验证 HUD 与玩法主链路 |
 | REQDOC-001 | REQ-003 | WS-01 | STAGE-00 | 已完成 | requirements -> implementation -> handoff/status 链路完成一次真实验证，且治理检查继续通过 |
+| REQDOC-002 | REQ-004 | WS-02 | STAGE-00 | 已完成 | `apps/harness-trace-console/` 已直接读取 `working-context`、stage status 与 `traceability-matrix`，展示当前阶段、摘要卡片和活跃队列 |
+| REQDOC-002 | REQ-005 | WS-02 | STAGE-00 | 已完成 | 控制台支持按 `stage/workstream/status/search` 过滤 traceability，并可查看单条 requirement 详情 |
+| REQDOC-002 | REQ-006 | WS-02 | STAGE-00 | 已完成 | `python3 scripts/harness_trace_console_smoke.py` 已验证 load -> WS-02 filter -> REQ-006 search；runtime hooks 与 reducer 已用显式 metadata 跑通一次 |

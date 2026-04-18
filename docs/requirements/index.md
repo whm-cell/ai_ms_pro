@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-04-16
-当前状态：已导入首个真实验证场景
+更新时间：2026-04-18
+当前状态：已导入两个真实验证场景
 
 ## 目的
 
@@ -39,8 +39,13 @@
 ## 当前活跃内容
 
 - [REQDOC-001 Three.js 贪吃蛇 Harness 验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
+- [REQDOC-002 Harness Trace Console 复用验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-002-harness-trace-console-validation.md)
 - [REQ-001 Three.js 贪吃蛇核心玩法](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
 - [REQ-002 Three.js 贪吃蛇三维呈现与交互反馈](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
 - [REQ-003 用真实任务验证 Harness Traceability](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-003-harness-traceability-validation.md)
+- [REQ-004 Harness 主真相聚合展示](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-004-harness-primary-truth-console.md)
+- [REQ-005 Traceability 交互筛选与详情检查](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-005-traceability-filter-and-inspection.md)
+- [REQ-006 可 smoke 的治理证据控制台](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-006-smoke-verifiable-governance-console.md)
 - [WS-01 Three.js Snake MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)
+- [WS-02 Harness Trace Console](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-02-harness-trace-console.md)
 - 追踪关系已建立于 [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)

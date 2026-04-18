@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
 更新时间：2026-04-18
-当前状态：首个真实 workstream 已落地，并具备 repo-level smoke
+当前状态：两个真实 workstream 已落地，且第二个场景已覆盖 runtime hook/reducer 验证
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -51,6 +51,7 @@
 ### 当前阶段文档
 
 - [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+- [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
 - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)

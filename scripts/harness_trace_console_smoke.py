@@ -17,12 +17,12 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-APP_URL_PATH = "/apps/threejs-snake/?smoke=1"
+APP_URL_PATH = "/apps/harness-trace-console/?smoke=1"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run a lightweight browser smoke test against apps/threejs-snake.",
+        description="Run a lightweight browser smoke test against apps/harness-trace-console.",
     )
     parser.add_argument(
         "--host",
@@ -65,7 +65,7 @@ def start_static_server(host: str, port: int) -> tuple[socketserver.TCPServer, t
 
 def wait_for_server(host: str, port: int, timeout: float = 5.0) -> None:
     deadline = time.time() + timeout
-    url = f"http://{host}:{port}/apps/threejs-snake/index.html"
+    url = f"http://{host}:{port}/apps/harness-trace-console/index.html"
     while time.time() < deadline:
         try:
             with urllib.request.urlopen(url, timeout=0.5) as response:
@@ -120,7 +120,7 @@ def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
 def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
     open_args = [url]
     if headed:
-        open_args.append("--headed")
+      open_args.append("--headed")
 
     run_pw("open", *open_args, env=env)
 
@@ -128,24 +128,13 @@ def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
         "run-code",
         """
 await page.waitForLoadState("domcontentloaded");
-await page.waitForFunction(() => Boolean(window.__THREEJS_SNAKE_TEST__));
-const snapshot = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.restart());
-if (!snapshot.running || snapshot.gameOver || !snapshot.overlayHidden || snapshot.score !== 0) {
+await page.waitForFunction(() => window.__HARNESS_TRACE_CONSOLE_TEST__?.getSnapshot().loadState === "ready");
+const snapshot = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.getSnapshot());
+if (snapshot.totalRows !== 6 || snapshot.summary.workstreamCount !== 2) {
   throw new Error(`Unexpected initial snapshot: ${JSON.stringify(snapshot)}`);
 }
-        """.strip(),
-        env=env,
-    )
-
-    run_pw(
-        "run-code",
-        """
-const afterEat = await page.evaluate(() => {
-  window.__THREEJS_SNAKE_TEST__.placeFoodAhead();
-  return window.__THREEJS_SNAKE_TEST__.step(1);
-});
-if (afterEat.score !== 1 || !afterEat.running || afterEat.gameOver) {
-  throw new Error(`Expected a successful food pickup, got ${JSON.stringify(afterEat)}`);
+if (!snapshot.workstreams.includes("WS-01") || !snapshot.workstreams.includes("WS-02")) {
+  throw new Error(`Expected WS-01 and WS-02 to be present: ${JSON.stringify(snapshot)}`);
 }
         """.strip(),
         env=env,
@@ -154,9 +143,9 @@ if (afterEat.score !== 1 || !afterEat.running || afterEat.gameOver) {
     run_pw(
         "run-code",
         """
-const afterCrash = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.step(9));
-if (!afterCrash.gameOver || afterCrash.running || afterCrash.title !== "Game Over") {
-  throw new Error(`Expected a wall collision game over, got ${JSON.stringify(afterCrash)}`);
+const afterWorkstream = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.setWorkstreamFilter("WS-02"));
+if (afterWorkstream.rowCount !== 3 || afterWorkstream.visibleRequirements.join(",") !== "REQ-004,REQ-005,REQ-006") {
+  throw new Error(`Unexpected WS-02 filter snapshot: ${JSON.stringify(afterWorkstream)}`);
 }
         """.strip(),
         env=env,
@@ -165,10 +154,32 @@ if (!afterCrash.gameOver || afterCrash.running || afterCrash.title !== "Game Ove
     run_pw(
         "run-code",
         """
-await page.locator("#restart").click();
-const afterRestart = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.getSnapshot());
-if (!afterRestart.running || afterRestart.gameOver || afterRestart.score !== 0 || !afterRestart.overlayHidden) {
-  throw new Error(`Expected restart to reset the game, got ${JSON.stringify(afterRestart)}`);
+const afterSearch = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.setSearch("REQ-006"));
+if (afterSearch.rowCount !== 1 || afterSearch.visibleRequirements[0] !== "REQ-006") {
+  throw new Error(`Unexpected REQ-006 search snapshot: ${JSON.stringify(afterSearch)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+    run_pw(
+        "run-code",
+        """
+const afterSelect = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.selectRequirement("REQ-006"));
+if (afterSelect.selectedRequirement !== "REQ-006") {
+  throw new Error(`Expected REQ-006 to be selected, got ${JSON.stringify(afterSelect)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+    run_pw(
+        "run-code",
+        """
+const afterClear = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.clearFilters());
+const afterStatus = await page.evaluate(() => window.__HARNESS_TRACE_CONSOLE_TEST__.setStatusFilter("已完成"));
+if (afterClear.rowCount !== 6 || afterStatus.rowCount !== 6) {
+  throw new Error(`Unexpected clear/status snapshot: ${JSON.stringify({ afterClear, afterStatus })}`);
 }
         """.strip(),
         env=env,
@@ -182,7 +193,7 @@ def main() -> int:
     host = args.host
     port = args.port or find_free_port(host)
     server, thread, bound_port = start_static_server(host, port)
-    session_name = f"snake-{os.getpid()}-{int(time.time())}"
+    session_name = f"htc-{os.getpid()}-{int(time.time())}"
     env = os.environ.copy()
     env["PLAYWRIGHT_CLI_SESSION"] = session_name
     url = f"http://{host}:{bound_port}{APP_URL_PATH}"
@@ -193,7 +204,7 @@ def main() -> int:
     try:
         wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS threejs-snake: load -> eat -> game over -> restart")
+        print("[smoke] PASS harness-trace-console: load -> WS-02 filter -> REQ-006 search -> completed status")
         return 0
     finally:
         try:

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harness Trace Console</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="backdrop" aria-hidden="true"></div>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">WS-02 / Harness Trace Console</p>
+        <h1>Primary truth first.</h1>
+        <p class="lede">
+          A repo-native console that reads current stage context, traceability mappings,
+          and verification evidence directly from shared governance docs.
+        </p>
+      </div>
+      <div class="hero-links">
+        <a href="/docs/ai/working-context.md">Working Context</a>
+        <a href="/docs/ai/status/stage-00-runtime-harness-foundation.md">Stage Status</a>
+        <a href="/docs/requirements/traceability-matrix.md">Traceability Matrix</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel-summary">
+        <div class="panel-header">
+          <p class="panel-kicker">Stage Snapshot</p>
+          <h2>Current truth surface summary</h2>
+        </div>
+        <div id="summary-grid" class="summary-grid"></div>
+      </section>
+
+      <section class="panel panel-context">
+        <div class="panel-header">
+          <p class="panel-kicker">Working Context</p>
+          <h2>Current queue and risks</h2>
+        </div>
+        <div class="context-columns">
+          <div>
+            <h3>Active Queue</h3>
+            <ul id="queue-list" class="bullet-list"></ul>
+          </div>
+          <div>
+            <h3>Current Risks</h3>
+            <ul id="risk-list" class="bullet-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-filters">
+        <div class="panel-header">
+          <p class="panel-kicker">Traceability Filters</p>
+          <h2>Inspect requirements and workstreams</h2>
+        </div>
+        <div class="filter-grid">
+          <label>
+            <span>Search</span>
+            <input id="search-input" type="search" placeholder="REQ-006, WS-02, smoke..." />
+          </label>
+          <label>
+            <span>Stage</span>
+            <select id="stage-filter"></select>
+          </label>
+          <label>
+            <span>Workstream</span>
+            <select id="workstream-filter"></select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="status-filter"></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel panel-matrix">
+        <div class="panel-header panel-header-split">
+          <div>
+            <p class="panel-kicker">Matrix Rows</p>
+            <h2>Visible traceability entries</h2>
+          </div>
+          <p id="row-count" class="row-count"></p>
+        </div>
+        <div id="matrix-grid" class="matrix-grid"></div>
+      </section>
+
+      <aside class="panel panel-detail">
+        <div class="panel-header">
+          <p class="panel-kicker">Selected Entry</p>
+          <h2 id="detail-title">No row selected</h2>
+        </div>
+        <div id="detail-body" class="detail-body"></div>
+      </aside>
+    </main>
+
+    <template id="empty-state-template">
+      <div class="empty-state">
+        <p>No traceability rows match the current filters.</p>
+      </div>
+    </template>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

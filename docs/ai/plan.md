@@ -12,15 +12,15 @@
 ## 项目目标
 
 - 用真实业务场景验证当前 Codex-first harness 的可行性
-- 落地一个可运行的 Three.js 贪吃蛇 MVP
+- 落地多个可运行的 repo-native 垂直切片
 - 跑通 `requirements -> implementation -> runtime memory -> handoff/status` 的最小闭环
 
 ## 范围定义
 
 ### 当前范围
 
-- 导入首个真实需求场景 `REQDOC-001 / WS-01`
-- 实现一个桌面浏览器可玩的 Three.js 贪吃蛇
+- 导入多个真实需求场景，并验证 harness 在第二个 workstream 上可复用
+- 实现至少两个桌面浏览器可运行的 repo-native 静态应用切片
 - 继续强化 runtime harness、governance harness 和 requirements traceability 的协同
 
 ### 暂不纳入范围
@@ -33,15 +33,15 @@
 
 ### 核心业务线索
 
-- 真实需求导入与 traceability
-- Three.js 贪吃蛇 MVP 实现
+- 多个真实需求场景导入与 traceability
+- 垂直切片应用实现与 smoke 验证
 - runtime observation / reducer / handoff / status 压缩验证
 
 ### 模块划分
 
 - `docs/requirements/`：原始需求、标准化需求、工作流和追踪矩阵
 - `docs/ai/`：执行计划、handoff、status、ADR 和 working context
-- `apps/threejs-snake/`：Three.js 贪吃蛇应用实现
+- `apps/`：repo-native 垂直切片应用实现
 - `.codex/runtime/`：session、observation 和 reducer 原料
 
 ## 阶段规划
