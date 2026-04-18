@@ -4,6 +4,7 @@ const GRID_SIZE = 16;
 const CELL_SIZE = 1;
 const MOVE_INTERVAL_MS = 150;
 const STORAGE_KEY = "threejs-snake-best-score";
+const SMOKE_MODE = new URLSearchParams(window.location.search).has("smoke");
 
 const canvas = document.getElementById("game");
 const scoreEl = document.getElementById("score");
@@ -330,6 +331,70 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 
+function getSmokeSnapshot() {
+  return {
+    running: state.running,
+    gameOver: state.gameOver,
+    score: state.score,
+    best: state.best,
+    direction: { ...state.direction },
+    snake: state.snake.map((part) => ({ ...part })),
+    food: { ...state.food },
+    overlayHidden: overlayEl.classList.contains("hidden"),
+    title: titleEl.textContent,
+    message: messageEl.textContent,
+    restartLabel: restartButton.textContent,
+  };
+}
+
+function installSmokeApi() {
+  if (!SMOKE_MODE) {
+    return;
+  }
+
+  window.__THREEJS_SNAKE_TEST__ = Object.freeze({
+    getSnapshot() {
+      return getSmokeSnapshot();
+    },
+    restart() {
+      resetGame();
+      updateSnakeMeshes();
+      return getSmokeSnapshot();
+    },
+    placeFoodAhead() {
+      const head = state.snake[0];
+      const next = {
+        x: head.x + state.direction.x,
+        z: head.z + state.direction.z,
+      };
+      const outside = next.x < 0 || next.x >= GRID_SIZE || next.z < 0 || next.z >= GRID_SIZE;
+
+      if (outside || isOccupied(next.x, next.z)) {
+        throw new Error("Cannot place smoke-test food ahead of the snake.");
+      }
+
+      state.food = next;
+      ensureFoodMesh();
+      const foodPos = cellToWorld(next.x, next.z);
+      foodMesh.position.set(foodPos.x, 0.45, foodPos.z);
+      return getSmokeSnapshot();
+    },
+    step(moves = 1) {
+      const totalMoves = Math.max(0, Math.floor(Number(moves) || 0));
+
+      for (let i = 0; i < totalMoves; i += 1) {
+        handleMove();
+        if (!state.running) {
+          break;
+        }
+      }
+
+      updateSnakeMeshes();
+      return getSmokeSnapshot();
+    },
+  });
+}
+
 window.addEventListener("resize", resize);
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
@@ -358,5 +423,6 @@ restartButton.addEventListener("click", () => {
 });
 
 resize();
+installSmokeApi();
 resetGame();
 requestAnimationFrame(render);

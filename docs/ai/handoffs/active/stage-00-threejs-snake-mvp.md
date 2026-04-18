@@ -1,6 +1,6 @@
 # Three.js Snake MVP Handoff
 
-更新时间：2026-04-16
+更新时间：2026-04-18
 阶段：stage-00
 任务：threejs-snake-mvp
 状态：已完成
@@ -24,7 +24,8 @@
 - 游戏已具备最小三维表现：Three.js 场景、相机、基础光照、地面/网格、蛇与食物模型、HUD 和启动/失败 overlay
 - 新增应用说明 [apps/threejs-snake/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/apps/threejs-snake/README.md)
 - 已导入与该场景对应的 requirements / workstream / traceability 文档，并完成首轮 metadata 绑定
-- 已进行基本验证：`node --check apps/threejs-snake/main.js` 通过；本地静态服务可打开页面；浏览器内可点击开始按钮并加载场景
+- 已进行 repo 内可复现验证：`node --check apps/threejs-snake/main.js` 通过，`python3 scripts/threejs_snake_smoke.py` 已覆盖 `load -> eat -> game over -> restart`
+- `?smoke=1` 模式下已新增 `window.__THREEJS_SNAKE_TEST__` namespaced smoke API，用于 deterministic 状态断言，不影响正常使用路径
 
 ## 修改文件
 
@@ -32,6 +33,7 @@
 - [apps/threejs-snake/style.css](/Volumes/usd/codes/go_projects/ai_ms_pro/apps/threejs-snake/style.css)
 - [apps/threejs-snake/main.js](/Volumes/usd/codes/go_projects/ai_ms_pro/apps/threejs-snake/main.js)
 - [apps/threejs-snake/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/apps/threejs-snake/README.md)
+- [threejs_snake_smoke.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/threejs_snake_smoke.py)
 - [REQDOC-001-threejs-snake-harness-validation.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
 - [REQ-001-threejs-snake-core-gameplay.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
 - [REQ-002-threejs-snake-3d-presentation.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
@@ -44,17 +46,18 @@
 - 游戏视角采用俯视偏透视相机和基础灯光，优先保证可读性和可玩性，而不是追求复杂视觉效果
 - 当前实现重点是桌面浏览器可玩的 MVP，用于验证 harness 和 traceability，而不是一次性完成产品化
 - 要求与工作流绑定直接写入 handoff，保证这次实现不只是“做了个 demo”，而是进入 requirements 闭环
+- 浏览器 smoke 通过 `?smoke=1` 下的 namespaced API 暴露最小调试面，优先验证共享的游戏逻辑，不把断言建立在脆弱的视觉快照之上
 
 ## 当前未完成项
 
-- 尚未做更深入的浏览器自动化玩法验证，例如完整吃到食物和触发 game over 的自动 smoke test
+- 已有 deterministic smoke runner，但尚未做更接近真实用户输入的黑盒浏览器回归验证
 - 尚未决定该场景后续是否会继续演化为更完整的前端样例或被归档为一次性验证案例
 - 尚未接入部署或 CI 级前端校验
 
 ## 已知风险与注意事项
 
 - 当前实现依赖 CDN 加载 Three.js，离线或受限网络环境下无法直接运行
-- 当前浏览器验证已确认页面可打开和可开始，但没有完成全流程自动化玩法验证
+- 当前 smoke 依赖 `?smoke=1` 下的本地测试辅助 API，适合稳定验证玩法主链路，但不替代更完整的端到端黑盒测试
 - 当前仓库仍以 harness 骨架为主，应用目录只是首个真实垂直切片，不代表最终产品结构已定型
 
 ## 已验证有效的路线
@@ -62,6 +65,7 @@
 - 先用轻量静态方式接入一个真实前端场景，比先引入完整工具链更适合验证 harness 本身
 - 将 `REQ/WS` 绑定直接写进 handoff/status/session/reducer，能让这次实现真正进入 traceability 链路
 - 选择贪吃蛇这类规则清晰的玩法，足以覆盖状态管理、渲染、交互和失败恢复等真实开发要素
+- 通过 `?smoke=1` 暴露最小、namespaced 的测试 API，能显著降低浏览器 smoke 的不确定性，同时不污染正常用户路径
 
 ## 已验证无效的路线
 
@@ -71,7 +75,7 @@
 
 ## 尚未尝试但建议的路线
 
-- 为游戏补一个更完整的浏览器 smoke test，至少覆盖开始、移动、得分变化或失败后的重开
+- 若继续增强质量面，可再补一层纯黑盒浏览器回归，覆盖真实按键路径和更长时间的运行稳定性
 - 若后续继续扩展前端样例，可评估是否引入构建工具，并把该决策升级为新的 ADR
 - 以本次 `WS-01` 为样板，再导入第二个真实 workstream，验证 harness 的可复用性
 

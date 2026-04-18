@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import functools
+import http.server
+import os
+import shutil
+import socket
+import socketserver
+import subprocess
+import sys
+import threading
+import time
+import urllib.request
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+APP_URL_PATH = "/apps/threejs-snake/?smoke=1"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run a lightweight browser smoke test against apps/threejs-snake.",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host interface for the local static server. Default: 127.0.0.1",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=0,
+        help="Port for the local static server. Default: auto-select a free port.",
+    )
+    parser.add_argument(
+        "--headed",
+        action="store_true",
+        help="Launch the browser in headed mode for manual observation.",
+    )
+    return parser.parse_args()
+
+
+def find_free_port(host: str) -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind((host, 0))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return int(sock.getsockname()[1])
+
+
+class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format: str, *args: object) -> None:
+        return
+
+
+def start_static_server(host: str, port: int) -> tuple[socketserver.TCPServer, threading.Thread, int]:
+    handler_cls = functools.partial(QuietHandler, directory=str(REPO_ROOT))
+    server = socketserver.TCPServer((host, port), handler_cls)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, thread, int(server.server_address[1])
+
+
+def wait_for_server(host: str, port: int, timeout: float = 5.0) -> None:
+    deadline = time.time() + timeout
+    url = f"http://{host}:{port}/apps/threejs-snake/index.html"
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=0.5) as response:
+                if response.status == 200:
+                    return
+        except Exception:
+            time.sleep(0.1)
+    raise RuntimeError(f"Static server did not become ready in time: {url}")
+
+
+def run_command(cmd: list[str], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        cwd=REPO_ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def ensure_npx() -> None:
+    if shutil.which("npx"):
+        return
+    raise RuntimeError("npx is required to run this smoke test.")
+
+
+def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
+    cmd = [
+        "npx",
+        "--yes",
+        "--package",
+        "@playwright/cli",
+        "playwright-cli",
+        "--session",
+        env["PLAYWRIGHT_CLI_SESSION"],
+        command,
+        *args,
+    ]
+    result = run_command(cmd, env=env)
+    if result.returncode == 0:
+        return
+
+    details = "\n".join(part for part in [result.stdout.strip(), result.stderr.strip()] if part)
+    help_note = (
+        "\nOne-time browser install may be required: "
+        "`npx --yes --package=playwright playwright install chromium`"
+    )
+    raise RuntimeError(f"Playwright CLI command failed: {' '.join(cmd)}\n{details}{help_note}")
+
+
+def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
+    open_args = [url]
+    if headed:
+        open_args.append("--headed")
+
+    run_pw("open", *open_args, env=env)
+
+    run_pw(
+        "run-code",
+        """
+await page.waitForLoadState("domcontentloaded");
+await page.waitForFunction(() => Boolean(window.__THREEJS_SNAKE_TEST__));
+const snapshot = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.restart());
+if (!snapshot.running || snapshot.gameOver || !snapshot.overlayHidden || snapshot.score !== 0) {
+  throw new Error(`Unexpected initial snapshot: ${JSON.stringify(snapshot)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+    run_pw(
+        "run-code",
+        """
+const afterEat = await page.evaluate(() => {
+  window.__THREEJS_SNAKE_TEST__.placeFoodAhead();
+  return window.__THREEJS_SNAKE_TEST__.step(1);
+});
+if (afterEat.score !== 1 || !afterEat.running || afterEat.gameOver) {
+  throw new Error(`Expected a successful food pickup, got ${JSON.stringify(afterEat)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+    run_pw(
+        "run-code",
+        """
+const afterCrash = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.step(9));
+if (!afterCrash.gameOver || afterCrash.running || afterCrash.title !== "Game Over") {
+  throw new Error(`Expected a wall collision game over, got ${JSON.stringify(afterCrash)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+    run_pw(
+        "run-code",
+        """
+await page.locator("#restart").click();
+const afterRestart = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.getSnapshot());
+if (!afterRestart.running || afterRestart.gameOver || afterRestart.score !== 0 || !afterRestart.overlayHidden) {
+  throw new Error(`Expected restart to reset the game, got ${JSON.stringify(afterRestart)}`);
+}
+        """.strip(),
+        env=env,
+    )
+
+
+def main() -> int:
+    args = parse_args()
+    ensure_npx()
+
+    host = args.host
+    port = args.port or find_free_port(host)
+    server, thread, bound_port = start_static_server(host, port)
+    session_name = f"threejs-snake-smoke-{os.getpid()}-{int(time.time())}"
+    env = os.environ.copy()
+    env["PLAYWRIGHT_CLI_SESSION"] = session_name
+    url = f"http://{host}:{bound_port}{APP_URL_PATH}"
+
+    print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
+    print(f"[smoke] opening {url}")
+
+    try:
+        wait_for_server(host, bound_port)
+        smoke_steps(url, args.headed, env)
+        print("[smoke] PASS threejs-snake: load -> eat -> game over -> restart")
+        return 0
+    finally:
+        try:
+            run_pw("close", env=env)
+        except Exception:
+            pass
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=1.0)
+        shutil.rmtree(REPO_ROOT / ".playwright-cli", ignore_errors=True)
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        print(f"[smoke] FAIL {exc}", file=sys.stderr)
+        raise SystemExit(1)

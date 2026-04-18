@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-16
+更新时间：2026-04-18
 阶段：stage-00
 状态：进行中
 
@@ -25,6 +25,7 @@
   - requirement/workstream metadata 位点与 ADR 规则
   - runtime staged 阻断、working-context 新鲜度检查、handoff 堆积 warning
   - 首个真实场景 `WS-01 / Three.js Snake MVP` 的 requirements 导入、实现落地与 handoff/status 压缩
+  - `WS-01` 的 repo-level deterministic smoke runner，覆盖 `load -> eat -> game over -> restart`
 - 进行中：
   - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
   - 评估这套流程在第二个真实 workstream 上的复用性
@@ -40,11 +41,13 @@
 - requirements traceability 规则已经进入 handoff、status、session 和 reducer 输出，且 canonical mapping 保持在 `docs/requirements/traceability-matrix.md`
 - quality / governance 检查已经能识别 metadata section 缺失，并继续阻断 runtime state 误提交
 - `WS-01 / Three.js Snake MVP` 已作为首个真实场景落地，证明当前 harness 能支撑从 requirements 到代码实现的完整闭环
+- `WS-01` 已新增 repo 内可直接运行的浏览器 smoke 入口，不再只依赖一次性手工打开页面验证
 
 ## 风险与阻塞
 
 - observation 与 session 仍依赖 best-effort hook payload，真实运行时字段可能需要继续适配
 - reducer 目前只做轻量聚合，尚未在真实长期 observation 数据上验证压缩质量
+- 当前前端 smoke 通过 `?smoke=1` 下的 namespaced API 走 deterministic 断言，后续若要覆盖真实用户输入路径，仍需补更黑盒的浏览器回归
 - 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
 
 ## 下一阶段重点

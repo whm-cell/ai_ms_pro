@@ -1,7 +1,7 @@
 # 当前工作上下文
 
-更新时间：2026-04-16
-当前阶段：STAGE-00 规划与治理固化
+更新时间：2026-04-18
+当前阶段：STAGE-00 真实场景验证与治理固化
 当前模式：Codex-first harness engineering
 
 ## 作用
@@ -27,7 +27,7 @@
 
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
 - verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime observation append-only 采集与 runtime session best-effort 自动写入，以及 `SessionStart / Resume` 时的最近 session 精简摘要读取
-- 真实前端场景已经落地，但浏览器侧仍只做了基础 smoke test，未覆盖完整玩法自动化验证
+- `WS-01` 已具备 repo 内可复现的 deterministic smoke runner，能覆盖 `load -> eat -> game over -> restart`；但仍未覆盖自由输入路径、渲染质量、多尺寸和 CI 级自动执行
 
 ## 当前真实入口
 
@@ -80,6 +80,7 @@
 - `SessionStart` 恢复摘要在 session metadata 已知时，会一并带回 requirement/workstream 绑定，减少 resume 后的追踪断点
 - Stage-00 已新增阶段级 status，用于压缩 `Runtime Hooks + Observation Reducer + Requirement Metadata` 的稳定成果
 - `WS-01 / Three.js Snake MVP` 已完成首轮 requirements、implementation、handoff/status 闭环，证明当前 harness 可支撑真实场景
+- `WS-01` 已新增 `python3 scripts/threejs_snake_smoke.py` 浏览器 smoke 入口，并通过 `?smoke=1` 下的 `window.__THREEJS_SNAKE_TEST__` namespaced API 提供低侵入、可重复的玩法断言
 - 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP` 四个子任务；下一步应验证这套流程在第二个真实 workstream 上的复用性
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
