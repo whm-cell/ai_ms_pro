@@ -22,6 +22,7 @@
 - 更新 [scripts/check_ai_docs.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/check_ai_docs.py)，改为“最小默认 + `.codex/harness.toml` 可配置”
 - 新增默认最小配置 [.codex/harness.toml](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/harness.toml)
 - 新增 [scripts/bootstrap_harness.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/bootstrap_harness.py)，可在新项目中生成 `index / working-context / plan / requirements index / traceability-matrix`
+- 新增 repo-level Python runner，统一 Codex hook 与 Git hook 对 `.codex/.venv` 的优先解析，避免落到系统 Python 3.9
 - 新增 [Harness 可迁移清单](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-portability-guide.md)，明确哪些文件保留、清空和参数化
 - 新增 [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
 - 更新 `handoff/status/adr` 模板中的内部链接为相对路径，避免迁移时带入当前仓库绝对路径
@@ -32,6 +33,10 @@
 - [.codex/harness.toml](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/harness.toml)
 - [scripts/check_ai_docs.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/check_ai_docs.py)
 - [scripts/bootstrap_harness.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/bootstrap_harness.py)
+- [.codex/hooks/run_with_repo_python.sh](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks/run_with_repo_python.sh)
+- [.codex/hooks/run_hook.sh](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks/run_hook.sh)
+- [.githooks/pre-commit](/Volumes/usd/codes/go_projects/ai_ms_pro/.githooks/pre-commit)
+- [.codex/requirements.txt](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/requirements.txt)
 - [docs/ai/harness-portability-guide.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-portability-guide.md)
 - [docs/ai/adr/ADR-006-harness-portability-bootstrap.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
 - [docs/ai/handoffs/active/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/_template.md)
@@ -46,6 +51,7 @@
 - 不把当前项目的 `working-context/status/handoff/traceability` 当成可复制模板，而是只复制机制层
 - `check_ai_docs.py` 的默认要求保持最小，repo-specific 附加文档交给 `.codex/harness.toml` 决定
 - 新项目从 0 到 1 的首个动作固定为 bootstrap 最小控制面，而不是直接进入业务实现
+- bootstrap 默认使用当前环境 Python 创建 repo-local `.codex/.venv`，并由统一 runner 供 Git hook 与 Codex hook 共用
 - 模板文档优先使用相对链接，避免把当前仓库绝对路径污染到新项目
 
 ## 已验证有效的路线
@@ -53,6 +59,7 @@
 - 先收掉 repo-specific 硬编码，再给 bootstrap 入口，比只写迁移说明更可执行
 - 把“复制机制，不复制真相”写成 ADR 和迁移清单，能明显降低新项目误启动风险
 - 默认最小 `.codex/harness.toml` 更适合作为跨项目可复制基线
+- Git hook 与 Codex hook 共用同一个 repo-level Python 解析入口后，能稳定避开 `/usr/bin/python3` 3.9 引发的 `tomllib` 类兼容性问题
 
 ## 已验证无效的路线
 
@@ -69,14 +76,14 @@
 ## 当前未完成项
 
 - 尚未给 `AGENTS.md` 提供独立 starter 版本
-- 尚未在真实新仓库中实际演练一次完整 bootstrap 流程
+- 尚未在真实外部新仓库中实际演练一次完整 bootstrap 流程
 - 尚未把更多 smoke/validation 样板做成可选模块
 
 ## 已知风险与注意事项
 
 - 新项目若直接复制当前 repo 全量内容且不运行 bootstrap，仍可能先继承错误上下文
 - `.codex/harness.toml` 只解决 required docs 的配置，不会自动替项目决定附加治理文档
-- bootstrap 只生成最小控制面，不生成首个真实 `REQDOC / REQ / WS`
+- bootstrap 只生成最小控制面和 repo-local Python 运行时，不生成首个真实 `REQDOC / REQ / WS`
 
 ## 下一位 Agent 的第一步动作
 

@@ -1,0 +1,9 @@
+[checks]
+required_ai_docs = [
+  "AGENTS.md",
+  "docs/ai/plan.md",
+  "docs/ai/working-context.md",
+]
+required_requirements_docs = [
+  "docs/requirements/traceability-matrix.md",
+]

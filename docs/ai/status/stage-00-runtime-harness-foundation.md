@@ -32,6 +32,7 @@
   - 显式 `REQ/WS` metadata 下的 Stop hook observation/session 与 reducer 验证
   - repo-level smoke 的 Playwright session 命名已收紧，避免当前 macOS 环境中的 unix socket 路径截断冲突
   - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目最小控制面初始化入口
+  - Git hook 与 Codex hook 已统一收敛到 repo-level Python runner，默认优先使用 `.codex/.venv`
 - 进行中：
   - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -51,6 +52,7 @@
 - `WS-02 / Harness Trace Console` 已作为第二个真实场景落地，证明当前 harness 在新 workstream 上也能复用 requirements、implementation 和 shared truth surface
 - `WS-02` 已通过显式 `REQ-004~006 / WS-02` metadata 运行 Stop hooks 与 reducer，验证 runtime promotion 链路不只在首个 workstream 有效
 - harness 已具备跨项目 bootstrap 能力，说明当前阶段成果不只适用于本 repo，也可作为新项目起手式
+- repo-level Python runner 已补齐 Git hook 与 Codex hook 的解释器一致性，减少系统 Python 版本差异对治理检查的影响
 - `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
 

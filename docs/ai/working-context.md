@@ -32,7 +32,8 @@
 - `plan` 与 `workstream` 的 projection boundary 已明确，但 metadata 与 traceability matrix 的字段级一致性校验仍未自动化
 - `WS-02` 已证明第二个 workstream 也能走通 runtime hook 与 reducer，但这次 metadata 仍通过显式环境变量传入，尚未证明任意调用方都能零配置带齐 IDs
 - 当前两个 smoke 场景都偏 deterministic 行为验证，还未覆盖视觉回归或 CI 级长期稳定性
-- harness 现在已具备跨项目 bootstrap 入口，但 `AGENTS.md` 仍是当前项目版本；新项目若不改写项目目标和 repo-specific 规则，仍会带入旧假设
+- harness 现在已具备跨项目 bootstrap 入口与 repo-local Python runner；当前还需验证 starter bundle 在真正新仓库中的首跑体验
+- `AGENTS.md` 仍是当前项目版本；新项目若不改写项目目标和 repo-specific 规则，仍会带入旧假设
 
 ## 当前真实入口
 
@@ -104,6 +105,7 @@
 - repo-level smoke 已收紧 Playwright session 命名，避免在当前 macOS 环境中因 unix socket 路径截断导致本地重跑冲突
 - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目初始化入口
 - 已明确“复制机制，不复制当前项目真相”的迁移边界，并沉淀为 portability guide 与 ADR-006
+- Git hook 与 Codex hook 已开始统一走 repo-level Python 入口，默认优先 `.codex/.venv`，避免系统 Python 版本漂移影响治理脚本
 - 项目已明确 `plan/workstream` 作为 projection surface 的边界，当前完成度与验证证据默认集中到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance check 已新增 projection freshness 规则，但只针对显式状态字段，不做自由文本语义判断
 - 当前 `working-context` 已与最新 stage status 对齐，后续应继续把新增治理能力优先回收到 primary truth surface

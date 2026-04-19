@@ -12,6 +12,7 @@
   - 仅当前项目成立的共享真相
 - 如果把整套目录原样复制到新项目，AI 会先读到旧项目的 `working-context`、`status`、`traceability-matrix` 和 `REQ/WS` 文档，产生错误上下文。
 - `scripts/check_ai_docs.py` 之前还把当前 repo 的某些文档名写死为必需项，导致新项目即使只想保留最小控制面，也会被旧项目假设卡住。
+- Git hook 与 Codex hook 之前都可能直接落到 `/usr/bin/python3`，这会在 Python 3.9 环境下触发 `tomllib` 等兼容性问题，也不利于 repo 内依赖收敛。
 
 ## 决策
 
@@ -21,6 +22,7 @@
 - `scripts/check_ai_docs.py` 改为“最小默认 + `.codex/harness.toml` 可配置”。
 - `.codex/harness.toml` 的默认值保持最小，不带当前 repo 的专题文档假设。
 - 新仓库的初始化入口统一为 `python3 scripts/bootstrap_harness.py`。
+- harness 的 Python 运行时统一收敛到 repo-local `.codex/.venv`；bootstrap 默认使用当前环境的 Python 创建该虚拟环境，Git/Codex hooks 共用同一个 repo-level Python runner。
 - 模板文件中的内部链接改为相对路径，避免把当前仓库绝对路径带到新项目。
 
 ## 备选方案
@@ -34,13 +36,14 @@
 - 方案 A 容易让 AI 在第一轮就继承错误上下文，也会把清理旧文档变成额外工作。
 - 方案 B 只能靠人记住所有迁移细节，不足以降低实际误用概率。
 - 方案 C 会让 hook 越过“是否真的要创建这些文档”的语义边界，且不利于项目自定义。
-- 机制层可复制、真相层重建，再配合 bootstrap 入口，能把新项目从 0 到 1 的第一步变成可重复流程。
+- 机制层可复制、真相层重建，再配合 bootstrap 入口和 repo-local Python runner，能把新项目从 0 到 1 的第一步变成可重复流程，同时避免解释器漂移。
 
 ## 影响
 
 - 新项目不再需要先复制旧项目 `working-context/status/handoff/traceability` 再人工清洗。
 - `check_ai_docs.py` 不再默认要求当前 repo 特有的附加文档；项目若需要更多 always-on 文档，可在 `.codex/harness.toml` 中追加。
 - 新项目第一次启动时，AI 应优先执行 bootstrap 和首个 `REQDOC / REQ / WS` 初始化，而不是直接写业务功能。
+- 新项目中的 Git hook、Codex hook 与手工脚本运行可以共用 `.codex/.venv`，降低“系统 Python 版本不一致”带来的治理检查波动。
 
 ## 关联文档
 
