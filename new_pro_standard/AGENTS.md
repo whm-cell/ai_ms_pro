@@ -17,6 +17,28 @@ Customize these items before large-scale implementation:
 
 Do not keep old project truth when copying this starter to a new repository.
 
+## AGENTS Rewrite Checklist
+
+When this starter is copied into a new repository, rewrite `AGENTS.md` before large-scale implementation.
+
+At minimum, replace or add these repo-specific facts:
+
+- what the project is trying to build
+- which directories are the real code entrypoints
+- which documents are the real business or architecture truth surfaces
+- which commands are the real verification commands
+- which boundaries should not be edited casually
+- what must be true before a task is considered complete
+
+Do not turn `AGENTS.md` into a current-status board.
+
+Current state, active backlog, and transient progress belong in:
+
+- `docs/ai/working-context.md`
+- active `handoff`
+- `status`
+- `docs/requirements/traceability-matrix.md`
+
 ## Document System
 
 Project-progress and AI-handoff documents live under `docs/ai/`.

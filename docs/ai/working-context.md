@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-04-18
+更新时间：2026-04-19
 当前阶段：STAGE-00 真实场景验证与治理固化
 当前模式：Codex-first harness engineering
 
@@ -45,6 +45,9 @@
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
+- [新项目 AGENTS 改写指南](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/new-project-agents-rewrite-guide.md)
+- [传统项目接入 Harness 的标准起手式](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/traditional-project-harness-kickoff.md)
+- [V2 文档项目的 REQDOC / REQ / WS / STAGE 拆解模板](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)

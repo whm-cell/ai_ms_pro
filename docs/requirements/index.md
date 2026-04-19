@@ -1,6 +1,6 @@
 # 需求文档入口索引
 
-更新时间：2026-04-18
+更新时间：2026-04-19
 当前状态：已导入两个真实验证场景
 
 ## 目的
@@ -20,6 +20,7 @@
 2. [标准化需求目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized)
 3. [工作流目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams)
 4. [原始需求目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source)
+5. [V2 文档项目的 REQDOC / REQ / WS / STAGE 拆解模板](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
 
 ## 目录结构
 
@@ -27,6 +28,7 @@
 - [normalized](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized)
 - [workstreams](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams)
 - [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)
+- [v2-requirements-splitting-template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
 
 ## 使用规则
 
@@ -35,6 +37,10 @@
 - `workstreams/` 将多个需求映射成可开发的业务工作流
 - `traceability-matrix.md` 负责串联 `需求 -> 工作流 -> 阶段 -> 实现/测试`
 - 当 `docs/ai/` 下的 `handoff`、`status` 或 reducer 草稿已经绑定需求时，应显式写出 `Requirement IDs` / `Workstream IDs`，并与本目录中的追踪关系保持一致
+
+## 辅助模板
+
+- [V2 文档项目的 REQDOC / REQ / WS / STAGE 拆解模板](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
 
 ## 当前活跃内容
 
