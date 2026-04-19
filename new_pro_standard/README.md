@@ -11,6 +11,7 @@ It intentionally includes:
 - runtime templates
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
+- portable migration and rewrite guides
 
 It intentionally does not include:
 
@@ -73,6 +74,13 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_ai_governance.py`
 - `scripts/reduce_runtime_observations.py`
+
+## Included Guides
+
+- `docs/ai/harness-portability-guide.md`
+- `docs/ai/new-project-agents-rewrite-guide.md`
+- `docs/ai/traditional-project-harness-kickoff.md`
+- `docs/requirements/v2-requirements-splitting-template.md`
 
 ## Included Bootstrap
 

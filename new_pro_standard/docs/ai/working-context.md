@@ -35,6 +35,10 @@
 - [AI 文档入口索引](./index.md)
 - [需求文档入口索引](../requirements/index.md)
 - [项目计划](./plan.md)
+- [Harness 可迁移清单](./harness-portability-guide.md)
+- [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
+- [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
+- [V2 文档项目的 REQDOC / REQ / WS / STAGE 拆解模板](../requirements/v2-requirements-splitting-template.md)
 
 ## 下一次会话先读
 
@@ -42,6 +46,8 @@
 2. [当前工作上下文](./working-context.md)
 3. [需求文档入口索引](../requirements/index.md)
 4. [项目计划](./plan.md)
+5. [Harness 可迁移清单](./harness-portability-guide.md)
+6. [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
 
 ## 最近已固化的决策
 
