@@ -42,6 +42,15 @@ def check_required_sections(path: Path, sections: list[str], errors: list[str]) 
             errors.append(f"Missing section in {path.relative_to(ROOT)}: {section}")
 
 
+def check_required_section_choices(path: Path, section_choices: list[list[str]], errors: list[str]) -> None:
+    text = load_text(path)
+    for choices in section_choices:
+        if any(section in text for section in choices):
+            continue
+        rendered = " | ".join(choices)
+        errors.append(f"Missing one of sections in {path.relative_to(ROOT)}: {rendered}")
+
+
 def check_placeholder_markers(path: Path, warnings: list[str]) -> None:
     text = load_text(path)
     for marker in PLACEHOLDER_MARKERS:
@@ -207,15 +216,15 @@ def main() -> int:
         check_placeholder_markers(path, warnings)
 
     for path in iter_docs(REQ_DIR / "workstreams"):
-        check_required_sections(
+        check_required_section_choices(
             path,
             [
-                "## 使用边界",
-                "## 业务目标",
-                "## 覆盖需求",
-                "## 主要模块",
-                "## 阶段拆分建议",
-                "## 验收重点",
+                ["## 使用边界"],
+                ["## 业务目标"],
+                ["## 覆盖需求"],
+                ["## 主要模块"],
+                ["## 阶段拆分建议"],
+                ["## 验收模型", "## 验收重点"],
             ],
             errors,
         )

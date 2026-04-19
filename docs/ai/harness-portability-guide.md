@@ -68,6 +68,7 @@
 - `AGENTS.md` 中的项目目标、文档职责和默认 workflow 偏好
 - `.codex/harness.toml` 中的 `required_ai_docs` 与 `required_requirements_docs`
 - `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`
+- `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
 - `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
 - `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
 - `docs/ai/plan.md` 中的项目目标、范围和阶段规划
@@ -80,12 +81,13 @@
 1. 复制机制层文件，不复制当前项目真相和 runtime 原料。
 2. 在新仓库运行 `python3 scripts/bootstrap_harness.py --project-name "你的项目名"`。
 3. bootstrap 会优先取当前 `VIRTUAL_ENV` / `CONDA_PREFIX` / 调用它的 `sys.executable` 来创建 repo-local `.codex/.venv`；如需指定解释器，用 `--python /path/to/python3`。
-4. 执行 `git config core.hooksPath .githooks`，让 Git hook 与 Codex hook 统一通过 repo-local Python 入口运行。
-5. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`。
-6. 让 AI 先初始化或确认 `docs/ai/`、`docs/requirements/` 控制面，而不是直接写业务代码。
-7. 导入首个真实 `REQDOC / REQ / WS`。
-8. 落第一个垂直切片实现，并在完成后补 `handoff/status`。
-9. 再让 runtime hooks、reducer 和 governance check 进入常规工作流。
+4. Python 依赖安装默认是 best-effort；离线或受限网络下即使 `pip install` 失败，bootstrap 也应继续完成 venv 初始化。若你需要强制安装成功，可追加 `--strict-python-deps`。
+5. 执行 `git config core.hooksPath .githooks`，让 Git hook 与 Codex hook 统一通过 repo-local Python 入口运行。
+6. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`。
+7. 让 AI 先初始化或确认 `docs/ai/`、`docs/requirements/` 控制面，而不是直接写业务代码。
+8. 导入首个真实 `REQDOC / REQ / WS`。
+9. 落第一个垂直切片实现，并在完成后补 `handoff/status`。
+10. 再让 runtime hooks、reducer 和 governance check 进入常规工作流。
 
 ## 新项目的首条 Prompt 建议
 
@@ -102,5 +104,6 @@
 
 - bootstrap 只解决最小控制面初始化，不会自动替你决定首个真实 workstream。
 - repo-local `.codex/.venv` 是 harness Python 的默认落点，但不会自动提交，也不应复制到别的仓库。
+- `.codex/requirements.txt` 里的依赖目前按可选兼容层处理；离线时 bootstrap 完成不代表这些包一定已经安装。
 - `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。

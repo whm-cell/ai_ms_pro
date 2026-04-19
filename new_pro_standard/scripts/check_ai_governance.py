@@ -235,7 +235,7 @@ def projection_freshness_errors(
 def load_changed_paths() -> list[Path]:
     try:
         result = subprocess.run(
-            ["git", "status", "--porcelain=v1"],
+            ["git", "status", "--porcelain=v1", "-uall"],
             cwd=str(ROOT),
             capture_output=True,
             text=True,

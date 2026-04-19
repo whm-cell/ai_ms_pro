@@ -33,7 +33,9 @@
 - `WS-02` 已证明第二个 workstream 也能走通 runtime hook 与 reducer，但这次 metadata 仍通过显式环境变量传入，尚未证明任意调用方都能零配置带齐 IDs
 - 当前两个 smoke 场景都偏 deterministic 行为验证，还未覆盖视觉回归或 CI 级长期稳定性
 - harness 现在已具备跨项目 bootstrap 入口与 repo-local Python runner；当前还需验证 starter bundle 在真正新仓库中的首跑体验
+- 已在 `output/harness_rehearsal_20260419_100339` 完成一次真实新仓库演练，starter copy -> bootstrap -> Git hook -> 首个 `REQDOC / REQ / WS` -> 最小实现链路已跑通
 - `AGENTS.md` 仍是当前项目版本；新项目若不改写项目目标和 repo-specific 规则，仍会带入旧假设
+- 受限网络环境下，bootstrap 若仍把 Python 兼容依赖安装视为强依赖，会让新项目首跑在 `.codex/.venv` 已建好后仍然失败；这个边界需要在 starter 中收掉
 
 ## 当前真实入口
 
@@ -52,6 +54,7 @@
 - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
 - [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
 - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
+- [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
@@ -72,12 +75,13 @@
 11. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 12. [Harness 可迁移清单](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-portability-guide.md)
 13. [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
-14. [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
-15. [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
-16. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
-17. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
-18. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
-19. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+14. [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
+15. [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
+16. [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
+17. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
+18. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+19. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
+20. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -106,6 +110,8 @@
 - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目初始化入口
 - 已明确“复制机制，不复制当前项目真相”的迁移边界，并沉淀为 portability guide 与 ADR-006
 - Git hook 与 Codex hook 已开始统一走 repo-level Python 入口，默认优先 `.codex/.venv`，避免系统 Python 版本漂移影响治理脚本
+- starter 已暴露出一个真实 portability 问题：当新仓库当前 `python3` 为 3.9 且网络受限时，`tomli` 安装不能阻断 bootstrap 完成
+- governance checker 已补齐全新仓库未跟踪文件的细粒度采集，避免首次初始化时把顶层目录误判为“未同步治理文档”
 - 项目已明确 `plan/workstream` 作为 projection surface 的边界，当前完成度与验证证据默认集中到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance check 已新增 projection freshness 规则，但只针对显式状态字段，不做自由文本语义判断
 - 当前 `working-context` 已与最新 stage status 对齐，后续应继续把新增治理能力优先回收到 primary truth surface

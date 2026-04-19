@@ -33,6 +33,8 @@
   - repo-level smoke 的 Playwright session 命名已收紧，避免当前 macOS 环境中的 unix socket 路径截断冲突
   - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目最小控制面初始化入口
   - Git hook 与 Codex hook 已统一收敛到 repo-level Python runner，默认优先使用 `.codex/.venv`
+  - bootstrap 已补齐离线容错：Python 兼容依赖安装默认 best-effort，不再因为受限网络阻断 `.codex/.venv` 初始化
+  - 已在 `output/harness_rehearsal_20260419_100339` 完成全新测试仓库演练，starter copy -> bootstrap -> 首个 `REQDOC / REQ / WS` -> 最小实现 -> governance check 已闭环
 - 进行中：
   - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -53,6 +55,8 @@
 - `WS-02` 已通过显式 `REQ-004~006 / WS-02` metadata 运行 Stop hooks 与 reducer，验证 runtime promotion 链路不只在首个 workstream 有效
 - harness 已具备跨项目 bootstrap 能力，说明当前阶段成果不只适用于本 repo，也可作为新项目起手式
 - repo-level Python runner 已补齐 Git hook 与 Codex hook 的解释器一致性，减少系统 Python 版本差异对治理检查的影响
+- 通过真实新仓库演练可以暴露 portability 边界问题；当前已确认“离线安装可选兼容依赖失败”不应视为 bootstrap 失败
+- governance checker 已通过 `-uall` 修复全新仓库首次初始化时的目录级未跟踪误判
 - `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
 
@@ -89,6 +93,7 @@
   - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
   - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
   - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
+  - [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
 - 相关 `adr`：
   - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
   - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)

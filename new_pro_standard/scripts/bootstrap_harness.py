@@ -43,6 +43,11 @@ def parse_args() -> argparse.Namespace:
         "--python",
         help="Explicit Python executable to use for creating the repo-local virtual environment.",
     )
+    parser.add_argument(
+        "--strict-python-deps",
+        action="store_true",
+        help="Fail bootstrap when Python dependency installation fails. Default behavior is best-effort.",
+    )
     return parser.parse_args()
 
 
@@ -71,7 +76,10 @@ def main() -> int:
         path.write_text(content, encoding="utf-8")
 
     if not args.skip_venv:
-        bootstrap_python_environment(explicit_python=args.python)
+        bootstrap_python_environment(
+            explicit_python=args.python,
+            strict_dependency_install=args.strict_python_deps,
+        )
 
     written = []
     skipped = []
@@ -135,10 +143,21 @@ def render_harness_config() -> str:
 
 
 def render_requirements_txt() -> str:
-    return 'tomli>=2,<3; python_version < "3.11"\n'
+    return textwrap.dedent(
+        """\
+        # Optional compatibility dependency for Python < 3.11.
+        # Bootstrap treats dependency installation as best-effort by default
+        # so offline repos can still finish initialization.
+        tomli>=2,<3; python_version < "3.11"
+        """
+    )
 
 
-def bootstrap_python_environment(*, explicit_python: str | None) -> None:
+def bootstrap_python_environment(
+    *,
+    explicit_python: str | None,
+    strict_dependency_install: bool,
+) -> None:
     python_bin = resolve_bootstrap_python(explicit_python)
     if not DEFAULT_VENV_DIR.exists():
         subprocess.run(
@@ -152,13 +171,36 @@ def bootstrap_python_environment(*, explicit_python: str | None) -> None:
         raise SystemExit(f"ERROR: expected venv python at {venv_python}")
 
     if DEFAULT_REQUIREMENTS_PATH.exists():
+        install_optional_requirements(
+            venv_python=venv_python,
+            strict_dependency_install=strict_dependency_install,
+        )
+
+    print(f"Python environment ready: {venv_python}")
+
+
+def install_optional_requirements(
+    *,
+    venv_python: Path,
+    strict_dependency_install: bool,
+) -> None:
+    try:
         subprocess.run(
             [str(venv_python), "-m", "pip", "install", "-r", str(DEFAULT_REQUIREMENTS_PATH)],
             cwd=str(ROOT),
             check=True,
         )
-
-    print(f"Python environment ready: {venv_python}")
+    except subprocess.CalledProcessError as exc:
+        message = (
+            "WARN: Python dependency install failed; continuing because bootstrap only "
+            "requires a repo-local venv to finish initialization. "
+            f"Re-run `{venv_python} -m pip install -r {DEFAULT_REQUIREMENTS_PATH}` later if needed."
+        )
+        if strict_dependency_install:
+            raise SystemExit(
+                f"ERROR: {message[6:]}"
+            ) from exc
+        print(message)
 
 
 def resolve_bootstrap_python(explicit_python: str | None) -> str:
