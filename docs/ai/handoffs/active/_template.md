@@ -55,4 +55,4 @@
 
 - 必要时更新 `status`
 - 阶段收尾时更新 `changelog`
-- 检查 [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
+- 检查 [AI 文档入口索引](../../index.md)

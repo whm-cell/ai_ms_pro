@@ -31,6 +31,7 @@
   - `WS-02` 的 repo-level deterministic smoke runner，覆盖 `load -> WS-02 filter -> REQ-006 search -> completed status`
   - 显式 `REQ/WS` metadata 下的 Stop hook observation/session 与 reducer 验证
   - repo-level smoke 的 Playwright session 命名已收紧，避免当前 macOS 环境中的 unix socket 路径截断冲突
+  - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目最小控制面初始化入口
 - 进行中：
   - 基于真实 observation 样本验证 reducer 噪音和压缩阈值
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -49,6 +50,7 @@
 - `WS-01` 已新增 repo 内可直接运行的浏览器 smoke 入口，不再只依赖一次性手工打开页面验证
 - `WS-02 / Harness Trace Console` 已作为第二个真实场景落地，证明当前 harness 在新 workstream 上也能复用 requirements、implementation 和 shared truth surface
 - `WS-02` 已通过显式 `REQ-004~006 / WS-02` metadata 运行 Stop hooks 与 reducer，验证 runtime promotion 链路不只在首个 workstream 有效
+- harness 已具备跨项目 bootstrap 能力，说明当前阶段成果不只适用于本 repo，也可作为新项目起手式
 - `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
 
@@ -59,12 +61,14 @@
 - 当前前端 smoke 通过 `?smoke=1` 下的 namespaced API 走 deterministic 断言，后续若要覆盖真实用户输入路径，仍需补更黑盒的浏览器回归
 - 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
 - `WS-02` 当前通过显式环境变量携带 `REQ/WS` metadata，说明链路可用，但自动化一致性仍未完全收紧
+- `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
 
 ## 下一阶段重点
 
 - 用真实 observation 数据验证 reducer 输出，并明确何时应进一步压缩到 `status` 或 `ADR`
 - 判断 `WS-01` 与 `WS-02` 是否应归档为已验证样板，或继续演化成更完整的示例
 - 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
+- 评估是否需要把 `AGENTS.md` 也拆成更项目中立的 starter 版本
 
 ## 验收判断
 
@@ -82,9 +86,11 @@
   - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
   - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
   - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
+  - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
 - 相关 `adr`：
   - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
   - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
   - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
   - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
   - [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
+  - [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)

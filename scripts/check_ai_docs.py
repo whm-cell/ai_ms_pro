@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 
@@ -12,8 +13,17 @@ AI_DIR = ROOT / "docs" / "ai"
 INDEX_PATH = AI_DIR / "index.md"
 REQ_DIR = ROOT / "docs" / "requirements"
 REQ_INDEX_PATH = REQ_DIR / "index.md"
+HARNESS_CONFIG_PATH = ROOT / ".codex" / "harness.toml"
 
 LINK_RE = re.compile(r"\[[^\]]+\]\((/[^)]+)\)")
+DEFAULT_REQUIRED_AI_DOCS = [
+    "AGENTS.md",
+    "docs/ai/plan.md",
+    "docs/ai/working-context.md",
+]
+DEFAULT_REQUIRED_REQ_DOCS = [
+    "docs/requirements/traceability-matrix.md",
+]
 
 
 def load_text(path: Path) -> str:
@@ -42,6 +52,42 @@ def add_missing_doc_error(errors: list[str], index_text: str, path: Path, label:
         errors.append(f"{label} not referenced in index: {path.relative_to(ROOT)}")
 
 
+def resolve_required_docs(entries: list[str], *, config_label: str) -> list[Path]:
+    resolved: list[Path] = []
+    for entry in entries:
+        path = (ROOT / entry).resolve()
+        try:
+            path.relative_to(ROOT)
+        except ValueError:
+            raise SystemExit(f"ERROR: {config_label} path escapes repository root: {entry}")
+        resolved.append(path)
+    return resolved
+
+
+def load_harness_config() -> tuple[list[Path], list[Path]]:
+    required_ai_entries = list(DEFAULT_REQUIRED_AI_DOCS)
+    required_req_entries = list(DEFAULT_REQUIRED_REQ_DOCS)
+
+    if HARNESS_CONFIG_PATH.exists():
+        try:
+            data = tomllib.loads(HARNESS_CONFIG_PATH.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as exc:
+            raise SystemExit(f"ERROR: invalid TOML in {HARNESS_CONFIG_PATH.relative_to(ROOT)}: {exc}") from exc
+        checks = data.get("checks", {})
+        if isinstance(checks, dict):
+            ai_entries = checks.get("required_ai_docs")
+            req_entries = checks.get("required_requirements_docs")
+            if isinstance(ai_entries, list) and all(isinstance(item, str) for item in ai_entries):
+                required_ai_entries = ai_entries
+            if isinstance(req_entries, list) and all(isinstance(item, str) for item in req_entries):
+                required_req_entries = req_entries
+
+    return (
+        resolve_required_docs(required_ai_entries, config_label="checks.required_ai_docs"),
+        resolve_required_docs(required_req_entries, config_label="checks.required_requirements_docs"),
+    )
+
+
 def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
@@ -67,17 +113,7 @@ def main() -> int:
     targets = link_targets(index_text)
     req_targets = link_targets(req_index_text)
 
-    required_ai_docs = [
-        ROOT / "AGENTS.md",
-        AI_DIR / "plan.md",
-        AI_DIR / "working-context.md",
-        AI_DIR / "medium-project-documentation-findings.md",
-        AI_DIR / "lightweight-large-project-doc-governance.md",
-    ]
-
-    required_req_docs = [
-        REQ_DIR / "traceability-matrix.md",
-    ]
+    required_ai_docs, required_req_docs = load_harness_config()
 
     for path in required_ai_docs:
         if not path.exists():

@@ -39,7 +39,7 @@
 
 ## 关联文档
 
-- [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
-- [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
+- [项目计划](../plan.md)
+- [AI 文档入口索引](../index.md)
 - 相关 `handoff`：按需补充
 - 相关 `adr`：按需补充

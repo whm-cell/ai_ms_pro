@@ -1,0 +1,98 @@
+# Harness 可迁移清单
+
+更新时间：2026-04-18
+适用范围：将当前 Codex-first harness 迁移到一个全新的项目仓库
+
+## 核心原则
+
+- 复制机制，不复制当前项目真相。
+- 机制层包括规则、hook、检查脚本、模板和 bootstrap 入口。
+- 真相层包括当前项目的 `working-context`、`status`、`handoff`、`traceability-matrix`、真实 `REQ/WS` 文档和 runtime 原料。
+- 新项目的第一步应该是 bootstrap 最小控制面，而不是直接沿用旧项目共享文档内容。
+
+## 迁移时应保留
+
+以下内容适合作为 harness 机制层复制到新仓库：
+
+- `AGENTS.md`
+- `.codex/hooks.json`
+- `.codex/hooks/`
+- `scripts/check_ai_governance.py`
+- `scripts/check_ai_docs.py`
+- `scripts/check_ai_doc_quality.py`
+- `scripts/reduce_runtime_observations.py`
+- `scripts/bootstrap_harness.py`
+- `.codex/harness.toml`
+- `docs/ai/handoffs/active/_template.md`
+- `docs/ai/status/_template.md`
+- `docs/ai/changelog/_template.md`
+- `docs/ai/adr/_template.md`
+- `docs/requirements/source/_template.md`
+- `docs/requirements/normalized/_template.md`
+- `docs/requirements/workstreams/_template.md`
+- `.codex/runtime/sessions/_template.md`
+- `.codex/runtime/README.md`
+- `.codex/runtime/sessions/README.md`
+- `.codex/runtime/observations/README.md`
+
+## 迁移时应清空或重建
+
+以下内容属于当前项目真相，不应原样带入新仓库：
+
+- `docs/ai/index.md`
+- `docs/ai/working-context.md`
+- `docs/ai/plan.md`
+- `docs/ai/handoffs/active/*.md`
+- `docs/ai/status/*.md`
+- `docs/ai/changelog/*.md`
+- `docs/ai/adr/ADR-*.md`
+- `docs/requirements/index.md`
+- `docs/requirements/traceability-matrix.md`
+- `docs/requirements/source/REQDOC-*.md`
+- `docs/requirements/normalized/REQ-*.md`
+- `docs/requirements/workstreams/WS-*.md`
+- `.codex/runtime/sessions/*.md`
+- `.codex/runtime/observations/*.jsonl`
+- `apps/threejs-snake/`
+- `apps/harness-trace-console/`
+- 任意只服务于当前项目验证样板的 smoke 脚本
+
+## 迁移时必须参数化
+
+以下内容在新仓库里必须按项目实际情况调整：
+
+- `AGENTS.md` 中的项目目标、文档职责和默认 workflow 偏好
+- `.codex/harness.toml` 中的 `required_ai_docs` 与 `required_requirements_docs`
+- `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
+- `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
+- `docs/ai/plan.md` 中的项目目标、范围和阶段规划
+- `docs/requirements/index.md` 中的当前活跃内容
+- `docs/requirements/traceability-matrix.md` 中的首个真实 `REQDOC / REQ / WS`
+- 第一个垂直切片的应用目录与 smoke 脚本
+
+## 推荐迁移步骤
+
+1. 复制机制层文件，不复制当前项目真相和 runtime 原料。
+2. 在新仓库运行 `python3 scripts/bootstrap_harness.py --project-name "你的项目名"`。
+3. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`。
+4. 让 AI 先初始化或确认 `docs/ai/`、`docs/requirements/` 控制面，而不是直接写业务代码。
+5. 导入首个真实 `REQDOC / REQ / WS`。
+6. 落第一个垂直切片实现，并在完成后补 `handoff/status`。
+7. 再让 runtime hooks、reducer 和 governance check 进入常规工作流。
+
+## 新项目的首条 Prompt 建议
+
+```text
+先不要写业务功能。基于当前仓库实际结构初始化 Codex-first harness：
+1. 检查工具链和目录现状
+2. 确认或生成最小 docs/ai 和 docs/requirements 控制面
+3. 初始化 index、working-context、plan、traceability-matrix
+4. 根据我的目标，落首个 REQDOC / REQ / WS
+5. 然后再开始第一个垂直切片实现
+```
+
+## 已知边界
+
+- bootstrap 只解决最小控制面初始化，不会自动替你决定首个真实 workstream。
+- `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
+- `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。

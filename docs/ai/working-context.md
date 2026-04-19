@@ -20,8 +20,9 @@
 
 1. 判断 Stage-00 是否已满足“基础可用性已验证”，以及是否应进入下一阶段
 2. 评估何时把治理检查接入 CI，并继续增加 metadata 与 traceability matrix 的一致性校验
-3. 决定 `WS-01` 与 `WS-02` 哪些部分应该归档为样板，哪些继续演化
-4. 用更真实的 observation 样本继续验证 reducer 压缩阈值
+3. 判断是否要把 `bootstrap_harness.py` 和迁移清单沉淀为默认跨项目起手式
+4. 决定 `WS-01` 与 `WS-02` 哪些部分应该归档为样板，哪些继续演化
+5. 用更真实的 observation 样本继续验证 reducer 压缩阈值
 
 ## 当前风险与阻塞
 
@@ -31,6 +32,7 @@
 - `plan` 与 `workstream` 的 projection boundary 已明确，但 metadata 与 traceability matrix 的字段级一致性校验仍未自动化
 - `WS-02` 已证明第二个 workstream 也能走通 runtime hook 与 reducer，但这次 metadata 仍通过显式环境变量传入，尚未证明任意调用方都能零配置带齐 IDs
 - 当前两个 smoke 场景都偏 deterministic 行为验证，还未覆盖视觉回归或 CI 级长期稳定性
+- harness 现在已具备跨项目 bootstrap 入口，但 `AGENTS.md` 仍是当前项目版本；新项目若不改写项目目标和 repo-specific 规则，仍会带入旧假设
 
 ## 当前真实入口
 
@@ -43,9 +45,12 @@
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 - [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
+- [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
 - [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+- [Harness 可迁移清单](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-portability-guide.md)
 - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
 - [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
+- [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
 - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
@@ -62,13 +67,16 @@
 7. [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 8. [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 9. [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
-10. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
-11. [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
-12. [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
-13. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
-14. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
-15. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
-16. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+10. [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
+11. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+12. [Harness 可迁移清单](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-portability-guide.md)
+13. [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
+14. [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
+15. [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
+16. [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
+17. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+18. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
+19. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
 
 ## 最近已固化的决策
 
@@ -94,10 +102,12 @@
 - `WS-02` 已新增 `python3 scripts/harness_trace_console_smoke.py`，并通过 `?smoke=1` 下的 `window.__HARNESS_TRACE_CONSOLE_TEST__` namespaced API 验证加载、过滤、搜索与选择行为
 - 已通过显式 `REQ-004~006 / WS-02` metadata 手工调用 Stop hooks 与 reducer，证明 runtime observation/session/reducer 在第二个 workstream 上也能贯穿
 - repo-level smoke 已收紧 Playwright session 命名，避免在当前 macOS 环境中因 unix socket 路径截断导致本地重跑冲突
+- `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目初始化入口
+- 已明确“复制机制，不复制当前项目真相”的迁移边界，并沉淀为 portability guide 与 ADR-006
 - 项目已明确 `plan/workstream` 作为 projection surface 的边界，当前完成度与验证证据默认集中到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance check 已新增 projection freshness 规则，但只针对显式状态字段，不做自由文本语义判断
 - 当前 `working-context` 已与最新 stage status 对齐，后续应继续把新增治理能力优先回收到 primary truth surface
-- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP + Projection Freshness + Harness Trace Console` 六个子任务；下一步应判断 Stage-00 是否可以压缩并进入下一阶段
+- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP + Projection Freshness + Harness Trace Console + Harness Portability` 七个子任务；下一步应判断 Stage-00 是否可以压缩并进入下一阶段
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
 
 ## 更新规则
