@@ -14,7 +14,7 @@
 
 - 用 `WS-01 + WS-02` 证明当前 harness 已能支撑两个真实 repo-native 场景
 - 保持 `docs/ai/` 与 `docs/requirements/` 的入口、模板、验证层一致
-- 判断 Stage-00 是否已经完成“可用性验证”，以及还剩哪些 hardening 缺口
+- 判断 Stage-00 是否已经完成“可用性验证”，并把剩余 hardening 缺口收敛成明确 backlog
 
 ## 当前活跃队列
 
@@ -22,7 +22,7 @@
 2. 评估何时把治理检查接入 CI，并继续增加 metadata 与 traceability matrix 的一致性校验
 3. 判断是否要把 `bootstrap_harness.py` 和迁移清单沉淀为默认跨项目起手式
 4. 决定 `WS-01` 与 `WS-02` 哪些部分应该归档为样板，哪些继续演化
-5. 用更真实的 observation 样本继续验证 reducer 压缩阈值
+5. 用 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 作为当前剩余事项的集中入口
 
 ## 当前风险与阻塞
 
@@ -43,6 +43,7 @@
 - [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 - [需求文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/index.md)
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
+- [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)

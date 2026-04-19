@@ -31,6 +31,35 @@ It intentionally does not include:
 7. Import the first real `REQDOC / REQ / WS`.
 8. Start the first vertical slice implementation.
 
+## Wake The Harness
+
+After copying the starter, the mechanism is considered "awake" only when these conditions are true:
+
+1. The repository root contains `AGENTS.md`, `.codex/`, `docs/ai/`, `docs/requirements/`, and `scripts/`.
+2. You have run `python3 scripts/bootstrap_harness.py --project-name "Your Project Name"`.
+3. You have enabled Git hooks with `git config core.hooksPath .githooks`.
+4. Your Codex/AI session is opened from the repository root so it can see `AGENTS.md` and `.codex/config.toml`.
+5. Your first prompt tells the agent to initialize or confirm the control plane before writing business code.
+
+Recommended first prompt:
+
+```text
+先不要直接写业务功能。
+先基于当前仓库实际结构唤醒并检查这套 harness：
+1. 确认 AGENTS.md、.codex hooks、docs/ai、docs/requirements 是否齐全
+2. 检查或运行 bootstrap，确保最小控制面有效
+3. 阅读 index、working-context、requirements index、plan
+4. 根据我的目标建立首个 REQDOC / REQ / WS
+5. 然后再开始第一个垂直切片实现
+```
+
+If the harness is awake, the expected behavior is:
+
+- the agent reads `AGENTS.md` and `docs/ai/index.md` first
+- shared truth stays in `docs/ai/*` and `docs/requirements/*`
+- local runtime memory goes to `.codex/runtime/*`
+- `Stop` runs the governance check automatically when Codex hooks are enabled
+
 ## Python Runtime
 
 - Codex hooks and Git hooks resolve Python through `.codex/hooks/run_with_repo_python.sh`.
