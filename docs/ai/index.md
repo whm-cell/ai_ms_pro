@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-04-19
-当前状态：两个真实 workstream 已落地，且第二个场景已覆盖 runtime hook/reducer 验证
+更新时间：2026-04-20
+当前状态：两个真实 workstream 已落地，且 `working-context` 同步元数据校验已上线
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -69,6 +69,7 @@
 - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
 - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
+- [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
 - 暂无阶段 `changelog`
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)

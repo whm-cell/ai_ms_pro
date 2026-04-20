@@ -10,6 +10,16 @@
 
 它不是长期归档，不替代 `plan`、`status`、`handoff`、`adr`。
 
+## 同步元数据
+
+- Current Stage: STAGE-00
+- Active Status Source: 未绑定
+- Active Handoff Sources: 未绑定
+- Requirement IDs: 未绑定
+- Workstream IDs: 未绑定
+- Last Synced From: bootstrap
+- Last Synced At: YYYY-MM-DD
+
 ## 当前主目标
 
 - 为 `New Project Standard` 建立最小可用的共享治理控制面

@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-18
+更新时间：2026-04-20
 阶段：stage-00
 状态：进行中
 
@@ -36,6 +36,7 @@
   - bootstrap 已补齐离线容错：Python 兼容依赖安装默认 best-effort，不再因为受限网络阻断 `.codex/.venv` 初始化
   - 已在 `output/harness_rehearsal_20260419_100339` 完成全新测试仓库演练，starter copy -> bootstrap -> 首个 `REQDOC / REQ / WS` -> 最小实现 -> governance check 已闭环
   - 已在测试仓库内补齐 `WS-01 Quick Notes` 的 smoke、runtime promotion 与首个 stage `status` 压缩
+  - `working-context` 已新增轻结构化同步元数据头，并开始校验 stage/status/handoff/REQ/WS 的显式字段一致性
 - 进行中：
   - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -50,6 +51,7 @@
 - governance 层已经明确采用 `handoff -> status -> adr/changelog` 压缩链路，并新增 handoff-first reducer
 - requirements traceability 规则已经进入 handoff、status、session 和 reducer 输出，且 canonical mapping 保持在 `docs/requirements/traceability-matrix.md`
 - quality / governance 检查已经能识别 metadata section 缺失，并继续阻断 runtime state 误提交
+- quality / governance 检查已开始利用 `working-context` 同步元数据验证 stage source、handoff source 和 REQ/WS 显式绑定
 - `WS-01 / Three.js Snake MVP` 已作为首个真实场景落地，证明当前 harness 能支撑从 requirements 到代码实现的完整闭环
 - `WS-01` 已新增 repo 内可直接运行的浏览器 smoke 入口，不再只依赖一次性手工打开页面验证
 - `WS-02 / Harness Trace Console` 已作为第二个真实场景落地，证明当前 harness 在新 workstream 上也能复用 requirements、implementation 和 shared truth surface
@@ -97,6 +99,7 @@
   - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
   - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
   - [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
+  - [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
 - 相关 `adr`：
   - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
   - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
