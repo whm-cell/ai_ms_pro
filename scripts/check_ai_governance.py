@@ -44,6 +44,8 @@ DIFF_WARNING_EXCLUDE_FILES = {
     ROOT / "AGENTS.md",
 }
 ACTIVE_HANDOFF_STATUS_WARNING_THRESHOLD = 3
+ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD = 5
+WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD = 5
 PLAN_STATE_LABELS = (
     "项目状态：",
     "当前状态：",
@@ -121,6 +123,12 @@ def main() -> int:
         warnings.append(
             "Active handoffs have accumulated without a stage status summary. "
             f"Current active handoff count: {len(active_handoffs)}."
+        )
+    if len(active_handoffs) > ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD:
+        warnings.append(
+            "Active handoff count exceeds the sustainable default surface budget "
+            f"({len(active_handoffs)} > {ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD}). "
+            "Archive or compress handoffs already absorbed by stage status/ADR."
         )
 
     freshness_target = latest_doc(active_handoffs + status_docs)
@@ -655,6 +663,12 @@ def validate_working_context_sync_metadata(
         warnings.append(
             "working-context.md is older than one of its bound Active Handoff Sources, latest: "
             f"{newest.relative_to(ROOT)}."
+        )
+    if len(bound_handoff_paths) > WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD:
+        warnings.append(
+            "working-context sync metadata binds too many active handoffs "
+            f"({len(bound_handoff_paths)} > {WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD}). "
+            "Keep the default recovery surface small and move absorbed detail to status/archive."
         )
 
     validate_identifier_field(

@@ -39,6 +39,7 @@
   - `working-context` 已新增轻结构化同步元数据头，并开始校验 stage/status/handoff/REQ/WS 的显式字段一致性
   - 已新增 repo-local `$repo-governed-coding` skill，把 Karpathy-style 行为约束适配为当前仓库的显式调用能力，并补入文档同步、traceability、verification 与 projection boundary 规则
   - governance checker 已新增 active `handoff` / `status` 的 `REQ/WS` 字段存在性校验，把 metadata consistency 自动化从 `working-context` 扩展到更多 primary truth surface
+  - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`，并已将被 stage `status` / ADR 吸收的完成型 handoff 归档
 - 进行中：
   - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -65,6 +66,8 @@
 - `WS-01 Quick Notes` 已在新仓库内完成 `requirements -> implementation -> smoke -> runtime promotion -> status`
 - `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
+- `index` 已回收为稳定路由层，`working-context` 已回收为增量真相层，默认恢复面不再重复展开完整阶段目录
+- governance checker 已新增 active handoff 与 `working-context` 绑定 handoff 的预算 warning，用于持续压缩默认治理面
 - repo-local `$repo-governed-coding` skill 已证明当前 harness 不只支持文档与 hook 规则，也能承载显式调用的行为层约束；当前仍保持为策略补强，而不是主治理面替换
 - repo-local `$repo-governed-coding` skill 已在首个真实实现任务中完成前向使用，说明它不只停留在结构校验层面，也能驱动一个受控的小范围 hardening 变更闭环
 
@@ -78,6 +81,7 @@
 - `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
 - repo-local `$repo-governed-coding` skill 当前只在本仓库以显式调用方式提供；是否值得提升为 starter 资产仍需更多真实任务样本
 - 当前 metadata consistency 自动化仍只覆盖 `working-context + active handoff/status` 的字段级检查，尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
+- active surface budget 当前仍是 warning 而不是 blocking；后续仍需观察阈值是否足够稳定
 
 ## 下一阶段重点
 
@@ -98,22 +102,9 @@
 - [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
-- 相关 `handoff`：
-  - [Harness Trace Console Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-trace-console.md)
-  - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
-  - [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
-  - [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
-  - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
-  - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
-  - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
-  - [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
-  - [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
-  - [Repo-Governed Coding Skill Handoff](../handoffs/active/stage-00-repo-governed-coding-skill.md)
-  - [Traceability Metadata Consistency Check Handoff](../handoffs/active/stage-00-traceability-metadata-consistency-check.md)
-- 相关 `adr`：
-  - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
-  - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
-  - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
-  - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
-  - [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
-  - [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
+- [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
+- [当前活跃 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)
+- [已归档 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive)
+- [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)
+- [ADR-007 Governance Surface Budget](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-007-governance-surface-budget.md)
+- 当前默认恢复顺序与 active handoff 集合由 `working-context` 的同步元数据维护；已被本 stage `status` / ADR 吸收的完成型 handoff 已归档
