@@ -61,6 +61,7 @@ WORKSTREAM_STATE_LABELS = (
     "验收证据：",
 )
 SYNC_METADATA_SECTION = "## 同步元数据"
+TRACEABILITY_METADATA_SECTION = "## 需求与工作流标识"
 SYNC_METADATA_REQUIRED_KEYS = (
     "Current Stage",
     "Active Status Source",
@@ -69,6 +70,10 @@ SYNC_METADATA_REQUIRED_KEYS = (
     "Workstream IDs",
     "Last Synced From",
     "Last Synced At",
+)
+TRACEABILITY_METADATA_REQUIRED_KEYS = (
+    "Requirement IDs",
+    "Workstream IDs",
 )
 SYNC_ALLOWED_SOURCE_TOKENS = {"bootstrap", "handoff", "status", "manual"}
 UNBOUND_VALUE = "未绑定"
@@ -135,6 +140,21 @@ def main() -> int:
     )
     errors.extend(sync_errors)
     warnings.extend(sync_warnings)
+
+    for path in active_handoffs:
+        validate_traceability_metadata_doc(
+            path,
+            doc_kind="active handoff",
+            errors=errors,
+            warnings=warnings,
+        )
+    for path in status_docs:
+        validate_traceability_metadata_doc(
+            path,
+            doc_kind="status",
+            errors=errors,
+            warnings=warnings,
+        )
 
     errors.extend(
         projection_freshness_errors(active_handoffs=active_handoffs, status_docs=status_docs)
@@ -313,6 +333,17 @@ def parse_working_context_sync_metadata() -> dict[str, str | list[str]]:
     return metadata
 
 
+def parse_traceability_metadata(path: Path) -> dict[str, str]:
+    metadata: dict[str, str] = {}
+    for raw_line in extract_markdown_section(path, TRACEABILITY_METADATA_SECTION):
+        if not raw_line.startswith("- "):
+            continue
+        key, value = split_metadata_field(raw_line[2:].strip())
+        if key and value:
+            metadata[key] = value
+    return metadata
+
+
 def scalar_metadata_value(
     metadata: dict[str, str | list[str]],
     key: str,
@@ -386,6 +417,8 @@ def validate_identifier_field(
     bootstrap_like: bool,
     errors: list[str],
     warnings: list[str],
+    owner_label: str,
+    warn_on_unbound: bool,
 ) -> None:
     value = metadata.get(key)
     if value is None:
@@ -403,23 +436,23 @@ def validate_identifier_field(
         if not stripped:
             continue
         if stripped == UNBOUND_VALUE:
-            if known_ids and not bootstrap_like:
+            if warn_on_unbound and known_ids and not bootstrap_like:
                 warnings.append(
-                    f"working-context sync metadata leaves '{key}' unbound even though "
+                    f"{owner_label} leaves '{key}' unbound even though "
                     "traceability ids already exist."
                 )
             return
         tokens.extend(parse_csv_values(stripped))
 
     if not tokens:
-        errors.append(f"working-context sync metadata field '{key}' is empty.")
+        errors.append(f"{owner_label} field '{key}' is empty.")
         return
 
     invalid_tokens = [token for token in tokens if not pattern.fullmatch(token)]
     if invalid_tokens:
         rendered = ", ".join(sorted(set(invalid_tokens)))
         errors.append(
-            f"working-context sync metadata field '{key}' contains malformed ids: {rendered}"
+            f"{owner_label} field '{key}' contains malformed ids: {rendered}"
         )
         return
 
@@ -427,9 +460,54 @@ def validate_identifier_field(
     if unknown_ids:
         rendered = ", ".join(sorted(set(unknown_ids)))
         errors.append(
-            f"working-context sync metadata field '{key}' contains ids missing from "
+            f"{owner_label} field '{key}' contains ids missing from "
             f"docs/requirements/traceability-matrix.md: {rendered}"
         )
+
+
+def validate_traceability_metadata_doc(
+    path: Path,
+    *,
+    doc_kind: str,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    metadata = parse_traceability_metadata(path)
+    try:
+        rendered_path = path.relative_to(ROOT)
+    except ValueError:
+        rendered_path = path
+    owner_label = f"{doc_kind} {rendered_path} traceability metadata"
+
+    for key in TRACEABILITY_METADATA_REQUIRED_KEYS:
+        if key not in metadata:
+            errors.append(
+                f"{rendered_path} is missing '{key}' under "
+                f"{TRACEABILITY_METADATA_SECTION}."
+            )
+
+    validate_identifier_field(
+        metadata,
+        key="Requirement IDs",
+        pattern=REQ_ID_PATTERN,
+        known_ids=extract_known_ids(REQ_ID_PATTERN),
+        bootstrap_like=False,
+        errors=errors,
+        warnings=warnings,
+        owner_label=owner_label,
+        warn_on_unbound=False,
+    )
+    validate_identifier_field(
+        metadata,
+        key="Workstream IDs",
+        pattern=WS_ID_PATTERN,
+        known_ids=extract_known_ids(WS_ID_PATTERN),
+        bootstrap_like=False,
+        errors=errors,
+        warnings=warnings,
+        owner_label=owner_label,
+        warn_on_unbound=False,
+    )
 
 
 def validate_working_context_sync_metadata(
@@ -587,6 +665,8 @@ def validate_working_context_sync_metadata(
         bootstrap_like=bootstrap_like,
         errors=errors,
         warnings=warnings,
+        owner_label="working-context sync metadata",
+        warn_on_unbound=True,
     )
     validate_identifier_field(
         metadata,
@@ -596,6 +676,8 @@ def validate_working_context_sync_metadata(
         bootstrap_like=bootstrap_like,
         errors=errors,
         warnings=warnings,
+        owner_label="working-context sync metadata",
+        warn_on_unbound=True,
     )
 
     last_synced_from = scalar_metadata_value(metadata, "Last Synced From", errors)

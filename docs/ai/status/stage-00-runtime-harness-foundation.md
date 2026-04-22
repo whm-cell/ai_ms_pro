@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-20
+更新时间：2026-04-22
 阶段：stage-00
 状态：进行中
 
@@ -37,13 +37,15 @@
   - 已在 `output/harness_rehearsal_20260419_100339` 完成全新测试仓库演练，starter copy -> bootstrap -> 首个 `REQDOC / REQ / WS` -> 最小实现 -> governance check 已闭环
   - 已在测试仓库内补齐 `WS-01 Quick Notes` 的 smoke、runtime promotion 与首个 stage `status` 压缩
   - `working-context` 已新增轻结构化同步元数据头，并开始校验 stage/status/handoff/REQ/WS 的显式字段一致性
+  - 已新增 repo-local `$repo-governed-coding` skill，把 Karpathy-style 行为约束适配为当前仓库的显式调用能力，并补入文档同步、traceability、verification 与 projection boundary 规则
+  - governance checker 已新增 active `handoff` / `status` 的 `REQ/WS` 字段存在性校验，把 metadata consistency 自动化从 `working-context` 扩展到更多 primary truth surface
 - 进行中：
   - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
+  - metadata consistency 自动校验已从 `working-context` 扩展到 active `handoff/status`，但仍未覆盖 reducer/runtime 与更细的组合关系
 - 未开始：
   - CI 强校验接入
   - reducer 到 `status` / `ADR` 的更强自动压缩策略
-  - metadata 与 traceability matrix 一致性自动校验
 
 ## 本阶段关键成果
 
@@ -63,6 +65,8 @@
 - `WS-01 Quick Notes` 已在新仓库内完成 `requirements -> implementation -> smoke -> runtime promotion -> status`
 - `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
 - governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
+- repo-local `$repo-governed-coding` skill 已证明当前 harness 不只支持文档与 hook 规则，也能承载显式调用的行为层约束；当前仍保持为策略补强，而不是主治理面替换
+- repo-local `$repo-governed-coding` skill 已在首个真实实现任务中完成前向使用，说明它不只停留在结构校验层面，也能驱动一个受控的小范围 hardening 变更闭环
 
 ## 风险与阻塞
 
@@ -72,6 +76,8 @@
 - 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
 - `WS-02` 当前通过显式环境变量携带 `REQ/WS` metadata，说明链路可用，但自动化一致性仍未完全收紧
 - `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
+- repo-local `$repo-governed-coding` skill 当前只在本仓库以显式调用方式提供；是否值得提升为 starter 资产仍需更多真实任务样本
+- 当前 metadata consistency 自动化仍只覆盖 `working-context + active handoff/status` 的字段级检查，尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
 
 ## 下一阶段重点
 
@@ -79,6 +85,8 @@
 - 判断 `WS-01` 与 `WS-02` 是否应归档为已验证样板，或继续演化成更完整的示例
 - 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
 - 评估是否需要把 `AGENTS.md` 也拆成更项目中立的 starter 版本
+- 在几个真实实现任务中显式调用 `$repo-governed-coding`，判断它是否只需保留为 repo-local skill，还是值得进入 starter / ADR
+- 若继续推进 OPEN-06，优先补 reducer/runtime 或 `REQ <-> WS` 组合关系校验，而不是直接做自由文本级语义推断
 
 ## 验收判断
 
@@ -100,6 +108,8 @@
   - [Harness Portability Template Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-portability-template.md)
   - [New Repo Rehearsal Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md)
   - [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
+  - [Repo-Governed Coding Skill Handoff](../handoffs/active/stage-00-repo-governed-coding-skill.md)
+  - [Traceability Metadata Consistency Check Handoff](../handoffs/active/stage-00-traceability-metadata-consistency-check.md)
 - 相关 `adr`：
   - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
   - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)

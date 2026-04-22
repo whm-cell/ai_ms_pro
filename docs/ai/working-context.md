@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-04-20
+更新时间：2026-04-22
 当前阶段：STAGE-00 真实场景验证与治理固化
 当前模式：Codex-first harness engineering
 
@@ -24,10 +24,12 @@
   - docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md
   - docs/ai/handoffs/active/stage-00-projection-surface-freshness.md
   - docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md
+  - docs/ai/handoffs/active/stage-00-repo-governed-coding-skill.md
+  - docs/ai/handoffs/active/stage-00-traceability-metadata-consistency-check.md
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff
-- Last Synced At: 2026-04-20
+- Last Synced At: 2026-04-22
 
 ## 当前主目标
 
@@ -39,23 +41,25 @@
 ## 当前活跃队列
 
 1. 判断 Stage-00 是否已满足“基础可用性已验证”，以及是否应进入下一阶段
-2. 评估何时把治理检查接入 CI，并继续扩大 metadata 与 traceability matrix 的显式字段一致性校验
+2. 评估何时把治理检查接入 CI，并继续把 metadata 与 traceability matrix 的一致性校验从 `working-context + active handoff/status` 扩大到 reducer/runtime 等更多产物
 3. 判断是否要把 `bootstrap_harness.py` 和迁移清单沉淀为默认跨项目起手式
 4. 决定 `WS-01` 与 `WS-02` 哪些部分应该归档为样板，哪些继续演化
 5. 用 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 作为当前剩余事项的集中入口
+6. 在首个真实任务样本之后继续观察 repo-local `$repo-governed-coding` skill 的显式调用效果，判断它是否只需保留为当前仓库策略补强，或值得后续提升到 starter / ADR
 
 ## 当前风险与阻塞
 
 - 文档质量检查已上线，并已覆盖 `handoff` 模板中的有效/无效/候选路线结构；当前普通实现变更仍以 diff-aware warning 为主，但 `scripts/`、`.codex/hooks*`、`.githooks/` 等核心治理实现改动若未同步 `working-context` 或 `ADR`，已升级为阻断
 - verification 层已新增 `working-context` 新鲜度 warning、活跃 `handoff` 堆积 warning 和 runtime session/observation staged 阻断；当前已接入 `Stop` 时的 runtime observation append-only 采集与 runtime session best-effort 自动写入，以及 `SessionStart / Resume` 时的最近 session 精简摘要读取
 - `WS-01` 已具备 repo 内可复现的 deterministic smoke runner，能覆盖 `load -> eat -> game over -> restart`；但仍未覆盖自由输入路径、渲染质量、多尺寸和 CI 级自动执行
-- `plan` 与 `workstream` 的 projection boundary 已明确，`working-context` 同步元数据与字段级校验已上线；更广泛的 metadata 与 traceability matrix 一致性校验仍未自动化
+- `plan` 与 `workstream` 的 projection boundary 已明确，`working-context` 同步元数据与 active handoff/status 的 `REQ/WS` 存在性校验已上线；更广泛的 metadata 与 traceability matrix 一致性校验仍未自动化
 - `WS-02` 已证明第二个 workstream 也能走通 runtime hook 与 reducer，但这次 metadata 仍通过显式环境变量传入，尚未证明任意调用方都能零配置带齐 IDs
 - 当前两个 smoke 场景都偏 deterministic 行为验证，还未覆盖视觉回归或 CI 级长期稳定性
 - harness 现在已具备跨项目 bootstrap 入口与 repo-local Python runner；当前还需验证 starter bundle 在真正新仓库中的首跑体验
 - 已在 `output/harness_rehearsal_20260419_100339` 完成一次真实新仓库演练，starter copy -> bootstrap -> Git hook -> 首个 `REQDOC / REQ / WS` -> 最小实现链路已跑通
 - `AGENTS.md` 仍是当前项目版本；新项目若不改写项目目标和 repo-specific 规则，仍会带入旧假设
 - 受限网络环境下，bootstrap 若仍把 Python 兼容依赖安装视为强依赖，会让新项目首跑在 `.codex/.venv` 已建好后仍然失败；这个边界需要在 starter 中收掉
+- 新增的 repo-local `$repo-governed-coding` skill 当前明确限定为显式调用，不参与默认自动发现；是否值得提升为 starter 资产仍需看后续真实任务使用反馈
 
 ## 当前真实入口
 
@@ -68,6 +72,8 @@
 - [新项目 AGENTS 改写指南](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/new-project-agents-rewrite-guide.md)
 - [传统项目接入 Harness 的标准起手式](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/traditional-project-harness-kickoff.md)
 - [V2 文档项目的 REQDOC / REQ / WS / STAGE 拆解模板](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
+- [Repo-Governed Coding Skill](../../.codex/skills/repo-governed-coding/SKILL.md)
+- [Repo-Governed Coding Checklist](../../.codex/skills/repo-governed-coding/references/governance-checklist.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
 - [ADR-004 Requirement Workstream Metadata](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
@@ -84,6 +90,7 @@
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
 - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
 - [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
+- [Traceability Metadata Consistency Check Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-traceability-metadata-consistency-check.md)
 
 ## 下一次会话先读
 
@@ -108,6 +115,9 @@
 19. [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
 20. [Observation Reducer Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-observation-reducer.md)
 21. [Runtime Hooks Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-runtime-stop-session.md)
+22. [Repo-Governed Coding Skill Handoff](./handoffs/active/stage-00-repo-governed-coding-skill.md)
+23. [Traceability Metadata Consistency Check Handoff](./handoffs/active/stage-00-traceability-metadata-consistency-check.md)
+24. [Repo-Governed Coding Skill](../../.codex/skills/repo-governed-coding/SKILL.md)
 
 ## 最近已固化的决策
 
@@ -142,8 +152,11 @@
 - governance check 已新增 projection freshness 规则，但只针对显式状态字段，不做自由文本语义判断
 - `working-context` 已新增轻结构化同步元数据头，并开始对 stage/status/handoff/REQ/WS 字段做显式一致性校验
 - 当前 `working-context` 已与最新 stage status 对齐，后续应继续把新增治理能力优先回收到 primary truth surface
-- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP + Projection Freshness + Harness Trace Console + Harness Portability` 七个子任务；下一步应判断 Stage-00 是否可以压缩并进入下一阶段
+- 当前活跃 handoff 已扩展到 `Runtime Hooks + Observation Reducer + Requirement Metadata + Three.js Snake MVP + Projection Freshness + Harness Trace Console + Harness Portability + Repo-Governed Coding Skill + Traceability Metadata Consistency Check` 九个子任务；下一步应判断 Stage-00 是否可以压缩并进入下一阶段
 - `SessionStart` hook 已新增最近 runtime session 摘要注入能力，会在 `startup|resume` 时 best-effort 提供本地恢复提示，但不会替代共享治理文档
+- 已新增 `.codex/skills/repo-governed-coding/` repo-local skill，把 Karpathy-style 行为约束与本仓库的文档同步、traceability、verification、projection boundary 要求组合在一起，并显式保持为可选而非默认治理面
+- repo-level governance checker 已新增对 active `handoff` / `status` 的 `REQ/WS` 存在性校验，说明 OPEN-06 已从“完全未自动化”推进到“字段级基础约束已上线”
+- repo-local `$repo-governed-coding` skill 已在首个真实实现任务中完成前向验证；后续重点从“能否接入”转向“是否值得在更多任务样本后升格”
 
 ## 更新规则
 

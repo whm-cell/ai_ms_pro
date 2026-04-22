@@ -1,6 +1,6 @@
 # Harness Remaining Work
 
-更新时间：2026-04-19
+更新时间：2026-04-22
 当前状态：核心链路已在测试仓库跑通；剩余项以 hardening 为主
 
 ## 作用
@@ -66,7 +66,7 @@
 ### OPEN-06 Traceability / Metadata 一致性自动校验
 
 - 目标：自动检查 AI-side metadata 与 `traceability-matrix.md` 的一致性
-- 当前缺口：目前 canonical mapping 明确，但自动一致性校验仍未接入
+- 当前缺口：`working-context` 与 active `handoff/status` 的 `REQ/WS` 字段存在性校验已接入，但 reducer output、runtime 产物与更细的 `REQ <-> WS <-> STAGE` 组合关系校验仍未自动化
 - 完成定义：
   - `handoff / status / reducer output` 中的 `REQ/WS` 能和 requirements 面对齐
   - mismatch 会被脚本直接拦下或至少报警

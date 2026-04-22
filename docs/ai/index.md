@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-04-20
-当前状态：两个真实 workstream 已落地，且 `working-context` 同步元数据校验已上线
+更新时间：2026-04-22
+当前状态：两个真实 workstream 已落地，`working-context` 与 active handoff/status 的元数据校验已上线，且 repo-local coding skill 已完成首个真实任务样本
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -51,6 +51,8 @@
 - [传统项目接入 Harness 的标准起手式](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/traditional-project-harness-kickoff.md)
 - [中型项目发现总结](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/medium-project-documentation-findings.md)
 - [轻量版大项目治理方案](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/lightweight-large-project-doc-governance.md)
+- [Repo-Governed Coding Skill](../../.codex/skills/repo-governed-coding/SKILL.md)
+- [Repo-Governed Coding Checklist](../../.codex/skills/repo-governed-coding/references/governance-checklist.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
 - [ADR-003 Observation Reducer 顺序](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
@@ -70,6 +72,8 @@
 - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
 - [Projection Surface Freshness Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-projection-surface-freshness.md)
 - [Working Context Sync Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-working-context-sync-metadata.md)
+- [Repo-Governed Coding Skill Handoff](./handoffs/active/stage-00-repo-governed-coding-skill.md)
+- [Traceability Metadata Consistency Check Handoff](./handoffs/active/stage-00-traceability-metadata-consistency-check.md)
 - 暂无阶段 `changelog`
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
 - [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)

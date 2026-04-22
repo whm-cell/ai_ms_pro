@@ -245,6 +245,16 @@ If a new skill supersedes an old approach:
 - archive old task-specific notes if they are no longer active
 - do not keep two conflicting active workflows in parallel
 
+## Repo-local Skill Note
+
+This repository also carries an optional repo-local skill at `.codex/skills/repo-governed-coding/`.
+
+Use these rules:
+
+1. Use it only when explicitly invoked or when a task explicitly asks for Karpathy-style implementation guardrails inside this repository.
+2. Treat it as method-level guidance for governed coding work, not as a replacement for `AGENTS.md`, `docs/ai/*`, `docs/requirements/*`, or verification rules.
+3. If the skill and repository rules ever disagree, follow the repository rules and update stage docs if the skill pattern needs to change.
+
 ## Skill Escalation Policy
 
 When a new skill is introduced, decide where it should be recorded based on scope and persistence.
