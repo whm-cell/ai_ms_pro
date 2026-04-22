@@ -21,6 +21,19 @@ It intentionally does not include:
 - old project's runtime session or observation artifacts
 - old project's smoke/demo apps
 
+## Starter Shape
+
+The default shared recovery surface is intentionally slim:
+
+`docs/ai/index.md -> docs/ai/working-context.md -> latest stage status -> <=5 active handoff`
+
+This starter keeps that shape by:
+
+- treating `index.md` as a stable router instead of a full stage report
+- treating `working-context.md` as incremental truth instead of a second directory view
+- warning when active handoffs or bound handoffs grow past the default budget
+- expecting absorbed handoffs to move into `docs/ai/handoffs/archive/`
+
 ## First Use
 
 1. Copy the contents of this directory to the root of the new repository.
@@ -47,7 +60,7 @@ Recommended first prompt:
 ```text
 先不要直接写业务功能。
 先基于当前仓库实际结构唤醒并检查这套 harness：
-1. 确认 AGENTS.md、.codex hooks、docs/ai、docs/requirements 是否齐全
+1. 确认 AGENTS.md、codex hooks、docs/ai、docs/requirements 是否齐全
 2. 检查或运行 bootstrap，确保最小控制面有效
 3. 阅读 index、working-context、requirements index、plan
 4. 根据我的目标建立首个 REQDOC / REQ / WS
@@ -60,6 +73,7 @@ If the harness is awake, the expected behavior is:
 - shared truth stays in `docs/ai/*` and `docs/requirements/*`
 - local runtime memory goes to `.codex/runtime/*`
 - `Stop` runs the governance check automatically when Codex hooks are enabled
+- the default shared recovery surface stays small unless the repo explicitly chooses otherwise
 
 ## Python Runtime
 
@@ -86,3 +100,4 @@ If the harness is awake, the expected behavior is:
 
 - `scripts/bootstrap_harness.py` initializes the minimal shared control plane.
 - It is safe to rerun after the initial copy.
+- The generated starter docs follow the slim governance surface budget by default.

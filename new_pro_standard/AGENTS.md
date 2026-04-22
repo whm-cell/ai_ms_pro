@@ -17,6 +17,10 @@ Customize these items before large-scale implementation:
 
 Do not keep old project truth when copying this starter to a new repository.
 
+The default shared recovery surface should stay slim:
+
+`docs/ai/index.md -> docs/ai/working-context.md -> latest stage status -> <=5 active handoff`
+
 ## AGENTS Rewrite Checklist
 
 When this starter is copied into a new repository, rewrite `AGENTS.md` before large-scale implementation.
@@ -124,6 +128,14 @@ Use these rules:
 2. Git hooks and Codex hooks should call `.codex/hooks/run_with_repo_python.sh` or `.codex/hooks/run_hook.sh` instead of hardcoding `/usr/bin/python3`.
 3. Do not commit `.codex/.venv`.
 
+## Compression Rule
+
+Project docs follow this lifecycle:
+
+`handoff -> status -> changelog / adr -> archive old handoffs`
+
+When a completed handoff has already been absorbed by `status` or `adr` and no longer has default resume value, move it into `docs/ai/handoffs/archive/`.
+
 ## Projection Surface Boundary
 
 Not every document should carry current-state truth.
@@ -133,6 +145,18 @@ Use these rules:
 1. `docs/ai/working-context.md`, active `handoff`, `status`, `adr`, `docs/requirements/normalized/*.md`, and `docs/requirements/traceability-matrix.md` are the primary truth surfaces.
 2. `docs/ai/plan.md` is a projection document. It should keep goals, scope, stage breakdown, and acceptance framing, but should not repeat fast-changing completion state, latest validation results, or transient evidence.
 3. `docs/requirements/workstreams/*.md` are projection documents. They should keep workflow goal, covered requirements, stage suggestions, and acceptance model, but should not become a second copy of the latest execution status or smoke evidence.
+
+## Governance Surface Budget
+
+Do not let the default shared recovery surface grow without bound.
+
+Use these rules:
+
+1. `docs/ai/index.md` is a stable router, not a second stage report.
+2. `docs/ai/working-context.md` should keep incremental truth, not a duplicate stage directory.
+3. The default active handoff budget is `<=5`.
+4. If active handoffs exceed that budget, compress absorbed detail into `status` or `adr`, then archive old handoffs.
+5. Small routing duplication is acceptable when it supports structure checks; large duplicated stage listings are not.
 
 ## Verification Layer
 

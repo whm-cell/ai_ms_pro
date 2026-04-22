@@ -1,6 +1,6 @@
 # Harness Portability Template Handoff
 
-更新时间：2026-04-18
+更新时间：2026-04-22
 阶段：stage-00
 任务：harness-portability-template
 状态：已完成
@@ -27,6 +27,9 @@
 - 新增 [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
 - 更新 `handoff/status/adr` 模板中的内部链接为相对路径，避免迁移时带入当前仓库绝对路径
 - 已同步 `working-context`、stage `status` 与 `docs/ai/index.md`
+- 已把 `new_pro_standard` 下的 `index`、`working-context`、`AGENTS.md`、`README.md` 与 portability guide 同步到 slim governance surface 逻辑
+- 已同步 root 与 starter 两份 `scripts/bootstrap_harness.py`，避免 bootstrap 重新生成旧的 fat governance surface 模板
+- 已为 `new_pro_standard/scripts/check_ai_governance.py` 增加 active handoff / working-context bound handoff 预算 warning
 
 ## 修改文件
 
@@ -45,6 +48,13 @@
 - [docs/ai/index.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 - [docs/ai/working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
 - [docs/ai/status/stage-00-runtime-harness-foundation.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
+- [new_pro_standard/docs/ai/index.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/docs/ai/index.md)
+- [new_pro_standard/docs/ai/working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/docs/ai/working-context.md)
+- [new_pro_standard/AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/AGENTS.md)
+- [new_pro_standard/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/README.md)
+- [new_pro_standard/docs/ai/harness-portability-guide.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/docs/ai/harness-portability-guide.md)
+- [new_pro_standard/scripts/bootstrap_harness.py](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/scripts/bootstrap_harness.py)
+- [new_pro_standard/scripts/check_ai_governance.py](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/scripts/check_ai_governance.py)
 
 ## 关键实现决策
 
@@ -53,6 +63,7 @@
 - 新项目从 0 到 1 的首个动作固定为 bootstrap 最小控制面，而不是直接进入业务实现
 - bootstrap 默认使用当前环境 Python 创建 repo-local `.codex/.venv`，并由统一 runner 供 Git hook 与 Codex hook 共用
 - 模板文档优先使用相对链接，避免把当前仓库绝对路径污染到新项目
+- portability starter 与 root bootstrap generator 必须同源对齐；否则一次手工瘦身会被下一次 bootstrap 重新打回旧模板
 
 ## 已验证有效的路线
 

@@ -1,6 +1,6 @@
 # Harness 可迁移清单
 
-更新时间：2026-04-18
+更新时间：2026-04-22
 适用范围：将当前 Codex-first harness 迁移到一个全新的项目仓库
 
 ## 核心原则
@@ -8,7 +8,8 @@
 - 复制机制，不复制当前项目真相。
 - 机制层包括规则、hook、检查脚本、模板和 bootstrap 入口。
 - 真相层包括当前项目的 `working-context`、`status`、`handoff`、`traceability-matrix`、真实 `REQ/WS` 文档和 runtime 原料。
-- 新项目的第一步应该是 bootstrap 最小控制面，而不是直接沿用旧项目共享文档内容。
+- 新项目的第一步应是 bootstrap 最小控制面，而不是直接沿用旧项目共享文档内容。
+- 默认共享恢复面应保持轻量：`index -> working-context -> status -> <=5 active handoff`。
 
 ## 迁移时应保留
 
@@ -67,7 +68,7 @@
 - `.codex/harness.toml` 中的 `required_ai_docs` 与 `required_requirements_docs`
 - `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`
 - `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
-- `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
+- `docs/ai/index.md` 中的阅读顺序、稳定入口和阶段占位状态
 - `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
 - `docs/ai/plan.md` 中的项目目标、范围和阶段规划
 - `docs/requirements/index.md` 中的当前活跃内容
@@ -84,7 +85,7 @@
 6. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`。
 7. 让 AI 先初始化或确认 `docs/ai/`、`docs/requirements/` 控制面，而不是直接写业务代码。
 8. 导入首个真实 `REQDOC / REQ / WS`。
-9. 落第一个垂直切片实现，并在完成后补 `handoff/status`。
+9. 落地第一个垂直切片实现，并在完成后补 `handoff/status`。
 10. 再让 runtime hooks、reducer 和 governance check 进入常规工作流。
 
 ## 新项目的首条 Prompt 建议
@@ -102,6 +103,6 @@
 
 - bootstrap 只解决最小控制面初始化，不会自动替你决定首个真实 workstream。
 - repo-local `.codex/.venv` 是 harness Python 的默认落点，但不会自动提交，也不应复制到别的仓库。
-- `.codex/requirements.txt` 里的依赖目前按可选兼容层处理；离线时 bootstrap 完成不代表这些包一定已经安装。
+- `.codex/requirements.txt` 里的依赖当前按可选兼容层处理；离线时 bootstrap 完成不代表这些包一定已经安装。
 - `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
-- `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
+- `check_ai_docs.py` 现在默认接受“最小路由 + 占位状态”，不会要求 `index.md` 再展开一整套阶段目录。

@@ -35,7 +35,7 @@
 
 1. 以 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 为准，继续推进 OPEN-01、OPEN-03、OPEN-04、OPEN-06
 2. 判断 Stage-00 是否可以在完成本轮 hardening 后压缩并进入下一阶段
-3. 在仓库外部路径再做一轮 starter copy -> bootstrap -> governance check 演练
+3. 在仓库外部路径再做一轮 starter copy -> bootstrap -> governance check 演练，并确认 `new_pro_standard` 与 root `bootstrap_harness.py` 保持同一套 slim governance surface 模板
 4. 用真实 observation 验证 runtime metadata 自动发现与 reducer 压缩阈值
 5. 观察 active handoff 预算 warning 是否足够收紧默认恢复面，必要时再调阈值或升级级别
 
@@ -72,6 +72,7 @@
 - `Stop -> observation/session -> SessionStart additionalContext -> reducer draft` 的最小 runtime promotion 链路已成立，但 reducer 仍维持 handoff-first
 - `WS-01` 与 `WS-02` 已验证当前 harness 能支撑两个真实 repo-native workstream
 - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`；已被 stage `status` / ADR 吸收的完成型 handoff 进入 archive
+- `new_pro_standard` 与 root `scripts/bootstrap_harness.py` 已同步到同一套 slim governance surface 模板；新仓 bootstrap 默认生成轻量路由型 `index` 与增量真相型 `working-context`
 
 ## 更新规则
 
