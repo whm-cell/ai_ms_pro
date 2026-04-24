@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$(git rev-parse --show-toplevel)/.codex/hooks/run_hook.sh\" session_start_runtime_context.py",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 session_start_runtime_context.py",
             "statusMessage": "Loading runtime session context",
             "timeout": 30
           }
@@ -18,19 +18,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$(git rev-parse --show-toplevel)/.codex/hooks/run_hook.sh\" stop_runtime_observation.py",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 stop_runtime_observation.py",
             "statusMessage": "Capturing runtime observations",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "\"$(git rev-parse --show-toplevel)/.codex/hooks/run_hook.sh\" stop_runtime_session.py",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 stop_runtime_session.py",
             "statusMessage": "Persisting runtime session snapshot",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "\"$(git rev-parse --show-toplevel)/.codex/hooks/run_hook.sh\" stop_ai_docs_check.py",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 stop_ai_docs_check.py",
             "statusMessage": "Checking AI docs governance",
             "timeout": 30
           }

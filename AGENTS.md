@@ -110,6 +110,18 @@ Use these rules:
 5. Subagents may return structured results or handoff drafts, but the main agent publishes the canonical shared documents.
 6. If a runtime finding remains relevant beyond the current local session, promote it into `handoff`, `status`, `adr`, `plan`, or requirements documents.
 
+## Python Runtime Rule
+
+Harness Python must prefer the repo-local virtual environment `.codex/.venv`.
+
+Use these rules:
+
+1. `scripts/bootstrap_harness.py` must support Windows and POSIX venv layouts.
+2. Git hooks and Codex hooks must resolve Python through `.codex/hooks/` runners instead of hardcoding a system Python path.
+3. Runners must verify that a Python candidate is actually runnable before using it.
+4. If `.codex/.venv` exists but is not runnable, bootstrap may rebuild it in place without touching `.codex/runtime/*`.
+5. Do not commit `.codex/.venv`.
+
 ## Session Promotion
 
 Runtime session files under `.codex/runtime/sessions/` are local recovery material and should follow the session template.
@@ -170,6 +182,19 @@ Use these rules:
 4. When current-state text appears in a projection document, it must either be removed or be explicitly synchronized with its primary truth source in the same change.
 5. Current completion state, latest validation result, and canonical acceptance evidence should default to `working-context`, `handoff`, `status`, and `traceability-matrix.md`, not to `plan` or `workstream` docs.
 
+## Code Shape Budget
+
+Code shape is a harness-level constraint for implementation and harness scripts.
+
+Use these rules:
+
+1. The default scope is controlled by `.codex/code_shape.toml`.
+2. Python file target is `<=300` lines; warning starts above `350`, and new files above `500` should be split before landing.
+3. Function or method target is `<=60` lines; warning starts above `80`, and new definitions above `120` should be split.
+4. Class target is `<=180` lines; warning starts above `250`, and new classes above `350` should be split.
+5. Existing large files are legacy debt and may warn, but the rule is primarily intended to prevent new monoliths.
+6. Keep shape checks separate from AI governance checks; do not keep expanding `scripts/check_ai_governance.py` with code-size rules.
+
 ## Verification Layer
 
 Verification is required, but it scales by project maturity.
@@ -177,6 +202,10 @@ Verification is required, but it scales by project maturity.
 Preferred command:
 
 `python3 scripts/check_ai_governance.py`
+
+Common supplement:
+
+`python3 scripts/check_code_shape.py --staged`
 
 This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
 
@@ -303,3 +332,4 @@ A task that materially changed the project is not fully complete until:
 2. affected project docs are updated if needed
 3. `docs/ai/index.md` is still accurate
 4. `python3 scripts/check_ai_governance.py` passes when applicable
+5. `python3 scripts/check_code_shape.py --staged` passes when implementation or harness code is staged

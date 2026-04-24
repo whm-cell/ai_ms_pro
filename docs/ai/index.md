@@ -57,6 +57,11 @@
 - [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
 - [ADR-006 Harness 可迁移性与 Bootstrap 决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-006-harness-portability-bootstrap.md)
 - [ADR-007 Governance Surface Budget](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-007-governance-surface-budget.md)
+- [ADR-008 Cross-Platform Hooks And Code Shape Budget](./adr/ADR-008-cross-platform-hooks-and-code-shape.md)
+
+## 当前 Changelog
+
+- [2026-04-24 Harness Portability Hardening](./changelog/2026-04-24-harness-portability-hardening.md)
 
 ## 归档入口
 

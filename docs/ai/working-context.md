@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-04-22
+更新时间：2026-04-24
 当前阶段：STAGE-00 真实场景验证与治理固化
 当前模式：Codex-first harness engineering
 
@@ -22,8 +22,8 @@
   - docs/ai/handoffs/active/stage-00-new-repo-rehearsal.md
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
-- Last Synced From: status,handoff
-- Last Synced At: 2026-04-22
+- Last Synced From: status,handoff,manual
+- Last Synced At: 2026-04-24
 
 ## 当前主目标
 
@@ -73,6 +73,7 @@
 - `WS-01` 与 `WS-02` 已验证当前 harness 能支撑两个真实 repo-native workstream
 - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`；已被 stage `status` / ADR 吸收的完成型 handoff 进入 archive
 - `new_pro_standard` 与 root `scripts/bootstrap_harness.py` 已同步到同一套 slim governance surface 模板；新仓 bootstrap 默认生成轻量路由型 `index` 与增量真相型 `working-context`
+- 2026-04-24: `ghtt_crawler` 中已验证的 Windows hook entry、runnable Python resolution、repo-local venv self-heal 与 staged code-shape budget 已反哺进当前 harness，并在 ADR-008 固化。
 
 ## 更新规则
 
