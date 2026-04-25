@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -13,6 +14,71 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_VENV_DIR = ROOT / ".codex" / ".venv"
 DEFAULT_REQUIREMENTS_PATH = ROOT / ".codex" / "requirements.txt"
+
+
+def python_candidates(prefix: Path) -> list[Path]:
+    candidates: list[Path] = []
+    if os.name == "nt":
+        candidates.extend(
+            [
+                prefix / "Scripts" / "python.exe",
+                prefix / "Scripts" / "python",
+            ]
+        )
+    candidates.extend(
+        [
+            prefix / "bin" / "python",
+            prefix / "bin" / "python3",
+            prefix / "python.exe",
+            prefix / "python",
+        ]
+    )
+    return candidates
+
+
+def resolve_existing_python(prefix: Path) -> Path | None:
+    for candidate in python_candidates(prefix):
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def common_windows_python_candidates() -> list[Path]:
+    if os.name != "nt":
+        return []
+
+    roots: list[Path] = []
+    local_appdata = os.environ.get("LOCALAPPDATA")
+    if local_appdata:
+        roots.append(Path(local_appdata) / "Programs" / "Python")
+
+    candidates: list[Path] = []
+    for root in roots:
+        if not root.exists():
+            continue
+        for prefix in sorted(root.glob("Python*"), reverse=True):
+            candidate = prefix / "python.exe"
+            if candidate.exists():
+                candidates.append(candidate)
+    return candidates
+
+
+def is_runnable_python(command: list[str]) -> bool:
+    try:
+        subprocess.run(
+            [*command, "-c", "import sys"],
+            cwd=str(ROOT),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    return True
+
+
+def expected_repo_venv_python() -> Path:
+    return python_candidates(DEFAULT_VENV_DIR)[0]
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,6 +124,7 @@ def main() -> int:
     files = {
         ROOT / ".codex" / "harness.toml": render_harness_config(),
         ROOT / ".codex" / "requirements.txt": render_requirements_txt(),
+        ROOT / ".codex" / "hooks.json": render_hooks_config(),
         ROOT / "docs" / "ai" / "index.md": render_ai_index(args.project_name, args.stage_label),
         ROOT / "docs" / "ai" / "plan.md": render_plan(args.project_name, args.stage_label),
         ROOT / "docs" / "ai" / "working-context.md": render_working_context(args.project_name, args.stage_label),
@@ -80,6 +147,9 @@ def main() -> int:
             explicit_python=args.python,
             strict_dependency_install=args.strict_python_deps,
         )
+
+    hooks_config_path = ROOT / ".codex" / "hooks.json"
+    hooks_config_path.write_text(files[hooks_config_path], encoding="utf-8")
 
     written = []
     skipped = []
@@ -153,21 +223,80 @@ def render_requirements_txt() -> str:
     )
 
 
+def render_hooks_config() -> str:
+    if os.name == "nt":
+        hook_runner = "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
+    else:
+        hook_runner = ".codex/hooks/run_hook.sh"
+
+    return textwrap.dedent(
+        f"""\
+        {{
+          "hooks": {{
+            "SessionStart": [
+              {{
+                "matcher": "startup|resume",
+                "hooks": [
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} session_start_runtime_context.py",
+                    "statusMessage": "Loading runtime session context",
+                    "timeout": 30
+                  }}
+                ]
+              }}
+            ],
+            "Stop": [
+              {{
+                "hooks": [
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_runtime_observation.py",
+                    "statusMessage": "Capturing runtime observations",
+                    "timeout": 30
+                  }},
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_runtime_session.py",
+                    "statusMessage": "Persisting runtime session snapshot",
+                    "timeout": 30
+                  }},
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_ai_docs_check.py",
+                    "statusMessage": "Checking AI docs governance",
+                    "timeout": 30
+                  }}
+                ]
+              }}
+            ]
+          }}
+        }}
+        """
+    )
+
+
 def bootstrap_python_environment(
     *,
     explicit_python: str | None,
     strict_dependency_install: bool,
 ) -> None:
-    python_bin = resolve_bootstrap_python(explicit_python)
-    if not DEFAULT_VENV_DIR.exists():
+    python_cmd = resolve_bootstrap_python(explicit_python)
+    refresh_existing_venv = resolve_runnable_repo_python_command() is None
+
+    if not DEFAULT_VENV_DIR.exists() or refresh_existing_venv:
+        create_args = [*python_cmd, "-m", "venv"]
+        if DEFAULT_VENV_DIR.exists():
+            create_args.append("--clear")
         subprocess.run(
-            [python_bin, "-m", "venv", str(DEFAULT_VENV_DIR)],
+            [*create_args, str(DEFAULT_VENV_DIR)],
             cwd=str(ROOT),
             check=True,
         )
 
-    venv_python = DEFAULT_VENV_DIR / "bin" / "python"
-    if not venv_python.exists():
+    repo_python_cmd = resolve_runnable_repo_python_command()
+    venv_python = resolve_existing_python(DEFAULT_VENV_DIR) or expected_repo_venv_python()
+    if not venv_python.exists() or repo_python_cmd is None:
         raise SystemExit(f"ERROR: expected venv python at {venv_python}")
 
     if DEFAULT_REQUIREMENTS_PATH.exists():
@@ -203,22 +332,52 @@ def install_optional_requirements(
         print(message)
 
 
-def resolve_bootstrap_python(explicit_python: str | None) -> str:
+def resolve_bootstrap_python(explicit_python: str | None) -> list[str]:
+    candidate_commands: list[list[str]] = []
+
     if explicit_python:
-        return explicit_python
+        candidate_commands.append([explicit_python])
 
-    venv_python = Path(os.environ.get("VIRTUAL_ENV", "")) / "bin" / "python"
-    if os.environ.get("VIRTUAL_ENV") and venv_python.exists():
-        return str(venv_python)
+    if os.environ.get("VIRTUAL_ENV"):
+        env_python = resolve_existing_python(Path(os.environ["VIRTUAL_ENV"]))
+        if env_python is not None:
+            candidate_commands.append([str(env_python)])
 
-    conda_python = Path(os.environ.get("CONDA_PREFIX", "")) / "bin" / "python"
-    if os.environ.get("CONDA_PREFIX") and conda_python.exists():
-        return str(conda_python)
+    if os.environ.get("CONDA_PREFIX"):
+        env_python = resolve_existing_python(Path(os.environ["CONDA_PREFIX"]))
+        if env_python is not None:
+            candidate_commands.append([str(env_python)])
 
     if sys.executable:
-        return sys.executable
+        candidate_commands.append([sys.executable])
+
+    python_on_path = shutil.which("python")
+    if python_on_path:
+        candidate_commands.append([python_on_path])
+
+    if os.name == "nt":
+        py_launcher = shutil.which("py")
+        if py_launcher:
+            candidate_commands.append([py_launcher, "-3"])
+
+    for candidate in common_windows_python_candidates():
+        candidate_commands.append([str(candidate)])
+
+    for command in candidate_commands:
+        if is_runnable_python(command):
+            return command
 
     raise SystemExit("ERROR: could not determine a Python executable for bootstrap")
+
+
+def resolve_runnable_repo_python_command() -> list[str] | None:
+    repo_python = resolve_existing_python(DEFAULT_VENV_DIR)
+    if repo_python is None:
+        return None
+    command = [str(repo_python)]
+    if is_runnable_python(command):
+        return command
+    return None
 
 
 def render_ai_index(project_name: str, stage_label: str) -> str:

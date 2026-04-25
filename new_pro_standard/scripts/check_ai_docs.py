@@ -57,6 +57,15 @@ def add_missing_doc_error(errors: list[str], index_text: str, path: Path, label:
         errors.append(f"{label} not referenced in index: {path.relative_to(ROOT)}")
 
 
+def is_doc_or_anchor_referenced(index_text: str, path: Path, anchor_tokens: tuple[str, ...] = ()) -> bool:
+    if path.name in index_text:
+        return True
+    repo_relative = path.relative_to(ROOT).as_posix()
+    if repo_relative in index_text:
+        return True
+    return any(token in index_text for token in anchor_tokens)
+
+
 def resolve_required_docs(entries: list[str], *, config_label: str) -> list[Path]:
     resolved: list[Path] = []
     for entry in entries:
@@ -184,25 +193,45 @@ def main() -> int:
         if "暂无活跃 `handoff`" in index_text:
             errors.append("Index still says there are no active handoffs, but active handoff files exist.")
         for path in active_handoffs:
-            add_missing_doc_error(errors, index_text, path, "Active handoff")
+            if not is_doc_or_anchor_referenced(
+                index_text,
+                path,
+                anchor_tokens=("docs/ai/handoffs/active", "./handoffs/active", "docs/ai/working-context.md", "./working-context.md"),
+            ):
+                errors.append(f"Active handoff not referenced in index: {path.relative_to(ROOT)}")
 
     if status_docs:
         if "暂无阶段 `status`" in index_text:
             errors.append("Index still says there is no status document, but status files exist.")
         for path in status_docs:
-            add_missing_doc_error(errors, index_text, path, "Status document")
+            if not is_doc_or_anchor_referenced(
+                index_text,
+                path,
+                anchor_tokens=("docs/ai/status", "./status"),
+            ):
+                errors.append(f"Status document not referenced in index: {path.relative_to(ROOT)}")
 
     if changelog_docs:
         if "暂无阶段 `changelog`" in index_text:
             errors.append("Index still says there is no changelog, but changelog files exist.")
         for path in changelog_docs:
-            add_missing_doc_error(errors, index_text, path, "Changelog document")
+            if not is_doc_or_anchor_referenced(
+                index_text,
+                path,
+                anchor_tokens=("docs/ai/changelog", "./changelog"),
+            ):
+                errors.append(f"Changelog document not referenced in index: {path.relative_to(ROOT)}")
 
     if adr_docs:
         if "暂无正式 `adr`" in index_text:
             errors.append("Index still says there is no ADR, but ADR files exist.")
         for path in adr_docs:
-            add_missing_doc_error(errors, index_text, path, "ADR document")
+            if not is_doc_or_anchor_referenced(
+                index_text,
+                path,
+                anchor_tokens=("docs/ai/adr", "./adr"),
+            ):
+                errors.append(f"ADR document not referenced in index: {path.relative_to(ROOT)}")
 
     if not active_handoffs and "暂无活跃 `handoff`" not in index_text:
         warnings.append("No active handoffs found. Consider updating index wording if this is intentional.")

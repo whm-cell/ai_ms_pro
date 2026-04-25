@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-04-22
-当前状态：核心链路已在测试仓库跑通；剩余项以 hardening 为主
+更新时间：2026-04-25
+当前状态：核心链路已在测试仓库跑通，starter 机制层也已与主仓重新对齐并可经 bootstrap 适配当前宿主环境；剩余项以 hardening 为主
 
 ## 作用
 
@@ -13,7 +13,7 @@
 
 - `0 -> 1 初始化可用性` 已在测试仓库验证完成
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已在新仓库内跑通一轮
-- 当前剩余问题不再是“能不能用”，而是 `CI + external replay + discoverability + hardening`
+- 当前剩余问题不再是“能不能用”，而是 `CI + external replay + auto-discovery + cross-host migration hardening`
 
 ## P0 当前最值得做
 
@@ -80,14 +80,6 @@
 - 完成定义：
   - 明确选择“保留样板”或“只保留治理面”
   - 相应更新 starter 文档和迁移说明
-
-### OPEN-08 AGENTS Starter 中立化
-
-- 目标：进一步把 starter 中的 `AGENTS.md` 压成更项目中立的版本
-- 当前缺口：虽然已有 starter 版 `AGENTS.md`，但仍有进一步收缩 repo-specific 表述的空间
-- 完成定义：
-  - 新项目拿到 starter 后，改写成本更低
-  - 默认规则更聚焦机制，而不是示例项目内容
 
 ## 当前不纳入本轮
 

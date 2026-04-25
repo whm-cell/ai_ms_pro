@@ -124,6 +124,7 @@ def main() -> int:
     files = {
         ROOT / ".codex" / "harness.toml": render_harness_config(),
         ROOT / ".codex" / "requirements.txt": render_requirements_txt(),
+        ROOT / ".codex" / "hooks.json": render_hooks_config(),
         ROOT / "docs" / "ai" / "index.md": render_ai_index(args.project_name, args.stage_label),
         ROOT / "docs" / "ai" / "plan.md": render_plan(args.project_name, args.stage_label),
         ROOT / "docs" / "ai" / "working-context.md": render_working_context(args.project_name, args.stage_label),
@@ -146,6 +147,9 @@ def main() -> int:
             explicit_python=args.python,
             strict_dependency_install=args.strict_python_deps,
         )
+
+    hooks_config_path = ROOT / ".codex" / "hooks.json"
+    hooks_config_path.write_text(files[hooks_config_path], encoding="utf-8")
 
     written = []
     skipped = []
@@ -215,6 +219,59 @@ def render_requirements_txt() -> str:
         # Bootstrap treats dependency installation as best-effort by default
         # so offline repos can still finish initialization.
         tomli>=2,<3; python_version < "3.11"
+        """
+    )
+
+
+def render_hooks_config() -> str:
+    if os.name == "nt":
+        hook_runner = "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
+    else:
+        hook_runner = ".codex/hooks/run_hook.sh"
+
+    return textwrap.dedent(
+        f"""\
+        {{
+          "hooks": {{
+            "SessionStart": [
+              {{
+                "matcher": "startup|resume",
+                "hooks": [
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} session_start_runtime_context.py",
+                    "statusMessage": "Loading runtime session context",
+                    "timeout": 30
+                  }}
+                ]
+              }}
+            ],
+            "Stop": [
+              {{
+                "hooks": [
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_runtime_observation.py",
+                    "statusMessage": "Capturing runtime observations",
+                    "timeout": 30
+                  }},
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_runtime_session.py",
+                    "statusMessage": "Persisting runtime session snapshot",
+                    "timeout": 30
+                  }},
+                  {{
+                    "type": "command",
+                    "command": "{hook_runner} stop_ai_docs_check.py",
+                    "statusMessage": "Checking AI docs governance",
+                    "timeout": 30
+                  }}
+                ]
+              }}
+            ]
+          }}
+        }}
         """
     )
 

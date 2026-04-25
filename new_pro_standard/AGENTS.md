@@ -82,6 +82,31 @@ Use this rule:
 
 `implementation change -> document impact check -> update affected docs -> update docs/ai/index.md`
 
+### Update triggers
+
+Update or create a `handoff` when:
+
+- a subtask is completed
+- a task is paused but should be resumed later
+- implementation changed in a way the next agent must understand
+
+Update or create a `status` document when:
+
+- a stage ends
+- several handoffs have accumulated and need compression
+- current risks or blockers materially changed
+
+Update or create a `changelog` when:
+
+- a stage is ready for integration
+- externally visible behavior changed
+- release-facing notes are needed
+
+Update or create an `adr` when:
+
+- a decision will remain relevant beyond the current stage
+- architecture, API shape, storage strategy, deployment strategy, or major constraints changed
+
 Always check `docs/ai/index.md` after adding or changing:
 
 - `plan`
@@ -103,6 +128,8 @@ At the start of a new Codex task, prefer this order:
 7. relevant `docs/ai/adr/*.md`
 8. archive only if necessary
 
+Runtime session files under `.codex/runtime/sessions/` are optional recovery inputs and should only be read when local session detail is needed.
+
 ## Harness Layers
 
 This starter uses three harness layers:
@@ -114,19 +141,66 @@ This starter uses three harness layers:
 Use these rules:
 
 1. Runtime files are local-only recovery artifacts, not the canonical project truth.
-2. Hooks may write `.codex/runtime/*`, but must not auto-edit shared governance docs.
+2. Hooks may write `.codex/runtime/*`, but must not auto-edit `working-context.md`, `index.md`, `handoff`, `status`, `changelog`, or `adr`.
 3. Shared governance documents are authored at explicit semantic checkpoints such as subtask completion, pause/resume boundaries, stage compression, and long-lived decisions.
 4. The main agent owns canonical writes to `docs/ai/*` and `docs/requirements/*`.
+5. Subagents may return structured results or handoff drafts, but the main agent publishes the canonical shared documents.
+6. If a runtime finding remains relevant beyond the current local session, promote it into `handoff`, `status`, `adr`, `plan`, or requirements documents.
 
 ## Python Runtime Rule
 
-Harness Python should run from a repo-local virtual environment at `.codex/.venv`.
+Harness Python must prefer the repo-local virtual environment `.codex/.venv`.
 
 Use these rules:
 
-1. `scripts/bootstrap_harness.py` should create `.codex/.venv` with the current environment's Python unless `--python` overrides it.
-2. Git hooks and Codex hooks should call `.codex/hooks/run_with_repo_python.sh` or `.codex/hooks/run_hook.sh` instead of hardcoding `/usr/bin/python3`.
-3. Do not commit `.codex/.venv`.
+1. `scripts/bootstrap_harness.py` must support Windows and POSIX venv layouts.
+2. Git hooks and Codex hooks must resolve Python through `.codex/hooks/` runners instead of hardcoding a system Python path.
+3. Runners must verify that a Python candidate is actually runnable before using it.
+4. If `.codex/.venv` exists but is not runnable, bootstrap may rebuild it in place without touching `.codex/runtime/*`.
+5. Do not commit `.codex/.venv`.
+
+Platform note:
+
+- This starter includes both POSIX and PowerShell hook runners.
+- `scripts/bootstrap_harness.py` refreshes `.codex/hooks.json` for the current host shell during setup; if a repo later moves to a different host shell, rerun bootstrap or update only the hook entrypoint commands instead of rewriting the runtime scripts ad hoc.
+
+## Session Promotion
+
+Runtime session files under `.codex/runtime/sessions/` are local recovery material and should follow the session template.
+
+Promote a session into a `handoff` when any of the following are true:
+
+- a subtask has completed
+- a task is being paused and should be resumed later
+- implementation changed in a way the next agent must understand
+- the session established durable valid/invalid approaches or risks that should be shared by default
+- the session created a change that should affect `status`, `adr`, `plan`, or requirements tracking
+
+Do not promote a session when it only contains local scratch work, personal prompt experimentation, or exploratory notes without repo-level reuse value.
+
+The main agent is responsible for deciding whether promotion is required and for publishing the canonical `handoff`.
+
+## Requirement Traceability
+
+When a task is already mapped to normalized requirements or workstreams, include those identifiers in runtime and governance artifacts.
+
+Use these rules:
+
+1. `handoff`, `status`, runtime session files, and observation-derived handoff drafts should carry `Requirement IDs` and `Workstream IDs` when the mapping is known.
+2. If the mapping is not known yet, write `未绑定` instead of inventing IDs.
+3. The canonical mapping still lives in `docs/requirements/traceability-matrix.md` and related workstream docs; AI-side metadata references that mapping and must not drift from it.
+4. When a task is newly bound to a requirement or workstream, update both the AI-side artifact and the requirements-side traceability docs in the same change whenever feasible.
+
+## Observation Reduction
+
+Runtime observation files under `.codex/runtime/observations/*.jsonl` are local reduction inputs, not shared truth.
+
+Use these rules:
+
+1. Reduce observations explicitly with `python3 scripts/reduce_runtime_observations.py` when local observation material should be reviewed for promotion.
+2. The default reduction order is `observations -> handoff draft -> main agent review -> status/adr if warranted`.
+3. Reducer output is a candidate artifact. It does not replace the main agent's responsibility to decide whether canonical shared docs should change.
+4. Only promote to `status` or `adr` when the reducer output has already been reviewed and the conclusion is stable beyond a single local observation batch.
 
 ## Compression Rule
 
@@ -145,6 +219,21 @@ Use these rules:
 1. `docs/ai/working-context.md`, active `handoff`, `status`, `adr`, `docs/requirements/normalized/*.md`, and `docs/requirements/traceability-matrix.md` are the primary truth surfaces.
 2. `docs/ai/plan.md` is a projection document. It should keep goals, scope, stage breakdown, and acceptance framing, but should not repeat fast-changing completion state, latest validation results, or transient evidence.
 3. `docs/requirements/workstreams/*.md` are projection documents. They should keep workflow goal, covered requirements, stage suggestions, and acceptance model, but should not become a second copy of the latest execution status or smoke evidence.
+4. When current-state text appears in a projection document, it must either be removed or be explicitly synchronized with its primary truth source in the same change.
+5. Current completion state, latest validation result, and canonical acceptance evidence should default to `working-context`, `handoff`, `status`, and `traceability-matrix.md`, not to `plan` or `workstream` docs.
+
+## Code Shape Budget
+
+Code shape is a harness-level constraint for implementation and harness scripts.
+
+Use these rules:
+
+1. The default scope is controlled by `.codex/code_shape.toml`.
+2. Python file target is `<=300` lines; warning starts above `350`, and new files above `500` should be split before landing.
+3. Function or method target is `<=60` lines; warning starts above `80`, and new definitions above `120` should be split.
+4. Class target is `<=180` lines; warning starts above `250`, and new classes above `350` should be split.
+5. Existing large files are legacy debt and may warn, but the rule is primarily intended to prevent new monoliths.
+6. Keep shape checks separate from AI governance checks; do not keep expanding `scripts/check_ai_governance.py` with code-size rules.
 
 ## Governance Surface Budget
 
@@ -164,11 +253,39 @@ Preferred command:
 
 `python3 scripts/check_ai_governance.py`
 
+Common supplement:
+
+`python3 scripts/check_code_shape.py --staged`
+
 This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
 
 Git hook setup:
 
 `git config core.hooksPath .githooks`
+
+## Scope Discipline
+
+Skills are allowed and useful, but they do not replace repository rules.
+
+Use this division:
+
+- `AGENTS.md`: always-on project rules
+- `.codex/runtime/*`: local runtime harness memory
+- `docs/ai/*`: persistent project memory
+- `docs/requirements/*`: requirement source, normalization, and workstream tracking
+- skills: task-specific execution guidance
+- scripts/checks: enforcement and drift detection
+- `.codex/hooks.json`: Codex lifecycle enforcement
+
+## Skill Coordination
+
+Skills do not coordinate themselves. Codex coordinates them using repository rules and document layers.
+
+Use these rules:
+
+1. Existing skills are not "always running". They are loaded when relevant to the current task.
+2. New skills may be introduced mid-project, but they must write their results into the existing document system.
+3. Repository rules and `docs/ai/index.md` remain the stable control plane even when skills change.
 
 ## Completion Condition
 
@@ -178,3 +295,4 @@ A task that materially changed the project is not fully complete until:
 2. affected project docs are updated if needed
 3. `docs/ai/index.md` is still accurate
 4. `python3 scripts/check_ai_governance.py` passes when applicable
+5. `python3 scripts/check_code_shape.py --staged` passes when implementation or harness code is staged

@@ -33,6 +33,7 @@ This starter keeps that shape by:
 - treating `working-context.md` as incremental truth instead of a second directory view
 - warning when active handoffs or bound handoffs grow past the default budget
 - expecting absorbed handoffs to move into `docs/ai/handoffs/archive/`
+- keeping exact active handoff bindings in `docs/ai/working-context.md` sync metadata instead of duplicating them across multiple router docs
 
 ## First Use
 
@@ -41,7 +42,7 @@ This starter keeps that shape by:
 3. The bootstrap step will use the current environment Python, unless overridden, to create `.codex/.venv`.
 4. Dependency installation is best-effort by default, so offline bootstrap can still finish. If you need a strict dependency install, rerun with `--strict-python-deps`.
 5. Enable Git hooks with `git config core.hooksPath .githooks`.
-6. Rewrite `AGENTS.md`, `docs/ai/working-context.md`, `docs/ai/plan.md`, and `.codex/harness.toml` for the new project.
+6. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell; then rewrite `AGENTS.md`, `docs/ai/working-context.md`, `docs/ai/plan.md`, and `.codex/harness.toml` for the new project.
 7. Import the first real `REQDOC / REQ / WS`.
 8. Start the first vertical slice implementation.
 
@@ -77,8 +78,11 @@ If the harness is awake, the expected behavior is:
 
 ## Python Runtime
 
-- Codex hooks and Git hooks resolve Python through `.codex/hooks/run_with_repo_python.sh`.
-- Resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then `python3`.
+- Codex hooks and Git hooks resolve Python through the repo-local hook runners in `.codex/hooks/`.
+- The starter includes both `.sh` and `.ps1` entrypoints so Windows and POSIX workspaces can share the same harness logic.
+- `scripts/bootstrap_harness.py` refreshes `.codex/hooks.json` for the current host shell during setup, so normal new-project bootstrap no longer needs manual hook entrypoint edits.
+- Resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then `python3`, then `python`, then `py -3` when available.
+- Python candidates are probed before use, and bootstrap can rebuild a broken repo-local `.codex/.venv` in place.
 - Do not commit `.codex/.venv`.
 - `.codex/requirements.txt` currently carries optional compatibility dependencies, so a finished bootstrap does not guarantee every optional pip package is already installed.
 
@@ -87,7 +91,13 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_ai_docs.py`
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_ai_governance.py`
+- `scripts/check_code_shape.py`
 - `scripts/reduce_runtime_observations.py`
+
+The shipped Git hook runs:
+
+- `scripts/check_ai_governance.py`
+- `scripts/check_code_shape.py --staged`
 
 ## Included Guides
 
@@ -101,3 +111,4 @@ If the harness is awake, the expected behavior is:
 - `scripts/bootstrap_harness.py` initializes the minimal shared control plane.
 - It is safe to rerun after the initial copy.
 - The generated starter docs follow the slim governance surface budget by default.
+- The bootstrap flow supports Windows and POSIX venv layouts, refreshes hook config for the current host shell, and keeps optional dependency installation best-effort unless `--strict-python-deps` is requested.

@@ -1,0 +1,44 @@
+version = 1
+
+[scope]
+include = [
+  "apps/**/*.py",
+  "scripts/*.py",
+  "scripts/**/*.py",
+  ".codex/hooks/*.py",
+  ".codex/hooks/**/*.py",
+  ".codex/hooks/*.sh",
+  ".codex/hooks/**/*.sh",
+  ".githooks/pre-commit",
+  ".codex/skills/*/scripts/*.py",
+  ".codex/skills/**/scripts/**/*.py",
+]
+exclude = [
+  ".codex/.venv/**",
+  ".codex/runtime/**",
+  "new_pro_standard/**",
+  "output/**",
+  "**/__pycache__/**",
+]
+
+[targets]
+python_file = 300
+python_function = 60
+python_class = 180
+shell_file = 80
+
+[thresholds.python_file]
+warn = 350
+error = 500
+
+[thresholds.python_function]
+warn = 80
+error = 120
+
+[thresholds.python_class]
+warn = 250
+error = 350
+
+[thresholds.shell_file]
+warn = 120
+error = 200

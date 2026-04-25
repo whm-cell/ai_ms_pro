@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-22
+更新时间：2026-04-25
 阶段：stage-00
 状态：进行中
 
@@ -41,6 +41,7 @@
   - governance checker 已新增 active `handoff` / `status` 的 `REQ/WS` 字段存在性校验，把 metadata consistency 自动化从 `working-context` 扩展到更多 primary truth surface
   - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`，并已将被 stage `status` / ADR 吸收的完成型 handoff 归档
   - 2026-04-24: `ghtt_crawler` 中已验证的 Windows hook entry、runnable Python resolution、repo-local venv self-heal 与 staged code-shape budget 已反哺进当前 harness；长期决策记录在 `ADR-008-cross-platform-hooks-and-code-shape.md`
+  - 2026-04-25: `new_pro_standard` 已同步 PowerShell hook entrypoints、code-shape budget、runnable Python resolution、坏 `.codex/.venv` 自愈、staged code-shape pre-commit 与 active handoff/status `REQ/WS` metadata 校验；bootstrap 也会按当前宿主环境刷新 `.codex/hooks.json`，默认治理面中的重复当前态展开已进一步回收到 `working-context` 同步元数据与 stage `status`
 - 进行中：
   - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
@@ -72,6 +73,8 @@
 - repo-local `$repo-governed-coding` skill 已证明当前 harness 不只支持文档与 hook 规则，也能承载显式调用的行为层约束；当前仍保持为策略补强，而不是主治理面替换
 - repo-local `$repo-governed-coding` skill 已在首个真实实现任务中完成前向使用，说明它不只停留在结构校验层面，也能驱动一个受控的小范围 hardening 变更闭环
 - 2026-04-24 portability hardening establishes a cleaner cross-platform hook/Python baseline and keeps code-shape checks separate from AI governance checks.
+- `new_pro_standard` 现已和当前 harness 的关键机制层重新对齐，starter 不再遗漏 2026-04-24 portability hardening 与 metadata consistency 的核心能力
+- `index -> working-context -> stage status` 的默认恢复链路进一步去重，精确 active handoff 集合以 `working-context` 同步元数据为准
 
 ## 风险与阻塞
 
@@ -83,6 +86,7 @@
 - `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
 - repo-local `$repo-governed-coding` skill 当前只在本仓库以显式调用方式提供；是否值得提升为 starter 资产仍需更多真实任务样本
 - 当前 metadata consistency 自动化仍只覆盖 `working-context + active handoff/status` 的字段级检查，尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
+- starter 当前已同时携带 `.sh` 与 `.ps1` hook runner，且 bootstrap 会按当前宿主环境刷新 `.codex/hooks.json`；若仓库在初始化后跨 host shell 迁移，仍需重新 bootstrap 或只调整 hook 入口配置
 - active surface budget 当前仍是 warning 而不是 blocking；后续仍需观察阈值是否足够稳定
 
 ## 下一阶段重点
@@ -90,7 +94,7 @@
 - 用真实 observation 数据验证 reducer 输出，并明确何时应进一步压缩到 `status` 或 `ADR`
 - 判断 `WS-01` 与 `WS-02` 是否应归档为已验证样板，或继续演化成更完整的示例
 - 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
-- 评估是否需要把 `AGENTS.md` 也拆成更项目中立的 starter 版本
+- 评估是否要继续收紧“仓库初始化后跨 host shell 迁移”的体验，例如自动探测或迁移提示，而不是继续阻塞新项目起手
 - 在几个真实实现任务中显式调用 `$repo-governed-coding`，判断它是否只需保留为 repo-local skill，还是值得进入 starter / ADR
 - 若继续推进 OPEN-06，优先补 reducer/runtime 或 `REQ <-> WS` 组合关系校验，而不是直接做自由文本级语义推断
 
@@ -110,4 +114,5 @@
 - [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)
 - [ADR-007 Governance Surface Budget](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-007-governance-surface-budget.md)
 - [ADR-008 Cross-Platform Hooks And Code Shape Budget](../adr/ADR-008-cross-platform-hooks-and-code-shape.md)
+- [2026-04-25 Harness Starter Sync And Surface Trim](../changelog/2026-04-25-harness-starter-sync-and-surface-trim.md)
 - 当前默认恢复顺序与 active handoff 集合由 `working-context` 的同步元数据维护；已被本 stage `status` / ADR 吸收的完成型 handoff 已归档
