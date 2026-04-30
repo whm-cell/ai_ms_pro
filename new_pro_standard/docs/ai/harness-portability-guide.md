@@ -1,6 +1,6 @@
 # Harness 可迁移清单
 
-更新时间：2026-04-18
+更新时间：2026-04-30
 适用范围：将当前 Codex-first harness 迁移到一个全新的项目仓库
 
 ## 核心原则
@@ -20,10 +20,12 @@
 - `.codex/config.toml`
 - `.codex/hooks.json`
 - `.codex/hooks/`
+- `.codex/skills/repo-governed-coding/`（可选行为护栏；只保留机制，不写当前项目真相）
 - `.codex/requirements.txt`
 - `scripts/check_ai_governance.py`
 - `scripts/check_ai_docs.py`
 - `scripts/check_ai_doc_quality.py`
+- `scripts/check_archive_candidates.py`
 - `scripts/reduce_runtime_observations.py`
 - `scripts/bootstrap_harness.py`
 - `.codex/harness.toml`
@@ -67,9 +69,10 @@
 
 - `AGENTS.md` 中的项目目标、文档职责和默认 workflow 偏好
 - `.codex/harness.toml` 中的 `required_ai_docs` 与 `required_requirements_docs`
-- `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`
+- `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`，POSIX/macOS 与 Windows PowerShell fallback 会枚举候选并优先 Python 3.11+
 - `.codex/hooks.json` 的 hook command entrypoint；bootstrap 会按当前宿主环境刷新为 `.ps1` 或 `.sh` 入口
 - `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
+- `.codex/skills/repo-governed-coding/` 的使用策略；默认保持显式调用，不应替代 `AGENTS.md` 和治理检查
 - `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
 - `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
 - `docs/ai/plan.md` 中的项目目标、范围和阶段规划
@@ -80,11 +83,11 @@
 ## 推荐迁移步骤
 
 1. 复制机制层文件，不复制当前项目真相和 runtime 原料。
-2. 在新仓库运行 `python3 scripts/bootstrap_harness.py --project-name "你的项目名"`。
-3. bootstrap 会优先取当前 `VIRTUAL_ENV` / `CONDA_PREFIX` / 调用它的 `sys.executable` 来创建 repo-local `.codex/.venv`；如需指定解释器，用 `--python /path/to/python3`。
+2. 在新仓库运行 `python3 scripts/bootstrap_harness.py --project-name "你的项目名"`；如果你希望 starter 自带的 `plan / working-context / requirements index / traceability-matrix` 立刻替换成新项目名，再追加一次 `--force`。
+3. bootstrap 会优先取当前 `VIRTUAL_ENV` / `CONDA_PREFIX`、显式 `CODEX_HARNESS_PYTHON` 或最佳 Python 3.11+ 候选来创建 repo-local `.codex/.venv`；如需指定解释器，用 `--python /path/to/python3`。
 4. Python 依赖安装默认是 best-effort；离线或受限网络下即使 `pip install` 失败，bootstrap 也应继续完成 venv 初始化。若你需要强制安装成功，可追加 `--strict-python-deps`。
 5. 执行 `git config core.hooksPath .githooks`，让 Git hook 与 Codex hook 统一通过 repo-local Python 入口运行；bootstrap 会同时按当前宿主环境刷新 `.codex/hooks.json`。
-6. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`。
+6. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`；`AGENTS.md` 不会由 bootstrap 自动项目化。
 7. 让 AI 先初始化或确认 `docs/ai/`、`docs/requirements/` 控制面，而不是直接写业务代码。
 8. 导入首个真实 `REQDOC / REQ / WS`。
 9. 落第一个垂直切片实现，并在完成后补 `handoff/status`。
@@ -108,3 +111,5 @@
 - `.codex/requirements.txt` 里的依赖目前按可选兼容层处理；离线时 bootstrap 完成不代表这些包一定已经安装。
 - `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
+- repo-local 行为 skill 只能约束执行方法；跨会话共享结论仍必须提升到 `handoff/status/ADR` 或 requirements 文档。
+- archive candidate monitor 只适合作为压缩前提醒，不应替代主 Agent 对 `handoff -> status -> archive` 的语义判断。

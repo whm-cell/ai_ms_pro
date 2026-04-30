@@ -10,15 +10,21 @@ import sys
 import textwrap
 from pathlib import Path
 
+from hook_config_lib import render_hooks_config as render_platform_hooks_config
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_VENV_DIR = ROOT / ".codex" / ".venv"
 DEFAULT_REQUIREMENTS_PATH = ROOT / ".codex" / "requirements.txt"
 
 
+def is_windows_host() -> bool:
+    return os.name == "nt"
+
+
 def python_candidates(prefix: Path) -> list[Path]:
     candidates: list[Path] = []
-    if os.name == "nt":
+    if is_windows_host():
         candidates.extend(
             [
                 prefix / "Scripts" / "python.exe",
@@ -44,7 +50,7 @@ def resolve_existing_python(prefix: Path) -> Path | None:
 
 
 def common_windows_python_candidates() -> list[Path]:
-    if os.name != "nt":
+    if not is_windows_host():
         return []
 
     roots: list[Path] = []
@@ -64,17 +70,91 @@ def common_windows_python_candidates() -> list[Path]:
 
 
 def is_runnable_python(command: list[str]) -> bool:
+    return python_version(command) is not None
+
+
+def python_version(command: list[str]) -> tuple[int, int, int] | None:
     try:
-        subprocess.run(
-            [*command, "-c", "import sys"],
+        result = subprocess.run(
+            [
+                *command,
+                "-c",
+                "import sys; print('%d.%d.%d' % sys.version_info[:3])",
+            ],
             cwd=str(ROOT),
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            check=True,
+            text=True,
+            check=False,
         )
-    except (OSError, subprocess.CalledProcessError):
-        return False
-    return True
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    parts = result.stdout.strip().split(".")
+    if len(parts) != 3:
+        return None
+    try:
+        return tuple(int(part) for part in parts)  # type: ignore[return-value]
+    except ValueError:
+        return None
+
+
+def all_commands_on_path(name: str) -> list[str]:
+    candidates: list[str] = []
+    seen: set[str] = set()
+    candidate_names = path_candidate_names(name)
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        if not directory:
+            continue
+        for candidate_name in candidate_names:
+            candidate = Path(directory) / candidate_name
+            rendered = str(candidate)
+            if rendered in seen:
+                continue
+            if candidate.is_file() and is_executable_command(candidate):
+                candidates.append(rendered)
+                seen.add(rendered)
+    return candidates
+
+
+def path_candidate_names(name: str) -> list[str]:
+    if not is_windows_host() or command_name_has_suffix(name):
+        return [name]
+
+    extensions = [".exe", ".cmd", ".bat", ".com"]
+    raw_pathext = os.environ.get("PATHEXT", "")
+    for extension in raw_pathext.replace(";", os.pathsep).split(os.pathsep):
+        normalized = extension.strip().lower()
+        if normalized and normalized not in extensions:
+            extensions.append(normalized)
+
+    return [name, *[f"{name}{extension}" for extension in extensions]]
+
+
+def command_name_has_suffix(name: str) -> bool:
+    basename = name.replace("\\", "/").rsplit("/", 1)[-1]
+    return "." in basename
+
+
+def is_executable_command(candidate: Path) -> bool:
+    if is_windows_host():
+        return candidate.is_file()
+    return candidate.is_file() and os.access(candidate, os.X_OK)
+
+
+def best_python_command(commands: list[list[str]]) -> list[str] | None:
+    runnable: list[tuple[int, tuple[int, int, int], list[str]]] = []
+    for index, command in enumerate(commands):
+        version = python_version(command)
+        if version is not None:
+            runnable.append((index, version, command))
+    if not runnable:
+        return None
+    preferred = [item for item in runnable if item[1] >= (3, 11, 0)]
+    pool = preferred or runnable
+    _, _, command = max(pool, key=lambda item: (item[1], -item[0]))
+    return command
 
 
 def expected_repo_venv_python() -> Path:
@@ -224,56 +304,7 @@ def render_requirements_txt() -> str:
 
 
 def render_hooks_config() -> str:
-    if os.name == "nt":
-        hook_runner = "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
-    else:
-        hook_runner = ".codex/hooks/run_hook.sh"
-
-    return textwrap.dedent(
-        f"""\
-        {{
-          "hooks": {{
-            "SessionStart": [
-              {{
-                "matcher": "startup|resume",
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} session_start_runtime_context.py",
-                    "statusMessage": "Loading runtime session context",
-                    "timeout": 30
-                  }}
-                ]
-              }}
-            ],
-            "Stop": [
-              {{
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_observation.py",
-                    "statusMessage": "Capturing runtime observations",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_session.py",
-                    "statusMessage": "Persisting runtime session snapshot",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_ai_docs_check.py",
-                    "statusMessage": "Checking AI docs governance",
-                    "timeout": 30
-                  }}
-                ]
-              }}
-            ]
-          }}
-        }}
-        """
-    )
+    return render_platform_hooks_config(root=ROOT)
 
 
 def bootstrap_python_environment(
@@ -333,37 +364,58 @@ def install_optional_requirements(
 
 
 def resolve_bootstrap_python(explicit_python: str | None) -> list[str]:
-    candidate_commands: list[list[str]] = []
-
     if explicit_python:
-        candidate_commands.append([explicit_python])
+        command = [explicit_python]
+        if is_runnable_python(command):
+            return command
+        raise SystemExit(f"ERROR: explicit Python is not runnable: {explicit_python}")
 
+    prefix_commands: list[list[str]] = []
     if os.environ.get("VIRTUAL_ENV"):
         env_python = resolve_existing_python(Path(os.environ["VIRTUAL_ENV"]))
         if env_python is not None:
-            candidate_commands.append([str(env_python)])
+            prefix_commands.append([str(env_python)])
 
     if os.environ.get("CONDA_PREFIX"):
         env_python = resolve_existing_python(Path(os.environ["CONDA_PREFIX"]))
         if env_python is not None:
-            candidate_commands.append([str(env_python)])
+            prefix_commands.append([str(env_python)])
 
-    if sys.executable:
-        candidate_commands.append([sys.executable])
+    for command in prefix_commands:
+        if is_runnable_python(command):
+            return command
 
-    python_on_path = shutil.which("python")
-    if python_on_path:
-        candidate_commands.append([python_on_path])
+    env_python = os.environ.get("CODEX_HARNESS_PYTHON", "").strip()
+    if env_python:
+        command = [env_python]
+        if is_runnable_python(command):
+            return command
 
-    if os.name == "nt":
+    path_commands: list[list[str]] = []
+    for name in ("python3", "python"):
+        for python_path in all_commands_on_path(name):
+            command = [python_path]
+            if command not in path_commands:
+                path_commands.append(command)
+
+    path_command = best_python_command(path_commands)
+    if path_command is not None:
+        return path_command
+
+    if is_windows_host():
         py_launcher = shutil.which("py")
         if py_launcher:
-            candidate_commands.append([py_launcher, "-3"])
+            command = [py_launcher, "-3"]
+            if is_runnable_python(command):
+                return command
 
     for candidate in common_windows_python_candidates():
-        candidate_commands.append([str(candidate)])
+        command = [str(candidate)]
+        if is_runnable_python(command):
+            return command
 
-    for command in candidate_commands:
+    if sys.executable:
+        command = [sys.executable]
         if is_runnable_python(command):
             return command
 
@@ -600,6 +652,7 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         - `.codex/runtime/` 只保存本地 session/observation 原料，不替代 `docs/ai/` 共享治理文档
         - 默认共享恢复面保持轻量：`index -> working-context -> status -> <=5 active handoff`
         - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态
+        - `.codex/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本
 
         ## 更新规则
 

@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-04-19
-当前状态：已导入两个真实验证场景
+更新时间：2026-04-29
+当前状态：已导入两个真实验证场景，并把 traceability matrix -> normalized/workstream 对齐纳入 governance check
 
 ## 目的
 
@@ -27,6 +27,7 @@
 - [source](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source)
 - [normalized](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized)
 - [workstreams](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams)
+- [index.md](./index.md)
 - [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)
 - [v2-requirements-splitting-template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/v2-requirements-splitting-template.md)
 

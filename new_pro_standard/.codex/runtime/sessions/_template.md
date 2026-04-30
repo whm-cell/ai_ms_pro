@@ -19,6 +19,13 @@ Session 类型：new | resume | pause-before-exit
 
 - 说明这次 session 从哪个任务、阶段或阻塞点进入
 
+## 行为护栏快照
+
+- Assumptions：列出本次实现前明确采用的假设；若存在会改变方案的歧义，写入 `当前 Open Loops`
+- Scope Boundary：说明本次只改什么、不顺手改什么
+- Success Criteria：写出可验证的完成条件
+- Verification Plan：列出收尾前应运行的检查、测试或 smoke
+
 ## 已做动作
 
 - 记录本次 session 已执行的关键动作、命令或检查

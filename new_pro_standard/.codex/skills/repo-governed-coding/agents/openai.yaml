@@ -1,0 +1,7 @@
+interface:
+  display_name: "Repo-Governed Coding"
+  short_description: "Governed coding for this harness"
+  default_prompt: "Use $repo-governed-coding at the repo-local path to implement or review a governed change."
+
+policy:
+  allow_implicit_invocation: false

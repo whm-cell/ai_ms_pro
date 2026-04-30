@@ -1,6 +1,6 @@
 # Harness Portability Template Handoff
 
-更新时间：2026-04-22
+更新时间：2026-04-30
 阶段：stage-00
 任务：harness-portability-template
 状态：已完成
@@ -30,6 +30,7 @@
 - 已把 `new_pro_standard` 下的 `index`、`working-context`、`AGENTS.md`、`README.md` 与 portability guide 同步到 slim governance surface 逻辑
 - 已同步 root 与 starter 两份 `scripts/bootstrap_harness.py`，避免 bootstrap 重新生成旧的 fat governance surface 模板
 - 已为 `new_pro_standard/scripts/check_ai_governance.py` 增加 active handoff / working-context bound handoff 预算 warning
+- 2026-04-30: 已把 Karpathy-style 行为护栏沉淀为 starter 内的可选 `.codex/skills/repo-governed-coding/`，并将 runtime session 模板/Stop 快照补上 `行为护栏快照`
 
 ## 修改文件
 
@@ -55,6 +56,15 @@
 - [new_pro_standard/docs/ai/harness-portability-guide.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/docs/ai/harness-portability-guide.md)
 - [new_pro_standard/scripts/bootstrap_harness.py](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/scripts/bootstrap_harness.py)
 - [new_pro_standard/scripts/check_ai_governance.py](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/scripts/check_ai_governance.py)
+- [.codex/skills/repo-governed-coding/SKILL.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/skills/repo-governed-coding/SKILL.md)
+- [.codex/runtime/sessions/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/_template.md)
+- [.codex/hooks/stop_runtime_session.py](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks/stop_runtime_session.py)
+- [docs/ai/handoffs/active/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/_template.md)
+- [docs/ai/adr/ADR-009-behavioral-guardrails-skill-and-session-snapshot.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-009-behavioral-guardrails-skill-and-session-snapshot.md)
+- [new_pro_standard/.codex/skills/repo-governed-coding/SKILL.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/.codex/skills/repo-governed-coding/SKILL.md)
+- [new_pro_standard/.codex/runtime/sessions/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/.codex/runtime/sessions/_template.md)
+- [new_pro_standard/.codex/hooks/stop_runtime_session.py](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/.codex/hooks/stop_runtime_session.py)
+- [new_pro_standard/docs/ai/handoffs/active/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/new_pro_standard/docs/ai/handoffs/active/_template.md)
 
 ## 关键实现决策
 
@@ -64,6 +74,7 @@
 - bootstrap 默认使用当前环境 Python 创建 repo-local `.codex/.venv`，并由统一 runner 供 Git hook 与 Codex hook 共用
 - 模板文档优先使用相对链接，避免把当前仓库绝对路径污染到新项目
 - portability starter 与 root bootstrap generator 必须同源对齐；否则一次手工瘦身会被下一次 bootstrap 重新打回旧模板
+- 行为护栏只作为显式调用的 method layer 进入 starter；不能替代 `AGENTS.md`、共享治理文档或 verification scripts
 
 ## 已验证有效的路线
 
@@ -71,6 +82,7 @@
 - 把“复制机制，不复制真相”写成 ADR 和迁移清单，能明显降低新项目误启动风险
 - 默认最小 `.codex/harness.toml` 更适合作为跨项目可复制基线
 - Git hook 与 Codex hook 共用同一个 repo-level Python 解析入口后，能稳定避开 `/usr/bin/python3` 3.9 引发的 `tomllib` 类兼容性问题
+- 把 assumptions / scope boundary / success criteria / verification plan 写入 runtime session 模板，比只复制外部行为说明更容易进入后续 handoff/status 压缩链路
 
 ## 已验证无效的路线
 

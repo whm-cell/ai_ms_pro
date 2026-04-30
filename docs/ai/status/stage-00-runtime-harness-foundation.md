@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-25
+更新时间：2026-04-30
 阶段：stage-00
 状态：进行中
 
@@ -42,12 +42,21 @@
   - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`，并已将被 stage `status` / ADR 吸收的完成型 handoff 归档
   - 2026-04-24: `ghtt_crawler` 中已验证的 Windows hook entry、runnable Python resolution、repo-local venv self-heal 与 staged code-shape budget 已反哺进当前 harness；长期决策记录在 `ADR-008-cross-platform-hooks-and-code-shape.md`
   - 2026-04-25: `new_pro_standard` 已同步 PowerShell hook entrypoints、code-shape budget、runnable Python resolution、坏 `.codex/.venv` 自愈、staged code-shape pre-commit 与 active handoff/status `REQ/WS` metadata 校验；bootstrap 也会按当前宿主环境刷新 `.codex/hooks.json`，默认治理面中的重复当前态展开已进一步回收到 `working-context` 同步元数据与 stage `status`
+  - 2026-04-29: root harness 已新增共享 hook renderer、独立 `scripts/sync_hooks_config.py`、POSIX `run_hook.py` 入口与 hook-sync 单测，当前 checkout 的 `.codex/hooks.json` 不再漂在 PowerShell 入口
+  - 2026-04-29: 已新增 GitHub Actions workflow，纳入 hook sync check、`check_ai_governance.py` 与两个 repo-native smoke
+  - 2026-04-29: governance checker 已补上 `REQ <-> WS` 组合关系、normalized/workstream 文档覆盖以及 traceability matrix -> 文档存在性对齐校验
+  - 2026-04-29: `.codex/harness.toml` 已从 starter 最小面收紧到当前 repo 的默认控制面，纳入 stage `status`、`harness-open-items` 和 requirements `index`
+  - 2026-04-29: Stop runtime observation/session 已支持基于 changed paths、workstream 模块路径和 traceability matrix 的 `REQ/WS` 自动发现，并已补 observation -> session -> reducer draft 三层测试
+  - 2026-04-29: `harness-trace-console` 已新增黑盒 DOM smoke，覆盖默认页面的 load -> WS-02 filter -> REQ-006 search -> detail 路径，不再只依赖 `?smoke=1` 下的 namespaced test API
+  - 2026-04-29: 仓外 starter 复演已补齐 `run_with_repo_python.sh` 的 macOS `/bin/bash` 3.2 兼容性修复，以及 `check_code_shape.py --staged` 对 unborn `HEAD` 初始 scaffold 的 baseline 处理；starter 首次 pre-commit 已在独立临时仓验证通过
+  - 2026-04-30: 已对照 `forrestchang/andrej-karpathy-skills`，把可复用行为层沉淀为 `new_pro_standard/.codex/skills/repo-governed-coding/`，并为 runtime session 模板、Stop 快照与 handoff 模板补充行为护栏位点
+  - 2026-04-30: 已修复 macOS/POSIX Python 解析优先级，并补齐 Windows PowerShell runner 的版本打分 fallback，避免 Codex hook、Git hook 或 bootstrap 误用低版本系统 Python
+  - 2026-04-30: 已新增 warning-only archive candidate monitor，用于在 active handoff 达到预算或 stage 压缩前列出候选归档对象，不自动移动文件
 - 进行中：
-  - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
+  - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项，重点转向 CI burn-in、reducer 阈值、黑盒回归扩展与更深一层的 runtime/stage consistency
   - 评估是否可以将 Stage-00 压缩并进入下一阶段
-  - metadata consistency 自动校验已从 `working-context` 扩展到 active `handoff/status`，但仍未覆盖 reducer/runtime 与更细的组合关系
+  - metadata consistency 自动校验已覆盖 `working-context + active handoff/status + normalized/workstream docs`，但仍未覆盖 reducer/runtime 与 stage 组合关系
 - 未开始：
-  - CI 强校验接入
   - reducer 到 `status` / `ADR` 的更强自动压缩策略
 
 ## 本阶段关键成果
@@ -75,33 +84,48 @@
 - 2026-04-24 portability hardening establishes a cleaner cross-platform hook/Python baseline and keeps code-shape checks separate from AI governance checks.
 - `new_pro_standard` 现已和当前 harness 的关键机制层重新对齐，starter 不再遗漏 2026-04-24 portability hardening 与 metadata consistency 的核心能力
 - `index -> working-context -> stage status` 的默认恢复链路进一步去重，精确 active handoff 集合以 `working-context` 同步元数据为准
+- 共享 hook renderer + `sync_hooks_config.py` 让 root harness 终于具备了可单独验证的 hook 配置同步能力，而不是只隐含在 bootstrap 里
+- `governance + hook sync + repo-native smoke` workflow 让 Stage-00 的守门从“本地最佳努力”推进到 repo 级持续约束
+- traceability checker 现在不只检查 ID 是否存在，还会检查 `REQ <-> WS` 配对关系，以及 normalized/workstream 文档是否与 matrix 对齐
+- runtime metadata 现在已经可以在不显式传入 `REQ/WS` 环境变量时，通过 changed paths 和 workstream 模块路径自动回填 observation、session 与 reducer draft 的 metadata
+- `harness-trace-console` 已同时具备 deterministic smoke 与黑盒 DOM smoke，说明 Stage-00 的浏览器验证不再只有测试接口驱动这一条路
+- starter 现在不仅能在仓外完成 bootstrap 和 governance check，也能完成首个 pre-commit；当前 remaining portability gap 已从“链路会断”收敛为“文档与默认行为需要写清楚”
+- Karpathy-style 行为护栏已从 root repo-local skill 扩展为 starter 可复制机制，并通过 runtime session 与 handoff 模板的 assumptions / scope / success criteria / verification 位点进入后续治理提炼链路
+- hook runner、shell/PowerShell runner 与 bootstrap 现在都会优先 repo-local `.codex/.venv`，并在 fallback 时枚举候选优先 Python 3.11+，不再只接受 PATH 中第一个 runnable Python
+- archive candidate monitor 已能在不扩大 Stop hook 噪音的前提下，列出已完成或未绑定 active handoff 的归档候选；当前扫描候选为 governance surface slimming、harness portability template、new repo rehearsal
 
 ## 风险与阻塞
 
 - observation 与 session 仍依赖 best-effort hook payload，真实运行时字段可能需要继续适配
+- CI workflow 已落地，但尚未积累远端绿色运行历史；目前更像“守门能力已接入”，还不是“守门稳定性已证明”
 - reducer 目前只做轻量聚合，尚未在真实长期 observation 数据上验证压缩质量
 - 当前前端 smoke 通过 `?smoke=1` 下的 namespaced API 走 deterministic 断言，后续若要覆盖真实用户输入路径，仍需补更黑盒的浏览器回归
 - 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
-- `WS-02` 当前通过显式环境变量携带 `REQ/WS` metadata，说明链路可用，但自动化一致性仍未完全收紧
+- runtime 自动发现已覆盖 `WS-02` 的零配置路径，但 reducer/runtime artifact 与 `REQ <-> WS <-> STAGE` 组合关系仍未完全收紧
 - `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
-- repo-local `$repo-governed-coding` skill 当前只在本仓库以显式调用方式提供；是否值得提升为 starter 资产仍需更多真实任务样本
-- 当前 metadata consistency 自动化仍只覆盖 `working-context + active handoff/status` 的字段级检查，尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
-- starter 当前已同时携带 `.sh` 与 `.ps1` hook runner，且 bootstrap 会按当前宿主环境刷新 `.codex/hooks.json`；若仓库在初始化后跨 host shell 迁移，仍需重新 bootstrap 或只调整 hook 入口配置
+- `$repo-governed-coding` skill 已进入 starter，但仍必须保持显式调用；如果后续任务把它当成默认 workflow，需要再通过 `status` 或 `ADR` 明确升级，而不是让 skill 隐式取代仓库规则
+- 当前 metadata consistency 自动化已覆盖 primary truth docs 与 requirements/workstream 文档，但尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
+- starter 当前已同时携带 `.py/.sh/.ps1` hook runner，且 bootstrap/`sync_hooks_config.py` 会按当前宿主环境刷新 `.codex/hooks.json`；若仓库在初始化后跨 host shell 迁移，仍需重新 bootstrap 或只调整 hook 入口配置
+- starter copied placeholder docs 当前仍需 `--force` 才会立刻替换成新项目名，且 `AGENTS.md` 仍需人工项目化；相关说明已同步进 starter README 与 portability guide
 - active surface budget 当前仍是 warning 而不是 blocking；后续仍需观察阈值是否足够稳定
+- Python 解析修复已在当前 macOS checkout 验证；Windows PowerShell runner 已补静态 parity 测试，但本机没有 `pwsh` / `powershell`，仍需要在 Windows 宿主上做一次真实执行复演
+- archive candidate monitor 只是启发式提醒；真正归档前仍需确认候选 handoff 中的未完成项、下一步动作和风险已经进入 `status`、backlog 或 ADR
 
 ## 下一阶段重点
 
 - 用真实 observation 数据验证 reducer 输出，并明确何时应进一步压缩到 `status` 或 `ADR`
 - 判断 `WS-01` 与 `WS-02` 是否应归档为已验证样板，或继续演化成更完整的示例
-- 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
+- 观察 CI workflow 的远端稳定性，并逐步增加 runtime/reducer 侧 metadata 一致性检查
+- 在下一次 stage compression 时审查 archive candidate monitor 输出，决定是否归档已完成 handoff 并刷新 `working-context`
+- 评估 `harness-trace-console` 之外是否还需要第二条黑盒浏览器回归路径，或是否应继续让 `WS-01` 保持 deterministic-only
 - 评估是否要继续收紧“仓库初始化后跨 host shell 迁移”的体验，例如自动探测或迁移提示，而不是继续阻塞新项目起手
-- 在几个真实实现任务中显式调用 `$repo-governed-coding`，判断它是否只需保留为 repo-local skill，还是值得进入 starter / ADR
-- 若继续推进 OPEN-06，优先补 reducer/runtime 或 `REQ <-> WS` 组合关系校验，而不是直接做自由文本级语义推断
+- 在更多真实实现任务中显式调用 `$repo-governed-coding`，观察它作为 starter 可选能力是否足够稳定；若要变成默认执行策略，再补新的 status/ADR
+- 若继续推进 OPEN-06，优先补 reducer/runtime 或 `REQ <-> WS <-> STAGE` 组合关系校验，而不是直接做自由文本级语义推断
 
 ## 验收判断
 
 - 当前阶段的“runtime harness foundation”目标已在两个真实 workstream 上得到验证：三层 harness、traceability、projection boundary 和 runtime promotion 均已跑通
-- 尚未完全进入下一阶段，因为 reducer 压缩阈值、CI 接入和 metadata consistency 自动校验仍未完成；剩余问题更偏 hardening，而不是“是否可用”
+- 尚未完全进入下一阶段，因为 reducer 压缩阈值、CI 远端 burn-in、runtime metadata 自动发现和更黑盒 smoke 仍未完成；剩余问题更偏 hardening，而不是“是否可用”
 
 ## 关联文档
 
@@ -114,5 +138,9 @@
 - [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)
 - [ADR-007 Governance Surface Budget](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-007-governance-surface-budget.md)
 - [ADR-008 Cross-Platform Hooks And Code Shape Budget](../adr/ADR-008-cross-platform-hooks-and-code-shape.md)
+- [ADR-009 Behavioral Guardrails Skill And Session Snapshot](../adr/ADR-009-behavioral-guardrails-skill-and-session-snapshot.md)
+- [2026-04-30 Cross-platform Python Resolution Hardening](../changelog/2026-04-30-macos-python-resolution-hardening.md)
+- [2026-04-30 Karpathy Guardrails Harness Upgrade](../changelog/2026-04-30-karpathy-guardrails-harness-upgrade.md)
+- [2026-04-29 Harness CI Hook Sync And Traceability Hardening](../changelog/2026-04-29-harness-ci-hook-sync-and-traceability-hardening.md)
 - [2026-04-25 Harness Starter Sync And Surface Trim](../changelog/2026-04-25-harness-starter-sync-and-surface-trim.md)
 - 当前默认恢复顺序与 active handoff 集合由 `working-context` 的同步元数据维护；已被本 stage `status` / ADR 吸收的完成型 handoff 已归档

@@ -120,7 +120,8 @@ Use these rules:
 2. Git hooks and Codex hooks must resolve Python through `.codex/hooks/` runners instead of hardcoding a system Python path.
 3. Runners must verify that a Python candidate is actually runnable before using it.
 4. If `.codex/.venv` exists but is not runnable, bootstrap may rebuild it in place without touching `.codex/runtime/*`.
-5. Do not commit `.codex/.venv`.
+5. On POSIX/macOS and Windows, fallback discovery must not stop at the first system Python when a later candidate provides Python 3.11+; prefer `.codex/.venv`, active envs, `CODEX_HARNESS_PYTHON`, then the best runnable Python before falling back to the launcher Python.
+6. Do not commit `.codex/.venv`.
 
 ## Session Promotion
 
@@ -155,7 +156,7 @@ Runtime observation files under `.codex/runtime/observations/*.jsonl` are local 
 
 Use these rules:
 
-1. Reduce observations explicitly with `python3 scripts/reduce_runtime_observations.py` when local observation material should be reviewed for promotion.
+1. Reduce observations explicitly through the repo-local Python runner, for example `.codex/hooks/run_with_repo_python.sh scripts/reduce_runtime_observations.py` on POSIX/macOS or `powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/reduce_runtime_observations.py` on Windows, when local observation material should be reviewed for promotion.
 2. The default reduction order is `observations -> handoff draft -> main agent review -> status/adr if warranted`.
 3. Reducer output is a candidate artifact. It does not replace the main agent's responsibility to decide whether canonical shared docs should change.
 4. Only promote to `status` or `adr` when the reducer output has already been reviewed and the conclusion is stable beyond a single local observation batch.
@@ -169,6 +170,8 @@ Project docs follow this lifecycle:
 More explicitly:
 
 `handoff -> status -> changelog / adr -> archive old handoffs`
+
+Use `scripts/check_archive_candidates.py` through the repo-local Python runner when active handoffs reach the surface budget or before a stage compression pass. The script is warning-only: it lists candidates and reasons, but the main agent still decides whether to move files and update shared docs.
 
 ## Projection Surface Boundary
 
@@ -199,13 +202,25 @@ Use these rules:
 
 Verification is required, but it scales by project maturity.
 
-Preferred command:
+Preferred POSIX/macOS command:
 
-`python3 scripts/check_ai_governance.py`
+`.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
 
-Common supplement:
+Preferred Windows PowerShell command:
 
-`python3 scripts/check_code_shape.py --staged`
+`powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/check_ai_governance.py`
+
+Common POSIX/macOS supplement:
+
+`.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged`
+
+Common Windows PowerShell supplement:
+
+`powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/check_code_shape.py --staged`
+
+Optional context-pressure check:
+
+`.codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py`
 
 This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
 
@@ -216,7 +231,7 @@ Use manual verification only:
 - after meaningful changes, check whether docs changed
 - after doc creation, check whether `docs/ai/index.md` points to the right files
 
-Codex should still run `python3 scripts/check_ai_governance.py` whenever the repository has enough structure for the script to be meaningful.
+Codex should still run `scripts/check_ai_governance.py` through the repo-local Python runner whenever the repository has enough structure for the script to be meaningful.
 
 ### Phase 1: early active development
 
@@ -331,5 +346,5 @@ A task that materially changed the project is not fully complete until:
 1. implementation is updated
 2. affected project docs are updated if needed
 3. `docs/ai/index.md` is still accurate
-4. `python3 scripts/check_ai_governance.py` passes when applicable
-5. `python3 scripts/check_code_shape.py --staged` passes when implementation or harness code is staged
+4. `scripts/check_ai_governance.py` passes through the repo-local Python runner when applicable
+5. `scripts/check_code_shape.py --staged` passes through the repo-local Python runner when implementation or harness code is staged

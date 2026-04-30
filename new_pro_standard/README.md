@@ -9,6 +9,7 @@ It intentionally includes:
 - Git hooks
 - governance check scripts
 - runtime templates
+- optional repo-local behavioral skill
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
 - portable migration and rewrite guides
@@ -20,6 +21,19 @@ It intentionally does not include:
 - old project's real `REQDOC / REQ / WS`
 - old project's runtime session or observation artifacts
 - old project's smoke/demo apps
+
+## Optional Behavioral Guardrails
+
+This starter includes `.codex/skills/repo-governed-coding/` as an optional task-level skill adapted from the Karpathy-style coding guidelines.
+
+Use it when a non-trivial implementation, review, or refactor should explicitly record:
+
+- assumptions before coding
+- scope boundary for the diff
+- success criteria
+- verification plan
+
+It is not an always-on governance replacement. `AGENTS.md`, `docs/ai/*`, `docs/requirements/*`, hooks, and check scripts remain the default harness control plane.
 
 ## Starter Shape
 
@@ -39,12 +53,14 @@ This starter keeps that shape by:
 
 1. Copy the contents of this directory to the root of the new repository.
 2. Run `python3 scripts/bootstrap_harness.py --project-name "Your Project Name"` in the new repository root.
-3. The bootstrap step will use the current environment Python, unless overridden, to create `.codex/.venv`.
+3. The bootstrap step will create `.codex/.venv` from the current environment, an explicit override, or the best runnable Python 3.11+ candidate it can find.
 4. Dependency installation is best-effort by default, so offline bootstrap can still finish. If you need a strict dependency install, rerun with `--strict-python-deps`.
 5. Enable Git hooks with `git config core.hooksPath .githooks`.
-6. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell; then rewrite `AGENTS.md`, `docs/ai/working-context.md`, `docs/ai/plan.md`, and `.codex/harness.toml` for the new project.
-7. Import the first real `REQDOC / REQ / WS`.
-8. Start the first vertical slice implementation.
+6. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell.
+7. If you want the copied starter placeholders to be replaced with the new project name immediately, rerun bootstrap with `--force`.
+8. Rewrite `AGENTS.md` manually for the new project; bootstrap does not projectize it for you.
+9. Import the first real `REQDOC / REQ / WS`.
+10. Start the first vertical slice implementation.
 
 ## Wake The Harness
 
@@ -73,6 +89,7 @@ If the harness is awake, the expected behavior is:
 - the agent reads `AGENTS.md` and `docs/ai/index.md` first
 - shared truth stays in `docs/ai/*` and `docs/requirements/*`
 - local runtime memory goes to `.codex/runtime/*`
+- optional behavior guidance can be invoked with `$repo-governed-coding` for non-trivial coding tasks
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise
 
@@ -81,7 +98,9 @@ If the harness is awake, the expected behavior is:
 - Codex hooks and Git hooks resolve Python through the repo-local hook runners in `.codex/hooks/`.
 - The starter includes both `.sh` and `.ps1` entrypoints so Windows and POSIX workspaces can share the same harness logic.
 - `scripts/bootstrap_harness.py` refreshes `.codex/hooks.json` for the current host shell during setup, so normal new-project bootstrap no longer needs manual hook entrypoint edits.
-- Resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then `python3`, then `python`, then `py -3` when available.
+- Resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then the best PATH Python candidate, then launcher/system fallback.
+- On POSIX/macOS, PATH fallback enumerates all visible `python3` / `python` candidates and prefers Python 3.11+ so `/usr/bin/python3` does not mask pyenv or another managed Python.
+- On Windows, the PowerShell runner compares `python3`, `python`, `py -3`, and common per-user Python installs with the same Python 3.11+ preference.
 - Python candidates are probed before use, and bootstrap can rebuild a broken repo-local `.codex/.venv` in place.
 - Do not commit `.codex/.venv`.
 - `.codex/requirements.txt` currently carries optional compatibility dependencies, so a finished bootstrap does not guarantee every optional pip package is already installed.
@@ -91,6 +110,7 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_ai_docs.py`
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_ai_governance.py`
+- `scripts/check_archive_candidates.py`
 - `scripts/check_code_shape.py`
 - `scripts/reduce_runtime_observations.py`
 
@@ -98,6 +118,8 @@ The shipped Git hook runs:
 
 - `scripts/check_ai_governance.py`
 - `scripts/check_code_shape.py --staged`
+
+Run `scripts/check_archive_candidates.py` manually through the repo-local Python runner when active handoffs reach the surface budget or before a stage compression pass. It only reports archive candidates; it does not move files.
 
 ## Included Guides
 

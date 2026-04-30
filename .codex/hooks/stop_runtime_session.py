@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from runtime_traceability import resolve_runtime_traceability
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
@@ -102,13 +104,18 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
     session_type = infer_session_type(payload, session_file)
     prompt_preview = compact_text(first_value(payload, TEXT_KEYS))
     transcript_path = compact_text(first_value(payload, TRANSCRIPT_KEYS))
-    requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
-    workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
-    if not requirement_ids:
-        requirement_ids = collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
-    if not workstream_ids:
-        workstream_ids = collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
     changed_paths = git_status_paths()
+    payload_requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
+    payload_workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
+    env_requirement_ids = [] if payload_requirement_ids else collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
+    env_workstream_ids = [] if payload_workstream_ids else collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
+    requirement_ids, workstream_ids, traceability_source = resolve_runtime_traceability(
+        payload_requirement_ids,
+        payload_workstream_ids,
+        env_requirement_ids,
+        env_workstream_ids,
+        changed_paths,
+    )
     now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
     field_text = "\n".join(f"- `{path}`" for path in changed_paths[:20]) or "- 暂无检测到当前工作区变更"
@@ -129,6 +136,7 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
             "",
             f"- Requirement IDs：{format_identifiers(requirement_ids)}",
             f"- Workstream IDs：{format_identifiers(workstream_ids)}",
+            f"- Traceability Source：{traceability_source}",
             "- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 保持一致",
             "",
             "## 当前目标",
@@ -141,6 +149,13 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
                 transcript_path,
                 "由 Stop hook 自动刷新；如需更完整背景，请结合工作区状态和共享治理文档判断",
             ),
+            "",
+            "## 行为护栏快照",
+            "",
+            "- Assumptions：待主 Agent 补充本次实现前明确采用的假设",
+            "- Scope Boundary：待主 Agent 补充本次只改什么、不顺手改什么",
+            "- Success Criteria：待主 Agent 补充可验证的完成条件",
+            "- Verification Plan：待主 Agent 补充收尾前应运行的检查、测试或 smoke",
             "",
             "## 已做动作",
             "",
@@ -188,6 +203,7 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
             "",
             bullet(transcript_path, "未检测到 transcript_path"),
             bullet(compact_text(str(WORKING_CONTEXT_PATH)), "未检测到 working-context 路径"),
+            bullet(traceability_source, "未检测到 traceability source"),
         ]
     ) + "\n"
 

@@ -80,48 +80,104 @@ function Test-PythonCommand {
         $Candidate
     )
 
+    return ($null -ne (Get-PythonVersionScore -Candidate $Candidate))
+}
+
+function Get-PythonVersionScore {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Candidate
+    )
+
     try {
-        & $Candidate.Command @($Candidate.Args) -c "import sys" *> $null
-        return ($LASTEXITCODE -eq 0)
+        $output = & $Candidate.Command @($Candidate.Args) -c "import sys; v=sys.version_info; print(v[0] * 1000000 + v[1] * 1000 + v[2])" 2> $null
+        if ($LASTEXITCODE -ne 0) {
+            return $null
+        }
+        $rendered = ($output | Select-Object -First 1).ToString().Trim()
+        if ($rendered -match '^\d+$') {
+            return [int]$rendered
+        }
+        return $null
     } catch {
-        return $false
+        return $null
     }
 }
 
-function Resolve-PythonCommand {
-    $candidates = @()
+function Select-BestPythonCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object[]]$Candidates
+    )
 
-    $candidates += Get-PythonCandidatesFromPrefix -Prefix (Join-Path $Root ".codex\.venv")
+    $preferredMinScore = 3 * 1000000 + 11 * 1000
+    $best = $null
+    $bestScore = -1
+    $bestIsPreferred = $false
+
+    foreach ($candidate in $Candidates) {
+        $score = Get-PythonVersionScore -Candidate $candidate
+        if ($null -eq $score) {
+            continue
+        }
+
+        $isPreferred = ($score -ge $preferredMinScore)
+        if (($isPreferred -and -not $bestIsPreferred) -or (($isPreferred -eq $bestIsPreferred) -and ($score -gt $bestScore))) {
+            $best = $candidate
+            $bestScore = $score
+            $bestIsPreferred = $isPreferred
+        }
+    }
+
+    return $best
+}
+
+function Resolve-PythonCommand {
+    $prefixCandidates = @()
+
+    $prefixCandidates += Get-PythonCandidatesFromPrefix -Prefix (Join-Path $Root ".codex\.venv")
 
     foreach ($envVar in @("VIRTUAL_ENV", "CONDA_PREFIX")) {
         $prefix = [Environment]::GetEnvironmentVariable($envVar)
         if (-not [string]::IsNullOrWhiteSpace($prefix)) {
-            $candidates += Get-PythonCandidatesFromPrefix -Prefix $prefix
+            $prefixCandidates += Get-PythonCandidatesFromPrefix -Prefix $prefix
+        }
+    }
+
+    foreach ($candidate in $prefixCandidates) {
+        if (Test-PythonCommand -Candidate $candidate) {
+            return $candidate
         }
     }
 
     if ($env:CODEX_HARNESS_PYTHON) {
-        $candidates += (New-PythonCommand -Command $env:CODEX_HARNESS_PYTHON)
+        $explicit = New-PythonCommand -Command $env:CODEX_HARNESS_PYTHON
+        if (Test-PythonCommand -Candidate $explicit) {
+            return $explicit
+        }
     }
 
-    try {
-        $python = Get-Command python -ErrorAction Stop
-        $candidates += (New-PythonCommand -Command $python.Source)
-    } catch {
+    $fallbackCandidates = @()
+
+    foreach ($name in @("python3", "python")) {
+        try {
+            $python = Get-Command $name -ErrorAction Stop
+            $fallbackCandidates += (New-PythonCommand -Command $python.Source)
+        } catch {
+        }
     }
 
     try {
         $py = Get-Command py -ErrorAction Stop
-        $candidates += (New-PythonCommand -Command $py.Source -Args @("-3"))
+        $fallbackCandidates += (New-PythonCommand -Command $py.Source -Args @("-3"))
     } catch {
     }
 
-    $candidates += Get-CommonWindowsPythonCandidates
+    $fallbackCandidates += Get-CommonWindowsPythonCandidates
 
-    foreach ($candidate in $candidates) {
-        if (Test-PythonCommand -Candidate $candidate) {
-            return $candidate
-        }
+    $bestFallback = Select-BestPythonCommand -Candidates $fallbackCandidates
+    if ($null -ne $bestFallback) {
+        return $bestFallback
     }
 
     throw "ERROR: could not determine a runnable Python executable for harness scripts"

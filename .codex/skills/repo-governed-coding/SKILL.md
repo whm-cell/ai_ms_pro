@@ -9,7 +9,7 @@ description: Behavioral coding guidelines for this repository that combine Karpa
 
 Use this skill as a repo-local constraint layer for governed code changes in this repository. Keep the four Karpathy-style principles, then extend them with this repo's requirements for doc sync, traceability, verification, and primary truth surface boundaries.
 
-Inspired by Karpathy-style coding guidelines, adapted for this repo's Codex-first harness.
+Inspired by the MIT-licensed `forrestchang/andrej-karpathy-skills` project and adapted for this repo's Codex-first harness.
 
 ## Workflow
 
@@ -22,6 +22,8 @@ Inspired by Karpathy-style coding guidelines, adapted for this repo's Codex-firs
 - State assumptions explicitly instead of silently choosing an interpretation.
 - Surface tradeoffs when there is a simpler or narrower path.
 - Convert the request into verifiable checks before implementing.
+- State the scope boundary: what will be changed and what will be left alone.
+- If ambiguity would change the implementation, ask before writing code.
 
 3. Implement the smallest direct change.
 - Keep code simple and keep the diff narrow.
@@ -61,7 +63,7 @@ Inspired by Karpathy-style coding guidelines, adapted for this repo's Codex-firs
 - Define success as a checkable outcome.
 - Prefer tests or smoke checks when they exist.
 - Verify before declaring completion.
-- Summarize what changed, what was verified, and what remains.
+- Summarize changed files, checks run, and remaining risk.
 
 ## Repo-Specific Extensions
 

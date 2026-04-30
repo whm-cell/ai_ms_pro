@@ -3,7 +3,10 @@ required_ai_docs = [
   "AGENTS.md",
   "docs/ai/plan.md",
   "docs/ai/working-context.md",
+  "docs/ai/status/stage-00-runtime-harness-foundation.md",
+  "docs/ai/harness-open-items.md",
 ]
 required_requirements_docs = [
+  "docs/requirements/index.md",
   "docs/requirements/traceability-matrix.md",
 ]

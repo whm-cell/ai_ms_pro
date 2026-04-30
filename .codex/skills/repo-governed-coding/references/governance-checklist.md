@@ -10,6 +10,13 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 - `docs/requirements/index.md` when the task is requirement-driven
 - `docs/requirements/traceability-matrix.md` when the task already carries `REQ/WS` bindings
 
+## Behavioral Snapshot
+
+- Assumptions: state what is known and what is being assumed.
+- Scope Boundary: state what will be changed and what will be left alone.
+- Success Criteria: state what observable result proves completion.
+- Verification Plan: list the checks, tests, or smoke commands to run.
+
 ## Document Impact Check
 
 - Update or create `handoff` when:
@@ -53,6 +60,7 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 ## Verification Finish Line
 
 - Run `python3 scripts/check_ai_governance.py`.
+- Run `python3 scripts/check_code_shape.py --staged` when implementation or harness code is staged.
 - Run any task-specific smoke or test commands needed for the request.
 - Confirm that new active docs are present in `docs/ai/index.md`.
 - Confirm that `docs/ai/working-context.md` sync metadata reflects new active `handoff` or `status` files when they changed.

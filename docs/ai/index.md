@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-04-25
-当前状态：Stage-00 已补齐 starter 机制层同步；默认治理面进一步收敛为“稳定路由 + working-context 同步元数据”
+更新时间：2026-04-30
+当前状态：Stage-00 已补齐 hook sync、governance + smoke workflow、更深一层的 traceability alignment、runtime metadata 自动发现、首条黑盒 smoke、Karpathy-style 行为护栏 starter 化、跨平台 Python 解析优先级与 archive candidate monitor
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -46,7 +46,8 @@
 - 当前 stage status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
-- 最新 changelog：[2026-04-25 Harness Starter Sync And Surface Trim](./changelog/2026-04-25-harness-starter-sync-and-surface-trim.md)
+- 最新 ADR：[ADR-009 Behavioral Guardrails Skill And Session Snapshot](./adr/ADR-009-behavioral-guardrails-skill-and-session-snapshot.md)
+- 最新 changelog：[2026-04-30 Archive Candidate Monitor](./changelog/2026-04-30-archive-candidate-monitor.md)
 
 ## 归档入口
 
