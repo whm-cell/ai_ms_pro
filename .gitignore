@@ -5,3 +5,4 @@
 !.codex/runtime/sessions/_template.md
 .codex/runtime/observations/*
 !.codex/runtime/observations/README.md
+**/*/__pycache__/

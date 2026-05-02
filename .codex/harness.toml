@@ -10,3 +10,16 @@ required_requirements_docs = [
   "docs/requirements/index.md",
   "docs/requirements/traceability-matrix.md",
 ]
+
+[context_surface]
+active_handoff_budget = 5
+archive_candidate_min_score = 3
+warn_at_budget = true
+
+[context_budget]
+default_surface_token_budget = 8500
+always_on_doc_line_budget = 300
+skill_description_word_budget = 30
+skill_body_line_budget = 400
+adr_count_budget = 15
+mcp_server_budget = 10

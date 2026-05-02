@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -9,6 +10,8 @@ from collections import defaultdict
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
+
+from harness_config import ContextSurfaceConfig, HarnessConfigError, load_harness_config
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,8 +54,6 @@ DIFF_WARNING_EXCLUDE_FILES = {
     ROOT / "AGENTS.md",
 }
 ACTIVE_HANDOFF_STATUS_WARNING_THRESHOLD = 3
-ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD = 5
-WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD = 5
 PLAN_STATE_LABELS = (
     "项目状态：",
     "当前状态：",
@@ -91,12 +92,19 @@ REQDOC_ID_PATTERN = re.compile(r"REQDOC-\d+")
 REQ_ID_PATTERN = re.compile(r"REQ-\d+")
 WS_ID_PATTERN = re.compile(r"WS-\d+")
 STAGE_TOKEN_PATTERN = re.compile(r"stage-\d+", re.IGNORECASE)
+RUNTIME_TRACEABILITY_SCAN_LIMIT = 20
 
 
 def main() -> int:
     failures = []
     errors = []
     warnings = []
+    context_surface = None
+
+    try:
+        context_surface = load_harness_config(ROOT).context_surface
+    except HarnessConfigError as exc:
+        errors.append(str(exc))
 
     changed_paths = load_changed_paths()
     if changed_paths:
@@ -142,11 +150,13 @@ def main() -> int:
             "Active handoffs have accumulated without a stage status summary. "
             f"Current active handoff count: {len(active_handoffs)}."
         )
-    if len(active_handoffs) > ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD:
-        warnings.append(
-            "Active handoff count exceeds the sustainable default surface budget "
-            f"({len(active_handoffs)} > {ACTIVE_HANDOFF_BUDGET_WARNING_THRESHOLD}). "
-            "Archive or compress handoffs already absorbed by stage status/ADR."
+    if context_surface is not None:
+        warnings.extend(
+            context_surface_budget_warnings(
+                count=len(active_handoffs),
+                label="Active handoff count",
+                config=context_surface,
+            )
         )
 
     freshness_target = latest_doc(active_handoffs + status_docs)
@@ -163,11 +173,13 @@ def main() -> int:
     sync_errors, sync_warnings = validate_working_context_sync_metadata(
         active_handoffs=active_handoffs,
         status_docs=status_docs,
+        context_surface=context_surface,
     )
     errors.extend(sync_errors)
     warnings.extend(sync_warnings)
 
     validate_requirements_traceability_alignment(errors)
+    validate_runtime_traceability_artifact_alignment(warnings)
 
     for path in active_handoffs:
         validate_traceability_metadata_doc(
@@ -430,6 +442,28 @@ def parse_csv_values(text: str) -> list[str]:
     return [part.strip() for part in re.split(r"[，,]", text) if part.strip()]
 
 
+def context_surface_budget_warnings(
+    *,
+    count: int,
+    label: str,
+    config: ContextSurfaceConfig,
+) -> list[str]:
+    budget = config.active_handoff_budget
+    over_budget = count > budget
+    at_budget = config.warn_at_budget and count >= budget
+    if not over_budget and not at_budget:
+        return []
+
+    relation = ">=" if count == budget else ">"
+    return [
+        (
+            f"{label} has reached the configured default surface budget "
+            f"({count} {relation} {budget}). Run scripts/check_archive_candidates.py "
+            "and archive or compress handoffs already absorbed by stage status/ADR."
+        )
+    ]
+
+
 def ordered_unique(items: list[str]) -> list[str]:
     seen: set[str] = set()
     ordered: list[str] = []
@@ -479,7 +513,7 @@ def parse_matrix_row(raw_line: str) -> dict[str, str] | None:
         "source_id": source_id,
         "requirement_id": requirement_id,
         "workstream_id": workstream_id,
-        "stage_token": stage_token,
+        "stage_token": stage_token or "",
     }
 
 
@@ -649,6 +683,63 @@ def validate_requirement_workstream_pairings(
             f"{owner_label} declares Workstream IDs [{rendered}] that do not map to any of its "
             f"declared Requirement IDs [{requirements_rendered}] in "
             "docs/requirements/traceability-matrix.md."
+        )
+
+
+def stage_alignment_mismatches(
+    *,
+    rows: list[dict[str, str]],
+    requirement_ids: list[str],
+    workstream_ids: list[str],
+    current_stage: str,
+) -> list[str]:
+    normalized_stage = normalize_stage_token(current_stage)
+    if not normalized_stage or not requirement_ids or not workstream_ids:
+        return []
+
+    requirement_set = set(requirement_ids)
+    workstream_set = set(workstream_ids)
+    mismatches: list[str] = []
+    for row in rows:
+        requirement_id = row.get("requirement_id", "")
+        workstream_id = row.get("workstream_id", "")
+        if requirement_id not in requirement_set or workstream_id not in workstream_set:
+            continue
+        matrix_stage = row.get("stage_token", "")
+        if matrix_stage != normalized_stage:
+            rendered_stage = matrix_stage or "未绑定"
+            mismatches.append(f"{requirement_id}/{workstream_id}={rendered_stage}")
+    return mismatches
+
+
+def validate_stage_traceability_alignment(
+    *,
+    requirement_ids: list[str],
+    workstream_ids: list[str],
+    current_stage: str | None,
+    owner_label: str,
+    errors: list[str],
+) -> None:
+    if not current_stage:
+        return
+    normalized_stage = normalize_stage_token(current_stage)
+    if not normalized_stage:
+        errors.append(f"{owner_label} current stage is empty.")
+        return
+
+    catalog = load_traceability_catalog()
+    rows: list[dict[str, str]] = catalog["rows"]  # type: ignore[assignment]
+    mismatches = stage_alignment_mismatches(
+        rows=rows,
+        requirement_ids=requirement_ids,
+        workstream_ids=workstream_ids,
+        current_stage=normalized_stage,
+    )
+    if mismatches:
+        rendered = ", ".join(mismatches)
+        errors.append(
+            f"{owner_label} declares stage {normalized_stage}, but these REQ/WS bindings have "
+            f"different stages in docs/requirements/traceability-matrix.md: {rendered}"
         )
 
 
@@ -893,6 +984,7 @@ def validate_working_context_sync_metadata(
     *,
     active_handoffs: list[Path],
     status_docs: list[Path],
+    context_surface: ContextSurfaceConfig | None,
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -1035,11 +1127,13 @@ def validate_working_context_sync_metadata(
             "working-context.md is older than one of its bound Active Handoff Sources, latest: "
             f"{newest.relative_to(ROOT)}."
         )
-    if len(bound_handoff_paths) > WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD:
-        warnings.append(
-            "working-context sync metadata binds too many active handoffs "
-            f"({len(bound_handoff_paths)} > {WORKING_CONTEXT_HANDOFF_BUDGET_WARNING_THRESHOLD}). "
-            "Keep the default recovery surface small and move absorbed detail to status/archive."
+    if context_surface is not None:
+        warnings.extend(
+            context_surface_budget_warnings(
+                count=len(bound_handoff_paths),
+                label="working-context sync metadata bound handoff count",
+                config=context_surface,
+            )
         )
 
     validate_identifier_field(
@@ -1078,6 +1172,13 @@ def validate_working_context_sync_metadata(
         validate_requirement_workstream_pairings(
             requirement_ids=requirement_ids,
             workstream_ids=workstream_ids,
+            owner_label="working-context sync metadata",
+            errors=errors,
+        )
+        validate_stage_traceability_alignment(
+            requirement_ids=requirement_ids,
+            workstream_ids=workstream_ids,
+            current_stage=current_stage,
             owner_label="working-context sync metadata",
             errors=errors,
         )
@@ -1140,6 +1241,123 @@ def validate_working_context_sync_metadata(
                 )
 
     return errors, warnings
+
+
+def validate_runtime_traceability_artifact_alignment(warnings: list[str]) -> None:
+    if not WORKING_CONTEXT_PATH.exists():
+        return
+
+    sync_metadata = parse_working_context_sync_metadata()
+    current_stage = sync_metadata.get("Current Stage")
+    if not isinstance(current_stage, str) or not current_stage.strip():
+        return
+
+    catalog = load_traceability_catalog()
+    rows: list[dict[str, str]] = catalog["rows"]  # type: ignore[assignment]
+    for owner_label, requirement_ids, workstream_ids in runtime_traceability_records():
+        mismatches = stage_alignment_mismatches(
+            rows=rows,
+            requirement_ids=requirement_ids,
+            workstream_ids=workstream_ids,
+            current_stage=current_stage,
+        )
+        if not mismatches:
+            continue
+        rendered = ", ".join(mismatches)
+        warnings.append(
+            f"{owner_label} carries REQ/WS metadata outside current stage "
+            f"{normalize_stage_token(current_stage)}: {rendered}"
+        )
+
+
+def runtime_traceability_records() -> list[tuple[str, list[str], list[str]]]:
+    records: list[tuple[str, list[str], list[str]]] = []
+    records.extend(runtime_session_traceability_records())
+    records.extend(runtime_observation_traceability_records())
+    return records
+
+
+def runtime_session_traceability_records() -> list[tuple[str, list[str], list[str]]]:
+    if not RUNTIME_SESSION_DIR.exists():
+        return []
+
+    records: list[tuple[str, list[str], list[str]]] = []
+    session_paths = sorted(RUNTIME_SESSION_DIR.glob("*.md"), key=lambda path: path.stat().st_mtime)
+    for path in session_paths[-RUNTIME_TRACEABILITY_SCAN_LIMIT:]:
+        if path.name.startswith("_") or path.name == "README.md":
+            continue
+        metadata = parse_traceability_metadata(path)
+        requirement_ids, requirements_unbound = metadata_identifier_tokens(
+            metadata,
+            "Requirement IDs",
+            REQ_ID_PATTERN,
+        )
+        workstream_ids, workstreams_unbound = metadata_identifier_tokens(
+            metadata,
+            "Workstream IDs",
+            WS_ID_PATTERN,
+        )
+        if requirements_unbound or workstreams_unbound or not requirement_ids or not workstream_ids:
+            continue
+        records.append((f"runtime session {path.relative_to(ROOT)}", requirement_ids, workstream_ids))
+    return records
+
+
+def runtime_observation_traceability_records() -> list[tuple[str, list[str], list[str]]]:
+    if not RUNTIME_OBSERVATION_DIR.exists():
+        return []
+
+    entries: list[tuple[float, Path, dict[str, object]]] = []
+    for path in sorted(RUNTIME_OBSERVATION_DIR.glob("*.jsonl")):
+        if path.name.startswith("_"):
+            continue
+        for record in load_runtime_observation_records(path):
+            timestamp = str(record.get("timestamp") or "")
+            sort_key = path.stat().st_mtime
+            if timestamp:
+                sort_key += 0.001
+            entries.append((sort_key, path, record))
+
+    records: list[tuple[str, list[str], list[str]]] = []
+    for _, path, record in entries[-RUNTIME_TRACEABILITY_SCAN_LIMIT:]:
+        requirement_ids = identifier_list_from_json(record.get("requirement_ids"), REQ_ID_PATTERN)
+        workstream_ids = identifier_list_from_json(record.get("workstream_ids"), WS_ID_PATTERN)
+        if not requirement_ids or not workstream_ids:
+            continue
+        session_id = str(record.get("session_id") or "unknown-session")
+        records.append(
+            (
+                f"runtime observation {path.relative_to(ROOT)} session {session_id}",
+                requirement_ids,
+                workstream_ids,
+            )
+        )
+    return records
+
+
+def load_runtime_observation_records(path: Path) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    for raw_line in load_text(path).splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            records.append(payload)
+    return records
+
+
+def identifier_list_from_json(value: object, pattern: re.Pattern[str]) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    tokens: list[str] = []
+    for item in value:
+        if isinstance(item, str) and pattern.fullmatch(item.strip()):
+            tokens.append(item.strip())
+    return ordered_unique(tokens)
 
 
 def load_changed_paths() -> list[Path]:

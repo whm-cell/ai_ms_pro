@@ -32,14 +32,14 @@
 2. 导入首个 `REQDOC / REQ / WS`。
 3. 实现第一个可验证的垂直切片。
 4. 跑通 runtime observation / session / reducer / handoff-status 链路。
-5. 默认将共享恢复面保持在 `index -> working-context -> status -> <=5 active handoff`。
+5. 默认将共享恢复面保持在 `index -> working-context -> status -> configured active handoff budget`。
 
 ## 当前风险与阻塞
 
 - 首个真实场景尚未导入，当前还不能证明 traceability 链路可用。
 - 若把旧项目共享真相直接复制过来，会污染新项目控制面。
 - 若未先初始化 `index / plan / working-context / traceability-matrix`，`Stop` hook 可能在首轮工作后直接给出治理失败。
-- active handoff 默认预算应保持在 `<=5`；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀。
+- active handoff 默认预算由 `.codex/harness.toml` 控制；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀。
 
 ## 下一次会话先读
 
@@ -54,7 +54,7 @@
 
 - 项目采用 `Runtime Harness + Governance Harness + Verification Harness` 三层分工。
 - `.codex/runtime/` 只保留本地恢复原料，不替代 `docs/ai/` 与 `docs/requirements/` 的共享治理真相。
-- 默认共享恢复面保持轻量：`index -> working-context -> status -> <=5 active handoff`。
+- 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`。
 - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态。
 - `.codex/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本。
 

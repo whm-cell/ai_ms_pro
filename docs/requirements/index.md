@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-04-29
-当前状态：已导入两个真实验证场景，并把 traceability matrix -> normalized/workstream 对齐纳入 governance check
+更新时间：2026-04-30
+当前状态：已导入两个真实验证场景，并把 traceability matrix -> normalized/workstream 对齐、WS-01 黑盒 smoke 证据与当前 stage alignment 纳入治理检查
 
 ## 目的
 

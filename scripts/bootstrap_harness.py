@@ -288,6 +288,19 @@ def render_harness_config() -> str:
         required_requirements_docs = [
           "docs/requirements/traceability-matrix.md",
         ]
+
+        [context_surface]
+        active_handoff_budget = 5
+        archive_candidate_min_score = 3
+        warn_at_budget = true
+
+        [context_budget]
+        default_surface_token_budget = 6500
+        always_on_doc_line_budget = 300
+        skill_description_word_budget = 30
+        skill_body_line_budget = 400
+        adr_count_budget = 15
+        mcp_server_budget = 10
         """
     )
 
@@ -449,28 +462,27 @@ def render_ai_index(project_name: str, stage_label: str) -> str:
 
         `.codex/runtime/` 下的 session 与 observation 文件属于本地 runtime harness，不纳入默认共享阅读面，也不作为项目共享真相。
 
-        ## 默认阅读顺序
+        ## 默认短链路
 
         1. [项目规则 AGENTS.md](../../AGENTS.md)
         2. [当前工作上下文](./working-context.md)
-        3. [需求文档入口索引](../requirements/index.md)
-        4. [项目计划](./plan.md)
-        5. [Harness 可迁移清单](./harness-portability-guide.md)
-        6. [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
-        7. [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
 
-        ## 默认治理控制面
+        任务进入哪个更深入口，由 `AGENTS.md` 的 Task Discovery Protocol 判断。简单任务默认停在短链路；requirements、plan、handoff、ADR 与 archive 都是按需入口。
 
-        - [项目规则 AGENTS.md](../../AGENTS.md)
-        - [当前工作上下文](./working-context.md)
-        - [需求文档入口索引](../requirements/index.md)
-        - [项目计划](./plan.md)
+        用户通常不需要手动标注任务类型。`按简单任务处理`、`按复杂任务处理`、`这是 0-1 阶段任务`、`不要读 archive`、`需要深挖历史` 只是可选覆盖指令，用来纠正或收窄 Agent 的默认判断。
+
+        ## 按需深入入口
+
+        - [需求文档入口索引](../requirements/index.md)：需求驱动、traceability 或 0-1 stage 任务再进入
+        - [项目计划](./plan.md)：阶段目标、范围与验收框架需要确认时再进入
         - [Harness 可迁移清单](./harness-portability-guide.md)
+        - [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
+        - [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
         - [handoffs/active](./handoffs/active)
         - [status](./status)
         - [changelog](./changelog)
         - [adr](./adr)
-        - 默认 active handoff 预算：`<=5`。超过预算时优先压缩到 `status` 或归档，而不是继续扩张默认恢复面。
+        - 默认 active handoff 预算由 `.codex/harness.toml` 的 `context_surface.active_handoff_budget` 控制，初始值为 `5`。达到预算时优先压缩到 `status` 或归档，而不是继续扩张默认恢复面。
 
         ## 当前阶段占位
 
@@ -627,14 +639,14 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         2. 导入首个 `REQDOC / REQ / WS`
         3. 实现第一个可验证的垂直切片
         4. 跑通 runtime observation / session / reducer / handoff-status 链路
-        5. 默认将共享恢复面保持在 `index -> working-context -> status -> <=5 active handoff`
+        5. 默认将共享恢复面保持在 `index -> working-context -> status -> configured active handoff budget`
 
         ## 当前风险与阻塞
 
         - 首个真实场景尚未导入，当前还不能证明 traceability 链路可用
         - 若把旧项目共享真相直接复制过来，会污染新项目控制面
         - 若未先初始化 index / plan / working-context / traceability-matrix，Stop hook 可能在首轮工作后直接给出治理失败
-        - active handoff 默认预算应保持在 `<=5`；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀
+        - active handoff 默认预算由 `.codex/harness.toml` 控制；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀
 
         ## 下一次会话先读
 
@@ -650,7 +662,7 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         - 项目采用 `AGENTS.md + Codex Stop hook + 校验脚本` 的治理方式
         - 项目采用 `docs/requirements/` 与 `docs/ai/` 分层管理需求与执行上下文
         - `.codex/runtime/` 只保存本地 session/observation 原料，不替代 `docs/ai/` 共享治理文档
-        - 默认共享恢复面保持轻量：`index -> working-context -> status -> <=5 active handoff`
+        - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`
         - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态
         - `.codex/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本
 

@@ -1,6 +1,6 @@
 ---
 name: repo-governed-coding
-description: Optional behavioral coding guardrails for repositories using this Codex-first harness. Use when implementing, reviewing, or refactoring code and the task benefits from explicit assumptions, minimal diffs, document impact checks, REQ/WS traceability, verification closeout, and projection-surface boundaries. Prefer explicit invocation via `$repo-governed-coding`; do not treat it as an always-on replacement for `AGENTS.md`.
+description: Optional coding guardrails for governed repo work. Use for non-trivial implementation, review, or refactor tasks needing assumptions, minimal diffs, doc sync, REQ/WS traceability, and verification.
 ---
 
 # Repo Governed Coding

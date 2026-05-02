@@ -1,6 +1,6 @@
 ---
 name: repo-governed-coding
-description: Behavioral coding guidelines for this repository that combine Karpathy-style implementation discipline with Codex-first governance rules. Use when implementing, reviewing, or refactoring code in `ai_ms_pro` and you need explicit guardrails for assumptions, minimal diffs, document impact checks, `REQ/WS` traceability, verification closeout, and projection-surface boundaries. Prefer explicit invocation via `$repo-governed-coding`; do not treat it as an always-on replacement for `AGENTS.md`.
+description: Optional coding guardrails for governed repo work. Use for non-trivial implementation, review, or refactor tasks needing assumptions, minimal diffs, doc sync, REQ/WS traceability, and verification.
 ---
 
 # Repo Governed Coding

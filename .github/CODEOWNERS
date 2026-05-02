@@ -1,0 +1,10 @@
+# Harness control-plane ownership.
+* @whm-cell
+
+AGENTS.md @whm-cell
+.codex/** @whm-cell
+.github/workflows/** @whm-cell
+scripts/check_* @whm-cell
+scripts/harness_config.py @whm-cell
+docs/ai/** @whm-cell
+docs/requirements/** @whm-cell

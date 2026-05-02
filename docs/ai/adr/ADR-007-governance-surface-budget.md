@@ -18,7 +18,7 @@
 - `docs/ai/working-context.md` 定位为“同步元数据 + 增量真相 + 下一次会话先读”，不再维护第二套全量入口清单或阶段级决策总表。
 - stage `status` 继续承担阶段压缩结论，但 `## 关联文档` 只保留稳定路由入口与当前仍活跃的文档集合，不再重复展开完整已吸收清单。
 - 完成型 handoff 一旦已被 stage `status` 或 ADR 吸收，且不再存在默认 resume 价值，就移入 `docs/ai/handoffs/archive/`。
-- 新增默认 active handoff 预算：`5`。`scripts/check_ai_governance.py` 对“active handoff 总量”与“working-context 绑定的 active handoff 数量”超预算给出 warning。
+- 新增默认 active handoff 预算：`5`。2026-04-30 起该默认值由 `.codex/harness.toml` 的 `[context_surface]` 配置承载；`scripts/check_ai_governance.py` 对“active handoff 总量”与“working-context 绑定的 active handoff 数量”达到或超过配置预算给出 warning。
 - 本轮预算先作为 warning，而不是 blocking；是否升级为阻断，取决于后续误报率与阶段复杂度。
 
 ## 备选方案

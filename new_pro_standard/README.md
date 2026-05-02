@@ -9,6 +9,7 @@ It intentionally includes:
 - Git hooks
 - governance check scripts
 - runtime templates
+- project skill lifecycle template
 - optional repo-local behavioral skill
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
@@ -35,17 +36,23 @@ Use it when a non-trivial implementation, review, or refactor should explicitly 
 
 It is not an always-on governance replacement. `AGENTS.md`, `docs/ai/*`, `docs/requirements/*`, hooks, and check scripts remain the default harness control plane.
 
+## Project Skill Lifecycle
+
+The starter includes `docs/ai/templates/project-skill-lifecycle.md` for architecture, style, and dependency skills.
+
+Use it only when a project-specific skill is being created or changed. It keeps volatile 0-1 project constraints out of the default context while still requiring durable decisions to be promoted to `status`, ADR, requirements, or checks.
+
 ## Starter Shape
 
 The default shared recovery surface is intentionally slim:
 
-`docs/ai/index.md -> docs/ai/working-context.md -> latest stage status -> <=5 active handoff`
+`docs/ai/index.md -> docs/ai/working-context.md -> latest stage status -> configured active handoff budget`
 
 This starter keeps that shape by:
 
 - treating `index.md` as a stable router instead of a full stage report
 - treating `working-context.md` as incremental truth instead of a second directory view
-- warning when active handoffs or bound handoffs grow past the default budget
+- warning when active handoffs or bound handoffs reach the configured default budget
 - expecting absorbed handoffs to move into `docs/ai/handoffs/archive/`
 - keeping exact active handoff bindings in `docs/ai/working-context.md` sync metadata instead of duplicating them across multiple router docs
 
@@ -87,9 +94,12 @@ Recommended first prompt:
 If the harness is awake, the expected behavior is:
 
 - the agent reads `AGENTS.md` and `docs/ai/index.md` first
+- the agent classifies substantial tasks and selects the matching reading profile before expanding context
+- users usually do not need to label task type manually; optional override phrases are `按简单任务处理`, `按复杂任务处理`, `这是 0-1 阶段任务`, `不要读 archive`, and `需要深挖历史`
 - shared truth stays in `docs/ai/*` and `docs/requirements/*`
 - local runtime memory goes to `.codex/runtime/*`
 - optional behavior guidance can be invoked with `$repo-governed-coding` for non-trivial coding tasks
+- project architecture/style/dependency skill guidance stays in the lifecycle template until a real project chooses to create a concrete skill
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise
 
@@ -111,6 +121,7 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_ai_governance.py`
 - `scripts/check_archive_candidates.py`
+- `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py`
 - `scripts/reduce_runtime_observations.py`
 
@@ -119,11 +130,14 @@ The shipped Git hook runs:
 - `scripts/check_ai_governance.py`
 - `scripts/check_code_shape.py --staged`
 
-Run `scripts/check_archive_candidates.py` manually through the repo-local Python runner when active handoffs reach the surface budget or before a stage compression pass. It only reports archive candidates; it does not move files.
+Run `scripts/check_archive_candidates.py` manually through the repo-local Python runner when active handoffs reach the `.codex/harness.toml` surface budget or before a stage compression pass. It only reports archive candidates; it does not move files.
+
+Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
 
 ## Included Guides
 
 - `docs/ai/harness-portability-guide.md`
+- `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/ai/new-project-agents-rewrite-guide.md`
 - `docs/ai/traditional-project-harness-kickoff.md`
 - `docs/requirements/v2-requirements-splitting-template.md`
@@ -132,5 +146,5 @@ Run `scripts/check_archive_candidates.py` manually through the repo-local Python
 
 - `scripts/bootstrap_harness.py` initializes the minimal shared control plane.
 - It is safe to rerun after the initial copy.
-- The generated starter docs follow the slim governance surface budget by default.
+- The generated starter docs follow the slim governance surface budget from `.codex/harness.toml` by default.
 - The bootstrap flow supports Windows and POSIX venv layouts, refreshes hook config for the current host shell, and keeps optional dependency installation best-effort unless `--strict-python-deps` is requested.

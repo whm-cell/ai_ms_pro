@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-import ast
 import re
 import sys
 from pathlib import Path
 
-try:
-    import tomllib
-except ModuleNotFoundError:
-    tomllib = None
+from harness_config import HarnessConfigError, load_harness_config, resolve_repo_paths
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,17 +14,8 @@ AI_DIR = ROOT / "docs" / "ai"
 INDEX_PATH = AI_DIR / "index.md"
 REQ_DIR = ROOT / "docs" / "requirements"
 REQ_INDEX_PATH = REQ_DIR / "index.md"
-HARNESS_CONFIG_PATH = ROOT / ".codex" / "harness.toml"
 
 LINK_RE = re.compile(r"\[[^\]]+\]\((/[^)]+)\)")
-DEFAULT_REQUIRED_AI_DOCS = [
-    "AGENTS.md",
-    "docs/ai/plan.md",
-    "docs/ai/working-context.md",
-]
-DEFAULT_REQUIRED_REQ_DOCS = [
-    "docs/requirements/traceability-matrix.md",
-]
 
 
 def load_text(path: Path) -> str:
@@ -66,74 +53,6 @@ def is_doc_or_anchor_referenced(index_text: str, path: Path, anchor_tokens: tupl
     return any(token in index_text for token in anchor_tokens)
 
 
-def resolve_required_docs(entries: list[str], *, config_label: str) -> list[Path]:
-    resolved: list[Path] = []
-    for entry in entries:
-        path = (ROOT / entry).resolve()
-        try:
-            path.relative_to(ROOT)
-        except ValueError:
-            raise SystemExit(f"ERROR: {config_label} path escapes repository root: {entry}")
-        resolved.append(path)
-    return resolved
-
-
-def load_harness_config() -> tuple[list[Path], list[Path]]:
-    required_ai_entries = list(DEFAULT_REQUIRED_AI_DOCS)
-    required_req_entries = list(DEFAULT_REQUIRED_REQ_DOCS)
-
-    if HARNESS_CONFIG_PATH.exists():
-        raw_text = HARNESS_CONFIG_PATH.read_text(encoding="utf-8")
-        try:
-            data = load_toml_config(raw_text)
-        except ValueError as exc:
-            raise SystemExit(f"ERROR: invalid TOML in {HARNESS_CONFIG_PATH.relative_to(ROOT)}: {exc}") from exc
-        checks = data.get("checks", {})
-        if isinstance(checks, dict):
-            ai_entries = checks.get("required_ai_docs")
-            req_entries = checks.get("required_requirements_docs")
-            if isinstance(ai_entries, list) and all(isinstance(item, str) for item in ai_entries):
-                required_ai_entries = ai_entries
-            if isinstance(req_entries, list) and all(isinstance(item, str) for item in req_entries):
-                required_req_entries = req_entries
-
-    return (
-        resolve_required_docs(required_ai_entries, config_label="checks.required_ai_docs"),
-        resolve_required_docs(required_req_entries, config_label="checks.required_requirements_docs"),
-    )
-
-
-def load_toml_config(raw_text: str) -> dict[str, object]:
-    if tomllib is not None:
-        try:
-            return tomllib.loads(raw_text)
-        except tomllib.TOMLDecodeError as exc:
-            raise ValueError(str(exc)) from exc
-    return load_minimal_toml_config(raw_text)
-
-
-def load_minimal_toml_config(raw_text: str) -> dict[str, object]:
-    checks_block = extract_checks_block(raw_text)
-    checks: dict[str, list[str]] = {}
-    for key in ("required_ai_docs", "required_requirements_docs"):
-        match = re.search(rf"(?ms)^\s*{re.escape(key)}\s*=\s*(\[[^\]]*\])", checks_block)
-        if not match:
-            continue
-        try:
-            parsed = ast.literal_eval(match.group(1))
-        except (SyntaxError, ValueError) as exc:
-            raise ValueError(f"could not parse {key}") from exc
-        if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
-            raise ValueError(f"{key} must be a list of strings")
-        checks[key] = parsed
-    return {"checks": checks}
-
-
-def extract_checks_block(raw_text: str) -> str:
-    match = re.search(r"(?ms)^\[checks\]\s*(.*?)(?=^\[|\Z)", raw_text)
-    return match.group(1) if match else raw_text
-
-
 def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
@@ -159,7 +78,22 @@ def main() -> int:
     targets = link_targets(index_text)
     req_targets = link_targets(req_index_text)
 
-    required_ai_docs, required_req_docs = load_harness_config()
+    try:
+        harness_config = load_harness_config(ROOT)
+        required_ai_docs = resolve_repo_paths(
+            ROOT,
+            harness_config.checks.required_ai_docs,
+            config_label="checks.required_ai_docs",
+        )
+        required_req_docs = resolve_repo_paths(
+            ROOT,
+            harness_config.checks.required_requirements_docs,
+            config_label="checks.required_requirements_docs",
+        )
+    except HarnessConfigError as exc:
+        print("AI docs governance check: FAILED")
+        print(f"ERROR: {exc}")
+        return 1
 
     for path in required_ai_docs:
         if not path.exists():

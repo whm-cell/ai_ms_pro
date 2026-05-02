@@ -9,6 +9,8 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from harness_config import HarnessConfigError, load_harness_config
+
 
 ROOT = Path(__file__).resolve().parents[1]
 AI_DOC_ROOT = ROOT / "docs" / "ai"
@@ -16,8 +18,6 @@ ACTIVE_HANDOFF_DIR = AI_DOC_ROOT / "handoffs" / "active"
 STATUS_DIR = AI_DOC_ROOT / "status"
 ADR_DIR = AI_DOC_ROOT / "adr"
 CHANGELOG_DIR = AI_DOC_ROOT / "changelog"
-WORKING_CONTEXT_PATH = AI_DOC_ROOT / "working-context.md"
-DEFAULT_ACTIVE_HANDOFF_BUDGET = 5
 COMPLETED_VALUES = {"已完成", "完成", "done", "completed"}
 
 
@@ -34,6 +34,8 @@ class ArchiveCandidate:
 class ArchiveReport:
     active_handoff_count: int
     budget: int
+    min_score: int
+    at_or_over_budget: bool
     candidates: list[ArchiveCandidate]
 
 
@@ -44,8 +46,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--budget",
         type=int,
-        default=DEFAULT_ACTIVE_HANDOFF_BUDGET,
-        help=f"Active handoff budget. Default: {DEFAULT_ACTIVE_HANDOFF_BUDGET}.",
+        default=None,
+        help="Active handoff budget. Default: .codex/harness.toml context_surface.active_handoff_budget.",
+    )
+    parser.add_argument(
+        "--min-score",
+        type=int,
+        default=None,
+        help="Minimum candidate score. Default: .codex/harness.toml context_surface.archive_candidate_min_score.",
     )
     parser.add_argument(
         "--json",
@@ -164,6 +172,7 @@ def score_handoff(
     root: Path,
     active_count: int,
     budget: int,
+    min_score: int,
     bound_handoffs: set[str],
     corpus: str,
     status_mtime: float | None,
@@ -202,7 +211,7 @@ def score_handoff(
         cautions.append("仍写有下一步动作，归档前需确认它不再是默认恢复入口")
 
     eligible_for_review = completed or not bound or active_count > budget
-    if not eligible_for_review or score < 3:
+    if not eligible_for_review or score < min_score:
         return None
 
     return ArchiveCandidate(
@@ -214,7 +223,18 @@ def score_handoff(
     )
 
 
-def build_report(root: Path = ROOT, budget: int = DEFAULT_ACTIVE_HANDOFF_BUDGET) -> ArchiveReport:
+def build_report(
+    root: Path = ROOT,
+    budget: int | None = None,
+    min_score: int | None = None,
+) -> ArchiveReport:
+    context_surface = load_harness_config(root).context_surface
+    effective_budget = (
+        context_surface.active_handoff_budget if budget is None else budget
+    )
+    effective_min_score = (
+        context_surface.archive_candidate_min_score if min_score is None else min_score
+    )
     active_handoffs = iter_docs(root / "docs" / "ai" / "handoffs" / "active")
     bound_handoffs = load_bound_active_handoffs(root)
     corpus = compression_corpus(root)
@@ -228,7 +248,8 @@ def build_report(root: Path = ROOT, budget: int = DEFAULT_ACTIVE_HANDOFF_BUDGET)
                 path,
                 root=root,
                 active_count=len(active_handoffs),
-                budget=budget,
+                budget=effective_budget,
+                min_score=effective_min_score,
                 bound_handoffs=bound_handoffs,
                 corpus=corpus,
                 status_mtime=status_mtime,
@@ -239,7 +260,9 @@ def build_report(root: Path = ROOT, budget: int = DEFAULT_ACTIVE_HANDOFF_BUDGET)
     candidates.sort(key=lambda item: (-item.score, item.path))
     return ArchiveReport(
         active_handoff_count=len(active_handoffs),
-        budget=budget,
+        budget=effective_budget,
+        min_score=effective_min_score,
+        at_or_over_budget=len(active_handoffs) >= effective_budget,
         candidates=candidates,
     )
 
@@ -247,7 +270,10 @@ def build_report(root: Path = ROOT, budget: int = DEFAULT_ACTIVE_HANDOFF_BUDGET)
 def render_text(report: ArchiveReport) -> str:
     lines = [
         "Archive candidate monitor: OK",
-        f"Active handoffs: {report.active_handoff_count} (budget {report.budget})",
+        (
+            f"Active handoffs: {report.active_handoff_count} "
+            f"(budget {report.budget}; min score {report.min_score})"
+        ),
     ]
     if not report.candidates:
         lines.append("No archive candidates found by heuristic scan.")
@@ -267,7 +293,12 @@ def render_text(report: ArchiveReport) -> str:
 
 def main() -> int:
     args = parse_args()
-    report = build_report(budget=args.budget)
+    try:
+        report = build_report(budget=args.budget, min_score=args.min_score)
+    except HarnessConfigError as exc:
+        print("Archive candidate monitor: FAILED")
+        print(f"ERROR: {exc}")
+        return 1
     if args.json:
         print(json.dumps(asdict(report), ensure_ascii=False, indent=2))
     else:

@@ -25,6 +25,7 @@ Core documents:
 - `docs/ai/status/*.md`
 - `docs/ai/changelog/*.md`
 - `docs/ai/adr/*.md`
+- `docs/ai/templates/*.md`
 - `docs/requirements/source/*.md`
 - `docs/requirements/normalized/*.md`
 - `docs/requirements/workstreams/*.md`
@@ -45,38 +46,14 @@ Use this rule:
 
 `implementation change -> document impact check -> update affected docs -> update docs/ai/index.md`
 
-### Update triggers
+Update trigger summary:
 
-Update or create a `handoff` when:
+- `handoff`: completed subtask, paused/resumable task, or implementation detail the next agent must inherit
+- `status`: stage end, accumulated handoffs needing compression, or material risk/blocker change
+- `changelog`: integration-ready stage, externally visible behavior change, or release-facing note
+- `adr`: long-lived decision about architecture, API, storage, deployment, major constraints, testing, review, or delivery
 
-- a subtask is completed
-- a task is paused but should be resumed later
-- implementation changed in a way the next agent must understand
-
-Update or create a `status` document when:
-
-- a stage ends
-- several handoffs have accumulated and need compression
-- current risks or blockers materially changed
-
-Update or create a `changelog` when:
-
-- a stage is ready for integration
-- externally visible behavior changed
-- release-facing notes are needed
-
-Update or create an `adr` when:
-
-- a decision will remain relevant beyond the current stage
-- architecture, API shape, storage strategy, deployment strategy, or major constraints changed
-
-Always check `docs/ai/index.md` after adding or changing:
-
-- `plan`
-- `handoff`
-- `status`
-- `changelog`
-- `adr`
+After changing `plan`, `handoff`, `status`, `changelog`, or `adr`, check `docs/ai/index.md`.
 
 ## Reading Order
 
@@ -92,6 +69,20 @@ At the start of a new Codex task, prefer this order:
 8. archive only if necessary
 
 Runtime session files under `.codex/runtime/sessions/` are optional recovery inputs and should only be read when local session detail is needed.
+
+## Task Discovery Protocol
+
+Codex should classify each task before expanding context. The user does not need to label every task manually.
+
+Use these default profiles:
+
+1. Simple task: small explanation, local edit, single validation command, or narrow bugfix. Read `index -> working-context -> current status`, then open only directly relevant files.
+2. Medium task: one module, one harness script, starter/root sync, or a small test set. Read the simple profile plus relevant active handoff, ADR, or implementation files.
+3. Complex task: cross-module behavior, governance rule changes, traceability changes, architecture/API/storage/deployment decisions, or changes that affect future agent workflow. Read the medium profile plus relevant `requirements`, `traceability-matrix`, workstream docs, and ADRs.
+4. 0-1 stage task: project initialization, first requirement import, new workstream, first vertical slice, or stage transition. Read `requirements index -> traceability matrix -> plan -> current status -> relevant workstream/templates`, then load handoff/ADR/archive only as needed.
+5. Recovery or dispute task: resume, regression, conflicting state, or historical rationale. Read relevant active handoff first; enter archive only when current truth surfaces do not answer the question.
+
+Before substantial work, state the selected profile briefly. Users do not need to add a task-type suffix to every prompt. Override phrases such as `按简单任务处理`, `按复杂任务处理`, `这是 0-1 阶段任务`, `不要读 archive`, or `需要深挖历史` are optional controls for correcting or narrowing the automatic classification.
 
 ## Harness Layers
 
@@ -202,55 +193,31 @@ Use these rules:
 
 Verification is required, but it scales by project maturity.
 
-Preferred POSIX/macOS command:
+Preferred POSIX/macOS commands:
 
-`.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py` when active handoffs reach budget or before stage compression
+- `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py` when default context feels heavy
 
-Preferred Windows PowerShell command:
-
-`powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/check_ai_governance.py`
-
-Common POSIX/macOS supplement:
-
-`.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged`
-
-Common Windows PowerShell supplement:
-
-`powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/check_code_shape.py --staged`
-
-Optional context-pressure check:
-
-`.codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py`
+Preferred Windows PowerShell equivalents use `.codex/hooks/run_with_repo_python.ps1` with the same script paths.
 
 This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
 
-### Phase 0: project start
+Maturity rule: Phase 0 can rely on manual verification plus governance checks when meaningful; Phase 1 adds lightweight drift warnings; Phase 2 validates handoff/archive/latest-stage pointers; Phase 3 runs verification in CI.
 
-Use manual verification only:
+## GitHub Gatekeeping
 
-- after meaningful changes, check whether docs changed
-- after doc creation, check whether `docs/ai/index.md` points to the right files
+GitHub repository settings are part of the verification harness, but not all of them live in the repo.
 
-Codex should still run `scripts/check_ai_governance.py` through the repo-local Python runner whenever the repository has enough structure for the script to be meaningful.
+Use these rules:
 
-### Phase 1: early active development
-
-Add a lightweight scripted verification step:
-
-- warn when source files changed but `docs/ai/` did not
-- warn when a new `status` or `changelog` exists but `index.md` was not updated
-
-### Phase 2: multi-stage / multi-agent development
-
-Add stronger verification:
-
-- validate active handoff references
-- validate archive moves
-- validate latest-stage pointers
-
-### Phase 3: release / CI maturity
-
-Run verification in CI so documentation drift is caught before merge.
+1. Workflows under `.github/workflows/` should keep least-privilege permissions, bounded timeouts, and concurrency cancellation unless a job has a documented reason to do otherwise.
+2. Harness control-plane paths should stay covered by `.github/CODEOWNERS`.
+3. Dependency review and Dependabot are the default supply-chain guardrails for this stage.
+4. Branch protection / ruleset configuration must be verified on GitHub before claiming required checks are enforced.
+5. The expected required checks are `governance`, `windows-hook-runtime`, `smoke`, and dependency review.
+6. CodeQL remains out of the default Stage-00 scope until the project enters release / CI maturity or adds enough business code to justify it.
 
 ## Scope Discipline
 
@@ -289,6 +256,14 @@ If a new skill supersedes an old approach:
 - archive old task-specific notes if they are no longer active
 - do not keep two conflicting active workflows in parallel
 
+## Project Skill Lifecycle
+
+Architecture, style, and dependency skills are project-specific execution guidance, not default governance truth.
+
+Use `docs/ai/templates/project-skill-lifecycle.md` when a task creates or changes a project architecture/style/dependency skill.
+
+Keep these skills out of the default short context chain. If a skill changes long-lived architecture, style, dependency, testing, deployment, or delivery strategy, promote the durable decision to `status` or `adr`.
+
 ## Repo-local Skill Note
 
 This repository also carries an optional repo-local skill at `.codex/skills/repo-governed-coding/`.
@@ -303,39 +278,12 @@ Use these rules:
 
 When a new skill is introduced, decide where it should be recorded based on scope and persistence.
 
-### Task prompt only
+Use this escalation ladder:
 
-Keep the skill only in the current task prompt when all of the following are true:
-
-- it is one-off or narrowly scoped
-- it does not change the repository's default workflow
-- future tasks do not need to assume it by default
-
-### Stage `status`
-
-Record the skill usage in the current stage `status` when:
-
-- it changes how the current stage is being executed
-- several tasks in the same stage depend on it
-- later work in the same stage would be confusing without noting the change
-
-### `AGENTS.md`
-
-Promote the skill usage pattern into `AGENTS.md` only when:
-
-- it becomes a recurring default for this repository
-- future Codex tasks should assume it without being reminded every time
-- it is a stable workflow preference rather than a temporary tactic
-
-### `ADR`
-
-Record the skill-related decision in an `adr` when:
-
-- it changes a long-lived workflow
-- it changes architecture, testing, deployment, review, or delivery strategy in a lasting way
-- the decision should remain true beyond the current stage
-
-### Conflict rule
+- task prompt only: one-off, narrow, or not needed by future tasks
+- stage `status`: affects current-stage execution or several tasks in the same stage
+- `AGENTS.md`: stable recurring default future tasks should assume
+- `ADR`: long-lived workflow, architecture, testing, deployment, review, or delivery decision
 
 Do not keep a skill in both temporary task use and default repository rule without explicitly deciding which one is active.
 

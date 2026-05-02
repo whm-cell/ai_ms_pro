@@ -1,6 +1,6 @@
 # Harness 可迁移清单
 
-更新时间：2026-04-30
+更新时间：YYYY-MM-DD
 适用范围：将当前 Codex-first harness 迁移到一个全新的项目仓库
 
 ## 核心原则
@@ -26,6 +26,7 @@
 - `scripts/check_ai_docs.py`
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_archive_candidates.py`
+- `scripts/check_context_budget.py`
 - `scripts/reduce_runtime_observations.py`
 - `scripts/bootstrap_harness.py`
 - `.codex/harness.toml`
@@ -33,6 +34,7 @@
 - `docs/ai/status/_template.md`
 - `docs/ai/changelog/_template.md`
 - `docs/ai/adr/_template.md`
+- `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/requirements/source/_template.md`
 - `docs/requirements/normalized/_template.md`
 - `docs/requirements/workstreams/_template.md`
@@ -68,11 +70,12 @@
 以下内容在新仓库里必须按项目实际情况调整：
 
 - `AGENTS.md` 中的项目目标、文档职责和默认 workflow 偏好
-- `.codex/harness.toml` 中的 `required_ai_docs` 与 `required_requirements_docs`
+- `.codex/harness.toml` 中的 `required_ai_docs`、`required_requirements_docs`、`context_surface` 与 `context_budget` 预算阈值
 - `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`，POSIX/macOS 与 Windows PowerShell fallback 会枚举候选并优先 Python 3.11+
 - `.codex/hooks.json` 的 hook command entrypoint；bootstrap 会按当前宿主环境刷新为 `.ps1` 或 `.sh` 入口
 - `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
 - `.codex/skills/repo-governed-coding/` 的使用策略；默认保持显式调用，不应替代 `AGENTS.md` 和治理检查
+- `docs/ai/templates/project-skill-lifecycle.md` 的使用策略；默认只在 architecture/style/dependency skill 任务中按需读取，不应进入默认短链路
 - `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
 - `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
 - `docs/ai/plan.md` 中的项目目标、范围和阶段规划
@@ -112,4 +115,6 @@
 - `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
 - repo-local 行为 skill 只能约束执行方法；跨会话共享结论仍必须提升到 `handoff/status/ADR` 或 requirements 文档。
+- project skill 生命周期模板只提供创建、升级、偏离和废弃 skill 的治理路径；不会自动决定新项目的架构、样式或依赖栈。
 - archive candidate monitor 只适合作为压缩前提醒，不应替代主 Agent 对 `handoff -> status -> archive` 的语义判断。
+- context budget audit 只适合作为默认上下文体检，不应替代 Task Discovery 或主 Agent 的语义取舍；starter/new-project 默认目标保持 6500，成熟项目若有证据可按需调高本地预算。
