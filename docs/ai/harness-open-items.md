@@ -16,7 +16,7 @@
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
 - `harness-trace-console` 与 `threejs-snake` 均已具备黑盒浏览器 smoke；`WS-01` 不再只有 deterministic smoke
 - GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job 和 dependency review workflow
-- CODEOWNERS 与 Dependabot 配置已落地；GitHub ruleset / branch protection 仍需在远端人工确认
+- CODEOWNERS 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
 - context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500，`AGENTS.md`、current status 与 skill description 已压缩，仍保持 warning-only 手动运行
@@ -28,7 +28,7 @@
 ### OPEN-01 CI burn-in、required checks 与 GitHub ruleset 确认
 
 - 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
-- 当前缺口：repo 内 workflow、CODEOWNERS、Dependabot 与 dependency review 文件已落地，但还没有足够的远端 green history，也不能从本地证明 GitHub ruleset 已配置
+- 当前缺口：repo 内 workflow、CODEOWNERS、Dependabot 与 dependency review 文件已落地；PR #1 已开始 burn-in 并暴露首轮 CI 问题，仍需要新一轮 green history，也不能从本地证明 GitHub ruleset / security analysis 已配置
 - 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/github-remote-configuration.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过
@@ -37,7 +37,7 @@
   - `python3 scripts/check_code_shape.py --all` 自动运行
   - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py` 与 `python3 scripts/harness_trace_console_blackbox_smoke.py` 自动运行
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
-  - dependency review job 在 PR 上可见
+  - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
   - 失败结果能直接定位到 governance、hook sync、code-shape、Windows runner、supply-chain 或 smoke 维度
 

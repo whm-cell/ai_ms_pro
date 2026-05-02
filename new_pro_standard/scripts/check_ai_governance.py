@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -1177,6 +1178,10 @@ def validate_working_context_sync_metadata(
 
 
 def load_changed_paths() -> list[Path]:
+    ci_paths = load_ci_changed_paths()
+    if ci_paths is not None:
+        return ci_paths
+
     try:
         result = subprocess.run(
             ["git", "status", "--porcelain=v1", "-uall"],
@@ -1198,6 +1203,26 @@ def load_changed_paths() -> list[Path]:
             path_text = path_text.split(" -> ", 1)[1]
         paths.append((ROOT / path_text).resolve())
     return paths
+
+
+def load_ci_changed_paths() -> list[Path] | None:
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return None
+
+    for base_ref in ("HEAD^1", "HEAD~1"):
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--name-only", "--relative", base_ref, "HEAD"],
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+        except (OSError, subprocess.CalledProcessError):
+            continue
+        return [(ROOT / entry).resolve() for entry in result.stdout.splitlines() if entry.strip()]
+
+    return []
 
 
 def load_staged_paths() -> list[Path]:

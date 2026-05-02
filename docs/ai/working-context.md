@@ -33,14 +33,14 @@
 ## 当前活跃队列
 
 1. 以 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 为准，继续推进 OPEN-01
-2. 推送后观察 `governance`、`windows-hook-runtime`、`smoke` 与 dependency review 是否在远端稳定通过
+2. PR #1 已开始远端 burn-in；首轮失败暴露 PR merge diff、Windows Python resolution test 与 dependency review unsupported 问题，当前修复已追加到同一分支，下一步观察新一轮 `governance`、`windows-hook-runtime`、`smoke` 与 dependency review
 3. 按 [GitHub 远端配置确认细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/github-remote-configuration.md) 在 branch protection / ruleset 中把 required checks、PR review、CODEOWNERS review、conversation resolved 与禁止直推 `main` 配好并回写 OPEN-01
 4. 判断 Stage-00 是否可以在远端 burn-in 后压缩并进入下一阶段，同时保留 OPEN-07 / OPEN-08 / OPEN-09 为 P2 策略项
 
 ## 当前风险与阻塞
 
-- governance、Windows hook runtime、repo-native smoke 与 dependency review 已进入 workflow，但尚无远端稳定运行历史，暂时不能把“已接 CI”当成完全收敛
-- GitHub branch protection / ruleset 属于远端设置，本地文件只能列出要求，不能证明 required checks 已生效；人工配置清单已整理到 `--使用细节/github-remote-configuration.md`
+- governance、Windows hook runtime、repo-native smoke 与 dependency review 已进入 workflow；PR #1 首轮 CI 失败已定位并修复，但尚未形成新一轮远端绿色结果，暂时不能把“已接 CI”当成完全收敛
+- GitHub branch protection / ruleset / security analysis 属于远端设置，本地文件只能列出要求，不能证明 required checks 或 dependency review 支撑能力已生效；人工配置清单已整理到 `--使用细节/github-remote-configuration.md`
 - reducer 阈值已有多日 observation 样本与判定标准，但长期质量仍需在后续 stage compression 中观察
 - runtime session / observation 的 stage drift 目前先以 warning 暴露，尚未升级为 blocking
 - starter 现在已能在仓外完成 bootstrap + pre-commit，但 copied placeholder docs 仍需 `--force` 才会立刻换成新项目名，`AGENTS.md` 仍需人工项目化；相关说明已回写 starter README/guide

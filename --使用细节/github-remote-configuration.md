@@ -64,6 +64,8 @@ repo 内的 workflow、CODEOWNERS、Dependabot 与 dependency review 文件只�
 
 确认 GitHub 侧已允许 dependency review 在 PR 上运行。
 
+PR #1 首轮 burn-in 发现：当前仓库远端返回 `Dependency review is not supported on this repository`。在 GitHub security analysis 配置完成前，workflow 中 dependency review 先保持 advisory，避免所有 PR 被平台配置缺口阻断。
+
 当前 workflow 使用：
 
 - `actions/dependency-review-action@v4`
@@ -72,6 +74,7 @@ repo 内的 workflow、CODEOWNERS、Dependabot 与 dependency review 文件只�
 验收方式：
 
 - 新建 PR 后能看到 dependency review job
+- GitHub security analysis 中 dependency graph / dependency review 所需能力已启用
 - 高风险依赖变更会让 PR check 失败
 - 该 job 被加入 `main` 的 required checks
 

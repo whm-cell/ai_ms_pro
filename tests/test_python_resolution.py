@@ -93,11 +93,25 @@ class PythonResolutionTest(unittest.TestCase):
             old_python = write_fake_python(root / "old", "python.exe", "3.9.6")
             new_python = write_fake_python(root / "new", "python.exe", "3.11.13")
             path_value = os.pathsep.join([str(old_python.parent), str(new_python.parent)])
+            versions = {
+                (str(old_python),): (3, 9, 6),
+                (str(new_python),): (3, 11, 13),
+            }
 
             with mock.patch.dict(os.environ, {"PATH": path_value, "PATHEXT": ".EXE"}, clear=True):
                 with mock.patch.object(run_hook.platform, "system", return_value="Windows"):
                     with mock.patch.object(run_hook, "python_prefixes", return_value=[]):
-                        command = run_hook.resolve_python_command()
+                        with mock.patch.object(
+                            run_hook,
+                            "all_commands_on_path",
+                            return_value=[str(old_python), str(new_python)],
+                        ):
+                            with mock.patch.object(
+                                run_hook,
+                                "python_version",
+                                side_effect=lambda command: versions.get(tuple(command)),
+                            ):
+                                command = run_hook.resolve_python_command()
 
         self.assertEqual(command, [str(new_python)])
 
@@ -107,10 +121,24 @@ class PythonResolutionTest(unittest.TestCase):
             old_python = write_fake_python(root / "old", "python.exe", "3.9.6")
             new_python = write_fake_python(root / "new", "python.exe", "3.11.13")
             path_value = os.pathsep.join([str(old_python.parent), str(new_python.parent)])
+            versions = {
+                (str(old_python),): (3, 9, 6),
+                (str(new_python),): (3, 11, 13),
+            }
 
             with mock.patch.dict(os.environ, {"PATH": path_value, "PATHEXT": ".EXE"}, clear=True):
                 with mock.patch.object(bootstrap_harness, "is_windows_host", return_value=True):
-                    command = bootstrap_harness.resolve_bootstrap_python(None)
+                    with mock.patch.object(
+                        bootstrap_harness,
+                        "all_commands_on_path",
+                        return_value=[str(old_python), str(new_python)],
+                    ):
+                        with mock.patch.object(
+                            bootstrap_harness,
+                            "python_version",
+                            side_effect=lambda command: versions.get(tuple(command)),
+                        ):
+                            command = bootstrap_harness.resolve_bootstrap_python(None)
 
         self.assertEqual(command, [str(new_python)])
 

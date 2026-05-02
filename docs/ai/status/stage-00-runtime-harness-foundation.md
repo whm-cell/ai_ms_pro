@@ -44,8 +44,8 @@
 
 ## 风险与阻塞
 
-- CI workflow 已落地并增强，但尚未积累远端绿色运行历史；branch protection / ruleset 仍需远端配置并人工确认。
-- Windows PowerShell runner 已补静态 parity 测试，但本机没有 `pwsh` / `powershell`，仍需要 Windows 宿主真实执行复演。
+- CI workflow 已落地并进入 PR #1 burn-in；首轮远端失败已暴露并修复 PR merge diff、Windows Python resolution test 和 dependency review unsupported 三类问题，仍需等待新一轮远端绿色结果。
+- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；branch protection / ruleset 与 security analysis 仍需远端配置并人工确认。
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
 - `$repo-governed-coding`、project skill lifecycle 和 context budget audit 已进入 starter，但都不替代 `AGENTS.md`、ADR、requirements 或 verification scripts。
