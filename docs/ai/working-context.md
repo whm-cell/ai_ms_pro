@@ -33,7 +33,7 @@
 ## 当前活跃队列
 
 1. 以 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 为准，继续推进 OPEN-01
-2. PR #1 已开始远端 burn-in；首轮失败暴露 PR merge diff、Windows Python resolution test 与 dependency review unsupported 问题，当前修复已追加到同一分支，下一步观察新一轮 `governance`、`windows-hook-runtime`、`smoke` 与 dependency review
+2. PR #1 已开始远端 burn-in；首轮失败暴露 PR merge diff、Windows Python resolution test 与 dependency review unsupported 问题，当前修复已追加到同一分支；PR branch push 现在只触发 PR checks，不再重复跑 push workflow
 3. 按 [GitHub 远端配置确认细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/github-remote-configuration.md) 在 branch protection / ruleset 中把 required checks、PR review、CODEOWNERS review、conversation resolved 与禁止直推 `main` 配好并回写 OPEN-01
 4. 判断 Stage-00 是否可以在远端 burn-in 后压缩并进入下一阶段，同时保留 OPEN-07 / OPEN-08 / OPEN-09 为 P2 策略项
 

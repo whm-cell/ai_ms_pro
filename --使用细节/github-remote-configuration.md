@@ -14,6 +14,7 @@ repo 内的 workflow、CODEOWNERS、Dependabot 与 dependency review 文件只�
 
 - `.github/workflows/governance-and-smoke.yml`
   - workflow name：`Governance And Smoke`
+  - trigger：PR 与 `main` push；PR 分支更新只走 PR checks，避免重复 push/pull_request CI
   - job：`governance`
   - job：`windows-hook-runtime`
   - job：`smoke`

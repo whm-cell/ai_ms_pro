@@ -20,6 +20,7 @@
 
 - `governance`, `windows-hook-runtime`, `smoke`, and dependency review should become required GitHub checks once branch protection / ruleset is configured remotely.
 - Dependency review currently uses `continue-on-error` because GitHub reports dependency review unsupported until repository security analysis features are enabled remotely.
+- `Governance And Smoke` now runs on PRs and direct pushes to `main` only, so updating a PR branch no longer creates duplicate push and pull_request CI runs.
 - `WS-01` no longer relies only on the smoke-only internal test API for browser verification.
 
 ## 破坏性变更
