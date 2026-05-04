@@ -1,7 +1,7 @@
 interface:
   display_name: "Harness Maintenance"
   short_description: "Scoped maintenance guide for Codex harness internals"
-  default_prompt: "Use $harness-maintenance when changing harness runtime, hooks, reducers, GitHub guardrails, or code-shape checks."
+  default_prompt: "Use $harness-maintenance when changing harness runtime, hooks, reducers, compression, GitHub guardrails, verification, or code-shape checks."
 
 policy:
   allow_implicit_invocation: false

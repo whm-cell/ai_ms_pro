@@ -57,7 +57,8 @@
 - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`。
 - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态。
 - `.agents/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本。
-- `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、GitHub guardrails 或 code-shape checks 时按需调用。
+- `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、compression、verification、GitHub guardrails 或 code-shape checks 时按需调用。
+- `.agents/skills/requirements-traceability-maintenance/` 是可选 requirements 维护能力，只在 PRD 导入、`REQDOC / REQ / WS`、traceability matrix 或技术假设变化时按需调用。
 - `.agents/skills/progressive-feature-development/` 与 `.agents/skills/prd-to-project-skills/` 是可选机制层 skills，默认只在非平凡功能或稳定 PRD 模式分类任务中按需调用。
 
 ## 更新规则

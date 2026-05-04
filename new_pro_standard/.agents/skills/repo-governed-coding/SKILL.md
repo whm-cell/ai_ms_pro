@@ -9,7 +9,7 @@ description: Optional coding guardrails for governed repo work. Use for non-triv
 
 This skill adapts the MIT-licensed `forrestchang/andrej-karpathy-skills` guidelines to the Codex-first harness. It is intentionally a task-level behavior layer: repository rules, shared docs, hooks, and verification scripts remain the control plane.
 
-Use it for non-trivial code, harness, or review work where the agent should slow down enough to make assumptions, scope, and verification explicit.
+Use it for non-trivial code, harness, or review work where the agent should slow down enough to make assumptions, scope, and verification explicit. Use the reference checklist for repo-specific document impact, traceability, verification, and primary truth surface details.
 
 ## Workflow
 
@@ -31,10 +31,9 @@ Use it for non-trivial code, harness, or review work where the agent should slow
 - Avoid incidental refactors, comment rewrites, or cleanup outside the requested scope.
 
 4. Close the loop with governance.
-- Run the document impact check after meaningful implementation or governance changes.
-- Preserve or add `Requirement IDs` and `Workstream IDs` when the task is already bound; write `未绑定` when the mapping is unknown.
-- Run repo verification before treating the task as complete.
-- Keep current-state truth out of `plan` and `workstream` projection surfaces.
+- Use `references/governance-checklist.md` for document impact, traceability, truth-surface, and verification closeout details.
+- Use `$requirements-traceability-maintenance` when changing PRD, `REQDOC`, `REQ`, `WS`, traceability matrix, or technical assumptions.
+- Use `$harness-maintenance` verification references when selecting repo checks.
 
 ## Four Guardrails
 
@@ -66,29 +65,7 @@ Use it for non-trivial code, harness, or review work where the agent should slow
 
 ## Repo-Specific Extensions
 
-### Document Impact Check
-
-- Use `implementation change -> document impact check -> update affected docs -> update docs/ai/index.md`.
-- Update `handoff`, `status`, `changelog`, `ADR`, `working-context`, or requirements docs when the task changes shared project truth.
-- Treat missing doc sync as incomplete work.
-
-### Traceability Discipline
-
-- Keep `Requirement IDs` and `Workstream IDs` aligned with `docs/requirements/traceability-matrix.md`.
-- Update both the AI-side artifact and requirements-side mapping when a task becomes newly bound.
-- Do not invent IDs; write `未绑定` when the mapping is unknown.
-
-### Verification Finish Line
-
-- Run `python3 scripts/check_ai_governance.py` before closing a meaningful task when applicable.
-- Run `python3 scripts/check_code_shape.py --staged` when implementation or harness code is staged.
-- Run task-specific tests or smoke checks needed to prove the request.
-
-### Primary Truth Surface Boundary
-
-- Primary truth belongs in `working-context`, active `handoff`, `status`, `ADR`, normalized requirements, and `traceability-matrix.md`.
-- `plan` and workstream docs are projection surfaces, not duplicate status boards.
-- Follow repository rules when this skill and repo policy ever disagree.
+Detailed repo-specific rules live in `references/governance-checklist.md` so this skill body stays small. Follow `AGENTS.md` if any rule conflicts, and promote durable workflow changes to status or ADR.
 
 ## Reference
 

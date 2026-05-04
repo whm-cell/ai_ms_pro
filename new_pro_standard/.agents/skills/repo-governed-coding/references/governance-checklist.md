@@ -32,6 +32,7 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 - Write `未绑定` when the mapping is not known.
 - Keep the canonical mapping in `docs/requirements/traceability-matrix.md`.
 - Update both AI-side artifacts and requirements-side mapping when a task becomes newly bound.
+- Use `$requirements-traceability-maintenance` for PRD import, `REQDOC / REQ / WS` edits, matrix changes, or technical assumption checks.
 
 ## Primary Truth Surface
 
@@ -41,7 +42,8 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 
 ## Verification Finish Line
 
-- Run `python3 scripts/check_ai_governance.py`.
-- Run `python3 scripts/check_code_shape.py --staged` when implementation or harness code is staged.
+- Run `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`.
+- Run `.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged` when implementation or harness code is staged.
 - Run any task-specific smoke or test commands needed for the request.
 - Confirm `docs/ai/working-context.md` sync metadata reflects changed active `handoff` or `status` files.
+- Use `$harness-maintenance` `references/verification-commands.md` when selecting specialized harness checks.

@@ -33,6 +33,8 @@
 - 哪一条不符合当前验收标准。
 - 本次偏离是否影响架构、测试或后续关卡。
 
+如果差异来自 PRD、`REQDOC / REQ / WS` 或 traceability matrix，调用 `$requirements-traceability-maintenance` 复核需求映射、技术假设状态和验证方法。
+
 ### 2. 判断偏离类型
 
 - 一次性偏离：留在当前 `REQ/WS` 或 handoff，不改 skill。

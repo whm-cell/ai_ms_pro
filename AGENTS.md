@@ -42,18 +42,9 @@ These runtime files are local recovery artifacts. They are not canonical project
 
 When work causes meaningful project progress, Codex must check whether documentation also needs to be updated.
 
-Use this rule:
+Use this rule: `implementation change -> document impact check -> update affected docs -> update docs/ai/index.md`.
 
-`implementation change -> document impact check -> update affected docs -> update docs/ai/index.md`
-
-Update trigger summary:
-
-- `handoff`: completed subtask, paused/resumable task, or implementation detail the next agent must inherit
-- `status`: stage end, accumulated handoffs needing compression, or material risk/blocker change
-- `changelog`: integration-ready stage, externally visible behavior change, or release-facing note
-- `adr`: long-lived decision about architecture, API, storage, deployment, major constraints, testing, review, or delivery
-
-After changing `plan`, `handoff`, `status`, `changelog`, or `adr`, check `docs/ai/index.md`.
+Detailed document-impact and closeout checklists live in `$repo-governed-coding` `references/governance-checklist.md`; keep this file as the always-on trigger layer.
 
 ## Reading Order
 
@@ -109,30 +100,15 @@ Always preserve the repo-local `.codex/.venv` preference, verify runnable Python
 
 ## Session Promotion
 
-Runtime session files under `.codex/runtime/sessions/` are local recovery material and should follow the session template.
+Runtime session files are local recovery material, not shared truth.
 
-Promote a session into a `handoff` when any of the following are true:
-
-- a subtask has completed
-- a task is being paused and should be resumed later
-- implementation changed in a way the next agent must understand
-- the session established durable valid/invalid approaches or risks that should be shared by default
-- the session created a change that should affect `status`, `adr`, `plan`, or requirements tracking
-
-Do not promote a session when it only contains local scratch work, personal prompt experimentation, or exploratory notes without repo-level reuse value.
-
-The main agent is responsible for deciding whether promotion is required and for publishing the canonical `handoff`.
+Promote stable repo-level conclusions into `handoff`, `status`, `adr`, `plan`, or requirements documents. Use `$harness-maintenance` `references/runtime-governance-compression.md` for detailed promotion and compression rules.
 
 ## Requirement Traceability
 
-When a task is already mapped to normalized requirements or workstreams, include those identifiers in runtime and governance artifacts.
+Requirement mappings must not drift. Carry known `Requirement IDs` and `Workstream IDs`; write `未绑定` instead of inventing IDs when mapping is unknown.
 
-Use these rules:
-
-1. `handoff`, `status`, runtime session files, and observation-derived handoff drafts should carry `Requirement IDs` and `Workstream IDs` when the mapping is known.
-2. If the mapping is not known yet, write `未绑定` instead of inventing IDs.
-3. The canonical mapping still lives in `docs/requirements/traceability-matrix.md` and related workstream docs; AI-side metadata references that mapping and must not drift from it.
-4. When a task is newly bound to a requirement or workstream, update both the AI-side artifact and the requirements-side traceability docs in the same change whenever feasible.
+For PRD import, `REQDOC / REQ / WS`, traceability-matrix, or technical-assumption changes, use `.agents/skills/requirements-traceability-maintenance/` and keep canonical mapping in `docs/requirements/*`.
 
 ## Observation Reduction
 
@@ -144,15 +120,9 @@ Default reduction order remains: `observations -> handoff draft -> main agent re
 
 ## Compression Rule
 
-Project docs follow this lifecycle:
+Project docs follow this lifecycle: `handoff -> status -> changelog / adr -> archive old handoffs`.
 
-`layer -> compress -> archive -> keep active entrypoints current`
-
-More explicitly:
-
-`handoff -> status -> changelog / adr -> archive old handoffs`
-
-Use `scripts/check_archive_candidates.py` through the repo-local Python runner when active handoffs reach the surface budget or before a stage compression pass. The script is warning-only: it lists candidates and reasons, but the main agent still decides whether to move files and update shared docs.
+When active surfaces reach budget or a stage is compressed, use `$harness-maintenance` `references/runtime-governance-compression.md`. The main agent still decides what becomes canonical or archived.
 
 ## Projection Surface Boundary
 
@@ -174,20 +144,9 @@ When changing the budget or the checker, use `$harness-maintenance` and `referen
 
 ## Verification Layer
 
-Verification is required, but it scales by project maturity.
+Verification is required, but command selection scales by changed surface and project maturity.
 
-Preferred POSIX/macOS commands:
-
-- `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py` when active handoffs reach budget or before stage compression
-- `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py` when default context feels heavy
-
-Preferred Windows PowerShell equivalents use `.codex/hooks/run_with_repo_python.ps1` with the same script paths.
-
-This repository also includes a repo-local Codex `Stop` hook that runs the same governance check automatically when hooks are enabled.
-
-Maturity rule: Phase 0 can rely on manual verification plus governance checks when meaningful; Phase 1 adds lightweight drift warnings; Phase 2 validates handoff/archive/latest-stage pointers; Phase 3 runs verification in CI.
+Material governance changes must run the governance check. Staged code or harness changes must run code-shape. Use `$harness-maintenance` `references/verification-commands.md` for the command matrix and warning interpretation.
 
 ## GitHub Gatekeeping
 
@@ -242,9 +201,9 @@ Use `docs/ai/templates/project-skill-lifecycle.md` when a task creates or change
 
 Keep these skills out of the default short context chain. If a skill changes long-lived architecture, style, dependency, testing, deployment, or delivery strategy, promote the durable decision to `status` or `adr`.
 
-For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`. Skip both for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
+For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`; when changing PRD imports, `REQDOC / REQ / WS`, traceability matrix, or technical assumptions, use `.agents/skills/requirements-traceability-maintenance/`. Skip workflow skills for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
 
-For harness-internal changes to runtime, hooks, reducers, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. Keep those mechanics out of the default short context unless the task touches that surface.
+For harness-internal changes to runtime, hooks, reducers, compression, verification commands, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. Keep those mechanics out of the default short context unless the task touches that surface.
 
 ## Repo-local Skill Note
 
@@ -271,10 +230,4 @@ Do not keep a skill in both temporary task use and default repository rule witho
 
 ## Completion Condition
 
-A task that materially changed the project is not fully complete until:
-
-1. implementation is updated
-2. affected project docs are updated if needed
-3. `docs/ai/index.md` is still accurate
-4. `scripts/check_ai_governance.py` passes through the repo-local Python runner when applicable
-5. `scripts/check_code_shape.py --staged` passes through the repo-local Python runner when implementation or harness code is staged
+A material task is complete only when implementation, affected docs, `docs/ai/index.md`, traceability, and applicable verification are current.

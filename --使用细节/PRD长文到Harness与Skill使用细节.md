@@ -25,7 +25,17 @@ docs/requirements/source/REQDOC-XXX-<short-name>.md
 
 原文入库时只做必要的标题、来源、更新时间补充，不要边导入边改写需求。
 
-### 2. 标准化需求
+### 2. 调用 `$requirements-traceability-maintenance`
+
+PRD 入库后，优先调用：
+
+```text
+$requirements-traceability-maintenance
+```
+
+它负责维护 PRD -> `REQDOC` -> `REQ` -> `WS` -> traceability-matrix 的链路，并把技术栈说法分类成 `accepted / proposed / deferred / rejected / unknown`，避免把不精准技术栈误写成已采纳架构事实。
+
+### 3. 标准化需求
 
 从原文拆出多个 normalized requirement：
 
@@ -44,7 +54,7 @@ docs/requirements/normalized/REQ-XXX-<short-name>.md
 
 PRD 中“不精准的技术栈”不要直接当成架构事实。先写成 `技术假设`、`待确认` 或 `ADR 候选`。
 
-### 3. 拆成 workstream
+### 4. 拆成 workstream
 
 把多个 `REQ` 组合成可开发切片：
 
@@ -54,7 +64,7 @@ docs/requirements/workstreams/WS-XX-<short-name>.md
 
 一个 `WS` 应该能指导一次阶段化实现或一个垂直切片，而不是简单复制 PRD 章节。
 
-### 4. 更新追踪矩阵
+### 5. 更新追踪矩阵
 
 更新：
 
@@ -70,7 +80,7 @@ REQDOC -> REQ -> WS -> STAGE -> 验收/测试
 
 如果当前还没有阶段或实现，写真实状态，不要伪造完成度。
 
-### 5. 调用 `$prd-to-project-skills`
+### 6. 调用 `$prd-to-project-skills`
 
 在 PRD / requirements / workstream 中出现稳定可复用模式时，再调用：
 
@@ -87,7 +97,7 @@ $prd-to-project-skills
 - `Promote To ADR / Status / Check`：长期架构决策、阶段执行策略、可自动检查规则
 - `Reject Skillization`：一次性需求、不可靠技术栈、当前进度、未验证想法、重复治理规则
 
-### 6. 开发具体功能时调用 `$progressive-feature-development`
+### 7. 开发具体功能时调用 `$progressive-feature-development`
 
 当进入某个非平凡功能、跨模块改动、API / storage / architecture / testing strategy 改动时，再调用：
 
@@ -118,6 +128,7 @@ $progressive-feature-development
 ```text
 请基于 docs/requirements/source/REQDOC-XXX-<short-name>.md 做 PRD 标准化。
 先不要写业务代码。
+请调用 $requirements-traceability-maintenance 维护 traceability 和技术假设状态。
 
 输出：
 1. 建议拆出的 REQ 列表

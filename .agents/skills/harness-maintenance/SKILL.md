@@ -11,7 +11,7 @@ Stable
 
 ## Scope
 
-Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, GitHub workflows or repository guardrails, code-shape budgets, or related verification scripts.
+Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, handoff compression, GitHub workflows or repository guardrails, code-shape budgets, or related verification scripts.
 
 Do not use this skill for ordinary product features, simple edits, PRD normalization, or task implementation that only consumes the harness.
 
@@ -20,8 +20,10 @@ Do not use this skill for ordinary product features, simple edits, PRD normaliza
 1. Classify the harness area.
 - Python runtime / hooks: use `references/python-runtime-and-hooks.md`.
 - Runtime observation / reducer: use `references/runtime-observation-reduction.md`.
+- Session promotion / compression: use `references/runtime-governance-compression.md`.
 - GitHub guardrails: use `references/github-guardrails.md`.
 - Code shape: use `references/code-shape-budget.md`.
+- Verification commands: use `references/verification-commands.md`.
 
 2. Keep AGENTS light.
 - Put recurring detailed mechanics in this skill or deterministic scripts.
@@ -60,5 +62,7 @@ Revise this skill through status, ADR, or changelog when harness maintenance tas
 
 - [python-runtime-and-hooks.md](references/python-runtime-and-hooks.md)
 - [runtime-observation-reduction.md](references/runtime-observation-reduction.md)
+- [runtime-governance-compression.md](references/runtime-governance-compression.md)
 - [github-guardrails.md](references/github-guardrails.md)
 - [code-shape-budget.md](references/code-shape-budget.md)
+- [verification-commands.md](references/verification-commands.md)

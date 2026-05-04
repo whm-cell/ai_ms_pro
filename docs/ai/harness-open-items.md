@@ -22,7 +22,7 @@
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py` 与 `scripts/check_github_guardrails.py` 已落地为 warning-only evidence checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / GitHub / code-shape 细则下沉到 `$harness-maintenance`，继续 warning-only 手动运行
+- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / compression / verification / GitHub / code-shape 细则下沉到 `$harness-maintenance`，并把 PRD/REQ/WS/技术假设维护方法下沉到 `$requirements-traceability-maintenance`，继续 warning-only 手动运行
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset confirmation + longer-term reducer/runtime sample monitoring`
 

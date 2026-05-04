@@ -13,6 +13,7 @@ It intentionally includes:
 - candidate skill eval protocol
 - optional repo-local behavioral skill
 - optional harness maintenance skill
+- optional requirements traceability maintenance skill
 - optional progressive feature development skill
 - optional PRD-to-project-skills classifier
 - document templates
@@ -48,9 +49,15 @@ Use it only when a project-specific skill is being created or changed. It keeps 
 
 ## Harness Maintenance Skill
 
-The starter includes `.agents/skills/harness-maintenance/` for changes to bootstrap, hook runners, runtime reducers, GitHub guardrails, and code-shape checks.
+The starter includes `.agents/skills/harness-maintenance/` for changes to bootstrap, hook runners, runtime reducers, session compression, verification command selection, GitHub guardrails, and code-shape checks.
 
 It keeps detailed harness mechanics out of `AGENTS.md`; use it only when modifying the harness itself.
+
+## Requirements Traceability Skill
+
+The starter includes `.agents/skills/requirements-traceability-maintenance/` for PRD import, `REQDOC / REQ / WS` updates, traceability-matrix maintenance, and technical assumption classification.
+
+It keeps requirement-maintenance mechanics out of `AGENTS.md`; requirement truth and acceptance status still belong in `docs/requirements/*` and `docs/ai/*`.
 
 ## Progressive Feature And PRD Skills
 
@@ -118,6 +125,7 @@ If the harness is awake, the expected behavior is:
 - shared truth stays in `docs/ai/*` and `docs/requirements/*`
 - local runtime memory goes to `.codex/runtime/*`
 - optional behavior guidance can be invoked with `$repo-governed-coding` for non-trivial coding tasks
+- optional requirements traceability guidance can be invoked with `$requirements-traceability-maintenance` for PRD import, `REQDOC / REQ / WS`, matrix, or technical assumption changes
 - optional progressive feature guidance can be invoked with `$progressive-feature-development` for non-trivial plan-first work
 - optional PRD-to-skill guidance can be invoked with `$prd-to-project-skills` when stable requirement patterns may become project skills
 - project architecture/style/dependency skill guidance stays in the lifecycle template until a real project chooses to create a concrete skill
@@ -144,6 +152,10 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_archive_candidates.py`
 - `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py`
+- `scripts/check_repo_skills.py`
+- `scripts/check_requirements_shape.py`
+- `scripts/check_skill_usage_samples.py`
+- `scripts/check_github_guardrails.py`
 - `scripts/reduce_runtime_observations.py`
 
 The shipped Git hook runs:
@@ -154,6 +166,8 @@ The shipped Git hook runs:
 Run `scripts/check_archive_candidates.py` manually through the repo-local Python runner when active handoffs reach the `.codex/harness.toml` surface budget or before a stage compression pass. It only reports archive candidates; it does not move files.
 
 Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
+
+Run `scripts/check_requirements_shape.py` after PRD / `REQDOC / REQ / WS` imports or traceability-matrix changes. The evidence checks remain warning-oriented until a new project explicitly promotes them to blocking policy.
 
 ## Included Guides
 
