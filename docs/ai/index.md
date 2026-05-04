@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-05-02
-当前状态：Stage-00 已补齐 hook sync、governance + smoke workflow、更深一层的 traceability alignment、runtime metadata 自动发现、WS-01/WS-02 黑盒 smoke、Karpathy-style 行为护栏 starter 化、跨平台 Python 解析优先级、archive candidate monitor、context surface 配置化、task discovery reading profiles、GitHub ownership/supply-chain 守门、完成型 handoff 语义归档、项目 skill 生命周期模板与 context budget audit
+更新时间：2026-05-04
+当前状态：Stage-00 harness 已可用；本轮补齐 `.agents/skills` 原生路径、with/without skill eval、PRD 技术假设检查、GitHub guardrails 检查与默认上下文压缩，剩余以远端确认和真实样本观察为主
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -36,6 +36,15 @@
 - [当前活跃 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)：resume、recovery 或相关 profile 需要时再进入
 - [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)：长期决策背景需要时再进入
 - [Project Skill Lifecycle Template](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/templates/project-skill-lifecycle.md)：创建或调整 architecture/style/dependency skill 时再进入
+- `$progressive-feature-development`：非平凡功能、跨模块、API / storage / architecture、测试策略变化或显式 plan-first 任务再调用
+- `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
+- [PRD 长文到 Harness + Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/prd-to-skill-harness-usage.md)：导入万字 PRD、拆 REQ/WS、判断是否 skill 化时再查看
+- [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)：评估 Candidate skill with/without eval 时再进入
+- [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)：记录详细对照实验材料时再进入
+- `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
+- `scripts/check_requirements_shape.py`：导入 PRD / REQ / WS 后检查 traceability、技术假设状态和 verification method 时手动运行
+- `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
+- `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
 - [OPEN-10 Context Budget 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/context-budget-open-10.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
 - [阶段性提交 / PR CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/stage-commit-pr-ci-manual.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
@@ -49,8 +58,8 @@
 - 当前 stage status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
-- 最新 ADR：[ADR-014 Context Budget Audit](./adr/ADR-014-context-budget-audit.md)
-- 最新 changelog：[2026-05-02 Context Budget Audit](./changelog/2026-05-02-context-budget-audit.md)
+- 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
+- 最新 changelog：[2026-05-04 Harness Evidence Checks](./changelog/2026-05-04-harness-evidence-checks.md)
 
 ## 归档入口
 

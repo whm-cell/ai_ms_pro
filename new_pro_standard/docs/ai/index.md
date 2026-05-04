@@ -29,6 +29,9 @@
 - [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
 - [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
 - [Project Skill Lifecycle Template](./templates/project-skill-lifecycle.md)：创建或调整 architecture/style/dependency skill 时再进入
+- [Candidate Skill Eval Protocol](./skill-evals/README.md)：评估 Candidate skill with/without 样本时再进入
+- `$progressive-feature-development`：非平凡功能、跨模块、API / storage / architecture、测试策略变化或显式 plan-first 任务再调用
+- `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
 - [handoffs/active](./handoffs/active)
 - [status](./status)

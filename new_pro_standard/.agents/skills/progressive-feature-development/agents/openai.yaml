@@ -1,0 +1,7 @@
+interface:
+  display_name: "Progressive Feature Development"
+  short_description: "Progressive planning gate for non-trivial feature work"
+  default_prompt: "Use $progressive-feature-development to plan non-trivial feature work before implementation."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-05-02
+更新时间：2026-05-04
 阶段：stage-00
 状态：进行中
 
@@ -19,44 +19,43 @@
 ## 当前完成度
 
 - 已完成：
-  - Runtime 链路：`Stop observation -> Stop session -> SessionStart resume context`、runtime staged 阻断、runtime metadata 自动发现、observation reducer 与 handoff-first 提升路径
-  - Governance 链路：`REQ/WS` metadata、working-context sync metadata、projection surface boundary、active handoff/status metadata 校验、requirements traceability alignment
-  - Verification 链路：repo-local Python runner、cross-platform hook entrypoints、hook sync check、code-shape budget、governance check、WS-01/WS-02 deterministic 与黑盒 smoke
-  - Starter 链路：`bootstrap_harness.py`、离线 best-effort venv 初始化、仓外 starter 复演、new project pre-commit 复演、no-old-truth boundary 与 portability guide
-  - Context 链路：默认短链路、Task Discovery profiles、context surface budget、archive candidate monitor、project skill lifecycle template、context budget audit
-  - GitHub 守门：workflow 最小权限/concurrency/timeout、CODEOWNERS、Dependabot、dependency review、Windows hook runtime job 与 required-check 策略
+  - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
+  - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、repo skill / requirements / skill eval / GitHub guardrails checks
+  - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
+  - Skills：`repo-governed-coding`、`progressive-feature-development`、`prd-to-project-skills` 均迁到 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
+  - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
+  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、Dependabot、dependency review、Windows hook runtime job、required-check 策略和可运行远端 guardrails check
 - 进行中：
   - OPEN-01：远端 CI burn-in、GitHub branch protection / ruleset required checks 确认
-  - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 真实样本观察
-- 本轮 OPEN-10 结论：
-  - `6500` token budget 保留为 starter / 新项目默认目标
-  - 当前 root repo 采用 `8500` 作为 Stage-00 本地预算，因为默认链路仍包含成熟阶段 status 与治理历史
-  - `AGENTS.md` 已压缩长细则；current status 已压缩历史完成列表；`$repo-governed-coding` description 已缩短
-  - `scripts/check_context_budget.py` 继续手动 warning-only，不接 Stop hook，不自动 compact / archive
+  - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 与 workflow skill 真实样本观察
+  - P2：继续压缩完成型 Stage-00 历史；本轮已把完成型 skill/evidence handoff 移入 archive，active handoff 从 4 降到 2
 
 ## 本阶段关键成果
 
 - 两个真实 workstream 已证明当前 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
 - 默认恢复面已收缩为 `index -> working-context -> stage status -> configured active handoff budget`，archive 只在 recovery/dispute 或当前 truth surface 不足时进入。
-- `new_pro_standard` 已同步机制层，包括 Python 解析、hook sync、code shape、context surface、Task Discovery、project skill lifecycle 与 context budget audit；当前 repo 的历史 truth 不复制进 starter。
+- `new_pro_standard` 已同步机制层，包括 Python 解析、hook sync、code shape、context surface、Task Discovery、project skill lifecycle、`.agents/skills` 与 context budget audit；当前 repo 的历史 truth 不复制进 starter。
 - `plan/workstream` 已明确为 projection surface，当前状态真相默认回收到 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
 - `REQ <-> WS <-> STAGE` 至少已有一层自动校验：`working-context` 当前 stage 与 matrix 不一致会阻断，runtime artifact 先 warning-only。
+- repo-local skills、requirements shape、Candidate skill eval samples 与 GitHub guardrails 已有独立 warning-only evidence checks，避免继续膨胀 governance checker。
 
 ## 风险与阻塞
 
 - CI workflow 已落地并进入 PR #1 burn-in；首轮远端失败已暴露并修复 PR merge diff、Windows Python resolution test 和 dependency review unsupported 三类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
-- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；branch protection / ruleset 与 security analysis 仍需远端配置并人工确认。
+- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
-- `$repo-governed-coding`、project skill lifecycle 和 context budget audit 已进入 starter，但都不替代 `AGENTS.md`、ADR、requirements 或 verification scripts。
+- `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts。
+- `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 0/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
 - Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
 
 ## 下一阶段重点
 
 - 推动 OPEN-01：远端 workflow green history、required checks、CODEOWNERS review、conversation resolved 与禁止直推 `main` 的远端确认。
 - 在下一次 stage compression 时继续审查 archive candidate monitor 输出，确认候选已被 status、backlog 或 ADR 吸收。
-- 在后续真实项目中观察 `$repo-governed-coding`、project skill lifecycle 和 context budget audit 是否需要从显式/手动能力升级。
-- 继续判断 `WS-01` 与 `WS-02` 是保留为验证样板，还是压缩为更轻的 starter 说明。
+- 在后续真实项目中观察 `$repo-governed-coding`、`$progressive-feature-development`、`$prd-to-project-skills`、project skill lifecycle 和 context budget audit 是否需要从显式/手动能力升级。
+- 对真实 PRD 导入和非平凡功能任务运行 evidence checks，并把 with/without eval 登记到 `docs/ai/skill-usage-samples.md`。
+- 继续压缩完成型 Stage-00 历史，判断 `WS-01` / `WS-02` 是保留为验证样板，还是压缩为更轻的 starter 说明。
 
 ## 验收判断
 
@@ -78,5 +77,9 @@
 - [ADR-012 GitHub Harness Gatekeeping](../adr/ADR-012-github-harness-gatekeeping.md)
 - [ADR-013 Project Skill Lifecycle](../adr/ADR-013-project-skill-lifecycle.md)
 - [ADR-014 Context Budget Audit](../adr/ADR-014-context-budget-audit.md)
+- [ADR-015 Progressive Feature And PRD Skills](../adr/ADR-015-progressive-feature-and-prd-skills.md)
 - [2026-05-02 Context Budget Audit](../changelog/2026-05-02-context-budget-audit.md)
+- [2026-05-04 Progressive Feature And PRD Skills](../changelog/2026-05-04-progressive-feature-and-prd-skills.md)
+- [2026-05-04 Harness Evidence Checks](../changelog/2026-05-04-harness-evidence-checks.md)
+- [Candidate Skill Usage Samples](../skill-usage-samples.md)
 - [OPEN-10 使用细节](../../../--使用细节/context-budget-open-10.md)

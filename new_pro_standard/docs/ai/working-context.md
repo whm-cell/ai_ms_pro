@@ -56,7 +56,8 @@
 - `.codex/runtime/` 只保留本地恢复原料，不替代 `docs/ai/` 与 `docs/requirements/` 的共享治理真相。
 - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`。
 - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态。
-- `.codex/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本。
+- `.agents/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本。
+- `.agents/skills/progressive-feature-development/` 与 `.agents/skills/prd-to-project-skills/` 是可选机制层 skills，默认只在非平凡功能或稳定 PRD 模式分类任务中按需调用。
 
 ## 更新规则
 

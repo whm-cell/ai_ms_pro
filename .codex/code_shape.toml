@@ -9,9 +9,9 @@ include = [
   ".codex/hooks/**/*.py",
   ".codex/hooks/*.sh",
   ".codex/hooks/**/*.sh",
+  ".agents/skills/*/scripts/*.py",
+  ".agents/skills/**/scripts/**/*.py",
   ".githooks/pre-commit",
-  ".codex/skills/*/scripts/*.py",
-  ".codex/skills/**/scripts/**/*.py",
 ]
 exclude = [
   ".codex/.venv/**",

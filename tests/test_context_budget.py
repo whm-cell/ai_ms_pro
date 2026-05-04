@@ -53,7 +53,7 @@ mcp_server_budget = 1
             write(root / "docs/ai/adr/ADR-001.md", "# ADR 1\n")
             write(root / "docs/ai/adr/ADR-002.md", "# ADR 2\n")
             write(
-                root / ".codex/skills/example/SKILL.md",
+                root / ".agents/skills/example/SKILL.md",
                 """---
 name: example
 description: this description is intentionally too long

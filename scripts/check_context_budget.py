@@ -99,7 +99,6 @@ def extract_active_status(root: Path) -> Path | None:
     status_docs = iter_docs(root / "docs" / "ai" / "status")
     return max(status_docs, key=lambda path: path.stat().st_mtime) if status_docs else None
 
-
 def default_surface_paths(root: Path) -> list[Path]:
     items = [root / path for path in DEFAULT_SURFACE]
     if status_path := extract_active_status(root):
@@ -130,11 +129,16 @@ def scan_default_surface(root: Path) -> list[SurfaceItem]:
 
 
 def skill_paths(root: Path) -> list[Path]:
-    roots = [root / ".codex" / "skills", root / ".agents" / "skills"]
+    roots = [root / ".agents" / "skills", root / ".codex" / "skills"]
     paths: list[Path] = []
+    seen_names: set[str] = set()
     for skill_root in roots:
         if skill_root.exists():
-            paths.extend(sorted(skill_root.glob("*/SKILL.md")))
+            for path in sorted(skill_root.glob("*/SKILL.md")):
+                if path.parent.name in seen_names:
+                    continue
+                seen_names.add(path.parent.name)
+                paths.append(path)
     return paths
 
 

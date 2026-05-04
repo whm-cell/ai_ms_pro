@@ -1,0 +1,63 @@
+# Candidate Skill Eval Samples
+
+更新时间：2026-05-04
+状态：收集 with/without 对照实验样本中
+
+## 作用
+
+本文件记录 Candidate repo-local skills 在真实任务中的 eval 证据。
+
+它不替代 `status`、`handoff`、ADR 或 requirements。它只回答一个问题：某个 Candidate skill 是否已经通过真实任务的 with/without 对照证明能减少上下文、减少返工，并且没有给简单任务制造流程税。
+
+## 当前 Candidate Skills
+
+| Skill | 当前有效 accepted eval 样本 | 升级门槛 | 当前判断 |
+| --- | ---: | ---: | --- |
+| `prd-to-project-skills` | 0 | 2 | 需要真实 PRD / workstream with/without 样本 |
+| `progressive-feature-development` | 0 | 2 | 需要非平凡功能或跨模块任务 with/without 样本 |
+
+## 接受为有效 eval 样本的条件
+
+- 任务必须是真实 PRD、真实 workstream、真实功能实现或真实 review，不是纯文档演示。
+- 样本必须说明是否使用该 skill，以及为什么触发或跳过。
+- 样本必须记录 `baseline_without_skill`、`run_with_skill`、`delta`、`acceptance` 和 `verification`，形成可复查的 with/without 对照。
+- `baseline_without_skill` 必须说明不使用 skill 时预计或实际的读取面、步骤、返工风险或流程税。
+- `run_with_skill` 必须说明实际触发方式、读取面、产出路径和是否把结果回写到 repo truth surface。
+- `delta` 必须说明相对 baseline 的上下文、返工、质量或速度变化；没有收益也要明确记录。
+- `acceptance` 必须说明该样本为什么能或不能计入升级证据。
+- `verification` 必须记录实际运行的测试、smoke、治理检查或人工复核证据。
+- 样本必须有 `Outcome: accepted`，并且没有把 PRD 当前状态、最新验收证据或临时 TODO 藏进 skill。
+- 简单任务若被完整流程拖慢，应记录为负样本。
+- 每个 Candidate skill 仍需至少 2 个 accepted real-task eval samples 才能认为完成升级前置证据。
+
+## 样本格式
+
+```text
+### SAMPLE-XXX short-name
+
+- Date: YYYY-MM-DD
+- Skills: prd-to-project-skills, progressive-feature-development
+- Evidence Type: real-task
+- Outcome: accepted | rejected | pending
+- Requirement IDs: REQ-XXX 或 未绑定
+- Workstream IDs: WS-XX 或 未绑定
+- baseline_without_skill: 不使用 skill 的基线流程、读取面、风险或返工预期
+- run_with_skill: 使用 skill 后的实际触发、读取面、输出和治理回写
+- delta: 相对 baseline 的上下文、返工、质量或速度变化
+- acceptance: 是否计入升级证据及原因
+- verification: 实际运行的测试、smoke、治理检查或人工复核
+- Doc Promotion: 留在 task、本文件、handoff、status、ADR、requirements 或 check
+- Notes: 关键结论
+```
+
+更详细的 eval 记录可放在 `docs/ai/skill-evals/`，本文件保留索引级样本摘要。
+
+## 当前样本
+
+暂无 accepted real-task eval samples。
+
+## 复查命令
+
+```bash
+.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py
+```

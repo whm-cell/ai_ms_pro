@@ -18,7 +18,7 @@
 | 状态 | 进入条件 | 存放位置 | 退出条件 |
 | --- | --- | --- | --- |
 | Draft | 尚未跑通首个垂直切片，约束仍在探索 | 当前任务、handoff 草稿、status 备注 | 首个切片证明这些规则会被重复使用，或被明确废弃 |
-| Candidate Skill | 同类约束在多个任务中重复出现，但仍可能调整 | `.codex/skills/<project-skill>/SKILL.md` | 2-3 个非平凡任务验证有效，或出现冲突需要回退 |
+| Candidate Skill | 同类约束在多个任务中重复出现，但仍可能调整 | `.agents/skills/<project-skill>/SKILL.md` | 2-3 个非平凡任务验证有效，或出现冲突需要回退 |
 | Stable Skill | 规则已稳定，适合按需复用 | repo-local skill + ADR/status 引用 | 需要所有任务默认遵守，或被新架构替代 |
 | Promote | 规则成为长期默认治理或可验证约束 | `AGENTS.md`、ADR、checks、requirements | 已进入 always-on 规则或自动检查 |
 | Deprecate | 规则被新证据、新需求或新架构替代 | status/ADR 记录，旧 skill 归档或标记废弃 | 旧入口不再被默认引用 |

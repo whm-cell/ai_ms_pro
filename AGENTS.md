@@ -264,9 +264,11 @@ Use `docs/ai/templates/project-skill-lifecycle.md` when a task creates or change
 
 Keep these skills out of the default short context chain. If a skill changes long-lived architecture, style, dependency, testing, deployment, or delivery strategy, promote the durable decision to `status` or `adr`.
 
+For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`. Skip both for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
+
 ## Repo-local Skill Note
 
-This repository also carries an optional repo-local skill at `.codex/skills/repo-governed-coding/`.
+This repository also carries an optional repo-local skill at `.agents/skills/repo-governed-coding/`.
 
 Use these rules:
 

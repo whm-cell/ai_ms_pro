@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-05-02
-当前状态：核心链路已在测试仓库和仓外 starter 复演中跑通；CI、hook sync、traceability alignment、runtime metadata 自动发现、WS-01/WS-02 黑盒 smoke、GitHub ownership/supply-chain 守门、可选行为护栏 skill、项目 skill 生命周期模板与 context budget audit 已落地，剩余项以远端 burn-in、GitHub 侧规则确认和后续真实项目样本观察为主
+更新时间：2026-05-04
+当前状态：核心链路已在测试仓库和仓外 starter 复演中跑通；`.agents/skills`、with/without skill eval、PRD 导入质量检查、GitHub guardrails check 与默认上下文压缩已落地，剩余项以远端 burn-in、GitHub 侧规则确认和后续真实项目样本观察为主
 
 ## 作用
 
@@ -18,8 +18,11 @@
 - GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job 和 dependency review workflow
 - CODEOWNERS 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
+- `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用，避免把方案先行流程变成简单任务默认流程
+- `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py` 与 `scripts/check_github_guardrails.py` 已落地为 warning-only evidence checks
+- Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500，`AGENTS.md`、current status 与 skill description 已压缩，仍保持 warning-only 手动运行
+- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已归档完成型 skill/evidence handoff，继续 warning-only 手动运行
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset confirmation + longer-term reducer/runtime sample monitoring`
 
@@ -28,7 +31,7 @@
 ### OPEN-01 CI burn-in、required checks 与 GitHub ruleset 确认
 
 - 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
-- 当前缺口：repo 内 workflow、CODEOWNERS、Dependabot 与 dependency review 文件已落地；PR #1 已开始 burn-in 并暴露首轮 CI 问题，仍需要新一轮 green history，也不能从本地证明 GitHub ruleset / security analysis 已配置
+- 当前缺口：repo 内 workflow、CODEOWNERS、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
 - 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/github-remote-configuration.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过
@@ -39,6 +42,7 @@
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
   - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
+  - `scripts/check_github_guardrails.py` 能返回远端状态；未登录或缺权限时必须明确显示 `UNKNOWN`，不能伪装成 OK
   - 失败结果能直接定位到 governance、hook sync、code-shape、Windows runner、supply-chain 或 smoke 维度
 
 ## 本轮已关闭
@@ -93,7 +97,7 @@
 ### OPEN-08 行为护栏 skill 是否升级为默认 workflow
 
 - 目标：观察 `$repo-governed-coding` 在更多真实任务中的收益，决定它继续显式调用，还是升级为更稳定的 stage / repo 默认策略
-- 当前缺口：已进入 starter，但还缺少多任务样本证明它适合作为默认工作流
+- 当前缺口：已进入 starter，且本轮明确不把功能开发全流程并入默认 workflow；仍缺少多任务样本证明 `$repo-governed-coding` 是否适合升级
 - 完成定义：
   - 至少几个非平凡实现/审查任务中显式使用该 skill
   - 能证明 assumptions / scope / success criteria / verification plan 对 handoff/status 提炼有实际帮助
@@ -102,11 +106,13 @@
 ### OPEN-09 Project architecture/style/dependency skill 生命周期真实样本观察
 
 - 目标：验证 `docs/ai/templates/project-skill-lifecycle.md` 是否足以指导新项目在架构、样式和依赖约束变化时创建、升级、偏离或废弃项目 skill
-- 当前缺口：模板、ADR 与 starter 同步已落地，但还缺少真实新项目中的多轮 architecture/style/dependency skill 使用样本
+- 当前缺口：模板、ADR、starter 同步、两个 Candidate workflow skills 与 with/without eval registry 已落地；`check_skill_usage_samples.py` 当前显示两个 workflow skills 都是 0/2 accepted eval samples
 - 完成定义：
   - 模板存在且不进入默认短链路
   - ADR 已采纳并说明 skill 不替代 canonical governance truth
   - `new_pro_standard` 已同步模板和说明
+  - Candidate workflow skills 已验证不会替代 requirements / AI governance truth
+  - `check_skill_usage_samples.py` 至少显示关键 Candidate skills 达到 2 个 accepted with/without eval samples，或明确记录不升级原因
   - governance check 与 code-shape check 通过
   - 至少一个后续真实项目能按 `Draft -> Candidate Skill -> Stable Skill -> Promote -> Deprecate` 路径处理项目约束变更
 

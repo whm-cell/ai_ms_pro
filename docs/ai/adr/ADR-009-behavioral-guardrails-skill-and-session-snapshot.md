@@ -14,7 +14,7 @@
 ## 决策
 
 - 采用外部项目中可复用的行为护栏思想，但只作为 task-level method layer。
-- `new_pro_standard` 纳入 `.codex/skills/repo-governed-coding/`，默认显式调用，不作为 always-on 替代控制面。
+- `new_pro_standard` 纳入 `.agents/skills/repo-governed-coding/`，默认显式调用，不作为 always-on 替代控制面。
 - runtime session 模板和 Stop session 快照新增 `行为护栏快照`：
   - Assumptions
   - Scope Boundary
@@ -46,7 +46,7 @@
 
 ## 关联文档
 
-- [Repo Governed Coding Skill](../../../.codex/skills/repo-governed-coding/SKILL.md)
+- [Repo Governed Coding Skill](../../../.agents/skills/repo-governed-coding/SKILL.md)
 - [Harness 可迁移清单](../harness-portability-guide.md)
 - [Stage-00 Runtime Harness Foundation Status](../status/stage-00-runtime-harness-foundation.md)
 - [当前工作上下文](../working-context.md)

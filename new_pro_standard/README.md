@@ -10,7 +10,10 @@ It intentionally includes:
 - governance check scripts
 - runtime templates
 - project skill lifecycle template
+- candidate skill eval protocol
 - optional repo-local behavioral skill
+- optional progressive feature development skill
+- optional PRD-to-project-skills classifier
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
 - portable migration and rewrite guides
@@ -25,7 +28,7 @@ It intentionally does not include:
 
 ## Optional Behavioral Guardrails
 
-This starter includes `.codex/skills/repo-governed-coding/` as an optional task-level skill adapted from the Karpathy-style coding guidelines.
+This starter includes `.agents/skills/repo-governed-coding/` as an optional task-level skill adapted from the Karpathy-style coding guidelines.
 
 Use it when a non-trivial implementation, review, or refactor should explicitly record:
 
@@ -41,6 +44,15 @@ It is not an always-on governance replacement. `AGENTS.md`, `docs/ai/*`, `docs/r
 The starter includes `docs/ai/templates/project-skill-lifecycle.md` for architecture, style, and dependency skills.
 
 Use it only when a project-specific skill is being created or changed. It keeps volatile 0-1 project constraints out of the default context while still requiring durable decisions to be promoted to `status`, ADR, requirements, or checks.
+
+## Progressive Feature And PRD Skills
+
+The starter includes two optional repo-local workflow skills:
+
+- `.agents/skills/progressive-feature-development/` for non-trivial feature work that needs progressive discovery and a technical-plan gate before implementation
+- `.agents/skills/prd-to-project-skills/` for classifying stable PRD / requirement / workstream patterns into candidate project skills
+
+They are mechanism-layer assets, not starter truth. They should not run for simple tasks, and they must not turn current progress, latest validation evidence, or acceptance status into hidden skill state.
 
 ## Starter Shape
 
@@ -99,6 +111,8 @@ If the harness is awake, the expected behavior is:
 - shared truth stays in `docs/ai/*` and `docs/requirements/*`
 - local runtime memory goes to `.codex/runtime/*`
 - optional behavior guidance can be invoked with `$repo-governed-coding` for non-trivial coding tasks
+- optional progressive feature guidance can be invoked with `$progressive-feature-development` for non-trivial plan-first work
+- optional PRD-to-skill guidance can be invoked with `$prd-to-project-skills` when stable requirement patterns may become project skills
 - project architecture/style/dependency skill guidance stays in the lifecycle template until a real project chooses to create a concrete skill
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise
