@@ -34,6 +34,7 @@
 - `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
 - `$requirements-traceability-maintenance`：PRD 导入、`REQDOC / REQ / WS`、traceability-matrix 或技术假设状态变化时再调用
 - `$harness-maintenance`：修改 bootstrap、hooks、runtime reducer、session compression、verification command reference、GitHub guardrails 或 code-shape checks 时再调用
+- `$team-pr-conflict-control`：多人或多 AI 并行开发、open PR changed-file overlap、PR template、CODEOWNERS 或 merge queue / `merge_group` readiness 任务再调用
 - `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
 - `scripts/check_requirements_shape.py`：导入 PRD / REQ / WS 后检查 traceability、技术假设状态和 verification method 时手动运行
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行

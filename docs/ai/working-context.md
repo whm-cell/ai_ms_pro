@@ -27,7 +27,7 @@
 - 维持短默认上下文：`index -> working-context -> current status`；requirements、handoff、ADR、archive 与 skills 都按需进入。
 - 收敛 Stage-00 剩余 hardening：远端 CI burn-in、GitHub branch protection / ruleset、required checks 与 security analysis 确认。
 - 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
-- 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 下沉 PRD/REQ/WS/技术假设维护流程，Candidate workflow skills 继续显式触发。
+- 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 下沉 PRD/REQ/WS/技术假设维护流程，`team-pr-conflict-control` 下沉多人 / 多 AI PR touch-set 冲突控制，Candidate workflow skills 继续显式触发。
 - 使用四个 warning-only evidence checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`。
 
 ## 当前活跃队列
@@ -35,7 +35,8 @@
 1. 继续推进 OPEN-01：远端 workflow green history、required checks、branch protection / ruleset 与 security analysis 确认。
 2. 用 `scripts/check_github_guardrails.py` 辅助区分本地已具备、远端 OK、远端 UNKNOWN，不再只靠人工记忆。
 3. 后续真实 PRD / 非平凡功能任务要登记 with/without eval；`prd-to-project-skills` 与 `progressive-feature-development` 仍是 0/2。
-4. 下一次 stage compression 继续清理完成型 handoff，避免 Stage-00 历史进入长期默认面。
+4. 后续真实多人 / 多 AI PR 要用 `$team-pr-conflict-control` 记录 touch-set overlap 和 coordination action，先观察是否值得升级为阻断式检查。
+5. 下一次 stage compression 继续清理完成型 handoff，避免 Stage-00 历史进入长期默认面。
 
 ## 当前风险与阻塞
 
@@ -62,6 +63,7 @@
 - Candidate skill 升级必须有 with/without eval；当前两个 workflow skills 均为 0/2 accepted samples。
 - `new_pro_standard` 同步机制层，不复制当前 repo 的历史 truth。
 - GitHub ownership、supply-chain 与 required-check 策略已固化在 ADR-012；branch protection / ruleset 完成前 OPEN-01 仍保持开放。
+- 多人 / 多 AI 开发的 PR touch-set 冲突控制已进入 `.agents/skills/team-pr-conflict-control/`；它是按需协作 skill，不证明远端 branch protection、merge queue 或冲突检查脚本已经启用。
 
 ## 更新规则
 

@@ -60,6 +60,7 @@
 - `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、compression、verification、GitHub guardrails 或 code-shape checks 时按需调用。
 - `.agents/skills/requirements-traceability-maintenance/` 是可选 requirements 维护能力，只在 PRD 导入、`REQDOC / REQ / WS`、traceability matrix 或技术假设变化时按需调用。
 - `.agents/skills/progressive-feature-development/` 与 `.agents/skills/prd-to-project-skills/` 是可选机制层 skills，默认只在非平凡功能或稳定 PRD 模式分类任务中按需调用。
+- `.agents/skills/team-pr-conflict-control/` 是可选团队协作机制层 skill，只在多人 / 多 AI 并行开发、PR touch-set overlap、PR template、CODEOWNERS 或 merge queue readiness 时按需调用。
 
 ## 更新规则
 

@@ -156,6 +156,8 @@ Keep workflow permissions minimal and verify remote branch protection / rulesets
 
 When changing workflows, CODEOWNERS, Dependabot, dependency review, required checks, or remote guardrail scripts, use `$harness-maintenance` and `references/github-guardrails.md`.
 
+When team development, multiple AIs, open-PR changed-file overlap, PR templates, CODEOWNERS ownership, or merge queue readiness is part of the task, use `.agents/skills/team-pr-conflict-control/` and keep durable outcomes in PR metadata, checks, status, ADR, or requirements docs as appropriate.
+
 ## Scope Discipline
 
 Skills are allowed and useful, but they do not replace repository rules.
@@ -203,7 +205,7 @@ Keep these skills out of the default short context chain. If a skill changes lon
 
 For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`; when changing PRD imports, `REQDOC / REQ / WS`, traceability matrix, or technical assumptions, use `.agents/skills/requirements-traceability-maintenance/`. Skip workflow skills for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
 
-For harness-internal changes to runtime, hooks, reducers, compression, verification commands, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. Keep those mechanics out of the default short context unless the task touches that surface.
+For harness-internal changes to runtime, hooks, reducers, compression, verification commands, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. For multi-person or multi-AI PR collision control, use `.agents/skills/team-pr-conflict-control/`. Keep those mechanics out of the default short context unless the task touches that surface.
 
 ## Repo-local Skill Note
 

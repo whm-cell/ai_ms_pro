@@ -22,7 +22,7 @@
   - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
   - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、repo skill / requirements / skill eval / GitHub guardrails checks
   - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
-      - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
+      - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills`、`team-pr-conflict-control` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
   - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
   - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、Dependabot、dependency review、Windows hook runtime job、required-check 策略和可运行远端 guardrails check
 - 进行中：
@@ -46,6 +46,7 @@
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
 - `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 只下沉 PRD/REQ/WS/技术假设维护方法。
+- `$team-pr-conflict-control` 只下沉多人 / 多 AI PR touch-set 冲突控制方法；它不等于 `scripts/check_pr_touch_conflicts.py`、PR template 或 merge queue 已经成为阻断式守门。
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 0/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
 - Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
 
@@ -55,6 +56,7 @@
 - 在下一次 stage compression 时继续审查 archive candidate monitor 输出，确认候选已被 status、backlog 或 ADR 吸收。
 - 在后续真实项目中观察 `$repo-governed-coding`、`$progressive-feature-development`、`$prd-to-project-skills`、project skill lifecycle 和 context budget audit 是否需要从显式/手动能力升级。
 - 对真实 PRD 导入和非平凡功能任务运行 evidence checks，并把 with/without eval 登记到 `docs/ai/skill-usage-samples.md`。
+- 在后续多人协作 PR 中验证 `$team-pr-conflict-control` 是否足以降低 touch-set 冲突；若样本证明有效，再考虑 PR template、changed-files overlap check 或 merge queue enforcement。
 - 继续压缩完成型 Stage-00 历史，判断 `WS-01` / `WS-02` 是保留为验证样板，还是压缩为更轻的 starter 说明。
 
 ## 验收判断

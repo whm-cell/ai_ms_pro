@@ -22,7 +22,7 @@
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py` 与 `scripts/check_github_guardrails.py` 已落地为 warning-only evidence checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / compression / verification / GitHub / code-shape 细则下沉到 `$harness-maintenance`，并把 PRD/REQ/WS/技术假设维护方法下沉到 `$requirements-traceability-maintenance`，继续 warning-only 手动运行
+- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / compression / verification / GitHub / code-shape 细则下沉到 `$harness-maintenance`，并把 PRD/REQ/WS/技术假设维护方法下沉到 `$requirements-traceability-maintenance`；多人 / 多 AI PR touch-set 冲突控制已下沉到 `$team-pr-conflict-control`，继续 warning-only / 按需使用
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset confirmation + longer-term reducer/runtime sample monitoring`
 
@@ -82,7 +82,15 @@
 
 ## P1 次高优先级
 
-- 暂无。当前剩余 P1 级 hardening 已转入本轮关闭项或 OPEN-01 远端确认。
+### OPEN-11 多人 / 多 AI PR touch-set 冲突控制验证
+
+- 目标：用真实团队 PR 样本验证 `$team-pr-conflict-control` 是否能降低同文件改动、治理文件冲突和 merge queue 前返工
+- 当前缺口：repo-local skill 已落地；PR template、changed-files overlap check 与 merge queue enforcement 仍未升级为阻断式机制
+- 当前验证：`docs/ai/skill-evals/SAMPLE-001-team-pr-conflict-control-validation.md` 已完成结构、discoverability、当前 PR 与离线场景矩阵验证；该验证不计入真实多人 PR accepted 样本
+- 完成定义：
+  - 至少两次多人或多 AI 并行 PR 使用该 skill 记录 touch-set overlap、high-risk files 与 coordination action
+  - 若样本有效，再决定是否落地 `.github/pull_request_template.md`、`scripts/check_pr_touch_conflicts.py` 或 merge queue / `merge_group` required-check 收紧
+  - 若样本证明流程税高于收益，保持显式调用并不升级 always-on
 
 ## P2 策略性决策
 
@@ -120,7 +128,7 @@
 ## 当前不纳入本轮
 
 - 发布 / 部署体系
-- 多 workstream 并行治理
+- 多 workstream 并行治理；当前仅新增 `$team-pr-conflict-control` 作为按需方法层，未做全局阻断式并行治理
 - 复杂前端或后端工具链验证
 - 自动归档 handoff / changelog 策略；当前只提供 warning-only candidate monitor
 - CodeQL；等业务代码进入 release / CI maturity 阶段后再评估

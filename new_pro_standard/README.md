@@ -16,6 +16,7 @@ It intentionally includes:
 - optional requirements traceability maintenance skill
 - optional progressive feature development skill
 - optional PRD-to-project-skills classifier
+- optional team PR conflict control skill
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
 - portable migration and rewrite guides
@@ -67,6 +68,12 @@ The starter includes two optional repo-local workflow skills:
 - `.agents/skills/prd-to-project-skills/` for classifying stable PRD / requirement / workstream patterns into candidate project skills
 
 They are mechanism-layer assets, not starter truth. They should not run for simple tasks, and they must not turn current progress, latest validation evidence, or acceptance status into hidden skill state.
+
+## Team PR Conflict Control Skill
+
+The starter includes `.agents/skills/team-pr-conflict-control/` for multi-person or multi-AI development where PR touch-set overlap, high-risk files, PR templates, CODEOWNERS, or merge queue readiness need explicit review.
+
+It is a mechanism-layer asset, not proof that the new repository has branch protection, merge queue, or a changed-files overlap check configured. Promote recurring coordination rules to PR templates, checks, status, or ADR only after the new project has real samples.
 
 ## Starter Shape
 
@@ -128,6 +135,7 @@ If the harness is awake, the expected behavior is:
 - optional requirements traceability guidance can be invoked with `$requirements-traceability-maintenance` for PRD import, `REQDOC / REQ / WS`, matrix, or technical assumption changes
 - optional progressive feature guidance can be invoked with `$progressive-feature-development` for non-trivial plan-first work
 - optional PRD-to-skill guidance can be invoked with `$prd-to-project-skills` when stable requirement patterns may become project skills
+- optional team PR conflict control can be invoked with `$team-pr-conflict-control` when multiple people or AIs may touch overlapping PR surfaces
 - project architecture/style/dependency skill guidance stays in the lifecycle template until a real project chooses to create a concrete skill
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise

@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
 更新时间：2026-05-04
-当前状态：Stage-00 harness 已可用；本轮新增 requirements traceability maintenance skill，并继续把 session/compression、verification 命令与 repo-governed coding 细则下沉到按需 skill/reference，剩余以远端确认和真实样本观察为主
+当前状态：Stage-00 harness 已可用；本轮新增 team PR conflict control skill，用于多人 / 多 AI PR touch-set 冲突控制，剩余以远端确认和真实样本观察为主
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -40,6 +40,7 @@
 - `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
 - `$requirements-traceability-maintenance`：PRD 导入、`REQDOC / REQ / WS`、traceability-matrix 或技术假设状态变化时再调用
 - `$harness-maintenance`：修改 bootstrap、hooks、runtime reducer、session compression、verification command reference、GitHub guardrails 或 code-shape checks 时再调用
+- `$team-pr-conflict-control`：多人或多 AI 并行开发、open PR changed-file overlap、PR template、CODEOWNERS 或 merge queue / `merge_group` readiness 任务再调用
 - [PRD 长文到 Harness 与 Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/PRD长文到Harness与Skill使用细节.md)：导入万字 PRD、拆 REQ/WS、判断是否 skill 化时再查看
 - [需求与 Skill 冲突处理细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/需求与Skill冲突处理细节.md)：PRD/REQ/WS 与既有 skill 建议冲突时再查看
 - [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)：评估 Candidate skill with/without eval 时再进入
@@ -62,7 +63,7 @@
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-04 Traceability And Governance Skill Downshift](./changelog/2026-05-04-traceability-and-governance-skill-downshift.md)
+- 最新 changelog：[2026-05-04 Team PR Conflict Control Skill](./changelog/2026-05-04-team-pr-conflict-control-skill.md)
 
 ## 归档入口
 
