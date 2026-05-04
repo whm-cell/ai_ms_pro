@@ -27,7 +27,7 @@
 - 维持短默认上下文：`index -> working-context -> current status`；requirements、handoff、ADR、archive 与 skills 都按需进入。
 - 收敛 Stage-00 剩余 hardening：远端 CI burn-in、GitHub branch protection / ruleset、required checks 与 security analysis 确认。
 - 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
-- 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；Candidate skills 继续显式触发，简单任务不走方案先行流程。
+- 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / GitHub / code-shape 细则，Candidate workflow skills 继续显式触发。
 - 使用四个 warning-only evidence checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`。
 
 ## 当前活跃队列
@@ -58,7 +58,7 @@
 - 三层 harness 分工不变：runtime 是本地恢复原料，governance docs 是共享真相，verification scripts/hooks 做漂移检测。
 - `plan/workstream` 是 projection surface；当前状态真相默认集中在 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
 - 默认上下文由 Task Discovery profile 扩面；长期决策见 ADR-010、ADR-011、ADR-014。
-- `.agents/skills/*` 是 repo-local native skill 层；`AGENTS.md` 只保留轻触发，Candidate skills 不替代 requirements / status / ADR。
+- `.agents/skills/*` 是 repo-local native skill 层；`AGENTS.md` 只保留轻触发和不可下沉真相边界，Candidate skills 不替代 requirements / status / ADR。
 - Candidate skill 升级必须有 with/without eval；当前两个 workflow skills 均为 0/2 accepted samples。
 - `new_pro_standard` 同步机制层，不复制当前 repo 的历史 truth。
 - GitHub ownership、supply-chain 与 required-check 策略已固化在 ADR-012；branch protection / ruleset 完成前 OPEN-01 仍保持开放。

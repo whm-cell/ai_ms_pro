@@ -22,7 +22,7 @@
   - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
   - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、repo skill / requirements / skill eval / GitHub guardrails checks
   - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
-  - Skills：`repo-governed-coding`、`progressive-feature-development`、`prd-to-project-skills` 均迁到 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
+  - Skills：`repo-governed-coding`、`harness-maintenance`、`progressive-feature-development`、`prd-to-project-skills` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
   - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
   - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、Dependabot、dependency review、Windows hook runtime job、required-check 策略和可运行远端 guardrails check
 - 进行中：
@@ -45,7 +45,7 @@
 - dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
-- `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts。
+- `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / GitHub / code-shape 细则。
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 0/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
 - Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
 
@@ -81,5 +81,6 @@
 - [2026-05-02 Context Budget Audit](../changelog/2026-05-02-context-budget-audit.md)
 - [2026-05-04 Progressive Feature And PRD Skills](../changelog/2026-05-04-progressive-feature-and-prd-skills.md)
 - [2026-05-04 Harness Evidence Checks](../changelog/2026-05-04-harness-evidence-checks.md)
+- [2026-05-04 Harness Maintenance Skill Downshift](../changelog/2026-05-04-harness-maintenance-skill-downshift.md)
 - [Candidate Skill Usage Samples](../skill-usage-samples.md)
-- [OPEN-10 使用细节](../../../--使用细节/context-budget-open-10.md)
+- [OPEN-10 使用细节](../../../--使用细节/上下文预算OPEN-10使用细节.md)

@@ -1,4 +1,4 @@
-# OPEN-10 Context Budget Triage 使用细节
+# 上下文预算 OPEN-10 使用细节
 
 更新时间：2026-05-02
 

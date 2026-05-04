@@ -22,7 +22,7 @@
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py` 与 `scripts/check_github_guardrails.py` 已落地为 warning-only evidence checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已归档完成型 skill/evidence handoff，继续 warning-only 手动运行
+- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / GitHub / code-shape 细则下沉到 `$harness-maintenance`，继续 warning-only 手动运行
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset confirmation + longer-term reducer/runtime sample monitoring`
 
@@ -32,7 +32,7 @@
 
 - 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
 - 当前缺口：repo 内 workflow、CODEOWNERS、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
-- 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/github-remote-configuration.md)
+- 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/GitHub远端配置确认细节.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过
   - `python3 scripts/sync_hooks_config.py --check` 自动运行
@@ -76,7 +76,7 @@
 
 ### OPEN-10 Context budget warning triage
 
-- 结果：已创建 [OPEN-10 Context Budget 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/context-budget-open-10.md)；当前 root Stage-00 budget 调整为 8500，starter/new-project 初始目标保留 6500；`AGENTS.md` 压缩到 300 行以内，current status 压缩为短判断，`$repo-governed-coding` description 已缩短
+- 结果：已创建 [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)；当前 root Stage-00 budget 调整为 8500，starter/new-project 初始目标保留 6500；`AGENTS.md` 压缩到 300 行以内，current status 压缩为短判断，`$repo-governed-coding` description 已缩短
 - 关闭原因：已完成本轮“是否调整预算、是否压缩默认面、是否接 Stop hook”的判断；context budget audit 继续保持 warning-only 手动运行，不自动 compact，不自动归档
 - 备注：未来如果 context budget 再次持续 warning，再开新的 triage 项，而不是把 OPEN-10 长期保持开放
 
@@ -102,6 +102,7 @@
   - 至少几个非平凡实现/审查任务中显式使用该 skill
   - 能证明 assumptions / scope / success criteria / verification plan 对 handoff/status 提炼有实际帮助
   - 若升级为默认，补对应 `status` 或 `ADR`；若不升级，保持显式调用并避免写入 always-on 规则
+  - `$harness-maintenance` 仍保持按需调用；不要把 runtime / hook / GitHub / code-shape 细则重新塞回 `AGENTS.md`
 
 ### OPEN-09 Project architecture/style/dependency skill 生命周期真实样本观察
 

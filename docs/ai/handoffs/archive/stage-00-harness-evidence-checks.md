@@ -37,7 +37,7 @@
 - [check_github_guardrails.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/check_github_guardrails.py)
 - [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)
 - [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)
-- [PRD 长文到 Harness + Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/prd-to-skill-harness-usage.md)
+- [PRD 长文到 Harness 与 Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/PRD长文到Harness与Skill使用细节.md)
 
 ## 关键实现决策
 

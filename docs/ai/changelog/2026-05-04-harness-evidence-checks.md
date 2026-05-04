@@ -43,6 +43,6 @@
 ## 关联文档
 
 - [Candidate Skill Usage Samples](../skill-usage-samples.md)
-- [PRD 长文到 Harness + Skill 使用细节](../../../--使用细节/prd-to-skill-harness-usage.md)
+- [PRD 长文到 Harness 与 Skill 使用细节](../../../--使用细节/PRD长文到Harness与Skill使用细节.md)
 - [AI 文档入口索引](../index.md)
 - [Harness Remaining Work](../harness-open-items.md)

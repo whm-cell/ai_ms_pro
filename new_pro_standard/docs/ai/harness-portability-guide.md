@@ -21,6 +21,7 @@
 - `.codex/hooks.json`
 - `.codex/hooks/`
 - `.agents/skills/repo-governed-coding/`（可选行为护栏；只保留机制，不写当前项目真相）
+- `.agents/skills/harness-maintenance/`（可选 harness 维护能力；下沉 runtime / hook / GitHub / code-shape 细则）
 - `.agents/skills/progressive-feature-development/`（可选非平凡功能方案 gate；只保留机制，不写当前项目真相）
 - `.agents/skills/prd-to-project-skills/`（可选 PRD-to-skill 分类器；只保留机制，不写当前项目真相）
 - `.codex/requirements.txt`
@@ -78,6 +79,7 @@
 - `.codex/hooks.json` 的 hook command entrypoint；bootstrap 会按当前宿主环境刷新为 `.ps1` 或 `.sh` 入口
 - `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
 - `.agents/skills/repo-governed-coding/` 的使用策略；默认保持显式调用，不应替代 `AGENTS.md` 和治理检查
+- `.agents/skills/harness-maintenance/` 的使用策略；默认只在修改 runtime、hook、reducer、GitHub guardrails 或 code-shape checks 时按需调用
 - `.agents/skills/progressive-feature-development/` 的使用策略；默认只在非平凡功能、跨模块、API / storage / architecture 或测试策略变化时按需调用
 - `.agents/skills/prd-to-project-skills/` 的使用策略；默认只在 PRD / requirements / workstream 中出现稳定可复用模式时按需调用
 - `docs/ai/templates/project-skill-lifecycle.md` 的使用策略；默认只在 architecture/style/dependency skill 任务中按需读取，不应进入默认短链路

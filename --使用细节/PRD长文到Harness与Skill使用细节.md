@@ -1,4 +1,4 @@
-# PRD 长文到 Harness + Skill 使用细节
+# PRD 长文到 Harness 与 Skill 使用细节
 
 更新时间：2026-05-04
 

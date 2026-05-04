@@ -34,7 +34,7 @@
 ## 影响
 
 - 当用户感觉 harness 对话变重，或 stage compression 前，可以运行 `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`。
-- OPEN-10 首轮 triage 已完成：`AGENTS.md`、current status 和 `$repo-governed-coding` description 已瘦身；后续再次持续 warning 时，按 `--使用细节/context-budget-open-10.md` 重新判断。
+- OPEN-10 首轮 triage 已完成：`AGENTS.md`、current status 和 `$repo-governed-coding` description 已瘦身；后续再次持续 warning 时，按 `--使用细节/上下文预算OPEN-10使用细节.md` 重新判断。
 - Context budget audit 仍然是手动体检，不接 Stop hook，不触发自动 compact 或自动归档。
 - 脚本退出码仍为 0，除非配置文件无法解析。
 
@@ -46,4 +46,4 @@
 - [Harness Remaining Work](../harness-open-items.md)
 - [ADR-010 Context Surface Layering](./ADR-010-context-surface-layering.md)
 - [ADR-013 Project Skill Lifecycle](./ADR-013-project-skill-lifecycle.md)
-- [OPEN-10 Context Budget 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/context-budget-open-10.md)
+- [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)

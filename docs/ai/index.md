@@ -38,7 +38,9 @@
 - [Project Skill Lifecycle Template](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/templates/project-skill-lifecycle.md)：创建或调整 architecture/style/dependency skill 时再进入
 - `$progressive-feature-development`：非平凡功能、跨模块、API / storage / architecture、测试策略变化或显式 plan-first 任务再调用
 - `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
-- [PRD 长文到 Harness + Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/prd-to-skill-harness-usage.md)：导入万字 PRD、拆 REQ/WS、判断是否 skill 化时再查看
+- `$harness-maintenance`：修改 bootstrap、hooks、runtime reducer、GitHub guardrails 或 code-shape checks 时再调用
+- [PRD 长文到 Harness 与 Skill 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/PRD长文到Harness与Skill使用细节.md)：导入万字 PRD、拆 REQ/WS、判断是否 skill 化时再查看
+- [需求与 Skill 冲突处理细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/需求与Skill冲突处理细节.md)：PRD/REQ/WS 与既有 skill 建议冲突时再查看
 - [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)：评估 Candidate skill with/without eval 时再进入
 - [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)：记录详细对照实验材料时再进入
 - `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
@@ -46,8 +48,8 @@
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
-- [OPEN-10 Context Budget 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/context-budget-open-10.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
-- [阶段性提交 / PR CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/stage-commit-pr-ci-manual.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
+- [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
+- [阶段提交与 PR-CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/阶段提交与PR-CI操作手册.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
 - [已归档 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive)：当前 truth surface 不足以回答历史原因时再进入
 - [当前 Changelog 目录](./changelog)
 

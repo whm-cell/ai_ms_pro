@@ -712,6 +712,7 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`
         - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态
         - `.agents/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本
+        - `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、GitHub guardrails 或 code-shape checks 时按需调用
 
         ## 更新规则
 

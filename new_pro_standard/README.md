@@ -12,6 +12,7 @@ It intentionally includes:
 - project skill lifecycle template
 - candidate skill eval protocol
 - optional repo-local behavioral skill
+- optional harness maintenance skill
 - optional progressive feature development skill
 - optional PRD-to-project-skills classifier
 - document templates
@@ -44,6 +45,12 @@ It is not an always-on governance replacement. `AGENTS.md`, `docs/ai/*`, `docs/r
 The starter includes `docs/ai/templates/project-skill-lifecycle.md` for architecture, style, and dependency skills.
 
 Use it only when a project-specific skill is being created or changed. It keeps volatile 0-1 project constraints out of the default context while still requiring durable decisions to be promoted to `status`, ADR, requirements, or checks.
+
+## Harness Maintenance Skill
+
+The starter includes `.agents/skills/harness-maintenance/` for changes to bootstrap, hook runners, runtime reducers, GitHub guardrails, and code-shape checks.
+
+It keeps detailed harness mechanics out of `AGENTS.md`; use it only when modifying the harness itself.
 
 ## Progressive Feature And PRD Skills
 

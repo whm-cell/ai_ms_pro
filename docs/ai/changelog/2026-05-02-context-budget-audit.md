@@ -10,7 +10,7 @@
 - Added `[context_budget]` thresholds to `.codex/harness.toml`.
 - Synced the script and config into `new_pro_standard`.
 - Added ADR-014 for the manual budget audit strategy.
-- Added `--使用细节/context-budget-open-10.md` as the recall note for when and how to rerun OPEN-10 style triage.
+- Added `--使用细节/上下文预算OPEN-10使用细节.md` as the recall note for when and how to rerun OPEN-10 style triage.
 
 ## 修复问题
 
@@ -41,4 +41,4 @@
 - [AI 文档入口索引](../index.md)
 - [ADR-014 Context Budget Audit](../adr/ADR-014-context-budget-audit.md)
 - [Stage-00 Runtime Harness Foundation Status](../status/stage-00-runtime-harness-foundation.md)
-- [OPEN-10 Context Budget 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/context-budget-open-10.md)
+- [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)

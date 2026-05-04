@@ -140,21 +140,13 @@ Use these rules:
 
 ## Python Runtime Rule
 
-Harness Python must prefer the repo-local virtual environment `.codex/.venv`.
+Harness Python details are on-demand. When changing bootstrap, hook runners, hook sync, `.githooks`, `.codex/hooks/*`, or Python resolution, use `$harness-maintenance` and `references/python-runtime-and-hooks.md`.
 
-Use these rules:
-
-1. `scripts/bootstrap_harness.py` must support Windows and POSIX venv layouts.
-2. Git hooks and Codex hooks must resolve Python through `.codex/hooks/` runners instead of hardcoding a system Python path.
-3. Runners must verify that a Python candidate is actually runnable before using it.
-4. If `.codex/.venv` exists but is not runnable, bootstrap may rebuild it in place without touching `.codex/runtime/*`.
-5. On POSIX/macOS and Windows, fallback discovery must not stop at the first system Python when a later candidate provides Python 3.11+; prefer `.codex/.venv`, active envs, `CODEX_HARNESS_PYTHON`, then the best runnable Python before falling back to the launcher Python.
-6. Do not commit `.codex/.venv`.
+Always preserve the repo-local `.codex/.venv` preference, verify runnable Python candidates, and never commit `.codex/.venv`.
 
 Platform note:
 
-- This starter includes both POSIX and PowerShell hook runners.
-- `scripts/bootstrap_harness.py` refreshes `.codex/hooks.json` for the current host shell during setup; if a repo later moves to a different host shell, rerun bootstrap or update only the hook entrypoint commands instead of rewriting the runtime scripts ad hoc.
+- This starter includes POSIX and PowerShell hook runners; rerun bootstrap when moving host shells.
 
 ## Session Promotion
 
@@ -187,12 +179,9 @@ Use these rules:
 
 Runtime observation files under `.codex/runtime/observations/*.jsonl` are local reduction inputs, not shared truth.
 
-Use these rules:
+When changing reducer or runtime observation behavior, use `$harness-maintenance` and `references/runtime-observation-reduction.md`.
 
-1. Reduce observations explicitly through the repo-local Python runner, for example `.codex/hooks/run_with_repo_python.sh scripts/reduce_runtime_observations.py` on POSIX/macOS or `powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_python.ps1 scripts/reduce_runtime_observations.py` on Windows, when local observation material should be reviewed for promotion.
-2. The default reduction order is `observations -> handoff draft -> main agent review -> status/adr if warranted`.
-3. Reducer output is a candidate artifact. It does not replace the main agent's responsibility to decide whether canonical shared docs should change.
-4. Only promote to `status` or `adr` when the reducer output has already been reviewed and the conclusion is stable beyond a single local observation batch.
+Default reduction order remains: `observations -> handoff draft -> main agent review -> status/adr if warranted`.
 
 ## Compression Rule
 
@@ -216,30 +205,15 @@ Use these rules:
 
 ## Code Shape Budget
 
-Code shape is a harness-level constraint for implementation and harness scripts.
+Code shape is a harness-level constraint for implementation and harness scripts. The scope and thresholds live in `.codex/code_shape.toml` and are enforced by `scripts/check_code_shape.py`.
 
-Use these rules:
-
-1. The default scope is controlled by `.codex/code_shape.toml`.
-2. Python file target is `<=300` lines; warning starts above `350`, and new files above `500` should be split before landing.
-3. Function or method target is `<=60` lines; warning starts above `80`, and new definitions above `120` should be split.
-4. Class target is `<=180` lines; warning starts above `250`, and new classes above `350` should be split.
-5. Existing large files are legacy debt and may warn, but the rule is primarily intended to prevent new monoliths.
-6. Keep shape checks separate from AI governance checks; do not keep expanding `scripts/check_ai_governance.py` with code-size rules.
+When changing the budget or the checker, use `$harness-maintenance` and `references/code-shape-budget.md`. Keep code-shape checks separate from AI governance checks.
 
 ## Governance Surface Budget
 
 Do not let the default shared recovery surface grow without bound.
 
-Use these rules:
-
-1. `docs/ai/index.md` is a stable router, not a second stage report.
-2. `docs/ai/working-context.md` should keep incremental truth, not a duplicate stage directory.
-3. The default active handoff budget is configured in `.codex/harness.toml` and starts at `5`.
-4. If active handoffs reach that budget, compress absorbed detail into `status` or `adr`, then archive old handoffs.
-5. Use `scripts/check_archive_candidates.py` through the repo-local Python runner when active handoffs reach the surface budget or before a stage compression pass.
-6. The archive candidate check is warning-only: it lists candidates and reasons, but the main agent still decides whether to move files and update shared docs.
-7. Small routing duplication is acceptable when it supports structure checks; large duplicated stage listings are not.
+`docs/ai/index.md` is a stable router; `docs/ai/working-context.md` is incremental truth. If active handoffs reach the configured budget, run `scripts/check_archive_candidates.py`, compress absorbed detail into `status` or ADR, then archive old handoffs. The check is warning-only; the main agent still decides what moves.
 
 ## Verification Layer
 
@@ -292,6 +266,8 @@ Keep these skills out of the default short context chain. If a skill changes lon
 
 For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`. Skip both for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
 
+For harness-internal changes to runtime, hooks, reducers, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. Keep those mechanics out of the default short context unless the task touches that surface.
+
 ## Repo-local Skill Note
 
 This starter carries an optional repo-local skill at `.agents/skills/repo-governed-coding/`.
@@ -317,10 +293,4 @@ Do not keep a skill in both temporary task use and default repository rule witho
 
 ## Completion Condition
 
-A task that materially changed the project is not fully complete until:
-
-1. implementation is updated
-2. affected project docs are updated if needed
-3. `docs/ai/index.md` is still accurate
-4. `scripts/check_ai_governance.py` passes through the repo-local Python runner when applicable
-5. `scripts/check_code_shape.py --staged` passes through the repo-local Python runner when implementation or harness code is staged
+A materially changing task is complete only after implementation, needed docs, `docs/ai/index.md`, governance check, and staged code-shape check are current.
