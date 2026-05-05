@@ -10,7 +10,7 @@
 ## 当前策略
 
 - OpenSSF Scorecard：通过 `Security Evidence` workflow 生成 SARIF artifact，先观察分数和建议。
-- CodeQL：覆盖 Python 与 JavaScript / TypeScript；默认作为 advisory job 运行，避免业务代码不足或 GitHub 安全功能限制阻断主线。
+- CodeQL：覆盖 Python 与 JavaScript / TypeScript；默认作为 advisory job 生成 SARIF artifact，使用 `upload: never`，避免 private repo 未启用 code scanning 时把证据层变成红叉。
 - SBOM：通过 Syft / Anchore action 生成 CycloneDX JSON artifact，先作为 release 前证据。
 - SLSA / provenance：新项目未形成正式 release artifact 前，先定义产物证明模型，不强制生成 provenance。
 
@@ -28,5 +28,5 @@
 ## 升级条件
 
 - Scorecard / CodeQL / SBOM 至少经过两轮 PR 或 scheduled burn-in。
-- 失败能指向明确修复路径，而不是平台权限或仓库可见性限制。
+- 失败能指向明确修复路径，而不是平台权限、code scanning 未启用或仓库可见性限制。
 - 若要升级为 blocking，必须新增 ADR，并同步 `check-registry.md`。
