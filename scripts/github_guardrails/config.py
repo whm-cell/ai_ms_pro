@@ -13,9 +13,10 @@ EXPECTED_WORKFLOWS = {
         "triggers": {"pull_request", "merge_group"},
     },
     ".github/workflows/security-evidence.yml": {
-        "jobs": {"scorecard", "codeql", "sbom"},
+        "jobs": {"security-evidence"},
         "permissions": {"contents": "read", "security-events": "write"},
         "triggers": {"pull_request", "push", "schedule", "workflow_dispatch"},
+        "tokens": {"Run OpenSSF Scorecard", "Perform CodeQL Analysis", "Generate SBOM"},
     },
 }
 EXPECTED_REQUIRED_CHECKS = {"governance", "windows-hook-runtime", "smoke", "dependency-review"}

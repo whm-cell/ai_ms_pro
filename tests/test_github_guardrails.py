@@ -20,6 +20,9 @@ class GitHubGuardrailsTest(unittest.TestCase):
             ".github/workflows/security-evidence.yml",
             check_github_guardrails.EXPECTED_WORKFLOWS,
         )
+        expected = check_github_guardrails.EXPECTED_WORKFLOWS[".github/workflows/security-evidence.yml"]
+        self.assertEqual(expected["jobs"], {"security-evidence"})
+        self.assertIn("Run OpenSSF Scorecard", expected["tokens"])
 
     def test_recommended_actions_call_out_unknown_remote_enforcement(self) -> None:
         checks = [

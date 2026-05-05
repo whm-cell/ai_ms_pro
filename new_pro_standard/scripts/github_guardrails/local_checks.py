@@ -31,7 +31,11 @@ def workflow_checks(root: Path) -> list[Check]:
             trigger for trigger in expected.get("triggers", set())
             if not has_event_trigger(text, trigger)
         )
-        if missing_jobs or missing_permissions or missing_meta or missing_triggers:
+        missing_tokens = sorted(
+            token for token in expected.get("tokens", set())
+            if token not in text
+        )
+        if missing_jobs or missing_permissions or missing_meta or missing_triggers or missing_tokens:
             detail = []
             if missing_jobs:
                 detail.append(f"missing jobs={','.join(missing_jobs)}")
@@ -41,6 +45,8 @@ def workflow_checks(root: Path) -> list[Check]:
                 detail.append(f"missing top-level keys={','.join(missing_meta)}")
             if missing_triggers:
                 detail.append(f"missing triggers={','.join(missing_triggers)}")
+            if missing_tokens:
+                detail.append(f"missing tokens={','.join(missing_tokens)}")
             checks.append(Check(f"workflow {rel_path}", "WARN", "; ".join(detail)))
         else:
             checks.append(Check(f"workflow {rel_path}", "OK", "expected jobs and metadata found"))

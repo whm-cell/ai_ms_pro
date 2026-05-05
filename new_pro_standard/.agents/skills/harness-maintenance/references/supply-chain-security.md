@@ -6,6 +6,7 @@ Use this reference when adding or changing Scorecard, CodeQL, SBOM, artifact att
 
 - Scorecard, CodeQL, and SBOM are evidence-producing advisory jobs until burn-in proves signal quality.
 - CodeQL should produce an artifact-only SARIF result (`upload: never`) until GitHub code scanning is enabled for the repository.
+- Prefer a single sequential `security-evidence` job for advisory evidence to reduce runner queue and timeout noise.
 - Dependency review remains advisory when GitHub reports dependency graph / Advanced Security is unavailable.
 - SLSA provenance is planned at the artifact boundary; do not require provenance before the project has release artifacts.
 - Do not claim supply-chain enforcement is active unless the relevant GitHub job or remote setting has been observed.

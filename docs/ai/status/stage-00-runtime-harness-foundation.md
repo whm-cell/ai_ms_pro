@@ -42,7 +42,7 @@
 ## 风险与阻塞
 
 - CI workflow 已落地并进入 PR #1 burn-in；远端失败已暴露并修复 PR merge diff、Windows Python resolution test、dependency review unsupported、security evidence checkout orphan gitlink、PR touch conflict unknown fail-closed 五类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
-- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；Scorecard / CodeQL / SBOM 也先作为 security evidence，不进入 required checks。CodeQL 在 private repo 未启用 code scanning 前只生成 SARIF artifact，不上传到 Code Scanning。branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。2026-05-05 已尝试读取 main branch protection / rulesets，但 GitHub 返回 HTTP 403，需要 GitHub Pro 或 public repo。
+- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；Scorecard / CodeQL / SBOM 也先作为单个顺序 `security-evidence` job 产出 artifacts，不进入 required checks。CodeQL 在 private repo 未启用 code scanning 前只生成 SARIF artifact，不上传到 Code Scanning。branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。2026-05-05 已尝试读取 main branch protection / rulesets，但 GitHub 返回 HTTP 403，需要 GitHub Pro 或 public repo。
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
 - `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 只下沉 PRD/REQ/WS/技术假设维护方法。

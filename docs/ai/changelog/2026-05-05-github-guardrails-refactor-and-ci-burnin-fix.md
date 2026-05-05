@@ -17,6 +17,7 @@
 - 从 Git 索引移除该演练输出 gitlink，并将 `output/` 作为本地生成产物忽略；本地演练目录保留，不作为主 repo truth。
 - PR #1 第二轮 governance 失败根因是 GitHub GraphQL 504 触发 PR touch conflict `UNKNOWN`，而 workflow 把 `--strict-unknown` 作为阻断；已调整为只阻断已确认的 high-risk overlap，`UNKNOWN` 在 burn-in 阶段保持可见但不阻断。
 - PR #1 第三轮 CodeQL 失败根因是 private repo 未启用 GitHub code scanning；已改为 `upload: never` 并上传 CodeQL SARIF artifact，保持 advisory evidence 不污染 required-check 信号。
+- PR #1 第四轮 Scorecard 失败根因是独立 advisory job 长时间未拿到 runner 并在 15 分钟后 timeout；已将 Scorecard、CodeQL、SBOM 收敛为同一个顺序 `security-evidence` job，减少私有仓库 CI 配额下的排队噪音。
 
 ## 行为变化
 
@@ -24,7 +25,7 @@
 - branch protection / rulesets 仍按 `OK / WARN / UNKNOWN` 区分；GitHub 403 时不能宣称禁止直推 `main` 已生效。
 - PR touch conflict checker 仍支持 `--strict-unknown`，但默认 PR workflow 暂不启用该开关，避免 GitHub API 瞬时 504 变成流程性 CI flake。
 - CodeQL 结果暂存为 workflow artifact；只有启用 GitHub code scanning 后，才考虑改回上传到 Code Scanning 并讨论是否升级。
-- Scorecard / CodeQL / SBOM 仍处于 burn-in advisory 阶段，不进入 required checks。
+- Scorecard / CodeQL / SBOM 仍处于 burn-in advisory 阶段，不进入 required checks；PR checks 中表现为一个 `security-evidence` check，具体结果看 job steps 与 artifacts。
 
 ## 破坏性变更
 
