@@ -9,6 +9,7 @@ Use this reference when changing GitHub workflows, CODEOWNERS, Dependabot, depen
 - Dependency review and Dependabot are the default supply-chain guardrails for this stage.
 - Branch protection / ruleset configuration must be verified on GitHub before claiming required checks are enforced.
 - Expected required checks are `governance`, `windows-hook-runtime`, `smoke`, and dependency review.
+- Change-triggered follow-up summaries may be posted to GitHub Actions Summary, but they remain advisory and must not be described as required checks.
 - CodeQL remains out of Stage-00 by default until the project enters release / CI maturity or has enough business code to justify it.
 
 ## Check

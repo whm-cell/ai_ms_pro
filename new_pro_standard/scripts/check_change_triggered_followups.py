@@ -145,7 +145,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--files", nargs="*", help="Explicit changed-file list, useful for tests.")
     parser.add_argument("--staged", action="store_true", help="Inspect staged changes only.")
     parser.add_argument("--base", help="Inspect changes against a git base, for example origin/main.")
-    parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    output.add_argument("--markdown", action="store_true", help="Emit GitHub Actions summary markdown.")
     parser.add_argument("--strict", action="store_true", help="Exit 1 when any follow-up is suggested.")
     return parser.parse_args()
 
@@ -242,6 +244,27 @@ def emit_text(files: tuple[str, ...], followups: tuple[Followup, ...]) -> None:
     print("\nThis checker is advisory. It suggests missing follow-up surfaces; it does not prove commands have already run.")
 
 
+def markdown_list(values: tuple[str, ...]) -> str:
+    return "<br>".join(f"`{value}`" for value in values)
+
+
+def emit_markdown(files: tuple[str, ...], followups: tuple[Followup, ...]) -> None:
+    lines = ["### Change-triggered follow-up suggestions", "", f"- Changed files: {len(files)}"]
+    if files:
+        lines.extend(["", "Changed files:", *(f"- `{path}`" for path in files)])
+    if followups:
+        lines.extend(["", "| Follow-up | Reason | Matched files | Commands | References |", "| --- | --- | --- | --- | --- |"])
+        lines.extend(
+            f"| `{item.name}` | {item.reason} | {markdown_list(item.matched_files)} | "
+            f"{markdown_list(item.commands)} | {markdown_list(item.references)} |"
+            for item in followups
+        )
+    else:
+        lines.extend(["", "No specialized follow-up checks suggested."])
+    lines.extend(["", "> Advisory only: this checker maps changed files to follow-up surfaces; it does not prove commands have already run."])
+    print("\n".join(lines))
+
+
 def main() -> int:
     args = parse_args()
     root = Path(args.root).expanduser().resolve()
@@ -253,17 +276,10 @@ def main() -> int:
 
     followups = build_followups(files)
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "changed_files": files,
-                    "followups": [asdict(item) for item in followups],
-                    "ok": not followups,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
+        payload = {"changed_files": files, "followups": [asdict(item) for item in followups], "ok": not followups}
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    elif args.markdown:
+        emit_markdown(files, followups)
     else:
         emit_text(files, followups)
     return 1 if args.strict and followups else 0

@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -30,6 +32,25 @@ jobs:
 
       - name: Check hook config sync
         run: python3 scripts/sync_hooks_config.py --check
+
+      - name: Add advisory follow-up summary for PR
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: python3 scripts/check_change_triggered_followups.py --base "origin/${{ github.base_ref }}" --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add advisory follow-up summary for main push
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        continue-on-error: true
+        run: python3 scripts/check_change_triggered_followups.py --base "${{ github.event.before }}" --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add advisory follow-up note for merge queue
+        if: github.event_name == 'merge_group'
+        run: |
+          {
+            echo "### Change-triggered follow-up suggestions"
+            echo ""
+            echo "Merge queue runs keep the blocking gates. Changed-file advisory summaries are generated on pull_request and main push events."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check PR touch conflicts
         if: github.event_name == 'pull_request'

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import io
 import sys
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 
@@ -15,6 +17,13 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
     def followup_names(self, *files: str) -> set[str]:
         followups = check_change_triggered_followups.build_followups(tuple(files))
         return {item.name for item in followups}
+
+    def markdown_for(self, *files: str) -> str:
+        followups = check_change_triggered_followups.build_followups(tuple(files))
+        output = io.StringIO()
+        with redirect_stdout(output):
+            check_change_triggered_followups.emit_markdown(tuple(files), followups)
+        return output.getvalue()
 
     def test_agents_change_triggers_governance_and_budget(self) -> None:
         names = self.followup_names("AGENTS.md")
@@ -69,6 +78,22 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
             check_change_triggered_followups.parse_status_line("?? .github/pull_request_template.md"),
             ".github/pull_request_template.md",
         )
+
+    def test_markdown_summary_lists_followups(self) -> None:
+        output = self.markdown_for(".github/workflows/governance-and-smoke.yml")
+
+        self.assertIn("### Change-triggered follow-up suggestions", output)
+        self.assertIn("| Follow-up | Reason | Matched files | Commands | References |", output)
+        self.assertIn("`github-guardrails`", output)
+        self.assertIn("scripts/check_github_guardrails.py", output)
+        self.assertIn("Advisory only", output)
+
+    def test_markdown_summary_handles_no_followups(self) -> None:
+        output = self.markdown_for("README.md")
+
+        self.assertIn("- Changed files: 1", output)
+        self.assertIn("No specialized follow-up checks suggested.", output)
+        self.assertIn("Advisory only", output)
 
 
 if __name__ == "__main__":

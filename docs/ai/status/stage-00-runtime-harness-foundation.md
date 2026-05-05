@@ -20,11 +20,11 @@
 
 - 已完成：
   - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
-  - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、change-triggered followups、repo skill / requirements / skill eval / GitHub guardrails checks
+  - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、change-triggered followups、CI / PR summary、repo skill / requirements / skill eval / GitHub guardrails checks
   - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
       - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills`、`team-pr-conflict-control` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
   - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
-  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、`merge_group` 触发、required-check 策略和可运行远端 guardrails check
+  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、change-triggered advisory summary、`merge_group` 触发、required-check 策略和可运行远端 guardrails check
 - 进行中：
   - OPEN-01：远端 CI burn-in、GitHub branch protection / ruleset required checks 确认
   - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 与 workflow skill 真实样本观察
@@ -37,7 +37,7 @@
 - `new_pro_standard` 已同步机制层，包括 Python 解析、hook sync、code shape、context surface、Task Discovery、project skill lifecycle、`.agents/skills` 与 context budget audit；当前 repo 的历史 truth 不复制进 starter。
 - `plan/workstream` 已明确为 projection surface，当前状态真相默认回收到 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
 - `REQ <-> WS <-> STAGE` 至少已有一层自动校验：`working-context` 当前 stage 与 matrix 不一致会阻断，runtime artifact 先 warning-only。
-- repo-local skills、requirements shape、Candidate skill eval samples、GitHub guardrails 与 changed-file follow-up triage 已有独立 warning-only checks，避免继续膨胀 governance checker 或 `AGENTS.md`。
+- repo-local skills、requirements shape、Candidate skill eval samples、GitHub guardrails 与 changed-file follow-up triage 已有独立 warning-only checks；PR / main push 会展示 advisory summary，避免继续膨胀 governance checker 或 `AGENTS.md`。
 
 ## 风险与阻塞
 
@@ -46,7 +46,7 @@
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
 - `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 只下沉 PRD/REQ/WS/技术假设维护方法。
-- `scripts/check_change_triggered_followups.py` 只提示 changed files 对应的可能漏跑检查和应读 reference，不证明命令已执行，也不升级为 blocking policy。
+- `scripts/check_change_triggered_followups.py` 只提示 changed files 对应的可能漏跑检查和应读 reference；CI summary 只提高可见性，不证明命令已执行，也不升级为 blocking policy。
 - `$team-pr-conflict-control` 只下沉多人 / 多 AI PR touch-set 冲突控制方法；repo 内已新增 `scripts/check_pr_touch_conflicts.py`、PR template 和 `merge_group` workflow 触发，但远端 merge queue / branch protection 仍未被证明启用。
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 0/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
 - Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
@@ -88,5 +88,6 @@
 - [2026-05-04 Traceability And Governance Skill Downshift](../changelog/2026-05-04-traceability-and-governance-skill-downshift.md)
 - [2026-05-05 PR Branch Guardrails](../changelog/2026-05-05-pr-branch-guardrails.md)
 - [2026-05-05 Change Triggered Followups](../changelog/2026-05-05-change-triggered-followups.md)
+- [2026-05-05 Advisory Followups CI Summary](../changelog/2026-05-05-advisory-followups-ci-summary.md)
 - [Candidate Skill Usage Samples](../skill-usage-samples.md)
 - [OPEN-10 使用细节](../../../--使用细节/上下文预算OPEN-10使用细节.md)

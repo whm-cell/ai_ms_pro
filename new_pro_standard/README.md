@@ -180,7 +180,7 @@ Run `scripts/check_archive_candidates.py` manually through the repo-local Python
 
 Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
 
-Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It is advisory and does not prove that suggested commands already ran.
+Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It also supports `--markdown` for PR / CI summaries. It is advisory and does not prove that suggested commands already ran.
 
 Run `scripts/check_requirements_shape.py` after PRD / `REQDOC / REQ / WS` imports or traceability-matrix changes. The evidence checks remain warning-oriented until a new project explicitly promotes them to blocking policy.
 

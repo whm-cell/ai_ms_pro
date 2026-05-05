@@ -29,7 +29,7 @@
 - 收敛 Stage-00 剩余 hardening：repo 内 PR 守门已补 PR template、touch conflict checker 与 `merge_group` workflow 触发；远端 GitHub branch protection / ruleset 仍需套餐或仓库可见性支持。
 - 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
 - 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 下沉 PRD/REQ/WS/技术假设维护流程，`team-pr-conflict-control` 下沉多人 / 多 AI PR touch-set 冲突控制，Candidate workflow skills 继续显式触发。
-- 使用 warning-only evidence / follow-up checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`、`check_change_triggered_followups.py`。
+- 使用 warning-only evidence / follow-up checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`、`check_change_triggered_followups.py`；其中 change-triggered follow-up 已可在 CI / PR summary 展示。
 
 ## 当前活跃队列
 
@@ -63,7 +63,7 @@
 - 默认上下文由 Task Discovery profile 扩面；长期决策见 ADR-010、ADR-011、ADR-014。
 - `.agents/skills/*` 是 repo-local native skill 层；`AGENTS.md` 只保留轻触发和不可下沉真相边界，requirements traceability skill 与 Candidate skills 都不替代 requirements / status / ADR。
 - 本轮 `AGENTS.md` 默认面压缩不改变能力边界；可下沉细节仍可追溯到 `$repo-governed-coding`、`$harness-maintenance`、`$team-pr-conflict-control`、requirements traceability skill、project-skill-lifecycle template 或检查脚本。
-- `scripts/check_change_triggered_followups.py` 用 changed files 提示可能遗漏的专项检查和 skill/reference，降低按需 skill 漏触发概率，但不证明命令已经执行。
+- `scripts/check_change_triggered_followups.py` 用 changed files 提示可能遗漏的专项检查和 skill/reference，降低按需 skill 漏触发概率；当前 workflow 会把 PR / main push 的 markdown 摘要写入 GitHub Actions Summary，但仍不证明命令已经执行。
 - Stage status 已同步记录 change-triggered follow-up checker；该 checker 继续保持 warning-only，不替代主 Agent 的语义判断。
 - Candidate skill 升级必须有 with/without eval；当前两个 workflow skills 均为 0/2 accepted samples。
 - `new_pro_standard` 同步机制层，不复制当前 repo 的历史 truth。
