@@ -20,6 +20,10 @@
 - `.codex/config.toml`
 - `.codex/hooks.json`
 - `.codex/hooks/`
+- `.github/CODEOWNERS`
+- `.github/pull_request_template.md`
+- `.github/workflows/`
+- `.github/dependabot.yml`
 - `.agents/skills/repo-governed-coding/`（可选行为护栏；只保留机制，不写当前项目真相）
 - `.agents/skills/harness-maintenance/`（可选 harness 维护能力；下沉 runtime / hook / compression / verification / GitHub / code-shape 细则）
 - `.agents/skills/requirements-traceability-maintenance/`（可选 requirements 维护能力；下沉 PRD / REQDOC / REQ / WS / traceability / 技术假设细则）
@@ -32,10 +36,12 @@
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_archive_candidates.py`
 - `scripts/check_context_budget.py`
+- `scripts/check_change_triggered_followups.py`
 - `scripts/check_repo_skills.py`
 - `scripts/check_requirements_shape.py`
 - `scripts/check_skill_usage_samples.py`
 - `scripts/check_github_guardrails.py`
+- `scripts/check_pr_touch_conflicts.py`
 - `scripts/reduce_runtime_observations.py`
 - `scripts/bootstrap_harness.py`
 - `.codex/harness.toml`
@@ -83,6 +89,8 @@
 - `.codex/harness.toml` 中的 `required_ai_docs`、`required_requirements_docs`、`context_surface` 与 `context_budget` 预算阈值
 - `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`，POSIX/macOS 与 Windows PowerShell fallback 会枚举候选并优先 Python 3.11+
 - `.codex/hooks.json` 的 hook command entrypoint；bootstrap 会按当前宿主环境刷新为 `.ps1` 或 `.sh` 入口
+- `.github/CODEOWNERS` 中的 owner 占位符；把 `@REPLACE_WITH_OWNER` 改为新项目真实 owner/team
+- `.github/workflows/` 中的 smoke job；starter 默认只跑 harness context budget smoke，新项目应替换为真实业务 smoke
 - `.codex/requirements.txt` 中的 Python 兼容依赖；当前默认是可选 best-effort 安装，不应让离线 bootstrap 直接失败
 - `.agents/skills/repo-governed-coding/` 的使用策略；默认保持显式调用，不应替代 `AGENTS.md` 和治理检查
 - `.agents/skills/harness-maintenance/` 的使用策略；默认只在修改 runtime、hook、reducer、session compression、verification command reference、GitHub guardrails 或 code-shape checks 时按需调用
@@ -93,7 +101,9 @@
 - `scripts/check_repo_skills.py` 的使用策略；默认只做 repo-local / globally installed 事实报告，不替代 skill 安装
 - `scripts/check_requirements_shape.py` 的使用策略；默认在 PRD / REQ / WS 导入后手动运行，第一阶段不做 blocking hook
 - `scripts/check_skill_usage_samples.py` 的使用策略；默认用于 Candidate skill with/without eval evidence，不应伪造样本或强制升级
+- `scripts/check_change_triggered_followups.py` 的使用策略；默认 warning-only，用 changed files 提示可能遗漏的专项检查和 skill/reference
 - `scripts/check_github_guardrails.py` 的使用策略；默认手动运行，远端未登录或缺权限时输出 `UNKNOWN` 而不是伪装成 OK
+- `scripts/check_pr_touch_conflicts.py` 的使用策略；默认在 PR 上阻断 high-risk changed-file overlap，普通 overlap 先提示协调
 - `docs/ai/templates/project-skill-lifecycle.md` 的使用策略；默认只在 architecture/style/dependency skill 任务中按需读取，不应进入默认短链路
 - `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态
 - `docs/ai/working-context.md` 中的当前主目标、活跃队列和风险
@@ -135,6 +145,7 @@
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
 - repo-local 行为 skill 只能约束执行方法；跨会话共享结论仍必须提升到 `handoff/status/ADR` 或 requirements 文档。
 - requirements traceability、progressive feature、PRD-to-skill 与 team PR conflict control skills 只能约束维护、发现、分类和协作控制方法；PRD 当前状态、验收进度、最新验证证据和远端 GitHub 配置不得藏进 skill。
+- starter 可以携带 PR template、CODEOWNERS、workflow 和 touch-conflict checker，但不能自动证明新仓库远端已启用 branch protection、rulesets 或 merge queue；这些必须在 GitHub 侧确认。
 - project skill 生命周期模板只提供创建、升级、偏离和废弃 skill 的治理路径；不会自动决定新项目的架构、样式或依赖栈。
 - archive candidate monitor 只适合作为压缩前提醒，不应替代主 Agent 对 `handoff -> status -> archive` 的语义判断。
 - context budget audit 只适合作为默认上下文体检，不应替代 Task Discovery 或主 Agent 的语义取舍；starter/new-project 默认目标保持 6500，成熟项目若有证据可按需调高本地预算。

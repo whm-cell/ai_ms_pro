@@ -28,23 +28,28 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Check hook config sync
-        run: python3 scripts/sync_hooks_config.py --check
-
       - name: Check PR touch conflicts
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/check_pr_touch_conflicts.py --current-pr "${{ github.event.pull_request.number }}" --strict-high-risk --strict-unknown
 
-      - name: Run unit tests
-        run: python3 -m unittest discover -s tests
+      - name: Run unit tests when present
+        run: |
+          if [ -d tests ]; then
+            python3 -m unittest discover -s tests
+          else
+            echo "No tests directory in this starter-derived project yet."
+          fi
 
       - name: Run AI governance checks
         run: python3 scripts/check_ai_governance.py
 
       - name: Run code shape checks
         run: python3 scripts/check_code_shape.py --all
+
+      - name: Run repo skill discoverability check
+        run: python3 scripts/check_repo_skills.py
 
   windows-hook-runtime:
     runs-on: windows-latest
@@ -58,12 +63,6 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run Python resolution unit tests
-        run: python -m unittest discover -s tests -p "test_python_resolution.py"
-
-      - name: Run hook sync unit tests
-        run: python -m unittest discover -s tests -p "test_hooks_config_sync.py"
-
       - name: Run PowerShell hook runner governance check
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 stop_ai_docs_check.py
@@ -73,7 +72,7 @@ jobs:
     needs:
       - governance
       - windows-hook-runtime
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,22 +82,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install Chromium For Playwright
-        run: npx --yes --package=playwright playwright install --with-deps chromium
-
-      - name: Run Three.js Snake smoke
-        run: python3 scripts/threejs_snake_smoke.py
-
-      - name: Run Three.js Snake blackbox smoke
-        run: python3 scripts/threejs_snake_blackbox_smoke.py
-
-      - name: Run Harness Trace Console smoke
-        run: python3 scripts/harness_trace_console_smoke.py
-
-      - name: Run Harness Trace Console blackbox smoke
-        run: python3 scripts/harness_trace_console_blackbox_smoke.py
+      - name: Run starter context budget smoke
+        run: python3 scripts/check_context_budget.py

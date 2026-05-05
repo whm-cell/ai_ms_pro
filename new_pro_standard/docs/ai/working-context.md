@@ -55,12 +55,15 @@
 - 项目采用 `Runtime Harness + Governance Harness + Verification Harness` 三层分工。
 - `.codex/runtime/` 只保留本地恢复原料，不替代 `docs/ai/` 与 `docs/requirements/` 的共享治理真相。
 - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`。
+- `AGENTS.md` 保持轻量 trigger layer；projection、verification、GitHub guardrails 与 skill lifecycle 细则默认由 repo-local skills、references、templates 或 checks 按需承接。
+- `scripts/check_change_triggered_followups.py` 是 warning-only follow-up triage，用 changed files 提示可能需要的专项检查和 skill/reference。
 - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态。
 - `.agents/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本。
 - `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、compression、verification、GitHub guardrails 或 code-shape checks 时按需调用。
 - `.agents/skills/requirements-traceability-maintenance/` 是可选 requirements 维护能力，只在 PRD 导入、`REQDOC / REQ / WS`、traceability matrix 或技术假设变化时按需调用。
 - `.agents/skills/progressive-feature-development/` 与 `.agents/skills/prd-to-project-skills/` 是可选机制层 skills，默认只在非平凡功能或稳定 PRD 模式分类任务中按需调用。
 - `.agents/skills/team-pr-conflict-control/` 是可选团队协作机制层 skill，只在多人 / 多 AI 并行开发、PR touch-set overlap、PR template、CODEOWNERS 或 merge queue readiness 时按需调用。
+- `.github/pull_request_template.md`、CODEOWNERS、portable workflows 与 `scripts/check_pr_touch_conflicts.py` 是 starter 机制层；新项目仍必须在 GitHub 远端单独确认 branch protection、rulesets 和 merge queue。
 
 ## 更新规则
 

@@ -8,6 +8,7 @@ It intentionally includes:
 - Codex hooks
 - Git hooks
 - governance check scripts
+- GitHub PR template, CODEOWNERS, dependency review, and starter workflows
 - runtime templates
 - project skill lifecycle template
 - candidate skill eval protocol
@@ -28,6 +29,7 @@ It intentionally does not include:
 - old project's real `REQDOC / REQ / WS`
 - old project's runtime session or observation artifacts
 - old project's smoke/demo apps
+- old project's remote branch protection or ruleset state
 
 ## Optional Behavioral Guardrails
 
@@ -73,7 +75,7 @@ They are mechanism-layer assets, not starter truth. They should not run for simp
 
 The starter includes `.agents/skills/team-pr-conflict-control/` for multi-person or multi-AI development where PR touch-set overlap, high-risk files, PR templates, CODEOWNERS, or merge queue readiness need explicit review.
 
-It is a mechanism-layer asset, not proof that the new repository has branch protection, merge queue, or a changed-files overlap check configured. Promote recurring coordination rules to PR templates, checks, status, or ADR only after the new project has real samples.
+It is a mechanism-layer asset. The starter also includes `.github/pull_request_template.md`, CODEOWNERS, portable GitHub workflows, and `scripts/check_pr_touch_conflicts.py`; the new repository must still verify remote branch protection, rulesets, and merge queue settings on GitHub before claiming direct pushes to `main` are blocked.
 
 ## Starter Shape
 
@@ -136,6 +138,7 @@ If the harness is awake, the expected behavior is:
 - optional progressive feature guidance can be invoked with `$progressive-feature-development` for non-trivial plan-first work
 - optional PRD-to-skill guidance can be invoked with `$prd-to-project-skills` when stable requirement patterns may become project skills
 - optional team PR conflict control can be invoked with `$team-pr-conflict-control` when multiple people or AIs may touch overlapping PR surfaces
+- PRs should use `.github/pull_request_template.md`, and PR CI can run `scripts/check_pr_touch_conflicts.py` to block high-risk changed-file overlap
 - project architecture/style/dependency skill guidance stays in the lifecycle template until a real project chooses to create a concrete skill
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise
@@ -160,10 +163,12 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_archive_candidates.py`
 - `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py`
+- `scripts/check_change_triggered_followups.py`
 - `scripts/check_repo_skills.py`
 - `scripts/check_requirements_shape.py`
 - `scripts/check_skill_usage_samples.py`
 - `scripts/check_github_guardrails.py`
+- `scripts/check_pr_touch_conflicts.py`
 - `scripts/reduce_runtime_observations.py`
 
 The shipped Git hook runs:
@@ -175,7 +180,11 @@ Run `scripts/check_archive_candidates.py` manually through the repo-local Python
 
 Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
 
+Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It is advisory and does not prove that suggested commands already ran.
+
 Run `scripts/check_requirements_shape.py` after PRD / `REQDOC / REQ / WS` imports or traceability-matrix changes. The evidence checks remain warning-oriented until a new project explicitly promotes them to blocking policy.
+
+Run `scripts/check_github_guardrails.py` after configuring the GitHub repository. The starter can ship workflows, CODEOWNERS, PR template, and PR touch-conflict checks, but remote branch protection / rulesets are external GitHub settings and may require a paid plan or a public repository.
 
 ## Included Guides
 

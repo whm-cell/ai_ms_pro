@@ -2,7 +2,10 @@
 * @whm-cell
 
 AGENTS.md @whm-cell
+.agents/** @whm-cell
 .codex/** @whm-cell
+.github/CODEOWNERS @whm-cell
+.github/pull_request_template.md @whm-cell
 .github/workflows/** @whm-cell
 scripts/check_* @whm-cell
 scripts/harness_config.py @whm-cell

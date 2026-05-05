@@ -32,6 +32,7 @@
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_archive_candidates.py`
 - `scripts/check_context_budget.py`
+- `scripts/check_change_triggered_followups.py`
 - `scripts/check_repo_skills.py`
 - `scripts/check_requirements_shape.py`
 - `scripts/check_skill_usage_samples.py`
@@ -92,6 +93,7 @@
 - `scripts/check_repo_skills.py` 的使用策略；默认只做 repo-local / globally installed 事实报告，不替代 skill 安装
 - `scripts/check_requirements_shape.py` 的使用策略；默认在 PRD / REQ / WS 导入后手动运行，第一阶段不做 blocking hook
 - `scripts/check_skill_usage_samples.py` 的使用策略；默认用于 Candidate skill with/without eval evidence，不应伪造样本或强制升级
+- `scripts/check_change_triggered_followups.py` 的使用策略；默认 warning-only，用 changed files 提示可能遗漏的专项检查和 skill/reference
 - `scripts/check_github_guardrails.py` 的使用策略；默认手动运行，远端未登录或缺权限时输出 `UNKNOWN` 而不是伪装成 OK
 - `docs/ai/templates/project-skill-lifecycle.md` 的使用策略；默认只在 architecture/style/dependency skill 任务中按需读取，不应进入默认短链路
 - `docs/ai/index.md` 中的阅读顺序、活跃文档入口和阶段状态

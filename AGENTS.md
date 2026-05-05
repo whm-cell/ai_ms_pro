@@ -126,15 +126,9 @@ When active surfaces reach budget or a stage is compressed, use `$harness-mainte
 
 ## Projection Surface Boundary
 
-Not every document should carry current-state truth.
+Current truth belongs in `working-context`, active `handoff`, `status`, `adr`, normalized requirements, and `traceability-matrix.md`.
 
-Use these rules:
-
-1. `docs/ai/working-context.md`, active `handoff`, `status`, `adr`, `docs/requirements/normalized/*.md`, and `docs/requirements/traceability-matrix.md` are the primary truth surfaces.
-2. `docs/ai/plan.md` is a projection document. It should keep goals, scope, stage breakdown, and acceptance framing, but should not repeat fast-changing completion state, latest validation results, or transient evidence.
-3. `docs/requirements/workstreams/*.md` are projection documents. They should keep workflow goal, covered requirements, stage suggestions, and acceptance model, but should not become a second copy of the latest execution status or smoke evidence.
-4. When current-state text appears in a projection document, it must either be removed or be explicitly synchronized with its primary truth source in the same change.
-5. Current completion state, latest validation result, and canonical acceptance evidence should default to `working-context`, `handoff`, `status`, and `traceability-matrix.md`, not to `plan` or `workstream` docs.
+`plan` and `workstreams` are projection surfaces: keep goals, scope, stage framing, and acceptance models there, but do not duplicate fast-changing completion state or latest verification evidence. Detailed truth-surface rules live in `$repo-governed-coding` `references/governance-checklist.md`.
 
 ## Code Shape Budget
 
@@ -144,19 +138,17 @@ When changing the budget or the checker, use `$harness-maintenance` and `referen
 
 ## Verification Layer
 
-Verification is required, but command selection scales by changed surface and project maturity.
-
-Material governance changes must run the governance check. Staged code or harness changes must run code-shape. Use `$harness-maintenance` `references/verification-commands.md` for the command matrix and warning interpretation.
+Verification is required, but command selection scales by changed surface. Material governance changes must run the governance check; staged code or harness changes must run code-shape. Use `$harness-maintenance` `references/verification-commands.md` for the command matrix and warning interpretation.
 
 ## GitHub Gatekeeping
 
 GitHub repository settings are part of the verification harness, but not all of them live in the repo.
 
-Keep workflow permissions minimal and verify remote branch protection / rulesets before claiming required checks are enforced.
+Keep workflow permissions minimal and verify remote branch protection / rulesets before claiming required checks are enforced. Do not restate remote `UNKNOWN` as OK.
 
-When changing workflows, CODEOWNERS, Dependabot, dependency review, required checks, or remote guardrail scripts, use `$harness-maintenance` and `references/github-guardrails.md`.
+Use `$harness-maintenance` `references/github-guardrails.md` when changing workflows, CODEOWNERS, Dependabot, dependency review, required checks, or remote guardrail scripts. Use `.agents/skills/team-pr-conflict-control/` for team or multi-AI PR overlap, PR template, ownership, or merge queue readiness tasks.
 
-When team development, multiple AIs, open-PR changed-file overlap, PR templates, CODEOWNERS ownership, or merge queue readiness is part of the task, use `.agents/skills/team-pr-conflict-control/` and keep durable outcomes in PR metadata, checks, status, ADR, or requirements docs as appropriate.
+PRs should use `.github/pull_request_template.md`; high-risk changed-file overlap is checked by `scripts/check_pr_touch_conflicts.py` on `pull_request`.
 
 ## Scope Discipline
 
@@ -172,63 +164,28 @@ Use this division:
 - scripts/checks: enforcement and drift detection
 - `.codex/hooks.json`: Codex lifecycle enforcement
 
-## Skill Coordination
+## Skill Use And Escalation
 
-Skills do not coordinate themselves. Codex coordinates them using repository rules and document layers.
+Skills are on-demand method guidance, not always-on governance truth. Codex coordinates skills through `AGENTS.md`, `docs/ai/index.md`, and the repo document layers.
 
-Use these rules:
+Operational rules:
 
-1. Existing skills are not "always running". They are loaded when relevant to the current task.
-2. New skills may be introduced mid-project, but they must write their results into the existing document system.
-3. Repository rules and `docs/ai/index.md` remain the stable control plane even when skills change.
+- Skills are loaded only when the task triggers them.
+- New or changed skills must write durable decisions back to docs, checks, or PR metadata.
+- Do not keep conflicting active workflows in parallel.
 
-When adding new skills in a later stage:
+Use these on-demand triggers:
 
-- keep `AGENTS.md` as the persistent source of workflow rules
-- use `plan`, `handoff`, `status`, `changelog`, and `adr` as the shared memory surface
-- let task skills produce task outputs, not governance decisions
-- update `adr` if a new skill changes a long-lived workflow or architecture decision
+- `.agents/skills/progressive-feature-development/`: non-trivial feature, API, storage, architecture, or testing-strategy work
+- `.agents/skills/prd-to-project-skills/`: PRD, requirements, workstreams, ADRs, or implementation samples may contain reusable project-skill candidates
+- `.agents/skills/requirements-traceability-maintenance/`: PRD imports, `REQDOC / REQ / WS`, traceability matrix, or technical assumptions
+- `.agents/skills/harness-maintenance/`: harness internals
+- `.agents/skills/team-pr-conflict-control/`: multi-person or multi-AI PR collision control
+- `.agents/skills/repo-governed-coding/`: only when explicitly invoked or when governed coding guardrails are requested
 
-If a new skill supersedes an old approach:
+Skip workflow skills for simple tasks. Skill outputs must write durable results back to requirements, handoff, status, ADR, changelog, checks, PR metadata, or candidate skills; they must not create hidden canonical truth.
 
-- record the change in `status` or `adr`
-- archive old task-specific notes if they are no longer active
-- do not keep two conflicting active workflows in parallel
-
-## Project Skill Lifecycle
-
-Architecture, style, and dependency skills are project-specific execution guidance, not default governance truth.
-
-Use `docs/ai/templates/project-skill-lifecycle.md` when a task creates or changes a project architecture/style/dependency skill.
-
-Keep these skills out of the default short context chain. If a skill changes long-lived architecture, style, dependency, testing, deployment, or delivery strategy, promote the durable decision to `status` or `adr`.
-
-For non-trivial feature modules, cross-module/API/storage/architecture/testing-strategy changes, or explicit plan-first requests, use `.agents/skills/progressive-feature-development/`; when PRD, requirement, workstream, ADR, or repeated implementation material may contain stable project-skill candidates, use `.agents/skills/prd-to-project-skills/`; when changing PRD imports, `REQDOC / REQ / WS`, traceability matrix, or technical assumptions, use `.agents/skills/requirements-traceability-maintenance/`. Skip workflow skills for simple tasks, and route outputs back into requirements, handoff, status, ADR, changelog, checks, or candidate skills instead of hidden canonical truth.
-
-For harness-internal changes to runtime, hooks, reducers, compression, verification commands, GitHub guardrails, or code-shape checks, use `.agents/skills/harness-maintenance/`. For multi-person or multi-AI PR collision control, use `.agents/skills/team-pr-conflict-control/`. Keep those mechanics out of the default short context unless the task touches that surface.
-
-## Repo-local Skill Note
-
-This repository also carries an optional repo-local skill at `.agents/skills/repo-governed-coding/`.
-
-Use these rules:
-
-1. Use it only when explicitly invoked or when a task explicitly asks for Karpathy-style implementation guardrails inside this repository.
-2. Treat it as method-level guidance for governed coding work, not as a replacement for `AGENTS.md`, `docs/ai/*`, `docs/requirements/*`, or verification rules.
-3. If the skill and repository rules ever disagree, follow the repository rules and update stage docs if the skill pattern needs to change.
-
-## Skill Escalation Policy
-
-When a new skill is introduced, decide where it should be recorded based on scope and persistence.
-
-Use this escalation ladder:
-
-- task prompt only: one-off, narrow, or not needed by future tasks
-- stage `status`: affects current-stage execution or several tasks in the same stage
-- `AGENTS.md`: stable recurring default future tasks should assume
-- `ADR`: long-lived workflow, architecture, testing, deployment, review, or delivery decision
-
-Do not keep a skill in both temporary task use and default repository rule without explicitly deciding which one is active.
+Use `docs/ai/templates/project-skill-lifecycle.md` when creating or changing architecture, style, or dependency skills. Escalate stable recurring rules by scope: task prompt only, stage `status`, `AGENTS.md`, or ADR/checks for long-lived workflow, architecture, testing, deployment, review, or delivery decisions. If a skill conflicts with repository rules, follow repository rules and update status or ADR if the skill pattern must change.
 
 ## Completion Condition
 

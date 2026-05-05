@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-05-04
-当前状态：Stage-00 harness 已可用；本轮新增 team PR conflict control skill，用于多人 / 多 AI PR touch-set 冲突控制，剩余以远端确认和真实样本观察为主
+更新时间：2026-05-05
+当前状态：Stage-00 harness 已可用；本轮新增 PR guardrails、压缩 `AGENTS.md` 默认上下文，并补 change-triggered follow-up checker；远端 main 保护仍受 GitHub Pro / public repo 限制阻塞
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -48,7 +48,9 @@
 - `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
 - `scripts/check_requirements_shape.py`：导入 PRD / REQ / WS 后检查 traceability、技术假设状态和 verification method 时手动运行
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
+- `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
+- `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
 - [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
 - [阶段提交与 PR-CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/阶段提交与PR-CI操作手册.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
@@ -63,7 +65,7 @@
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-04 Team PR Conflict Control Skill](./changelog/2026-05-04-team-pr-conflict-control-skill.md)
+- 最新 changelog：[2026-05-05 Change Triggered Followups](./changelog/2026-05-05-change-triggered-followups.md)
 
 ## 归档入口
 

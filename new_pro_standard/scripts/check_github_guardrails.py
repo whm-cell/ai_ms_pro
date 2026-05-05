@@ -15,16 +15,19 @@ EXPECTED_WORKFLOWS = {
     ".github/workflows/governance-and-smoke.yml": {
         "jobs": {"governance", "windows-hook-runtime", "smoke"},
         "permissions": {"contents": "read"},
+        "triggers": {"pull_request", "merge_group"},
     },
     ".github/workflows/dependency-review.yml": {
         "jobs": {"dependency-review"},
         "permissions": {"contents": "read", "pull-requests": "read"},
+        "triggers": {"pull_request", "merge_group"},
     },
 }
 EXPECTED_REQUIRED_CHECKS = {"governance", "windows-hook-runtime", "smoke", "dependency-review"}
 CONTROL_PLANE_PATHS = (
-    "AGENTS.md", ".codex/**", ".github/workflows/**", "docs/ai/**",
-    "docs/requirements/**", "scripts/check_*",
+    "AGENTS.md", ".agents/**", ".codex/**", ".github/CODEOWNERS",
+    ".github/pull_request_template.md", ".github/workflows/**",
+    "docs/ai/**", "docs/requirements/**", "scripts/check_*",
 )
 
 
@@ -140,6 +143,22 @@ def has_top_key(text: str, key: str) -> bool:
     return any(line.strip() == f"{key}:" for line in text.splitlines())
 
 
+def has_event_trigger(text: str, event: str) -> bool:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("on:") and event in stripped:
+            return True
+        if stripped != "on:":
+            continue
+        for nested in lines[index + 1:]:
+            if nested and not nested.startswith(" "):
+                break
+            if re.match(rf"\s{{2}}{re.escape(event)}\s*:", nested):
+                return True
+    return False
+
+
 def workflow_checks(root: Path) -> list[Check]:
     checks: list[Check] = []
     workflow_dir = root / ".github" / "workflows"
@@ -161,7 +180,11 @@ def workflow_checks(root: Path) -> list[Check]:
         missing_meta = [
             key for key in ("on", "concurrency") if not has_top_key(text, key)
         ]
-        if missing_jobs or missing_permissions or missing_meta:
+        missing_triggers = sorted(
+            trigger for trigger in expected.get("triggers", set())
+            if not has_event_trigger(text, trigger)
+        )
+        if missing_jobs or missing_permissions or missing_meta or missing_triggers:
             detail = []
             if missing_jobs:
                 detail.append(f"missing jobs={','.join(missing_jobs)}")
@@ -169,6 +192,8 @@ def workflow_checks(root: Path) -> list[Check]:
                 detail.append(f"permission mismatch={missing_permissions}")
             if missing_meta:
                 detail.append(f"missing top-level keys={','.join(missing_meta)}")
+            if missing_triggers:
+                detail.append(f"missing triggers={','.join(missing_triggers)}")
             checks.append(Check(f"workflow {rel_path}", "WARN", "; ".join(detail)))
         else:
             checks.append(Check(f"workflow {rel_path}", "OK", "expected jobs and metadata found"))
@@ -195,6 +220,40 @@ def dependabot_check(root: Path) -> Check:
     if missing:
         return Check("Dependabot", "WARN", f"missing ecosystems: {', '.join(missing)}")
     return Check("Dependabot", "OK", "github-actions, pip, and npm update entries are present")
+
+
+def pr_template_check(root: Path) -> Check:
+    paths = [
+        root / ".github" / "pull_request_template.md",
+        root / ".github" / "PULL_REQUEST_TEMPLATE" / "pull_request_template.md",
+    ]
+    existing = next((path for path in paths if path.exists()), None)
+    if not existing:
+        return Check("PR template", "WARN", "pull request template is missing")
+    text = existing.read_text(encoding="utf-8")
+    required = (
+        "Requirement / Workstream",
+        "Touch Set",
+        "Parallel PR Conflict Check",
+        "Verification",
+        "Governance Impact",
+    )
+    missing = [section for section in required if section not in text]
+    if missing:
+        return Check("PR template", "WARN", f"missing sections: {', '.join(missing)}")
+    return Check("PR template", "OK", f"template present at {existing.relative_to(root)}")
+
+
+def pr_touch_conflict_check(root: Path) -> Check:
+    path = root / "scripts" / "check_pr_touch_conflicts.py"
+    if not path.exists():
+        return Check("PR touch conflict checker", "WARN", "scripts/check_pr_touch_conflicts.py is missing")
+    text = path.read_text(encoding="utf-8")
+    required = ("--strict-high-risk", "HIGH_RISK_PATTERNS", "gh", "pr", "list")
+    missing = [token for token in required if token not in text]
+    if missing:
+        return Check("PR touch conflict checker", "WARN", f"missing expected tokens: {', '.join(missing)}")
+    return Check("PR touch conflict checker", "OK", "checker exists with high-risk and gh PR support")
 
 
 def actions_permissions_check(root: Path, repo: str, can_use_gh: bool) -> Check:
@@ -330,7 +389,7 @@ def main() -> int:
     branch_check, branch = default_branch(root, repo, authenticated_gh)
     checks.append(branch_check)
     checks.extend(workflow_checks(root))
-    checks.extend([codeowners_check(root), dependabot_check(root)])
+    checks.extend([codeowners_check(root), dependabot_check(root), pr_template_check(root), pr_touch_conflict_check(root)])
     if repo:
         checks.extend(
             [

@@ -1,6 +1,6 @@
 # GitHub Harness Gatekeeping
 
-更新时间：2026-05-04
+更新时间：2026-05-05
 编号：ADR-012
 标题：GitHub ownership、CI required checks 与 supply-chain 守门
 状态：已采纳
@@ -19,6 +19,8 @@
 - CodeQL 暂不纳入本轮 P0，等业务代码进入 release / CI maturity 阶段再评估。
 - GitHub branch protection / ruleset 需要人工或 API 配置，并且只有远端确认后才能把 OPEN-01 标记完成。
 - 多人 / 多 AI PR touch-set 冲突控制先作为 repo-local `$team-pr-conflict-control` skill 落地，用于按需评估 open PR overlap、high-risk files、PR template、CODEOWNERS 与 merge queue / `merge_group` readiness；是否升级为阻断式 PR check 需要真实样本证明。
+- 新增 `.github/pull_request_template.md` 与 `scripts/check_pr_touch_conflicts.py`，并在 PR workflow 中对 high-risk changed-file overlap 做阻断检查。
+- GitHub Actions workflow 增加 `merge_group` 触发；PR touch conflict check 只在 `pull_request` 事件运行。
 
 ## 备选方案
 
@@ -36,7 +38,8 @@
 
 - PR 上应出现 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job。
 - GitHub 远端 ruleset 应要求 required checks、PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`。
-- 团队并行开发任务应通过 `$team-pr-conflict-control` 显式记录 touch-set overlap 与协调动作；该 skill 不替代 GitHub branch protection、CODEOWNERS review 或 future changed-files overlap check。
+- 团队并行开发任务应通过 `$team-pr-conflict-control` 显式记录 touch-set overlap 与协调动作；`scripts/check_pr_touch_conflicts.py` 在 PR 上补充 high-risk overlap 阻断，但不替代 GitHub branch protection 或 CODEOWNERS review。
+- 2026-05-05 已尝试通过 GitHub API 配置 `main` branch protection；GitHub 返回 HTTP 403，提示需要 GitHub Pro 或 public repo，因此当前不能宣称远端已禁止直推 `main`。
 - CI 中 `check_code_shape.py --all` 作为 warning-aware gate 运行；当前 legacy warning 不阻断。
 - `WS-01` 与 `WS-02` 都具备黑盒浏览器回归路径。
 

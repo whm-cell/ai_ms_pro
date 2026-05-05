@@ -1,0 +1,13 @@
+# Harness control-plane ownership.
+* @REPLACE_WITH_OWNER
+
+AGENTS.md @REPLACE_WITH_OWNER
+.agents/** @REPLACE_WITH_OWNER
+.codex/** @REPLACE_WITH_OWNER
+.github/CODEOWNERS @REPLACE_WITH_OWNER
+.github/pull_request_template.md @REPLACE_WITH_OWNER
+.github/workflows/** @REPLACE_WITH_OWNER
+scripts/check_* @REPLACE_WITH_OWNER
+scripts/harness_config.py @REPLACE_WITH_OWNER
+docs/ai/** @REPLACE_WITH_OWNER
+docs/requirements/** @REPLACE_WITH_OWNER
