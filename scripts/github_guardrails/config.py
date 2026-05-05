@@ -1,0 +1,32 @@
+from __future__ import annotations
+
+
+EXPECTED_WORKFLOWS = {
+    ".github/workflows/governance-and-smoke.yml": {
+        "jobs": {"governance", "windows-hook-runtime", "smoke"},
+        "permissions": {"contents": "read"},
+        "triggers": {"pull_request", "merge_group"},
+    },
+    ".github/workflows/dependency-review.yml": {
+        "jobs": {"dependency-review"},
+        "permissions": {"contents": "read", "pull-requests": "read"},
+        "triggers": {"pull_request", "merge_group"},
+    },
+    ".github/workflows/security-evidence.yml": {
+        "jobs": {"scorecard", "codeql", "sbom"},
+        "permissions": {"contents": "read", "security-events": "write"},
+        "triggers": {"pull_request", "push", "schedule", "workflow_dispatch"},
+    },
+}
+EXPECTED_REQUIRED_CHECKS = {"governance", "windows-hook-runtime", "smoke", "dependency-review"}
+CONTROL_PLANE_PATHS = (
+    "AGENTS.md",
+    ".agents/**",
+    ".codex/**",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
+    ".github/workflows/**",
+    "docs/ai/**",
+    "docs/requirements/**",
+    "scripts/check_*",
+)

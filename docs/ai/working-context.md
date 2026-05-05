@@ -29,11 +29,11 @@
 - 收敛 Stage-00 剩余 hardening：repo 内 PR 守门已补 PR template、touch conflict checker 与 `merge_group` workflow 触发；远端 GitHub branch protection / ruleset 仍需套餐或仓库可见性支持。
 - 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
 - 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 下沉 PRD/REQ/WS/技术假设维护流程，`team-pr-conflict-control` 下沉多人 / 多 AI PR touch-set 冲突控制，Candidate workflow skills 继续显式触发。
-- 使用 warning-only evidence / follow-up checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`、`check_change_triggered_followups.py`；其中 change-triggered follow-up 已可在 CI / PR summary 展示，Scorecard / CodeQL / SBOM 先作为 security evidence 运行。
+- 使用 warning-only evidence / follow-up checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`、`check_change_triggered_followups.py`；其中 change-triggered follow-up 已可在 CI / PR summary 展示，Scorecard / CodeQL / SBOM 先作为 security evidence 运行，GitHub guardrails 已拆成 helper 模块并检查 orphan gitlink。
 
 ## 当前活跃队列
 
-1. 继续推进 OPEN-01：远端 workflow green history、required checks、branch protection / ruleset 与 security analysis 确认。
+1. 继续推进 OPEN-01：远端 workflow green history、required checks、branch protection / ruleset 与 security analysis 确认；`security-evidence.yml` 已被远端识别，首轮 checkout orphan gitlink 问题已定位并修复。
 2. 用 `scripts/check_github_guardrails.py` 辅助区分本地已具备、远端 OK、远端 UNKNOWN，不再只靠人工记忆。
 3. 后续 PR 通过 `.github/pull_request_template.md` 显式填写 `REQ/WS`、touch-set、overlap、verification 和 governance impact。
 4. 后续真实 PRD / 非平凡功能任务要登记 with/without eval；`prd-to-project-skills` 与 `progressive-feature-development` 仍是 0/2。
@@ -42,7 +42,7 @@
 
 ## 当前风险与阻塞
 
-- 远端 GitHub main 保护仍是 UNKNOWN；`gh api` 读取 branch protection / rulesets 返回 HTTP 403，需要 GitHub Pro 或将仓库公开后才能证明该远端强制力。
+- 远端 GitHub main 保护仍是 UNKNOWN；`gh api` 读取 branch protection / rulesets 返回 HTTP 403，需要 GitHub Pro、Team/Enterprise 对应能力或将仓库公开后才能证明该远端强制力。
 - Candidate skill eval 仍无 accepted 样本；不得为了升级 always-on 伪造样本或把简单任务拖入完整流程。
 - PRD 技术假设检查是启发式；`requirements-traceability-maintenance` 能提示缺状态/验证方法，但不能替代人工架构判断或 ADR。
 - runtime stage drift、archive candidate、context budget 都保持 warning-only；是否升级阻断要等更多真实样本。
@@ -64,6 +64,7 @@
 - `.agents/skills/*` 是 repo-local native skill 层；`AGENTS.md` 只保留轻触发和不可下沉真相边界，requirements traceability skill 与 Candidate skills 都不替代 requirements / status / ADR。
 - 本轮 `AGENTS.md` 默认面压缩不改变能力边界；可下沉细节仍可追溯到 `$repo-governed-coding`、`$harness-maintenance`、`$team-pr-conflict-control`、requirements traceability skill、project-skill-lifecycle template 或检查脚本。
 - `scripts/check_change_triggered_followups.py` 用 changed files 提示可能遗漏的专项检查和 skill/reference，降低按需 skill 漏触发概率；当前 workflow 会把 PR / main push 的 markdown 摘要写入 GitHub Actions Summary，并显示 check level / CI coverage，但仍不证明命令已经执行。
+- `scripts/check_github_guardrails.py` 现在是薄 CLI 入口，核心逻辑拆到 `scripts/github_guardrails/` 并同步 starter；它能检查 security evidence workflow、远端 workflow 可见性、branch protection / rulesets UNKNOWN 和 orphan gitlink。
 - `docs/ai/check-registry.md` 记录 checks 的 `advisory / review-required / blocking-candidate / blocking` 等级；Scorecard / CodeQL / SBOM 暂为 advisory evidence，不进入 required checks。
 - Stage status 已同步记录 change-triggered follow-up checker；该 checker 继续保持 warning-only，不替代主 Agent 的语义判断。
 - Candidate skill 升级必须有 with/without eval；当前两个 workflow skills 均为 0/2 accepted samples。

@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
 更新时间：2026-05-05
-当前状态：Stage-00 harness 已可用；本轮新增 PR guardrails、advisory PR summary、check registry 与供应链 evidence workflow；远端 main 保护仍受 GitHub Pro / public repo 限制阻塞
+当前状态：Stage-00 harness 已可用；本轮新增 PR guardrails、advisory PR summary、check registry 与供应链 evidence workflow；security evidence workflow 已被远端识别，远端 main 保护仍受 GitHub plan / public repo 限制阻塞
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -67,7 +67,7 @@
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-05 Harness Maturity Security Evidence](./changelog/2026-05-05-harness-maturity-security-evidence.md)
+- 最新 changelog：[2026-05-05 GitHub Guardrails Refactor And CI Burn-in Fix](./changelog/2026-05-05-github-guardrails-refactor-and-ci-burnin-fix.md)
 
 ## 归档入口
 

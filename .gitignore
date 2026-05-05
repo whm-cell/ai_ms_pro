@@ -6,3 +6,4 @@
 .codex/runtime/observations/*
 !.codex/runtime/observations/README.md
 **/*/__pycache__/
+output/

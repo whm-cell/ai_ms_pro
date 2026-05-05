@@ -15,11 +15,11 @@
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已在新仓库内跑通一轮
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
 - `harness-trace-console` 与 `threejs-snake` 均已具备黑盒浏览器 smoke；`WS-01` 不再只有 deterministic smoke
-- GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow
+- GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow；`security-evidence.yml` 已被远端 API 识别，首轮 checkout 失败根因是误跟踪的演练输出 gitlink
 - CODEOWNERS、PR template 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-05 `gh api` 配置 main protection 返回 HTTP 403，需要 GitHub Pro 或 public repo。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用，避免把方案先行流程变成简单任务默认流程
-- `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
+- `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_github_guardrails.py` 已拆分为 helper 模块并新增 orphan gitlink 检查，`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
 - `docs/ai/check-registry.md` 已记录 check 等级；Scorecard、CodeQL、SBOM 已作为 security evidence workflow 接入，第一阶段不作为 required checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
@@ -44,7 +44,7 @@
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
   - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
-  - 若 GitHub 继续返回 branch protection / ruleset HTTP 403，则完成定义必须先改为升级 GitHub Pro 或将仓库设为 public 后重试远端强制配置
+  - 若 GitHub 继续返回 branch protection / ruleset HTTP 403，则完成定义必须先改为升级 GitHub Pro、Team/Enterprise 对应能力或将仓库设为 public 后重试远端强制配置
   - `scripts/check_github_guardrails.py` 能返回远端状态；未登录或缺权限时必须明确显示 `UNKNOWN`，不能伪装成 OK
   - 失败结果能直接定位到 governance、hook sync、code-shape、Windows runner、supply-chain 或 smoke 维度
 
@@ -134,7 +134,7 @@
 - 多 workstream 并行治理；当前仅新增 `$team-pr-conflict-control` 作为按需方法层，未做全局阻断式并行治理
 - 复杂前端或后端工具链验证
 - 自动归档 handoff / changelog 策略；当前只提供 warning-only candidate monitor
-- CodeQL；等业务代码进入 release / CI maturity 阶段后再评估
+- CodeQL blocking / required-check 升级；当前仅作为 security evidence advisory 运行，等业务代码进入 release / CI maturity 阶段后再评估
 
 ## 建议阅读顺序
 
