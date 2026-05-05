@@ -7,6 +7,7 @@ Use this reference when changing GitHub workflows, CODEOWNERS, Dependabot, depen
 - Workflows should keep least-privilege permissions, bounded timeouts, and concurrency cancellation unless a job has a documented reason to differ.
 - Harness control-plane paths should stay covered by `.github/CODEOWNERS`.
 - Dependency review and Dependabot are the default supply-chain guardrails for this stage.
+- Scorecard, CodeQL, and SBOM may run as advisory evidence jobs before being promoted to required checks.
 - Branch protection / ruleset configuration must be verified on GitHub before claiming required checks are enforced.
 - Expected required checks are `governance`, `windows-hook-runtime`, `smoke`, and dependency review.
 - Change-triggered follow-up summaries may be posted to GitHub Actions Summary, but they remain advisory and must not be described as required checks.

@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_ROOTS = (ROOT / ".agents" / "skills", ROOT / ".codex" / "skills")
 SAMPLE_REGISTRY = ROOT / "docs" / "ai" / "skill-usage-samples.md"
+OBSERVED_SKILLS = ("team-pr-conflict-control",)
 REQUIRED_EVAL_FIELDS = (
     "baseline_without_skill",
     "run_with_skill",
@@ -25,9 +26,12 @@ REQUIRED_EVAL_FIELDS = (
 @dataclass(frozen=True)
 class CandidateSkillReport:
     name: str
+    tracking_scope: str
     path: str
     accepted_real_task_samples: int
     accepted_complete_eval_samples: int
+    rejected_real_task_samples: int
+    pending_real_task_samples: int
     evidence_status: str
 
 
@@ -55,7 +59,10 @@ def read_text(path: Path) -> str:
 
 
 def relative(path: Path) -> str:
-    return path.relative_to(ROOT).as_posix()
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def skill_docs() -> list[Path]:
@@ -108,6 +115,17 @@ def candidate_skills() -> dict[str, Path]:
     return result
 
 
+def observed_skills() -> dict[str, Path]:
+    result: dict[str, Path] = {}
+    for name in OBSERVED_SKILLS:
+        for root in SKILL_ROOTS:
+            path = root / name / "SKILL.md"
+            if path.exists():
+                result[name] = path
+                break
+    return result
+
+
 def sample_blocks(registry_text: str) -> list[str]:
     blocks: list[str] = []
     current: list[str] = []
@@ -153,23 +171,25 @@ def missing_eval_fields(block: str) -> list[str]:
 
 def accepted_sample_counts(
     skill_names: set[str],
-) -> tuple[dict[str, int], dict[str, int], list[str]]:
+) -> tuple[dict[str, int], dict[str, int], dict[str, int], dict[str, int], list[str]]:
     counts = {name: 0 for name in skill_names}
     complete_counts = {name: 0 for name in skill_names}
+    rejected_counts = {name: 0 for name in skill_names}
+    pending_counts = {name: 0 for name in skill_names}
     warnings: list[str] = []
     if not SAMPLE_REGISTRY.exists():
-        return counts, complete_counts, warnings
+        return counts, complete_counts, rejected_counts, pending_counts, warnings
     for block in sample_blocks(read_text(SAMPLE_REGISTRY)):
         outcome = metadata_value(block, "Outcome").strip().lower()
         evidence_type = metadata_value(block, "Evidence Type").strip().lower()
         skills = metadata_value(block, "Skills")
-        if outcome not in {"accepted", "已采纳"}:
-            continue
         if evidence_type not in {"real-task", "真实任务"}:
             continue
         missing_fields = missing_eval_fields(block)
         for name in skill_names:
-            if name in skills:
+            if name not in skills:
+                continue
+            if outcome in {"accepted", "已采纳"}:
                 counts[name] += 1
                 if missing_fields:
                     warnings.append(
@@ -178,33 +198,45 @@ def accepted_sample_counts(
                     )
                 else:
                     complete_counts[name] += 1
-    return counts, complete_counts, warnings
+            elif outcome in {"rejected", "已拒绝"}:
+                rejected_counts[name] += 1
+            elif outcome in {"pending", "待定"}:
+                pending_counts[name] += 1
+    return counts, complete_counts, rejected_counts, pending_counts, warnings
 
 
 def build_report(min_samples: int) -> UsageSampleReport:
     candidates = candidate_skills()
-    counts, complete_counts, sample_warnings = accepted_sample_counts(set(candidates))
+    observed = {name: path for name, path in observed_skills().items() if name not in candidates}
+    tracked = {**candidates, **observed}
+    counts, complete_counts, rejected_counts, pending_counts, sample_warnings = accepted_sample_counts(set(tracked))
     warnings: list[str] = []
     if not SAMPLE_REGISTRY.exists():
         warnings.append(f"sample registry missing: {relative(SAMPLE_REGISTRY)}")
     warnings.extend(sample_warnings)
 
     reports: list[CandidateSkillReport] = []
-    for name, path in sorted(candidates.items()):
+    for name, path in sorted(tracked.items()):
+        scope = "candidate" if name in candidates else "observed"
         count = counts.get(name, 0)
         complete_count = complete_counts.get(name, 0)
+        rejected_count = rejected_counts.get(name, 0)
+        pending_count = pending_counts.get(name, 0)
         status = "enough evidence" if complete_count >= min_samples else "needs samples"
         if complete_count < min_samples:
             warnings.append(
-                f"Candidate skill {name} has {complete_count}/{min_samples} "
+                f"{scope.title()} skill {name} has {complete_count}/{min_samples} "
                 "accepted real-task eval samples with required contrast fields."
             )
         reports.append(
             CandidateSkillReport(
                 name=name,
+                tracking_scope=scope,
                 path=relative(path),
                 accepted_real_task_samples=count,
                 accepted_complete_eval_samples=complete_count,
+                rejected_real_task_samples=rejected_count,
+                pending_real_task_samples=pending_count,
                 evidence_status=status,
             )
         )
@@ -225,9 +257,10 @@ def emit_text(report: UsageSampleReport) -> None:
     print(f"- required eval fields: {', '.join(report.required_eval_fields)}")
     for item in report.candidate_skills:
         print(
-            f"- {item.name}: {item.accepted_complete_eval_samples}/{report.min_samples} "
-            f"complete eval samples; {item.accepted_real_task_samples} accepted real-task "
-            f"samples total; {item.evidence_status}; path={item.path}"
+            f"- {item.name} ({item.tracking_scope}): "
+            f"{item.accepted_complete_eval_samples}/{report.min_samples} complete eval samples; "
+            f"accepted={item.accepted_real_task_samples}; rejected={item.rejected_real_task_samples}; "
+            f"pending={item.pending_real_task_samples}; {item.evidence_status}; path={item.path}"
         )
     for warning in report.warnings:
         print(f"WARN: {warning}")

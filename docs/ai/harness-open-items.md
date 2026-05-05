@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
 更新时间：2026-05-05
-当前状态：核心链路已在测试仓库和仓外 starter 复演中跑通；repo 内 PR template、PR touch conflict checker、change-triggered PR summary 与 `merge_group` workflow 触发已落地，剩余项以远端 branch protection / ruleset 阻塞、CI burn-in 和真实样本观察为主
+当前状态：核心链路已在测试仓库和仓外 starter 复演中跑通；repo 内 PR template、PR touch conflict checker、change-triggered PR summary、check registry、security evidence workflow 与 `merge_group` workflow 触发已落地，剩余项以远端 branch protection / ruleset 阻塞、CI burn-in 和真实样本观察为主
 
 ## 作用
 
@@ -15,11 +15,12 @@
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已在新仓库内跑通一轮
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
 - `harness-trace-console` 与 `threejs-snake` 均已具备黑盒浏览器 smoke；`WS-01` 不再只有 deterministic smoke
-- GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发和 dependency review workflow
+- GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow
 - CODEOWNERS、PR template 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-05 `gh api` 配置 main protection 返回 HTTP 403，需要 GitHub Pro 或 public repo。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用，避免把方案先行流程变成简单任务默认流程
-- `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary
+- `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
+- `docs/ai/check-registry.md` 已记录 check 等级；Scorecard、CodeQL、SBOM 已作为 security evidence workflow 接入，第一阶段不作为 required checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
 - context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / compression / verification / GitHub / code-shape 细则下沉到 `$harness-maintenance`，并把 PRD/REQ/WS/技术假设维护方法下沉到 `$requirements-traceability-maintenance`；多人 / 多 AI PR touch-set 冲突控制已下沉到 `$team-pr-conflict-control`，并新增 changed-file follow-up triage 继续 warning-only / 按需使用
@@ -31,7 +32,7 @@
 ### OPEN-01 CI burn-in、required checks 与 GitHub ruleset 确认
 
 - 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
-- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
+- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、check registry、security evidence workflow、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
 - 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/GitHub远端配置确认细节.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过

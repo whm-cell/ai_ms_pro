@@ -14,6 +14,7 @@ Use this reference to select checks after harness, governance, requirement, or s
 - PRD, `REQDOC`, `REQ`, `WS`, matrix, or technical assumptions changed: `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`
 - Candidate skills are being promoted or evaluated: `.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py`
 - GitHub workflows, CODEOWNERS, Dependabot, dependency review, or remote guardrails changed: `.codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py`
+- Scorecard, CodeQL, SBOM, SLSA, or provenance policy changed: review `docs/ai/check-registry.md` and `docs/ai/security/supply-chain-provenance-plan.md`
 - Skill structure changed: `python3 /Users/coolm/.codex/skills/.system/skill-creator/scripts/quick_validate.py <skill-dir>`
 
 ## Windows Equivalent

@@ -26,6 +26,9 @@
 - [需求文档入口索引](../requirements/index.md)：需求驱动、traceability 或 0-1 stage 任务再进入
 - [项目计划](./plan.md)：阶段目标、范围与验收框架需要确认时再进入
 - [Harness 可迁移清单](./harness-portability-guide.md)
+- [Check Registry](./check-registry.md)：评估某个 check 是否 advisory、review-required、blocking-candidate 或 blocking 时再进入
+- [Supply Chain And Provenance Plan](./security/supply-chain-provenance-plan.md)：修改 Scorecard、CodeQL、SBOM、SLSA 或 release provenance 时再进入
+- [Candidate Skill Usage Samples](./skill-usage-samples.md)：记录真实 with/without eval 样本时再进入
 - [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
 - [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
 - [Project Skill Lifecycle Template](./templates/project-skill-lifecycle.md)：创建或调整 architecture/style/dependency skill 时再进入
@@ -33,12 +36,12 @@
 - `$progressive-feature-development`：非平凡功能、跨模块、API / storage / architecture、测试策略变化或显式 plan-first 任务再调用
 - `$prd-to-project-skills`：PRD / requirements / workstream / ADR / 实现样本中出现稳定项目开发模式时再调用
 - `$requirements-traceability-maintenance`：PRD 导入、`REQDOC / REQ / WS`、traceability-matrix 或技术假设状态变化时再调用
-- `$harness-maintenance`：修改 bootstrap、hooks、runtime reducer、session compression、verification command reference、GitHub guardrails 或 code-shape checks 时再调用
+- `$harness-maintenance`：修改 bootstrap、hooks、runtime reducer、session compression、verification command reference、GitHub guardrails、supply-chain evidence 或 code-shape checks 时再调用
 - `$team-pr-conflict-control`：多人或多 AI 并行开发、open PR changed-file overlap、PR template、CODEOWNERS 或 merge queue / `merge_group` readiness 任务再调用
 - `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
 - `scripts/check_requirements_shape.py`：导入 PRD / REQ / WS 后检查 traceability、技术假设状态和 verification method 时手动运行
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
-- `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 可使用 `--markdown` 输出，仍为 advisory
+- `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 可使用 `--markdown` 输出 check level / CI coverage，仍为 advisory
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行

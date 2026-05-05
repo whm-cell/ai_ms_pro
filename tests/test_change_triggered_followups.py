@@ -36,6 +36,12 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertEqual(names, {"github-guardrails"})
 
+    def test_supply_chain_workflow_triggers_security_evidence(self) -> None:
+        names = self.followup_names(".github/workflows/security-evidence.yml")
+
+        self.assertIn("github-guardrails", names)
+        self.assertIn("supply-chain-evidence", names)
+
     def test_requirements_change_triggers_traceability(self) -> None:
         names = self.followup_names("docs/requirements/source/REQDOC-001.md")
 
@@ -83,10 +89,25 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         output = self.markdown_for(".github/workflows/governance-and-smoke.yml")
 
         self.assertIn("### Change-triggered follow-up suggestions", output)
-        self.assertIn("| Follow-up | Reason | Matched files | Commands | References |", output)
+        self.assertIn("| Follow-up | Level | CI coverage | Reason | Matched files | Commands | References |", output)
         self.assertIn("`github-guardrails`", output)
+        self.assertIn("`blocking-candidate`", output)
+        self.assertIn("remote enforcement may be UNKNOWN", output)
         self.assertIn("scripts/check_github_guardrails.py", output)
         self.assertIn("Advisory only", output)
+
+    def test_json_payload_includes_registry_fields(self) -> None:
+        followup = check_change_triggered_followups.build_followups(("docs/ai/index.md",))[0]
+
+        self.assertEqual(followup.level, "blocking-candidate")
+        self.assertIn("governance", followup.ci_coverage)
+
+    def test_supply_chain_rule_is_advisory(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("docs/ai/security/demo.md",))
+        supply_chain = next(item for item in followups if item.name == "supply-chain-evidence")
+
+        self.assertEqual(supply_chain.level, "advisory")
+        self.assertIn("not a required check", supply_chain.ci_coverage)
 
     def test_markdown_summary_handles_no_followups(self) -> None:
         output = self.markdown_for("README.md")

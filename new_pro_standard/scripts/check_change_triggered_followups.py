@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 @dataclass(frozen=True)
 class FollowupRule:
     name: str
+    level: str
+    ci_coverage: str
     patterns: tuple[str, ...]
     commands: tuple[str, ...]
     references: tuple[str, ...]
@@ -26,6 +28,8 @@ class FollowupRule:
 @dataclass(frozen=True)
 class Followup:
     name: str
+    level: str
+    ci_coverage: str
     matched_files: tuple[str, ...]
     commands: tuple[str, ...]
     references: tuple[str, ...]
@@ -35,6 +39,8 @@ class Followup:
 RULES: tuple[FollowupRule, ...] = (
     FollowupRule(
         name="governance-surface",
+        level="blocking-candidate",
+        ci_coverage="covered by governance job; changed-file mapping remains advisory",
         patterns=(
             "AGENTS.md",
             "docs/ai/**",
@@ -47,6 +53,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="default-context-budget",
+        level="advisory",
+        ci_coverage="manual check only",
         patterns=(
             "AGENTS.md",
             "docs/ai/index.md",
@@ -61,6 +69,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="repo-local-skills",
+        level="review-required",
+        ci_coverage="manual check unless a project promotes repo skill checks into CI",
         patterns=(".agents/skills/**",),
         commands=(".codex/hooks/run_with_repo_python.sh scripts/check_repo_skills.py",),
         references=("python3 /Users/coolm/.codex/skills/.system/skill-creator/scripts/quick_validate.py <changed-skill-dir>",),
@@ -68,6 +78,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="requirements-traceability",
+        level="blocking-candidate",
+        ci_coverage="partly covered by governance; shape check remains explicit",
         patterns=("docs/requirements/**",),
         commands=(".codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py",),
         references=(".agents/skills/requirements-traceability-maintenance/",),
@@ -75,6 +87,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="candidate-skill-eval",
+        level="advisory",
+        ci_coverage="manual sample-quality check",
         patterns=(
             "docs/ai/skill-usage-samples.md",
             "docs/ai/skill-evals/**",
@@ -87,6 +101,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="github-guardrails",
+        level="blocking-candidate",
+        ci_coverage="local workflow structure is checked; remote enforcement may be UNKNOWN",
         patterns=(
             ".github/**",
             "scripts/check_github_guardrails.py",
@@ -100,7 +116,26 @@ RULES: tuple[FollowupRule, ...] = (
         reason="GitHub workflow, ownership, remote guardrail, or PR overlap surface changed.",
     ),
     FollowupRule(
+        name="supply-chain-evidence",
+        level="advisory",
+        ci_coverage="security evidence workflow produces artifacts but is not a required check",
+        patterns=(
+            ".github/workflows/security-evidence.yml",
+            "docs/ai/check-registry.md",
+            "docs/ai/security/**",
+            ".agents/skills/harness-maintenance/references/supply-chain-security.md",
+        ),
+        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py",),
+        references=(
+            ".agents/skills/harness-maintenance/references/supply-chain-security.md",
+            "docs/ai/security/supply-chain-provenance-plan.md",
+        ),
+        reason="Scorecard, CodeQL, SBOM, or provenance evidence changed.",
+    ),
+    FollowupRule(
         name="harness-code-shape",
+        level="blocking-candidate",
+        ci_coverage="covered by code shape job for committed code",
         patterns=(
             "scripts/*.py",
             ".codex/hooks/*.py",
@@ -113,6 +148,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="handoff-compression",
+        level="advisory",
+        ci_coverage="manual compression review only",
         patterns=(
             "docs/ai/handoffs/active/**",
             "docs/ai/status/**",
@@ -124,6 +161,8 @@ RULES: tuple[FollowupRule, ...] = (
     ),
     FollowupRule(
         name="starter-sync",
+        level="review-required",
+        ci_coverage="validate from starter root before publishing starter changes",
         patterns=("new_pro_standard/**",),
         commands=(
             "cd new_pro_standard && python3 -m unittest discover -s tests",
@@ -211,6 +250,8 @@ def build_followups(files: tuple[str, ...]) -> tuple[Followup, ...]:
             followups.append(
                 Followup(
                     name=rule.name,
+                    level=rule.level,
+                    ci_coverage=rule.ci_coverage,
                     matched_files=matched,
                     commands=rule.commands,
                     references=rule.references,
@@ -233,6 +274,8 @@ def emit_text(files: tuple[str, ...], followups: tuple[Followup, ...]) -> None:
     print("\nSuggested follow-ups:")
     for item in followups:
         print(f"- {item.name}: {item.reason}")
+        print(f"  level: {item.level}")
+        print(f"  ci coverage: {item.ci_coverage}")
         print(f"  matched: {', '.join(item.matched_files)}")
         print("  commands:")
         for command in item.commands:
@@ -253,9 +296,15 @@ def emit_markdown(files: tuple[str, ...], followups: tuple[Followup, ...]) -> No
     if files:
         lines.extend(["", "Changed files:", *(f"- `{path}`" for path in files)])
     if followups:
-        lines.extend(["", "| Follow-up | Reason | Matched files | Commands | References |", "| --- | --- | --- | --- | --- |"])
         lines.extend(
-            f"| `{item.name}` | {item.reason} | {markdown_list(item.matched_files)} | "
+            [
+                "",
+                "| Follow-up | Level | CI coverage | Reason | Matched files | Commands | References |",
+                "| --- | --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        lines.extend(
+            f"| `{item.name}` | `{item.level}` | {item.ci_coverage} | {item.reason} | {markdown_list(item.matched_files)} | "
             f"{markdown_list(item.commands)} | {markdown_list(item.references)} |"
             for item in followups
         )

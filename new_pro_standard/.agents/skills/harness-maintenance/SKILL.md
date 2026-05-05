@@ -22,6 +22,7 @@ Do not use this skill for ordinary product features, simple edits, PRD normaliza
 - Runtime observation / reducer: use `references/runtime-observation-reduction.md`.
 - Session promotion / compression: use `references/runtime-governance-compression.md`.
 - GitHub guardrails: use `references/github-guardrails.md`.
+- Supply-chain evidence: use `references/supply-chain-security.md`.
 - Code shape: use `references/code-shape-budget.md`.
 - Verification commands: use `references/verification-commands.md`.
 
@@ -64,5 +65,6 @@ Revise this skill through status, ADR, or changelog when harness maintenance tas
 - [runtime-observation-reduction.md](references/runtime-observation-reduction.md)
 - [runtime-governance-compression.md](references/runtime-governance-compression.md)
 - [github-guardrails.md](references/github-guardrails.md)
+- [supply-chain-security.md](references/supply-chain-security.md)
 - [code-shape-budget.md](references/code-shape-budget.md)
 - [verification-commands.md](references/verification-commands.md)

@@ -1,7 +1,7 @@
 # Candidate Skill Eval Samples
 
-更新时间：2026-05-04
-状态：收集 with/without 对照实验样本中
+更新时间：YYYY-MM-DD
+状态：starter 机制层
 
 ## 作用
 
@@ -20,22 +20,15 @@
 
 | Skill | 当前真实多人 / 多 AI accepted 样本 | 观察门槛 | 当前判断 |
 | --- | ---: | ---: | --- |
-| `team-pr-conflict-control` | 0 | 2 | 已有离线验证样本；仍需要真实 PR touch-set overlap 和 coordination action 样本 |
+| `team-pr-conflict-control` | 0 | 2 | 需要真实 PR touch-set overlap 和 coordination action 样本 |
 
 ## 接受为有效 eval 样本的条件
 
-- 任务必须是真实 PRD、真实 workstream、真实功能实现或真实 review，不是纯文档演示。
-- 样本必须说明是否使用该 skill，以及为什么触发或跳过。
-- 样本必须记录 `baseline_without_skill`、`run_with_skill`、`delta`、`acceptance` 和 `verification`，形成可复查的 with/without 对照。
-- `baseline_without_skill` 必须说明不使用 skill 时预计或实际的读取面、步骤、返工风险或流程税。
-- `run_with_skill` 必须说明实际触发方式、读取面、产出路径和是否把结果回写到 repo truth surface。
-- `delta` 必须说明相对 baseline 的上下文、返工、质量或速度变化；没有收益也要明确记录。
-- `acceptance` 必须说明该样本为什么能或不能计入升级证据。
-- `verification` 必须记录实际运行的测试、smoke、治理检查或人工复核证据。
-- 样本必须有 `Outcome: accepted`，并且没有把 PRD 当前状态、最新验收证据或临时 TODO 藏进 skill。
+- 任务必须是真实 PRD、真实 workstream、真实功能实现、真实 review 或真实多人 / 多 AI PR。
+- 样本必须记录 `baseline_without_skill`、`run_with_skill`、`delta`、`acceptance` 和 `verification`。
+- `Outcome: accepted` 的样本才能计入升级证据；`rejected` 和 `pending` 应保留为流程税或不确定性证据。
 - 简单任务若被完整流程拖慢，应记录为负样本。
 - 每个 Candidate skill 仍需至少 2 个 accepted real-task eval samples 才能认为完成升级前置证据。
-- 多人 / 多 AI PR 样本必须记录 touch-set overlap、high-risk files、coordination action、最终冲突结果和是否降低返工。
 
 ## 样本格式
 
@@ -57,8 +50,6 @@
 - Notes: 关键结论
 ```
 
-更详细的 eval 记录可放在 `docs/ai/skill-evals/`，本文件保留索引级样本摘要。
-
 ## 当前样本
 
 暂无 accepted real-task eval samples。
@@ -66,5 +57,5 @@
 ## 复查命令
 
 ```bash
-.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py
+python3 scripts/check_skill_usage_samples.py
 ```

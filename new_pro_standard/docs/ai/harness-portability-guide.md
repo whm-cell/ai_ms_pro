@@ -26,6 +26,8 @@
 - `.github/dependabot.yml`
 - `.agents/skills/repo-governed-coding/`（可选行为护栏；只保留机制，不写当前项目真相）
 - `.agents/skills/harness-maintenance/`（可选 harness 维护能力；下沉 runtime / hook / compression / verification / GitHub / code-shape 细则）
+- `docs/ai/check-registry.md`（check 等级机制层；新项目应替换状态和升级结论）
+- `docs/ai/security/supply-chain-provenance-plan.md`（供应链证据机制层；不代表新项目已启用远端安全功能）
 - `.agents/skills/requirements-traceability-maintenance/`（可选 requirements 维护能力；下沉 PRD / REQDOC / REQ / WS / traceability / 技术假设细则）
 - `.agents/skills/progressive-feature-development/`（可选非平凡功能方案 gate；只保留机制，不写当前项目真相）
 - `.agents/skills/prd-to-project-skills/`（可选 PRD-to-skill 分类器；只保留机制，不写当前项目真相）
@@ -145,7 +147,7 @@
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
 - repo-local 行为 skill 只能约束执行方法；跨会话共享结论仍必须提升到 `handoff/status/ADR` 或 requirements 文档。
 - requirements traceability、progressive feature、PRD-to-skill 与 team PR conflict control skills 只能约束维护、发现、分类和协作控制方法；PRD 当前状态、验收进度、最新验证证据和远端 GitHub 配置不得藏进 skill。
-- starter 可以携带 PR template、CODEOWNERS、workflow、advisory follow-up summary 和 touch-conflict checker，但不能自动证明新仓库远端已启用 branch protection、rulesets 或 merge queue；这些必须在 GitHub 侧确认。
+- starter 可以携带 PR template、CODEOWNERS、workflow、advisory follow-up summary、security evidence workflow 和 touch-conflict checker，但不能自动证明新仓库远端已启用 branch protection、rulesets、security analysis 或 merge queue；这些必须在 GitHub 侧确认。
 - project skill 生命周期模板只提供创建、升级、偏离和废弃 skill 的治理路径；不会自动决定新项目的架构、样式或依赖栈。
 - archive candidate monitor 只适合作为压缩前提醒，不应替代主 Agent 对 `handoff -> status -> archive` 的语义判断。
 - context budget audit 只适合作为默认上下文体检，不应替代 Task Discovery 或主 Agent 的语义取舍；starter/new-project 默认目标保持 6500，成熟项目若有证据可按需调高本地预算。

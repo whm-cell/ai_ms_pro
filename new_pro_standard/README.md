@@ -9,6 +9,7 @@ It intentionally includes:
 - Git hooks
 - governance check scripts
 - GitHub PR template, CODEOWNERS, dependency review, and starter workflows
+- Advisory security evidence workflow for Scorecard, CodeQL, and SBOM artifacts
 - runtime templates
 - project skill lifecycle template
 - candidate skill eval protocol
@@ -180,15 +181,19 @@ Run `scripts/check_archive_candidates.py` manually through the repo-local Python
 
 Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
 
-Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It also supports `--markdown` for PR / CI summaries. It is advisory and does not prove that suggested commands already ran.
+Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It also supports `--markdown` for PR / CI summaries, including check level and CI coverage. It is advisory and does not prove that suggested commands already ran.
 
 Run `scripts/check_requirements_shape.py` after PRD / `REQDOC / REQ / WS` imports or traceability-matrix changes. The evidence checks remain warning-oriented until a new project explicitly promotes them to blocking policy.
 
 Run `scripts/check_github_guardrails.py` after configuring the GitHub repository. The starter can ship workflows, CODEOWNERS, PR template, and PR touch-conflict checks, but remote branch protection / rulesets are external GitHub settings and may require a paid plan or a public repository.
 
+Use `docs/ai/check-registry.md` to decide whether a check is advisory, review-required, blocking-candidate, or blocking. Use `docs/ai/security/supply-chain-provenance-plan.md` before promoting Scorecard, CodeQL, SBOM, or SLSA provenance from evidence to enforcement.
+
 ## Included Guides
 
 - `docs/ai/harness-portability-guide.md`
+- `docs/ai/check-registry.md`
+- `docs/ai/security/supply-chain-provenance-plan.md`
 - `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/ai/new-project-agents-rewrite-guide.md`
 - `docs/ai/traditional-project-harness-kickoff.md`
