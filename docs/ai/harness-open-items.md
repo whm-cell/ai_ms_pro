@@ -32,7 +32,7 @@
 ### OPEN-01 CI burn-in、required checks 与 GitHub ruleset 确认
 
 - 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
-- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、check registry、security evidence workflow、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
+- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、check registry、security evidence workflow、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap，远端 `UNKNOWN` 保持可见但不阻断；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
 - 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/GitHub远端配置确认细节.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过

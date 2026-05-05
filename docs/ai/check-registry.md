@@ -20,7 +20,7 @@
 | --- | --- | --- | --- |
 | `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
-| `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks high-risk / unknown overlap | 两次真实多人 PR 样本证明收益后收紧 |
+| `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `blocking-candidate` | manual / PR review evidence | 远端 branch protection / rulesets 可读取后再考虑阻断 |
 | `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入样本证明误报可控后升级 |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary | 不直接升级；只驱动其他 checks |

@@ -24,7 +24,7 @@
   - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
       - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills`、`team-pr-conflict-control` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
   - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
-  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、change-triggered advisory summary、security evidence workflow、`merge_group` 触发、required-check 策略和可运行远端 guardrails check；`check_github_guardrails.py` 已拆成 helper 模块并新增 orphan gitlink 检查
+  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、change-triggered advisory summary、security evidence workflow、`merge_group` 触发、required-check 策略和可运行远端 guardrails check；`check_github_guardrails.py` 已拆成 helper 模块并新增 orphan gitlink 检查；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap
 - 进行中：
   - OPEN-01：远端 CI burn-in、GitHub branch protection / ruleset required checks 确认
   - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 与 workflow skill 真实样本观察
@@ -41,7 +41,7 @@
 
 ## 风险与阻塞
 
-- CI workflow 已落地并进入 PR #1 burn-in；首轮远端失败已暴露并修复 PR merge diff、Windows Python resolution test、dependency review unsupported、security evidence checkout orphan gitlink 四类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
+- CI workflow 已落地并进入 PR #1 burn-in；远端失败已暴露并修复 PR merge diff、Windows Python resolution test、dependency review unsupported、security evidence checkout orphan gitlink、PR touch conflict unknown fail-closed 五类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
 - dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；Scorecard / CodeQL / SBOM 也先作为 security evidence，不进入 required checks。branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。2026-05-05 已尝试读取 main branch protection / rulesets，但 GitHub 返回 HTTP 403，需要 GitHub Pro 或 public repo。
 - reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
 - active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。

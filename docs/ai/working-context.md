@@ -70,7 +70,7 @@
 - Candidate skill 升级必须有 with/without eval；当前两个 workflow skills 均为 0/2 accepted samples。
 - `new_pro_standard` 同步机制层，不复制当前 repo 的历史 truth。
 - GitHub ownership、supply-chain 与 required-check 策略已固化在 ADR-012；branch protection / ruleset 完成前 OPEN-01 仍保持开放。
-- 多人 / 多 AI 开发的 PR touch-set 冲突控制已进入 `.agents/skills/team-pr-conflict-control/`；repo 内已有 `scripts/check_pr_touch_conflicts.py` 和 PR workflow gate，但仍不证明远端 branch protection / ruleset 已启用。
+- 多人 / 多 AI 开发的 PR touch-set 冲突控制已进入 `.agents/skills/team-pr-conflict-control/`；repo 内已有 `scripts/check_pr_touch_conflicts.py` 和 PR workflow gate，当前只阻断已确认 high-risk overlap，GitHub API `UNKNOWN` 在 burn-in 阶段保持可见但不阻断。
 
 ## 更新规则
 
