@@ -1,0 +1,107 @@
+name: Governance And Smoke
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Add advisory follow-up summary for PR
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: python3 scripts/check_change_triggered_followups.py --base "origin/${{ github.base_ref }}" --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add advisory follow-up summary for main push
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        continue-on-error: true
+        run: python3 scripts/check_change_triggered_followups.py --base "${{ github.event.before }}" --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add advisory follow-up note for merge queue
+        if: github.event_name == 'merge_group'
+        run: |
+          {
+            echo "### Change-triggered follow-up suggestions"
+            echo ""
+            echo "Merge queue runs keep the blocking gates. Changed-file advisory summaries are generated on pull_request and main push events."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check PR touch conflicts
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check_pr_touch_conflicts.py --current-pr "${{ github.event.pull_request.number }}" --strict-high-risk
+
+      - name: Run unit tests when present
+        run: |
+          if [ -d tests ]; then
+            python3 -m unittest discover -s tests
+          else
+            echo "No tests directory in this starter-derived project yet."
+          fi
+
+      - name: Run AI governance checks
+        run: python3 scripts/check_ai_governance.py
+
+      - name: Run code shape checks
+        run: python3 scripts/check_code_shape.py --all
+
+      - name: Run repo skill discoverability check
+        run: python3 scripts/check_repo_skills.py
+
+  windows-hook-runtime:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run PowerShell hook runner governance check
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1 stop_ai_docs_check.py
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs:
+      - governance
+      - windows-hook-runtime
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run starter context budget smoke
+        run: python3 scripts/check_context_budget.py

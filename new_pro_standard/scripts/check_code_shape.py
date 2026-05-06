@@ -118,6 +118,12 @@ def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
         check=False,
     )
 
+
+def repo_has_commits() -> bool:
+    result = run_git(["rev-parse", "--verify", "HEAD"])
+    return result.returncode == 0
+
+
 def decode_text(blob: bytes, path: str) -> str:
     try:
         return blob.decode("utf-8")
@@ -147,6 +153,7 @@ def load_staged_candidates(config: Config) -> list[Candidate]:
     if result.returncode != 0:
         raise RuntimeError(result.stderr.decode("utf-8", errors="replace").strip())
 
+    initial_commit = not repo_has_commits()
     candidates: list[Candidate] = []
     for raw_line in result.stdout.decode("utf-8").splitlines():
         if not raw_line.strip():
@@ -166,7 +173,7 @@ def load_staged_candidates(config: Config) -> list[Candidate]:
             Candidate(
                 path=path,
                 kind=kind,
-                is_new=status == "A",
+                is_new=status == "A" and not initial_commit,
                 text=decode_text(blob.stdout, path),
             )
         )

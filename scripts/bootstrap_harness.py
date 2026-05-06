@@ -10,15 +10,21 @@ import sys
 import textwrap
 from pathlib import Path
 
+from hook_config_lib import render_hooks_config as render_platform_hooks_config
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_VENV_DIR = ROOT / ".codex" / ".venv"
 DEFAULT_REQUIREMENTS_PATH = ROOT / ".codex" / "requirements.txt"
 
 
+def is_windows_host() -> bool:
+    return os.name == "nt"
+
+
 def python_candidates(prefix: Path) -> list[Path]:
     candidates: list[Path] = []
-    if os.name == "nt":
+    if is_windows_host():
         candidates.extend(
             [
                 prefix / "Scripts" / "python.exe",
@@ -44,7 +50,7 @@ def resolve_existing_python(prefix: Path) -> Path | None:
 
 
 def common_windows_python_candidates() -> list[Path]:
-    if os.name != "nt":
+    if not is_windows_host():
         return []
 
     roots: list[Path] = []
@@ -64,17 +70,91 @@ def common_windows_python_candidates() -> list[Path]:
 
 
 def is_runnable_python(command: list[str]) -> bool:
+    return python_version(command) is not None
+
+
+def python_version(command: list[str]) -> tuple[int, int, int] | None:
     try:
-        subprocess.run(
-            [*command, "-c", "import sys"],
+        result = subprocess.run(
+            [
+                *command,
+                "-c",
+                "import sys; print('%d.%d.%d' % sys.version_info[:3])",
+            ],
             cwd=str(ROOT),
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
-            check=True,
+            text=True,
+            check=False,
         )
-    except (OSError, subprocess.CalledProcessError):
-        return False
-    return True
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    parts = result.stdout.strip().split(".")
+    if len(parts) != 3:
+        return None
+    try:
+        return tuple(int(part) for part in parts)  # type: ignore[return-value]
+    except ValueError:
+        return None
+
+
+def all_commands_on_path(name: str) -> list[str]:
+    candidates: list[str] = []
+    seen: set[str] = set()
+    candidate_names = path_candidate_names(name)
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        if not directory:
+            continue
+        for candidate_name in candidate_names:
+            candidate = Path(directory) / candidate_name
+            rendered = str(candidate)
+            if rendered in seen:
+                continue
+            if candidate.is_file() and is_executable_command(candidate):
+                candidates.append(rendered)
+                seen.add(rendered)
+    return candidates
+
+
+def path_candidate_names(name: str) -> list[str]:
+    if not is_windows_host() or command_name_has_suffix(name):
+        return [name]
+
+    extensions = [".exe", ".cmd", ".bat", ".com"]
+    raw_pathext = os.environ.get("PATHEXT", "")
+    for extension in raw_pathext.replace(";", os.pathsep).split(os.pathsep):
+        normalized = extension.strip().lower()
+        if normalized and normalized not in extensions:
+            extensions.append(normalized)
+
+    return [name, *[f"{name}{extension}" for extension in extensions]]
+
+
+def command_name_has_suffix(name: str) -> bool:
+    basename = name.replace("\\", "/").rsplit("/", 1)[-1]
+    return "." in basename
+
+
+def is_executable_command(candidate: Path) -> bool:
+    if is_windows_host():
+        return candidate.is_file()
+    return candidate.is_file() and os.access(candidate, os.X_OK)
+
+
+def best_python_command(commands: list[list[str]]) -> list[str] | None:
+    runnable: list[tuple[int, tuple[int, int, int], list[str]]] = []
+    for index, command in enumerate(commands):
+        version = python_version(command)
+        if version is not None:
+            runnable.append((index, version, command))
+    if not runnable:
+        return None
+    preferred = [item for item in runnable if item[1] >= (3, 11, 0)]
+    pool = preferred or runnable
+    _, _, command = max(pool, key=lambda item: (item[1], -item[0]))
+    return command
 
 
 def expected_repo_venv_python() -> Path:
@@ -208,6 +288,19 @@ def render_harness_config() -> str:
         required_requirements_docs = [
           "docs/requirements/traceability-matrix.md",
         ]
+
+        [context_surface]
+        active_handoff_budget = 5
+        archive_candidate_min_score = 3
+        warn_at_budget = true
+
+        [context_budget]
+        default_surface_token_budget = 6500
+        always_on_doc_line_budget = 300
+        skill_description_word_budget = 30
+        skill_body_line_budget = 400
+        adr_count_budget = 15
+        mcp_server_budget = 10
         """
     )
 
@@ -224,56 +317,7 @@ def render_requirements_txt() -> str:
 
 
 def render_hooks_config() -> str:
-    if os.name == "nt":
-        hook_runner = "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
-    else:
-        hook_runner = ".codex/hooks/run_hook.sh"
-
-    return textwrap.dedent(
-        f"""\
-        {{
-          "hooks": {{
-            "SessionStart": [
-              {{
-                "matcher": "startup|resume",
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} session_start_runtime_context.py",
-                    "statusMessage": "Loading runtime session context",
-                    "timeout": 30
-                  }}
-                ]
-              }}
-            ],
-            "Stop": [
-              {{
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_observation.py",
-                    "statusMessage": "Capturing runtime observations",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_session.py",
-                    "statusMessage": "Persisting runtime session snapshot",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_ai_docs_check.py",
-                    "statusMessage": "Checking AI docs governance",
-                    "timeout": 30
-                  }}
-                ]
-              }}
-            ]
-          }}
-        }}
-        """
-    )
+    return render_platform_hooks_config(root=ROOT)
 
 
 def bootstrap_python_environment(
@@ -333,37 +377,58 @@ def install_optional_requirements(
 
 
 def resolve_bootstrap_python(explicit_python: str | None) -> list[str]:
-    candidate_commands: list[list[str]] = []
-
     if explicit_python:
-        candidate_commands.append([explicit_python])
+        command = [explicit_python]
+        if is_runnable_python(command):
+            return command
+        raise SystemExit(f"ERROR: explicit Python is not runnable: {explicit_python}")
 
+    prefix_commands: list[list[str]] = []
     if os.environ.get("VIRTUAL_ENV"):
         env_python = resolve_existing_python(Path(os.environ["VIRTUAL_ENV"]))
         if env_python is not None:
-            candidate_commands.append([str(env_python)])
+            prefix_commands.append([str(env_python)])
 
     if os.environ.get("CONDA_PREFIX"):
         env_python = resolve_existing_python(Path(os.environ["CONDA_PREFIX"]))
         if env_python is not None:
-            candidate_commands.append([str(env_python)])
+            prefix_commands.append([str(env_python)])
 
-    if sys.executable:
-        candidate_commands.append([sys.executable])
+    for command in prefix_commands:
+        if is_runnable_python(command):
+            return command
 
-    python_on_path = shutil.which("python")
-    if python_on_path:
-        candidate_commands.append([python_on_path])
+    env_python = os.environ.get("CODEX_HARNESS_PYTHON", "").strip()
+    if env_python:
+        command = [env_python]
+        if is_runnable_python(command):
+            return command
 
-    if os.name == "nt":
+    path_commands: list[list[str]] = []
+    for name in ("python3", "python"):
+        for python_path in all_commands_on_path(name):
+            command = [python_path]
+            if command not in path_commands:
+                path_commands.append(command)
+
+    path_command = best_python_command(path_commands)
+    if path_command is not None:
+        return path_command
+
+    if is_windows_host():
         py_launcher = shutil.which("py")
         if py_launcher:
-            candidate_commands.append([py_launcher, "-3"])
+            command = [py_launcher, "-3"]
+            if is_runnable_python(command):
+                return command
 
     for candidate in common_windows_python_candidates():
-        candidate_commands.append([str(candidate)])
+        command = [str(candidate)]
+        if is_runnable_python(command):
+            return command
 
-    for command in candidate_commands:
+    if sys.executable:
+        command = [sys.executable]
         if is_runnable_python(command):
             return command
 
@@ -397,28 +462,27 @@ def render_ai_index(project_name: str, stage_label: str) -> str:
 
         `.codex/runtime/` 下的 session 与 observation 文件属于本地 runtime harness，不纳入默认共享阅读面，也不作为项目共享真相。
 
-        ## 默认阅读顺序
+        ## 默认短链路
 
         1. [项目规则 AGENTS.md](../../AGENTS.md)
         2. [当前工作上下文](./working-context.md)
-        3. [需求文档入口索引](../requirements/index.md)
-        4. [项目计划](./plan.md)
-        5. [Harness 可迁移清单](./harness-portability-guide.md)
-        6. [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
-        7. [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
 
-        ## 默认治理控制面
+        任务进入哪个更深入口，由 `AGENTS.md` 的 Task Discovery Protocol 判断。简单任务默认停在短链路；requirements、plan、handoff、ADR 与 archive 都是按需入口。
 
-        - [项目规则 AGENTS.md](../../AGENTS.md)
-        - [当前工作上下文](./working-context.md)
-        - [需求文档入口索引](../requirements/index.md)
-        - [项目计划](./plan.md)
+        用户通常不需要手动标注任务类型。`按简单任务处理`、`按复杂任务处理`、`这是 0-1 阶段任务`、`不要读 archive`、`需要深挖历史` 只是可选覆盖指令，用来纠正或收窄 Agent 的默认判断。
+
+        ## 按需深入入口
+
+        - [需求文档入口索引](../requirements/index.md)：需求驱动、traceability 或 0-1 stage 任务再进入
+        - [项目计划](./plan.md)：阶段目标、范围与验收框架需要确认时再进入
         - [Harness 可迁移清单](./harness-portability-guide.md)
+        - [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
+        - [传统项目接入 Harness 的标准起手式](./traditional-project-harness-kickoff.md)
         - [handoffs/active](./handoffs/active)
         - [status](./status)
         - [changelog](./changelog)
         - [adr](./adr)
-        - 默认 active handoff 预算：`<=5`。超过预算时优先压缩到 `status` 或归档，而不是继续扩张默认恢复面。
+        - 默认 active handoff 预算由 `.codex/harness.toml` 的 `context_surface.active_handoff_budget` 控制，初始值为 `5`。达到预算时优先压缩到 `status` 或归档，而不是继续扩张默认恢复面。
 
         ## 当前阶段占位
 
@@ -575,14 +639,14 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         2. 导入首个 `REQDOC / REQ / WS`
         3. 实现第一个可验证的垂直切片
         4. 跑通 runtime observation / session / reducer / handoff-status 链路
-        5. 默认将共享恢复面保持在 `index -> working-context -> status -> <=5 active handoff`
+        5. 默认将共享恢复面保持在 `index -> working-context -> status -> configured active handoff budget`
 
         ## 当前风险与阻塞
 
         - 首个真实场景尚未导入，当前还不能证明 traceability 链路可用
         - 若把旧项目共享真相直接复制过来，会污染新项目控制面
         - 若未先初始化 index / plan / working-context / traceability-matrix，Stop hook 可能在首轮工作后直接给出治理失败
-        - active handoff 默认预算应保持在 `<=5`；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀
+        - active handoff 默认预算由 `.codex/harness.toml` 控制；被 `status` 吸收后的完成型 handoff 应进入 `archive`，否则默认恢复面会再次膨胀
 
         ## 下一次会话先读
 
@@ -598,8 +662,11 @@ def render_working_context(project_name: str, stage_label: str) -> str:
         - 项目采用 `AGENTS.md + Codex Stop hook + 校验脚本` 的治理方式
         - 项目采用 `docs/requirements/` 与 `docs/ai/` 分层管理需求与执行上下文
         - `.codex/runtime/` 只保存本地 session/observation 原料，不替代 `docs/ai/` 共享治理文档
-        - 默认共享恢复面保持轻量：`index -> working-context -> status -> <=5 active handoff`
+        - 默认共享恢复面保持轻量：`index -> working-context -> status -> configured active handoff budget`
         - `plan` 与 `workstream` 属于 projection surface，不应重复承载快速变化的当前状态
+        - `.agents/skills/repo-governed-coding/` 是可选行为护栏，默认显式调用，不替代 `AGENTS.md`、共享治理文档或检查脚本
+        - `.agents/skills/harness-maintenance/` 是可选 harness 维护能力，只在修改 runtime、hooks、reducers、compression、verification、GitHub guardrails 或 code-shape checks 时按需调用
+        - `.agents/skills/requirements-traceability-maintenance/` 是可选 requirements 维护能力，只在 PRD 导入、`REQDOC / REQ / WS`、traceability matrix 或技术假设变化时按需调用
 
         ## 更新规则
 

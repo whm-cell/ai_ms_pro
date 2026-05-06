@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-04-25
+更新时间：2026-05-05
 阶段：stage-00
 状态：进行中
 
@@ -12,96 +12,60 @@
 
 ## 当前阶段目标
 
-- 为项目建立最小可用的 runtime harness、governance harness 和 verification harness 协作链路
-- 保持 repo-first 治理边界，同时补齐 session、observation、reducer 与 traceability metadata 的基础能力
-- 为后续真实需求导入和阶段化开发预留稳定的 requirements traceability 位点
+- 建立最小可用的 runtime / governance / verification harness 协作链路
+- 保持 repo-first 治理边界，并让 session、observation、reducer、traceability metadata 可恢复、可压缩、可验证
+- 为后续真实需求导入、阶段化开发和新项目 starter 迁移保留稳定控制面
 
 ## 当前完成度
 
 - 已完成：
-  - `Stop` runtime observation/session writer
-  - `SessionStart` runtime session resume context
-  - observation handoff-first reducer
-  - requirement/workstream metadata 位点与 ADR 规则
-  - runtime staged 阻断、working-context 新鲜度检查、handoff 堆积 warning
-  - 首个真实场景 `WS-01 / Three.js Snake MVP` 的 requirements 导入、实现落地与 handoff/status 压缩
-  - `WS-01` 的 repo-level deterministic smoke runner，覆盖 `load -> eat -> game over -> restart`
-  - `plan/workstream` projection surface boundary 与显式状态字段 freshness 校验
-  - 第二个真实场景 `WS-02 / Harness Trace Console` 的 requirements 导入、实现落地与 handoff/status 压缩
-  - `WS-02` 的 repo-level deterministic smoke runner，覆盖 `load -> WS-02 filter -> REQ-006 search -> completed status`
-  - 显式 `REQ/WS` metadata 下的 Stop hook observation/session 与 reducer 验证
-  - repo-level smoke 的 Playwright session 命名已收紧，避免当前 macOS 环境中的 unix socket 路径截断冲突
-  - `check_ai_docs.py` 已收紧为“最小默认 + `.codex/harness.toml` 可配置”，并新增 `bootstrap_harness.py` 作为跨项目最小控制面初始化入口
-  - Git hook 与 Codex hook 已统一收敛到 repo-level Python runner，默认优先使用 `.codex/.venv`
-  - bootstrap 已补齐离线容错：Python 兼容依赖安装默认 best-effort，不再因为受限网络阻断 `.codex/.venv` 初始化
-  - 已在 `output/harness_rehearsal_20260419_100339` 完成全新测试仓库演练，starter copy -> bootstrap -> 首个 `REQDOC / REQ / WS` -> 最小实现 -> governance check 已闭环
-  - 已在测试仓库内补齐 `WS-01 Quick Notes` 的 smoke、runtime promotion 与首个 stage `status` 压缩
-  - `working-context` 已新增轻结构化同步元数据头，并开始校验 stage/status/handoff/REQ/WS 的显式字段一致性
-  - 已新增 repo-local `$repo-governed-coding` skill，把 Karpathy-style 行为约束适配为当前仓库的显式调用能力，并补入文档同步、traceability、verification 与 projection boundary 规则
-  - governance checker 已新增 active `handoff` / `status` 的 `REQ/WS` 字段存在性校验，把 metadata consistency 自动化从 `working-context` 扩展到更多 primary truth surface
-  - 默认治理面已收缩为 `index -> working-context -> stage status -> <=5 active handoff`，并已将被 stage `status` / ADR 吸收的完成型 handoff 归档
-  - 2026-04-24: `ghtt_crawler` 中已验证的 Windows hook entry、runnable Python resolution、repo-local venv self-heal 与 staged code-shape budget 已反哺进当前 harness；长期决策记录在 `ADR-008-cross-platform-hooks-and-code-shape.md`
-  - 2026-04-25: `new_pro_standard` 已同步 PowerShell hook entrypoints、code-shape budget、runnable Python resolution、坏 `.codex/.venv` 自愈、staged code-shape pre-commit 与 active handoff/status `REQ/WS` metadata 校验；bootstrap 也会按当前宿主环境刷新 `.codex/hooks.json`，默认治理面中的重复当前态展开已进一步回收到 `working-context` 同步元数据与 stage `status`
+  - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
+  - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02 smoke、context budget、archive candidate、change-triggered followups、CI / PR summary、check registry、repo skill / requirements / skill eval / GitHub guardrails checks
+  - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
+      - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills`、`team-pr-conflict-control` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
+  - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；PRD 导入检查现在要求技术假设状态和 verification method
+  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、change-triggered advisory summary、security evidence workflow、`merge_group` 触发、required-check 策略和可运行远端 guardrails check；`check_github_guardrails.py` 已拆成 helper 模块并新增 orphan gitlink 检查；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap
 - 进行中：
-  - 基于 [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md) 收敛剩余 hardening 项
-  - 评估是否可以将 Stage-00 压缩并进入下一阶段
-  - metadata consistency 自动校验已从 `working-context` 扩展到 active `handoff/status`，但仍未覆盖 reducer/runtime 与更细的组合关系
-- 未开始：
-  - CI 强校验接入
-  - reducer 到 `status` / `ADR` 的更强自动压缩策略
+  - OPEN-01：远端 CI burn-in、GitHub branch protection / ruleset required checks 确认
+  - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 与 workflow skill 真实样本观察
+  - P2：继续压缩完成型 Stage-00 历史；本轮已把完成型 skill/evidence handoff 移入 archive，active handoff 从 4 降到 2
 
 ## 本阶段关键成果
 
-- runtime 层已经具备 `Stop observation -> Stop session -> SessionStart additionalContext` 的最小自动化闭环
-- governance 层已经明确采用 `handoff -> status -> adr/changelog` 压缩链路，并新增 handoff-first reducer
-- requirements traceability 规则已经进入 handoff、status、session 和 reducer 输出，且 canonical mapping 保持在 `docs/requirements/traceability-matrix.md`
-- quality / governance 检查已经能识别 metadata section 缺失，并继续阻断 runtime state 误提交
-- quality / governance 检查已开始利用 `working-context` 同步元数据验证 stage source、handoff source 和 REQ/WS 显式绑定
-- `WS-01 / Three.js Snake MVP` 已作为首个真实场景落地，证明当前 harness 能支撑从 requirements 到代码实现的完整闭环
-- `WS-01` 已新增 repo 内可直接运行的浏览器 smoke 入口，不再只依赖一次性手工打开页面验证
-- `WS-02 / Harness Trace Console` 已作为第二个真实场景落地，证明当前 harness 在新 workstream 上也能复用 requirements、implementation 和 shared truth surface
-- `WS-02` 已通过显式 `REQ-004~006 / WS-02` metadata 运行 Stop hooks 与 reducer，验证 runtime promotion 链路不只在首个 workstream 有效
-- harness 已具备跨项目 bootstrap 能力，说明当前阶段成果不只适用于本 repo，也可作为新项目起手式
-- repo-level Python runner 已补齐 Git hook 与 Codex hook 的解释器一致性，减少系统 Python 版本差异对治理检查的影响
-- 通过真实新仓库演练可以暴露 portability 边界问题；当前已确认“离线安装可选兼容依赖失败”不应视为 bootstrap 失败
-- governance checker 已通过 `-uall` 修复全新仓库首次初始化时的目录级未跟踪误判
-- `WS-01 Quick Notes` 已在新仓库内完成 `requirements -> implementation -> smoke -> runtime promotion -> status`
-- `plan` 与 `workstream` 已收缩为 projection surface，当前完成度与验证证据默认回收到 `working-context`、`handoff`、`status`、`traceability-matrix`
-- governance 脚本已新增 projection freshness 规则，但仅检查显式状态字段，避免自由文本级误报
-- `index` 已回收为稳定路由层，`working-context` 已回收为增量真相层，默认恢复面不再重复展开完整阶段目录
-- governance checker 已新增 active handoff 与 `working-context` 绑定 handoff 的预算 warning，用于持续压缩默认治理面
-- repo-local `$repo-governed-coding` skill 已证明当前 harness 不只支持文档与 hook 规则，也能承载显式调用的行为层约束；当前仍保持为策略补强，而不是主治理面替换
-- repo-local `$repo-governed-coding` skill 已在首个真实实现任务中完成前向使用，说明它不只停留在结构校验层面，也能驱动一个受控的小范围 hardening 变更闭环
-- 2026-04-24 portability hardening establishes a cleaner cross-platform hook/Python baseline and keeps code-shape checks separate from AI governance checks.
-- `new_pro_standard` 现已和当前 harness 的关键机制层重新对齐，starter 不再遗漏 2026-04-24 portability hardening 与 metadata consistency 的核心能力
-- `index -> working-context -> stage status` 的默认恢复链路进一步去重，精确 active handoff 集合以 `working-context` 同步元数据为准
+- 两个真实 workstream 已证明当前 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
+- 默认恢复面已收缩为 `index -> working-context -> stage status -> configured active handoff budget`，archive 只在 recovery/dispute 或当前 truth surface 不足时进入。
+- `new_pro_standard` 已同步机制层，包括 Python 解析、hook sync、code shape、context surface、Task Discovery、project skill lifecycle、`.agents/skills` 与 context budget audit；当前 repo 的历史 truth 不复制进 starter。
+- `plan/workstream` 已明确为 projection surface，当前状态真相默认回收到 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
+- `REQ <-> WS <-> STAGE` 至少已有一层自动校验：`working-context` 当前 stage 与 matrix 不一致会阻断，runtime artifact 先 warning-only。
+- repo-local skills、requirements shape、Candidate skill eval samples、GitHub guardrails 与 changed-file follow-up triage 已有独立 warning-only checks；PR / main push 会展示 advisory summary 和 check level / CI coverage，避免继续膨胀 governance checker 或 `AGENTS.md`。
 
 ## 风险与阻塞
 
-- observation 与 session 仍依赖 best-effort hook payload，真实运行时字段可能需要继续适配
-- reducer 目前只做轻量聚合，尚未在真实长期 observation 数据上验证压缩质量
-- 当前前端 smoke 通过 `?smoke=1` 下的 namespaced API 走 deterministic 断言，后续若要覆盖真实用户输入路径，仍需补更黑盒的浏览器回归
-- 当前前端场景采用零构建静态接入，若后续引入更多复杂前端功能，可能需要重新评估工具链
-- `WS-02` 当前通过显式环境变量携带 `REQ/WS` metadata，说明链路可用，但自动化一致性仍未完全收紧
-- `AGENTS.md` 仍是当前项目版本；若新项目直接复制但不改写项目目标和 repo-specific 规则，仍可能带入旧假设
-- repo-local `$repo-governed-coding` skill 当前只在本仓库以显式调用方式提供；是否值得提升为 starter 资产仍需更多真实任务样本
-- 当前 metadata consistency 自动化仍只覆盖 `working-context + active handoff/status` 的字段级检查，尚未扩展到 reducer output、runtime artifact 或 `REQ <-> WS <-> STAGE` 组合关系
-- starter 当前已同时携带 `.sh` 与 `.ps1` hook runner，且 bootstrap 会按当前宿主环境刷新 `.codex/hooks.json`；若仓库在初始化后跨 host shell 迁移，仍需重新 bootstrap 或只调整 hook 入口配置
-- active surface budget 当前仍是 warning 而不是 blocking；后续仍需观察阈值是否足够稳定
+- CI workflow 已落地并进入 PR #1 burn-in；远端失败已暴露并修复 PR merge diff、Windows Python resolution test、dependency review unsupported、security evidence checkout orphan gitlink、PR touch conflict unknown fail-closed 五类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
+- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；Scorecard / CodeQL / SBOM 也先作为单个顺序 `security-evidence` job 产出 artifacts，不进入 required checks。CodeQL 在 private repo 未启用 code scanning 前只生成 SARIF artifact，不上传到 Code Scanning。branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。2026-05-05 已尝试读取 main branch protection / rulesets，但 GitHub 返回 HTTP 403，需要 GitHub Pro 或 public repo。
+- reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
+- active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；真正压缩/归档仍由主 Agent 语义确认。
+- `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 只下沉 PRD/REQ/WS/技术假设维护方法。
+- `scripts/check_change_triggered_followups.py` 只提示 changed files 对应的可能漏跑检查、等级、CI 覆盖状态和应读 reference；CI summary 只提高可见性，不证明命令已执行，也不升级为 blocking policy。
+- `$team-pr-conflict-control` 只下沉多人 / 多 AI PR touch-set 冲突控制方法；repo 内已新增 `scripts/check_pr_touch_conflicts.py`、PR template 和 `merge_group` workflow 触发，但远端 merge queue / branch protection 仍未被证明启用。
+- `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 0/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
+- `security-evidence.yml` 已能被 GitHub API 识别；Scorecard 首轮失败根因是仓库误跟踪 `output/harness_rehearsal_20260419_100339` 为无 `.gitmodules` 映射的 gitlink，不是 Scorecard 规则失败。
+- Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
 
 ## 下一阶段重点
 
-- 用真实 observation 数据验证 reducer 输出，并明确何时应进一步压缩到 `status` 或 `ADR`
-- 判断 `WS-01` 与 `WS-02` 是否应归档为已验证样板，或继续演化成更完整的示例
-- 评估是否将治理检查接入 CI，并逐步增加 metadata 一致性检查
-- 评估是否要继续收紧“仓库初始化后跨 host shell 迁移”的体验，例如自动探测或迁移提示，而不是继续阻塞新项目起手
-- 在几个真实实现任务中显式调用 `$repo-governed-coding`，判断它是否只需保留为 repo-local skill，还是值得进入 starter / ADR
-- 若继续推进 OPEN-06，优先补 reducer/runtime 或 `REQ <-> WS` 组合关系校验，而不是直接做自由文本级语义推断
+- 推动 OPEN-01：远端 workflow green history、required checks、CODEOWNERS review、conversation resolved 与禁止直推 `main` 的远端确认。
+- 在下一次 stage compression 时继续审查 archive candidate monitor 输出，确认候选已被 status、backlog 或 ADR 吸收。
+- 在后续真实项目中观察 `$repo-governed-coding`、`$progressive-feature-development`、`$prd-to-project-skills`、project skill lifecycle 和 context budget audit 是否需要从显式/手动能力升级。
+- 对真实 PRD 导入和非平凡功能任务运行 evidence checks，并把 with/without eval 登记到 `docs/ai/skill-usage-samples.md`。
+- 在后续多人协作 PR 中验证 `$team-pr-conflict-control` 与 `scripts/check_pr_touch_conflicts.py` 是否足以降低 touch-set 冲突；若样本证明有效，再考虑进一步收紧 merge queue enforcement。
+- 继续压缩完成型 Stage-00 历史，判断 `WS-01` / `WS-02` 是保留为验证样板，还是压缩为更轻的 starter 说明。
 
 ## 验收判断
 
-- 当前阶段的“runtime harness foundation”目标已在两个真实 workstream 上得到验证：三层 harness、traceability、projection boundary 和 runtime promotion 均已跑通
-- 尚未完全进入下一阶段，因为 reducer 压缩阈值、CI 接入和 metadata consistency 自动校验仍未完成；剩余问题更偏 hardening，而不是“是否可用”
+- Stage-00 的 runtime harness foundation 已在两个真实 workstream 上验证可用。
+- 当前尚未完全进入下一阶段，因为 CI burn-in、GitHub branch protection / ruleset required checks 和 Windows 真实复演仍需确认。
+- 剩余问题主要是远端守门与长期样本观察，不是本地 harness 能否使用。
 
 ## 关联文档
 
@@ -112,7 +76,20 @@
 - [当前活跃 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)
 - [已归档 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive)
 - [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)
-- [ADR-007 Governance Surface Budget](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-007-governance-surface-budget.md)
-- [ADR-008 Cross-Platform Hooks And Code Shape Budget](../adr/ADR-008-cross-platform-hooks-and-code-shape.md)
-- [2026-04-25 Harness Starter Sync And Surface Trim](../changelog/2026-04-25-harness-starter-sync-and-surface-trim.md)
-- 当前默认恢复顺序与 active handoff 集合由 `working-context` 的同步元数据维护；已被本 stage `status` / ADR 吸收的完成型 handoff 已归档
+- [ADR-010 Context Surface Layering](../adr/ADR-010-context-surface-layering.md)
+- [ADR-011 Task Discovery Reading Profiles](../adr/ADR-011-task-discovery-reading-profiles.md)
+- [ADR-012 GitHub Harness Gatekeeping](../adr/ADR-012-github-harness-gatekeeping.md)
+- [ADR-013 Project Skill Lifecycle](../adr/ADR-013-project-skill-lifecycle.md)
+- [ADR-014 Context Budget Audit](../adr/ADR-014-context-budget-audit.md)
+- [ADR-015 Progressive Feature And PRD Skills](../adr/ADR-015-progressive-feature-and-prd-skills.md)
+- [2026-05-02 Context Budget Audit](../changelog/2026-05-02-context-budget-audit.md)
+- [2026-05-04 Progressive Feature And PRD Skills](../changelog/2026-05-04-progressive-feature-and-prd-skills.md)
+- [2026-05-04 Harness Evidence Checks](../changelog/2026-05-04-harness-evidence-checks.md)
+- [2026-05-04 Harness Maintenance Skill Downshift](../changelog/2026-05-04-harness-maintenance-skill-downshift.md)
+- [2026-05-04 Traceability And Governance Skill Downshift](../changelog/2026-05-04-traceability-and-governance-skill-downshift.md)
+- [2026-05-05 PR Branch Guardrails](../changelog/2026-05-05-pr-branch-guardrails.md)
+- [2026-05-05 Change Triggered Followups](../changelog/2026-05-05-change-triggered-followups.md)
+- [2026-05-05 Advisory Followups CI Summary](../changelog/2026-05-05-advisory-followups-ci-summary.md)
+- [2026-05-05 Harness Maturity Security Evidence](../changelog/2026-05-05-harness-maturity-security-evidence.md)
+- [Candidate Skill Usage Samples](../skill-usage-samples.md)
+- [OPEN-10 使用细节](../../../--使用细节/上下文预算OPEN-10使用细节.md)

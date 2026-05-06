@@ -1,0 +1,7 @@
+interface:
+  display_name: "Requirements Traceability Maintenance"
+  short_description: "Maintain PRD-to-REQ-to-WS traceability and assumptions"
+  default_prompt: "Use $requirements-traceability-maintenance when importing PRDs, editing REQ/WS mappings, or checking technical assumptions."
+
+policy:
+  allow_implicit_invocation: false

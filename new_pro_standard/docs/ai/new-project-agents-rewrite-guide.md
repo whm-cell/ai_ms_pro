@@ -124,7 +124,7 @@ starter 默认只定义治理骨架，不知道你的项目怎么跑。
 2. 先改 `Purpose` 和 `Project Bootstrap Notes`，把旧项目语义清掉。
 3. 再补 `Reading Order` 和 repo-specific defaults。
 4. 最后补 `Verification Layer` 与 `Completion Condition`。
-5. 改完后立刻跑 `python3 scripts/check_ai_governance.py`。
+5. 改完后立刻通过 repo-local Python runner 跑 `scripts/check_ai_governance.py`。
 
 ## 最小改写清单
 

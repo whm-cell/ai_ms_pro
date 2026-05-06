@@ -1,0 +1,7 @@
+interface:
+  display_name: "PRD To Project Skills"
+  short_description: "Classify PRD and requirement patterns into candidate project skills"
+  default_prompt: "Use $prd-to-project-skills to extract stable project-skill candidates from PRD or requirement material."
+
+policy:
+  allow_implicit_invocation: false

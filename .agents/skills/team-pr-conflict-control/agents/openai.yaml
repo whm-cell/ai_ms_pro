@@ -1,0 +1,7 @@
+interface:
+  display_name: "Team PR Conflict Control"
+  short_description: "Guide PR overlap checks for multi-agent teams"
+  default_prompt: "Use $team-pr-conflict-control to assess PR touch conflicts, high-risk files, PR template coverage, CODEOWNERS, and merge queue readiness for team development."
+
+policy:
+  allow_implicit_invocation: false
