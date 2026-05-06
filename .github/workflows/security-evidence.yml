@@ -33,7 +33,7 @@ jobs:
       - name: Run OpenSSF Scorecard
         continue-on-error: true
         timeout-minutes: 10
-        uses: ossf/scorecard-action@v2.4.0
+        uses: ossf/scorecard-action@v2.4.3
         with:
           results_file: scorecard-results.sarif
           results_format: sarif
