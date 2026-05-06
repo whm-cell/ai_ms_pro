@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-04-30
-当前状态：已导入两个真实验证场景，并把 traceability matrix -> normalized/workstream 对齐、WS-01 黑盒 smoke 证据与当前 stage alignment 纳入治理检查
+更新时间：2026-05-06
+当前状态：已导入两个真实验证场景；新增 REQDOC-003 Godot 2D 闯关游戏 PRD source 作为原始需求输入，尚未标准化为 REQ / WS，当前 Requirement IDs / Workstream IDs：未绑定
 
 ## 目的
 
@@ -47,6 +47,7 @@
 
 - [REQDOC-001 Three.js 贪吃蛇 Harness 验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
 - [REQDOC-002 Harness Trace Console 复用验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-002-harness-trace-console-validation.md)
+- [REQDOC-003 Godot 2D 闯关游戏 PRD source](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/prd-game-chuban.md)（source only，待标准化；Requirement IDs / Workstream IDs：未绑定）
 - [REQ-001 Three.js 贪吃蛇核心玩法](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
 - [REQ-002 Three.js 贪吃蛇三维呈现与交互反馈](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
 - [REQ-003 用真实任务验证 Harness Traceability](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-003-harness-traceability-validation.md)

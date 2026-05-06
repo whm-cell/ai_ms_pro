@@ -56,6 +56,7 @@
 - `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
 - [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
 - [阶段提交与 PR-CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/阶段提交与PR-CI操作手册.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
+- [GitHub 私有仓库 Harness 与完整 CI 配置清单](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/GitHub私有仓库Harness与完整CI配置清单.md)：接手公司私有仓库、配置 branch protection / ruleset、required checks、CODEOWNERS、security evidence 与完整 CI 时再查看
 - [已归档 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive)：当前 truth surface 不足以回答历史原因时再进入
 - [当前 Changelog 目录](./changelog)
 
