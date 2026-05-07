@@ -15,7 +15,10 @@ warn_at_budget = true
 
 [context_budget]
 default_surface_token_budget = 6500
+default_surface_warning_percent = 80
+default_surface_high_warning_percent = 90
 always_on_doc_line_budget = 300
+stage_status_line_budget = 120
 skill_description_word_budget = 30
 skill_body_line_budget = 400
 adr_count_budget = 15

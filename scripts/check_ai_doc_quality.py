@@ -17,6 +17,92 @@ PLACEHOLDER_MARKERS = [
     "TBD",
 ]
 
+CORE_REQUIRED_SECTION_MAP: dict[Path, list[str]] = {
+    AI_DIR / "plan.md": [
+        "## 使用边界",
+        "## 项目目标",
+        "## 范围定义",
+        "## 阶段规划",
+    ],
+    AI_DIR / "working-context.md": [
+        "## 同步元数据",
+        "## 当前主目标",
+        "## 当前活跃队列",
+        "## 当前风险与阻塞",
+        "## 下一次会话先读",
+        "## 更新规则",
+    ],
+}
+
+HANDOFF_REQUIRED_SECTIONS = [
+    "## 需求与工作流标识",
+    "## 本任务目标",
+    "## 已完成内容",
+    "## 修改文件",
+    "## 关键实现决策",
+    "## 当前未完成项",
+    "## 已知风险与注意事项",
+    "## 已验证有效的路线",
+    "## 已验证无效的路线",
+    "## 尚未尝试但建议的路线",
+    "## 下一位 Agent 的第一步动作",
+]
+
+STATUS_REQUIRED_SECTIONS = [
+    "## 需求与工作流标识",
+    "## 当前阶段目标",
+    "## 当前完成度",
+    "## 本阶段关键成果",
+    "## 风险与阻塞",
+    "## 下一阶段重点",
+    "## 验收判断",
+]
+
+RUNTIME_SESSION_REQUIRED_SECTIONS = [
+    "## 需求与工作流标识",
+    "## 当前目标",
+    "## 会话范围与触发背景",
+    "## 已做动作",
+    "## 触碰文件",
+    "## 当前 Open Loops",
+    "## 需提升到共享治理层的内容",
+    "## 下次 Resume 提示",
+    "## 是否需要提升为 Handoff",
+]
+
+CHANGELOG_REQUIRED_SECTIONS = [
+    "## 新增功能",
+    "## 修复问题",
+    "## 行为变化",
+    "## 破坏性变更",
+    "## 验证范围",
+]
+
+ADR_REQUIRED_SECTIONS = [
+    "## 背景",
+    "## 决策",
+    "## 备选方案",
+    "## 决策理由",
+    "## 影响",
+]
+
+NORMALIZED_REQUIREMENT_SECTIONS = [
+    "## 背景",
+    "## 目标",
+    "## 范围",
+    "## 验收条件",
+    "## 依赖与前置条件",
+]
+
+WORKSTREAM_SECTION_CHOICES = [
+    ["## 使用边界"],
+    ["## 业务目标"],
+    ["## 覆盖需求"],
+    ["## 主要模块"],
+    ["## 阶段拆分建议"],
+    ["## 验收模型", "## 验收重点"],
+]
+
 
 def load_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
@@ -58,181 +144,51 @@ def check_placeholder_markers(path: Path, warnings: list[str]) -> None:
             warnings.append(f"Placeholder marker '{marker}' found in {path.relative_to(ROOT)}")
 
 
-def main() -> int:
-    errors: list[str] = []
-    warnings: list[str] = []
-
-    required_section_map: dict[Path, list[str]] = {
-        AI_DIR / "plan.md": [
-            "## 使用边界",
-            "## 项目目标",
-            "## 范围定义",
-            "## 阶段规划",
-        ],
-        AI_DIR / "working-context.md": [
-            "## 同步元数据",
-            "## 当前主目标",
-            "## 当前活跃队列",
-            "## 当前风险与阻塞",
-            "## 下一次会话先读",
-            "## 更新规则",
-        ],
-    }
-
-    for path, sections in required_section_map.items():
+def check_required_documents(errors: list[str]) -> None:
+    for path, sections in CORE_REQUIRED_SECTION_MAP.items():
         if not path.exists():
             errors.append(f"Required quality-controlled document missing: {path.relative_to(ROOT)}")
             continue
         check_required_sections(path, sections, errors)
 
-    for path in iter_docs(AI_DIR / "handoffs" / "active"):
-        check_required_sections(
-            path,
-            [
-                "## 需求与工作流标识",
-                "## 本任务目标",
-                "## 已完成内容",
-                "## 修改文件",
-                "## 关键实现决策",
-                "## 当前未完成项",
-                "## 已知风险与注意事项",
-                "## 已验证有效的路线",
-                "## 已验证无效的路线",
-                "## 尚未尝试但建议的路线",
-                "## 下一位 Agent 的第一步动作",
-            ],
-            errors,
-        )
+
+def check_section_collection(
+    directory: Path,
+    sections: list[str],
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    for path in iter_docs(directory):
+        check_required_sections(path, sections, errors)
         check_placeholder_markers(path, warnings)
 
-    template_path = AI_DIR / "handoffs" / "active" / "_template.md"
-    if template_path.exists():
-        check_required_sections(
-            template_path,
-            [
-                "## 需求与工作流标识",
-                "## 本任务目标",
-                "## 已完成内容",
-                "## 修改文件",
-                "## 关键实现决策",
-                "## 当前未完成项",
-                "## 已知风险与注意事项",
-                "## 已验证有效的路线",
-                "## 已验证无效的路线",
-                "## 尚未尝试但建议的路线",
-                "## 下一位 Agent 的第一步动作",
-            ],
-            errors,
-        )
 
-    for path in iter_docs(AI_DIR / "status"):
-        check_required_sections(
-            path,
-            [
-                "## 需求与工作流标识",
-                "## 当前阶段目标",
-                "## 当前完成度",
-                "## 本阶段关键成果",
-                "## 风险与阻塞",
-                "## 下一阶段重点",
-                "## 验收判断",
-            ],
-            errors,
-        )
-        check_placeholder_markers(path, warnings)
+def check_optional_template(path: Path, sections: list[str], errors: list[str]) -> None:
+    if path.exists():
+        check_required_sections(path, sections, errors)
 
-    status_template_path = AI_DIR / "status" / "_template.md"
-    if status_template_path.exists():
-        check_required_sections(
-            status_template_path,
-            [
-                "## 需求与工作流标识",
-                "## 当前阶段目标",
-                "## 当前完成度",
-                "## 本阶段关键成果",
-                "## 风险与阻塞",
-                "## 下一阶段重点",
-                "## 验收判断",
-            ],
-            errors,
-        )
 
-    if RUNTIME_SESSION_TEMPLATE.exists():
-        check_required_sections(
-            RUNTIME_SESSION_TEMPLATE,
-            [
-                "## 需求与工作流标识",
-                "## 当前目标",
-                "## 会话范围与触发背景",
-                "## 已做动作",
-                "## 触碰文件",
-                "## 当前 Open Loops",
-                "## 需提升到共享治理层的内容",
-                "## 下次 Resume 提示",
-                "## 是否需要提升为 Handoff",
-            ],
-            errors,
-        )
-
-    for path in iter_docs(AI_DIR / "changelog"):
-        check_required_sections(
-            path,
-            [
-                "## 新增功能",
-                "## 修复问题",
-                "## 行为变化",
-                "## 破坏性变更",
-                "## 验证范围",
-            ],
-            errors,
-        )
-        check_placeholder_markers(path, warnings)
-
-    for path in iter_docs(AI_DIR / "adr"):
-        check_required_sections(
-            path,
-            [
-                "## 背景",
-                "## 决策",
-                "## 备选方案",
-                "## 决策理由",
-                "## 影响",
-            ],
-            errors,
-        )
-        check_placeholder_markers(path, warnings)
-
-    for path in iter_docs(REQ_DIR / "normalized"):
-        check_required_sections(
-            path,
-            [
-                "## 背景",
-                "## 目标",
-                "## 范围",
-                "## 验收条件",
-                "## 依赖与前置条件",
-            ],
-            errors,
-        )
-        check_placeholder_markers(path, warnings)
-
+def check_workstream_docs(errors: list[str], warnings: list[str]) -> None:
     for path in iter_docs(REQ_DIR / "workstreams"):
-        check_required_section_choices(
-            path,
-            [
-                ["## 使用边界"],
-                ["## 业务目标"],
-                ["## 覆盖需求"],
-                ["## 主要模块"],
-                ["## 阶段拆分建议"],
-                ["## 验收模型", "## 验收重点"],
-            ],
-            errors,
-        )
+        check_required_section_choices(path, WORKSTREAM_SECTION_CHOICES, errors)
         check_placeholder_markers(path, warnings)
 
+
+def run_quality_checks(errors: list[str], warnings: list[str]) -> None:
+    check_required_documents(errors)
+    check_section_collection(AI_DIR / "handoffs" / "active", HANDOFF_REQUIRED_SECTIONS, errors, warnings)
+    check_optional_template(AI_DIR / "handoffs" / "active" / "_template.md", HANDOFF_REQUIRED_SECTIONS, errors)
+    check_section_collection(AI_DIR / "status", STATUS_REQUIRED_SECTIONS, errors, warnings)
+    check_optional_template(AI_DIR / "status" / "_template.md", STATUS_REQUIRED_SECTIONS, errors)
+    check_optional_template(RUNTIME_SESSION_TEMPLATE, RUNTIME_SESSION_REQUIRED_SECTIONS, errors)
+    check_section_collection(AI_DIR / "changelog", CHANGELOG_REQUIRED_SECTIONS, errors, warnings)
+    check_section_collection(AI_DIR / "adr", ADR_REQUIRED_SECTIONS, errors, warnings)
+    check_section_collection(REQ_DIR / "normalized", NORMALIZED_REQUIREMENT_SECTIONS, errors, warnings)
+    check_workstream_docs(errors, warnings)
     check_placeholder_markers(AI_DIR / "working-context.md", warnings)
 
+
+def print_result(errors: list[str], warnings: list[str]) -> int:
     if errors:
         print("AI docs quality check: FAILED")
         for message in errors:
@@ -245,6 +201,14 @@ def main() -> int:
     for message in warnings:
         print(f"WARN: {message}")
     return 0
+
+
+def main() -> int:
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    run_quality_checks(errors, warnings)
+    return print_result(errors, warnings)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # 需求追踪矩阵
 
-更新时间：2026-04-30
-当前状态：已建立两个真实场景追踪，并补充 WS-01 黑盒 smoke 与 stage consistency 校验
+更新时间：2026-05-07
+当前状态：已建立三个真实场景追踪，并补充 WS-03 Godot PRD 首轮 repo-native 垂直切片 smoke
 
 ## 目的
 
@@ -25,3 +25,6 @@
 | REQDOC-002 | REQ-004 | WS-02 | STAGE-00 | 已完成 | `apps/harness-trace-console/` 已直接读取 `working-context`、stage status 与 `traceability-matrix`，展示当前阶段、摘要卡片和活跃队列 |
 | REQDOC-002 | REQ-005 | WS-02 | STAGE-00 | 已完成 | 控制台支持按 `stage/workstream/status/search` 过滤 traceability，并可查看单条 requirement 详情 |
 | REQDOC-002 | REQ-006 | WS-02 | STAGE-00 | 已完成 | `python3 scripts/harness_trace_console_smoke.py` 已验证 load -> WS-02 filter -> REQ-006 search；runtime hooks 与 reducer 已用显式 metadata 跑通一次 |
+| REQDOC-003 | REQ-007 | WS-03 | STAGE-00 | 已完成 | `apps/godot-platformer-slice/` 已验证 move/jump -> freeze -> throw -> clear enemies -> unlock exit -> complete 的首轮玩法闭环；Godot 工程仍未采纳 |
+| REQDOC-003 | REQ-008 | WS-03 | STAGE-00 | 已完成 | `python3 scripts/godot_platformer_slice_smoke.py` 已验证 load -> freeze -> throw -> unlock exit -> complete -> reset，并接入 GitHub Actions smoke job |
+| REQDOC-003 | REQ-009 | WS-03 | STAGE-00 | 已完成 | Godot 4.6.2、Compatibility renderer、GUT、导出 preset 等保持 proposed / 待确认；本轮只采纳 repo-native 首轮切片作为 harness 验证样本 |

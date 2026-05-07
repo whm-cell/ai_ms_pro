@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Godot Platformer First Slice</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage-wrap" aria-label="Godot platformer first slice">
+        <canvas id="game" width="960" height="540"></canvas>
+        <div class="completion-banner hidden" id="completion-banner">Slice Complete</div>
+      </section>
+
+      <section class="hud" aria-label="Game status">
+        <div>
+          <p class="eyebrow">REQDOC-003 / WS-03</p>
+          <h1>Platformer First Slice</h1>
+        </div>
+        <div class="stats">
+          <div><span>Score</span><strong id="score">0</strong></div>
+          <div><span>Enemies</span><strong id="enemies">2</strong></div>
+          <div><span>Exit</span><strong id="exit">Locked</strong></div>
+        </div>
+        <p class="hint">Move with arrows or A/D. Jump with W, ArrowUp, or Space. Press J to freeze, K to throw, R to reset.</p>
+        <button id="reset" type="button">Reset</button>
+      </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 # 上下文预算 OPEN-10 使用细节
 
-更新时间：2026-05-02
+更新时间：2026-05-07
 
 ## 这是什么
 
@@ -29,6 +29,8 @@ OPEN-10 是一次默认上下文体检后的瘦身 triage，不是自动归档�
 
 - `6500` token budget 保留为 starter / 新项目的默认目标。
 - 当前 root repo 暂时使用 `8500` 作为 Stage-00 本地预算，因为它包含成熟阶段的 current status、ADR 历史和多个治理 hardening 结论。
+- 默认上下文达到 `80%` 时 warning，达到 `90%` 时视为高水位；继续增加 always-on 文档前应先压缩。
+- ADR 数量达到预算即 warning；stage status 达到 `stage_status_line_budget` 即触发 stage compression 判断。
 - context budget audit 保持 warning-only，不接 Stop hook。
 - 不做自动 compact；compact 应在计划完成、调试结束、阶段切换等语义点触发。
 - 不做自动归档；归档仍需确认 handoff 的未完成项、风险和下一步动作已经进入 status / backlog / ADR。
@@ -83,7 +85,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_with_repo_p
 ## 再次触发时怎么判断
 
 - 如果只有当前 root repo 超过 `6500`，但低于本地预算，先不改 starter。
+- 如果默认面达到 `80%`，先标记增长来源；达到 `90%` 时先压缩 status / AGENTS / handoff，再考虑提高硬预算。
 - 如果 `AGENTS.md` 超过 300 行，优先看是否有细则能移入 ADR、template 或 usage guide。
 - 如果 current status 过长，优先压缩历史完成项，只保留当前判断、风险、下一步。
+- 如果要让 subagent 参与，默认给精简任务包；不要用 `fork_context=true` 把完整历史复制给子任务。
+- 如果输入是 PRD / diff / runtime JSONL，先用 REQ/WS、文件片段、筛选 JSONL 或摘要提取，不把整包塞进对话。
 - 如果 skill description 过长，缩短触发说明，把细节留在 skill 正文。
 - 如果重复 instruction 出现在 `working-context` 和 status 中，只保留一个 primary truth，另一个改成引用。

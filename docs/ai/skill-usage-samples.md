@@ -1,6 +1,6 @@
 # Candidate Skill Eval Samples
 
-更新时间：2026-05-04
+更新时间：2026-05-07
 状态：收集 with/without 对照实验样本中
 
 ## 作用
@@ -13,8 +13,8 @@
 
 | Skill | 当前有效 accepted eval 样本 | 升级门槛 | 当前判断 |
 | --- | ---: | ---: | --- |
-| `prd-to-project-skills` | 0 | 2 | 需要真实 PRD / workstream with/without 样本 |
-| `progressive-feature-development` | 0 | 2 | 需要非平凡功能或跨模块任务 with/without 样本 |
+| `prd-to-project-skills` | 1 | 2 | SAMPLE-001 accepted；仍需要至少 1 个真实 PRD / workstream with/without 样本 |
+| `progressive-feature-development` | 1 | 2 | SAMPLE-001 accepted；仍需要至少 1 个非平凡功能或跨模块任务 with/without 样本 |
 
 ## 协作类 Skill 观察
 
@@ -61,7 +61,21 @@
 
 ## 当前样本
 
-暂无 accepted real-task eval samples。
+### SAMPLE-001 reqdoc-003-ws03-first-slice
+
+- Date: 2026-05-07
+- Skills: prd-to-project-skills, progressive-feature-development
+- Evidence Type: real-task
+- Outcome: accepted
+- Requirement IDs: REQ-007, REQ-008, REQ-009
+- Workstream IDs: WS-03
+- baseline_without_skill: 若直接把 REQDOC-003 当业务开发入口，预计会反复读取完整 PRD、Godot 技术假设和实现文件，容易把完整游戏工程、素材/导出/GUT 管线一起铺开，并把当前验收状态混入方法层。
+- run_with_skill: 任务按 PRD/requirements/workstream 触发两个 Candidate skills；读取面收敛到 index、working-context、requirements index、traceability、REQDOC-003、REQ-007/008/009、WS-03 与相关 smoke/changelog，产出限定为 REQ/WS 绑定、repo-native 薄切片、smoke、status/changelog/index 回写。
+- delta: 相对 baseline，业务范围被压缩为首轮可 smoke 垂直切片；完整 Godot 工程保持 proposed / 待确认；默认上下文未把 PRD 原文长期纳入，治理检查发现并修复了 REQDOC source 文件名漂移。
+- acceptance: 计入两个 Candidate skills 的 1 个 accepted 样本，因为它是真实 PRD 到真实实现的任务，包含 with/without 对照字段，且没有把 PRD 当前状态、最新验收证据或临时 TODO 藏入 skill。
+- verification: `python3 scripts/godot_platformer_slice_smoke.py`；`python3 scripts/threejs_snake_smoke.py`；`python3 scripts/threejs_snake_blackbox_smoke.py`；`python3 scripts/harness_trace_console_smoke.py`；`python3 scripts/harness_trace_console_blackbox_smoke.py`；`python3 -m unittest discover -s tests`；`.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`；`.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`；`.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all`；`.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`；`python3 scripts/check_github_guardrails.py`；`git diff --check`
+- Doc Promotion: 本文件登记 accepted 样本；详细 eval 记录在 `docs/ai/skill-evals/SAMPLE-001-reqdoc-003-ws03-first-slice.md`；长期业务真相仍留在 requirements、traceability、status 和 changelog。
+- Notes: caveat 是 baseline_without_skill 为反事实基线，不是独立重跑；该样本只把两个 Candidate skills 推进到 1/2，不支持升级为 always-on。这里的 SAMPLE-001 指 workflow Candidate skills 的首个 accepted real-task 样本；既有 team-pr `SAMPLE-001` 文件仍是 validation-task，不计入该 accepted 计数。
 
 ## 复查命令
 

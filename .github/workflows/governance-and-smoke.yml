@@ -123,3 +123,6 @@ jobs:
 
       - name: Run Harness Trace Console blackbox smoke
         run: python3 scripts/harness_trace_console_blackbox_smoke.py
+
+      - name: Run Godot Platformer first slice smoke
+        run: python3 scripts/godot_platformer_slice_smoke.py

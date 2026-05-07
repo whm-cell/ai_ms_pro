@@ -44,7 +44,7 @@
 - `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 可使用 `--markdown` 输出 check level / CI coverage，仍为 advisory
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap
-- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
+- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行；会提示 80/90 高水位、ADR 到达预算和 stage status 行数压缩
 - [handoffs/active](./handoffs/active)
 - [status](./status)
 - [changelog](./changelog)

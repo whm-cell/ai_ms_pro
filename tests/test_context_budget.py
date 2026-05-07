@@ -31,7 +31,10 @@ warn_at_budget = true
 
 [context_budget]
 default_surface_token_budget = 10
+default_surface_warning_percent = 80
+default_surface_high_warning_percent = 90
 always_on_doc_line_budget = 2
+stage_status_line_budget = 2
 skill_description_word_budget = 3
 skill_body_line_budget = 3
 adr_count_budget = 1
@@ -73,11 +76,64 @@ description: this description is intentionally too long
         warning_text = "\n".join(report.warnings)
         self.assertIn("Default context surface exceeds budget", warning_text)
         self.assertIn("Always-on document AGENTS.md is long", warning_text)
+        self.assertIn("Stage status docs/ai/status/stage-00.md reached compression", warning_text)
         self.assertIn("Active handoffs reached", warning_text)
-        self.assertIn("ADR count exceeds budget", warning_text)
+        self.assertIn("ADR count reached budget", warning_text)
         self.assertIn("Skill description is long", warning_text)
         self.assertIn("Skill body is long", warning_text)
         self.assertTrue(report.duplicate_instructions)
+
+    def test_default_surface_warns_at_percentage_thresholds_before_hard_budget(self) -> None:
+        config = check_context_budget.ContextBudgetConfig(
+            default_surface_token_budget=100,
+            default_surface_warning_percent=80,
+            default_surface_high_warning_percent=90,
+            always_on_doc_line_budget=300,
+            stage_status_line_budget=120,
+            skill_description_word_budget=30,
+            skill_body_line_budget=400,
+            adr_count_budget=15,
+            mcp_server_budget=10,
+        )
+
+        low_warnings = check_context_budget.build_warnings(
+            report_items=[
+                check_context_budget.SurfaceItem(
+                    path="AGENTS.md",
+                    lines=1,
+                    estimated_tokens=85,
+                )
+            ],
+            skills=[],
+            duplicates=[],
+            config=config,
+            active_handoff_count=0,
+            active_handoff_budget=5,
+            adr_count=0,
+            mcp_count=0,
+        )
+        high_warnings = check_context_budget.build_warnings(
+            report_items=[
+                check_context_budget.SurfaceItem(
+                    path="AGENTS.md",
+                    lines=1,
+                    estimated_tokens=91,
+                )
+            ],
+            skills=[],
+            duplicates=[],
+            config=config,
+            active_handoff_count=0,
+            active_handoff_budget=5,
+            adr_count=0,
+            mcp_count=0,
+        )
+
+        self.assertIn("Default context surface reached warning threshold", "\n".join(low_warnings))
+        self.assertIn(
+            "Default context surface reached high warning threshold",
+            "\n".join(high_warnings),
+        )
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # AI 文档入口索引
 
-更新时间：2026-05-05
-当前状态：Stage-00 harness 已可用；本轮新增 PR guardrails、advisory PR summary、check registry 与供应链 evidence workflow；security evidence workflow 已被远端识别，远端 main 保护仍受 GitHub plan / public repo 限制阻塞
+更新时间：2026-05-07
+当前状态：Stage-00 harness 已可用；REQDOC-003 已登记为 workflow Candidate skills 的首个 accepted eval 样本；context budget 已补 80/90 高水位、ADR 到达预算与 stage status 压缩 warning；远端 main 保护仍受 GitHub plan / public repo 限制阻塞
 当前阶段：STAGE-00 真实场景验证与治理固化
 
 ## 入口说明
@@ -53,7 +53,7 @@
 - `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 使用 `--markdown` 输出，仍为 advisory
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap
-- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行
+- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行；会提示 80/90 高水位、ADR 到达预算和 stage status 行数压缩
 - [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)：忘记何时重跑 budget triage、是否压缩、是否接 hook 时再查看
 - [阶段提交与 PR-CI 操作手册](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/阶段提交与PR-CI操作手册.md)：业务小阶段完成、下班前保存进度、准备 push/PR/CI 时再查看
 - [GitHub 私有仓库 Harness 与完整 CI 配置清单](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/GitHub私有仓库Harness与完整CI配置清单.md)：接手公司私有仓库、配置 branch protection / ruleset、required checks、CODEOWNERS、security evidence 与完整 CI 时再查看
@@ -68,7 +68,7 @@
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的 `## 同步元数据` 为准
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-05 GitHub Guardrails Refactor And CI Burn-in Fix](./changelog/2026-05-05-github-guardrails-refactor-and-ci-burnin-fix.md)
+- 最新 changelog：[2026-05-07 Context Budget Growth Guardrails](./changelog/2026-05-07-context-budget-growth-guardrails.md)
 
 ## 归档入口
 

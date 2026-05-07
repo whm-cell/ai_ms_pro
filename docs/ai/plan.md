@@ -1,6 +1,6 @@
 # 项目计划
 
-更新时间：2026-04-18
+更新时间：2026-05-07
 文档定位：阶段规划与范围控制视图
 
 ## 使用边界
@@ -19,8 +19,8 @@
 
 ### 当前范围
 
-- 导入多个真实需求场景，并验证 harness 在第二个 workstream 上可复用
-- 实现至少两个桌面浏览器可运行的 repo-native 静态应用切片
+- 导入多个真实需求场景，并验证 harness 在第二个和第三个 workstream 上可复用
+- 实现至少三个桌面浏览器可运行的 repo-native 静态应用切片
 - 继续强化 runtime harness、governance harness 和 requirements traceability 的协同
 
 ### 暂不纳入范围

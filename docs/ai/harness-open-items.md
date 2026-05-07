@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-05-05
-当前状态：核心链路已在测试仓库和仓外 starter 复演中跑通；repo 内 PR template、PR touch conflict checker、change-triggered PR summary、check registry、security evidence workflow 与 `merge_group` workflow 触发已落地，剩余项以远端 branch protection / ruleset 阻塞、CI burn-in 和真实样本观察为主
+更新时间：2026-05-07
+当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；repo 内 PR template、PR touch conflict checker、change-triggered PR summary、check registry、security evidence workflow 与 `merge_group` workflow 触发已落地，剩余项以远端 branch protection / ruleset 阻塞、CI burn-in 和真实样本观察为主
 
 ## 作用
 
@@ -14,7 +14,7 @@
 - `0 -> 1 初始化可用性` 已在测试仓库和仓外 starter 复演中验证完成
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已在新仓库内跑通一轮
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
-- `harness-trace-console` 与 `threejs-snake` 均已具备黑盒浏览器 smoke；`WS-01` 不再只有 deterministic smoke
+- `harness-trace-console`、`threejs-snake` 与 `godot-platformer-slice` 均已具备浏览器 smoke；`WS-03` 用薄切片验证长 PRD 进入 harness 的压缩路径
 - GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow；`security-evidence.yml` 已被远端 API 识别，首轮 checkout 失败根因是误跟踪的演练输出 gitlink
 - CODEOWNERS、PR template 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-05 `gh api` 配置 main protection 返回 HTTP 403，需要 GitHub Pro 或 public repo。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
@@ -22,8 +22,9 @@
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_github_guardrails.py` 已拆分为 helper 模块并新增 orphan gitlink 检查，`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
 - `docs/ai/check-registry.md` 已记录 check 等级；Scorecard、CodeQL、SBOM 已作为 security evidence workflow 接入，第一阶段不作为 required checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
+- REQDOC-003 已完成首轮标准化并绑定 REQ-007 / REQ-008 / REQ-009 与 WS-03；Godot engine 仍保持 proposed，后续如继续推进应先做独立 engine spike
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage：starter/default 目标保持 6500，当前 root Stage-00 预算调为 8500；本轮已把 runtime / hook / compression / verification / GitHub / code-shape 细则下沉到 `$harness-maintenance`，并把 PRD/REQ/WS/技术假设维护方法下沉到 `$requirements-traceability-maintenance`；多人 / 多 AI PR touch-set 冲突控制已下沉到 `$team-pr-conflict-control`，并新增 changed-file follow-up triage 继续 warning-only / 按需使用
+- context budget audit 已完成首轮 OPEN-10 triage 并补充增长护栏：starter/default 目标保持 6500，当前 root Stage-00 预算为 8500，80/90 高水位、ADR 到达预算和 stage status 行数触发 warning；changed-file follow-up triage 继续 warning-only / 按需使用
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset plan/visibility blocker + longer-term reducer/runtime sample monitoring`
 
@@ -40,7 +41,7 @@
   - `python3 scripts/check_ai_governance.py` 自动运行
   - `python3 scripts/check_code_shape.py --all` 自动运行
   - `scripts/check_change_triggered_followups.py --markdown` 在 PR / main push 的 GitHub Actions Summary 中展示 advisory follow-ups
-  - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py` 与 `python3 scripts/harness_trace_console_blackbox_smoke.py` 自动运行
+  - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py`、`python3 scripts/harness_trace_console_blackbox_smoke.py` 与 `python3 scripts/godot_platformer_slice_smoke.py` 自动运行
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
   - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
@@ -79,7 +80,7 @@
 
 ### OPEN-10 Context budget warning triage
 
-- 结果：已创建 [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)；当前 root Stage-00 budget 调整为 8500，starter/new-project 初始目标保留 6500；`AGENTS.md` 压缩到 300 行以内，current status 压缩为短判断，`$repo-governed-coding` description 已缩短
+- 结果：已创建 [上下文预算 OPEN-10 使用细节](/Volumes/usd/codes/go_projects/ai_ms_pro/--使用细节/上下文预算OPEN-10使用细节.md)；当前 root Stage-00 budget 调整为 8500，starter/new-project 初始目标保留 6500；默认面 80/90 高水位、ADR 到达预算和 stage status 行数纳入 warning；`AGENTS.md` 压缩到 300 行以内，current status 压缩为短判断，`$repo-governed-coding` description 已缩短
 - 关闭原因：已完成本轮“是否调整预算、是否压缩默认面、是否接 Stop hook”的判断；context budget audit 继续保持 warning-only 手动运行，不自动 compact，不自动归档
 - 备注：未来如果 context budget 再次持续 warning，再开新的 triage 项，而不是把 OPEN-10 长期保持开放
 
