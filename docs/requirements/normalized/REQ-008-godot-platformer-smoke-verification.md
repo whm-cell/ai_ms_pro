@@ -22,7 +22,7 @@
 - 新增 `scripts/godot_platformer_slice_smoke.py`。
 - smoke 自动启动静态服务器并打开 `apps/godot-platformer-slice/?smoke=1`。
 - smoke 验证初始状态、冻结、投掷、出口解锁、完成与重置。
-- GitHub Actions smoke job 纳入该脚本。
+- CI 接入暂缓到后续 PR，避免与当前 Dependabot workflow PR 的 touch-set 冲突。
 
 ### 不包含
 
@@ -32,7 +32,6 @@
 ## 验收条件
 
 - `python3 scripts/godot_platformer_slice_smoke.py` 通过。
-- `governance-and-smoke.yml` 的 smoke job 包含 Godot PRD 首轮切片 smoke。
 - 需求追踪矩阵记录该验证命令。
 
 ## 依赖与前置条件

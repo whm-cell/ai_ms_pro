@@ -9,7 +9,6 @@
 - 将 REQDOC-003 Godot 2D 单屏平台闯关游戏 PRD 完成首轮标准化，新增 REQ-007、REQ-008、REQ-009 与 WS-03。
 - 新增 `apps/godot-platformer-slice/`，作为 repo-native 浏览器垂直切片验证核心玩法闭环。
 - 新增 `scripts/godot_platformer_slice_smoke.py`，验证 load -> freeze -> throw -> unlock exit -> complete -> reset。
-- 将 Godot Platformer first slice smoke 接入 `.github/workflows/governance-and-smoke.yml` 的 smoke job。
 
 ## 修复问题
 
@@ -21,6 +20,7 @@
 - REQDOC-003 不再是 source-only 未绑定状态。
 - Godot engine、GUT、导出 preset、素材和本地化管线仍保持 proposed / 待确认；本轮不创建完整 Godot 工程。
 - Root repo 继续保持 harness 研究仓定位，业务样本限定为可 smoke 的薄切片。
+- GitHub Actions smoke 接入暂缓到后续 PR，避免与 Dependabot workflow PR 产生 high-risk touch-set overlap。
 
 ## 破坏性变更
 

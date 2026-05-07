@@ -41,7 +41,7 @@
   - `python3 scripts/check_ai_governance.py` 自动运行
   - `python3 scripts/check_code_shape.py --all` 自动运行
   - `scripts/check_change_triggered_followups.py --markdown` 在 PR / main push 的 GitHub Actions Summary 中展示 advisory follow-ups
-  - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py`、`python3 scripts/harness_trace_console_blackbox_smoke.py` 与 `python3 scripts/godot_platformer_slice_smoke.py` 自动运行
+  - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py` 与 `python3 scripts/harness_trace_console_blackbox_smoke.py` 自动运行；`godot_platformer_slice_smoke.py` 已具备，待 workflow touch-set 空档再接入 CI
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
   - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`

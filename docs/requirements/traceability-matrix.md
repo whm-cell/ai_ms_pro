@@ -26,5 +26,5 @@
 | REQDOC-002 | REQ-005 | WS-02 | STAGE-00 | 已完成 | 控制台支持按 `stage/workstream/status/search` 过滤 traceability，并可查看单条 requirement 详情 |
 | REQDOC-002 | REQ-006 | WS-02 | STAGE-00 | 已完成 | `python3 scripts/harness_trace_console_smoke.py` 已验证 load -> WS-02 filter -> REQ-006 search；runtime hooks 与 reducer 已用显式 metadata 跑通一次 |
 | REQDOC-003 | REQ-007 | WS-03 | STAGE-00 | 已完成 | `apps/godot-platformer-slice/` 已验证 move/jump -> freeze -> throw -> clear enemies -> unlock exit -> complete 的首轮玩法闭环；Godot 工程仍未采纳 |
-| REQDOC-003 | REQ-008 | WS-03 | STAGE-00 | 已完成 | `python3 scripts/godot_platformer_slice_smoke.py` 已验证 load -> freeze -> throw -> unlock exit -> complete -> reset，并接入 GitHub Actions smoke job |
+| REQDOC-003 | REQ-008 | WS-03 | STAGE-00 | 已完成 | `python3 scripts/godot_platformer_slice_smoke.py` 已验证 load -> freeze -> throw -> unlock exit -> complete -> reset；CI 接入因 workflow touch-set 冲突拆到后续 PR |
 | REQDOC-003 | REQ-009 | WS-03 | STAGE-00 | 已完成 | Godot 4.6.2、Compatibility renderer、GUT、导出 preset 等保持 proposed / 待确认；本轮只采纳 repo-native 首轮切片作为 harness 验证样本 |

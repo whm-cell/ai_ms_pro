@@ -30,7 +30,6 @@
 - `docs/requirements/normalized/REQ-009-godot-platformer-technical-boundary.md`
 - `apps/godot-platformer-slice/`
 - `scripts/godot_platformer_slice_smoke.py`
-- `.github/workflows/governance-and-smoke.yml`
 
 ## 阶段拆分建议
 
