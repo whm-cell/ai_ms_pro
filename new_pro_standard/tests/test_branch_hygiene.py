@@ -15,7 +15,7 @@ from branch_hygiene_budget import (  # noqa: E402
     load_branch_hygiene_budget,
     pull_request_counts,
 )
-from check_branch_hygiene import failed_open_pr_findings, failing_checks  # noqa: E402
+from check_branch_hygiene import failed_open_pr_findings, failing_checks, is_github_synthetic_ref  # noqa: E402
 
 
 class BranchHygieneBudgetTest(unittest.TestCase):
@@ -108,6 +108,11 @@ max_failed_open_prs = 0
         findings = failed_open_pr_findings(records, current_pr=9)
 
         self.assertEqual([finding.number for finding in findings], [10])
+
+    def test_github_pull_refs_are_not_auditable_remote_branches(self) -> None:
+        self.assertTrue(is_github_synthetic_ref("pull/9/merge"))
+        self.assertTrue(is_github_synthetic_ref("pull/9/head"))
+        self.assertFalse(is_github_synthetic_ref("codex/stage-00"))
 
 
 if __name__ == "__main__":

@@ -128,7 +128,14 @@ def pr_records() -> list[dict[str, object]]:
 
 def remote_branches() -> list[str]:
     text = run_checked(["git", "for-each-ref", "--format=%(refname:strip=3)", "refs/remotes/origin"])
-    return sorted(branch for branch in text.splitlines() if branch and branch != "HEAD")
+    return sorted(
+        branch for branch in text.splitlines()
+        if branch and branch != "HEAD" and not is_github_synthetic_ref(branch)
+    )
+
+
+def is_github_synthetic_ref(branch: str) -> bool:
+    return branch.startswith("pull/")
 
 
 def local_branches() -> list[str]:
