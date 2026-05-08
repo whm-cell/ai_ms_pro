@@ -37,7 +37,7 @@
 
 1. 继续推进 OPEN-01：远端 workflow green history、required checks、branch protection / ruleset 与 security analysis 确认；当前 branch protection 404、rulesets 为空，`security-evidence.yml` 已被远端识别。
 2. 用 `scripts/check_github_guardrails.py` 辅助区分本地已具备、远端 OK、远端 UNKNOWN，不再只靠人工记忆。
-3. 用 `scripts/check_branch_hygiene.py --strict` 控制 active PR 数量预算：total 10、Codex 3、Dependabot 4、failed open 0；PR CI 传入 `--current-pr`，避免把当前 PR 自身正在运行或刚失败的 checks 作为“其他失败 open PR”自阻断；`origin/pull/*` 这类 GitHub checkout 合成 refs 不进入 remote branch 审计；workflow 授予 `checks: read` 并用 `tee` 保留日志；open PR 分支通过 merge/close 处理，不直接删除。
+3. 用 `scripts/check_branch_hygiene.py --strict` 控制 active PR 数量预算：total 10、Codex 3、Dependabot 4、failed open 0；PR CI 传入 `--current-pr`，避免把当前 PR 自身正在运行或刚失败的 checks 作为“其他失败 open PR”自阻断；`origin/pull/*` 这类 GitHub checkout 合成 refs 不进入 remote branch 审计；workflow 授予 `checks: read` 并用 `tee` 保留日志；`delete_branch_on_merge` 仅报告，不作为 Actions token 下的 strict 阻断；open PR 分支通过 merge/close 处理，不直接删除。
 4. 后续 PR 通过 `.github/pull_request_template.md` 显式填写 `REQ/WS`、touch-set、overlap、verification 和 governance impact。
 5. REQDOC-003 后续若继续推进，应先决定是否新建真实 Godot engine spike；不要把完整游戏工程直接塞进 root repo 默认面。
 6. `prd-to-project-skills` 与 `progressive-feature-development` 已有 SAMPLE-001 / SAMPLE-002 两个 accepted eval；下一步是单独评估是否保持 Candidate、升级 stable，或继续观察简单任务流程税。

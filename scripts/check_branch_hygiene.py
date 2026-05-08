@@ -257,8 +257,6 @@ def build_report(current_pr: int = 0) -> BranchHygieneReport:
             )
 
     warnings: list[str] = []
-    if not delete_on_merge:
-        warnings.append("GitHub delete_branch_on_merge is disabled.")
     if stale_remote:
         warnings.append(f"{len(stale_remote)} stale remote branch(es) can be deleted.")
     if stale_local:
