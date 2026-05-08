@@ -8,6 +8,7 @@
 - `governance-and-smoke.yml` 的 governance job 会在 PR/main push 中以 `check_branch_hygiene.py --strict` 报告并阻断 active PR / stale branch 预算问题。
 - 真实 PR CI 暴露 branch hygiene self-check 风险后，PR job 改为传入 `--current-pr`；pending checks 不再被算作 failed open PR，当前 PR 自己的 check rollup 也不参与 failed-open-PR 判定。
 - PR CI 环境中的 `origin/pull/*` 合成 refs 不参与 remote branch hygiene，避免把 GitHub checkout 产生的临时 ref 误判为 unmanaged branch。
+- Governance workflow 增加 `checks: read`，branch hygiene summary 改为 `tee` 同时写入 job log 和 step summary，避免真实 CI 失败时只有 exit code。
 - `.github/dependabot.yml` 改为 dependency groups，并将每个 ecosystem directory 的 `open-pull-requests-limit` 收紧为 1。
 - 新增 SAMPLE-002，作为 `prd-to-project-skills` 与 `progressive-feature-development` 的第二个 accepted real-task eval。
 

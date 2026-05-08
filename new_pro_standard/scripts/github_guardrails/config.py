@@ -4,7 +4,7 @@ from __future__ import annotations
 EXPECTED_WORKFLOWS = {
     ".github/workflows/governance-and-smoke.yml": {
         "jobs": {"governance", "windows-hook-runtime", "smoke"},
-        "permissions": {"contents": "read"},
+        "permissions": {"contents": "read", "checks": "read", "pull-requests": "read"},
         "triggers": {"pull_request", "merge_group"},
         "tokens": {"check_branch_hygiene.py --markdown --strict --current-pr", "check_pr_touch_conflicts.py"},
     },
