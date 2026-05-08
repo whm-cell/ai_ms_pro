@@ -13,6 +13,12 @@ active_handoff_budget = 5
 archive_candidate_min_score = 3
 warn_at_budget = true
 
+[branch_hygiene]
+max_open_total_prs = 10
+max_open_codex_prs = 3
+max_open_dependabot_prs = 4
+max_failed_open_prs = 0
+
 [context_budget]
 default_surface_token_budget = 6500
 default_surface_warning_percent = 80

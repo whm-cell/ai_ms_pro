@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import argparse
-import ast
 import fnmatch
 import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+
+from code_shape_ast import DefinitionShape, collect_python_shapes, summarize
 
 try:
     import tomllib
@@ -38,45 +39,6 @@ class Candidate:
     kind: str
     is_new: bool
     text: str
-
-@dataclass(frozen=True)
-class DefinitionShape:
-    qualname: str
-    lines: int
-
-class ShapeVisitor(ast.NodeVisitor):
-    def __init__(self) -> None:
-        self.stack: list[str] = []
-        self.functions: list[DefinitionShape] = []
-        self.classes: list[DefinitionShape] = []
-
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        self.classes.append(DefinitionShape(self._qualname(node.name), self._lines(node)))
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        self.functions.append(DefinitionShape(self._qualname(node.name), self._lines(node)))
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self.functions.append(DefinitionShape(self._qualname(node.name), self._lines(node)))
-        self.stack.append(node.name)
-        self.generic_visit(node)
-        self.stack.pop()
-
-    def _qualname(self, name: str) -> str:
-        return ".".join([*self.stack, name]) if self.stack else name
-
-    @staticmethod
-    def _lines(node: ast.AST) -> int:
-        start = getattr(node, "lineno", 0)
-        end = getattr(node, "end_lineno", start)
-        return end - start + 1
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -196,22 +158,6 @@ def load_all_candidates(config: Config) -> list[Candidate]:
         text = decode_text((ROOT / path).read_bytes(), path)
         candidates.append(Candidate(path=path, kind=kind, is_new=False, text=text))
     return candidates
-
-
-def collect_python_shapes(text: str) -> tuple[list[DefinitionShape], list[DefinitionShape]]:
-    tree = ast.parse(text)
-    visitor = ShapeVisitor()
-    visitor.visit(tree)
-    return visitor.functions, visitor.classes
-
-
-def summarize(items: list[DefinitionShape], limit: int) -> str:
-    offenders = [item for item in items if item.lines > limit]
-    offenders.sort(key=lambda item: item.lines, reverse=True)
-    preview = ", ".join(f"{item.qualname} ({item.lines})" for item in offenders[:3])
-    if len(offenders) > 3:
-        preview += f", +{len(offenders) - 3} more"
-    return preview
 
 
 def add_length_findings(

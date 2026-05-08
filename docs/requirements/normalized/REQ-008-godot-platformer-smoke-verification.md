@@ -1,6 +1,6 @@
 # Godot PRD 首轮切片 Smoke 验证
 
-更新时间：2026-05-07
+更新时间：2026-05-08
 需求编号：REQ-008
 来源文档：REQDOC-003
 需求标题：Godot PRD 首轮切片 Smoke 验证
@@ -21,7 +21,7 @@
 
 - 新增 `scripts/godot_platformer_slice_smoke.py`。
 - smoke 自动启动静态服务器并打开 `apps/godot-platformer-slice/?smoke=1`。
-- smoke 验证初始状态、冻结、投掷、出口解锁、完成与重置。
+- smoke 验证初始状态、冻结、投掷、连击计分、出口解锁、评级、完成与重置。
 - CI 接入暂缓到后续 PR，避免与当前 Dependabot workflow PR 的 touch-set 冲突。
 
 ### 不包含
@@ -31,7 +31,7 @@
 
 ## 验收条件
 
-- `python3 scripts/godot_platformer_slice_smoke.py` 通过。
+- `python3 scripts/godot_platformer_slice_smoke.py` 通过，并覆盖 combo/rank 反馈。
 - 需求追踪矩阵记录该验证命令。
 
 ## 依赖与前置条件

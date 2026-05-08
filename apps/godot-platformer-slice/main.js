@@ -2,8 +2,10 @@ const SMOKE_MODE = new URLSearchParams(window.location.search).has("smoke");
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
+const comboEl = document.getElementById("combo");
 const enemiesEl = document.getElementById("enemies");
 const exitEl = document.getElementById("exit");
+const rankEl = document.getElementById("rank");
 const resetButton = document.getElementById("reset");
 const completionBanner = document.getElementById("completion-banner");
 
@@ -26,6 +28,8 @@ const state = {
   running: true,
   complete: false,
   score: 0,
+  combo: 0,
+  rank: "Pending",
   exitUnlocked: false,
   player: { x: 140, y: GROUND_Y - 34, vx: 0, vy: 0, grounded: true, facing: 1 },
   enemies: [],
@@ -40,6 +44,8 @@ function resetGame() {
   state.running = true;
   state.complete = false;
   state.score = 0;
+  state.combo = 0;
+  state.rank = "Pending";
   state.exitUnlocked = false;
   state.player = { x: 140, y: GROUND_Y - 34, vx: 0, vy: 0, grounded: true, facing: 1 };
   state.enemies = cloneEnemies();
@@ -82,8 +88,10 @@ function throwFrozenEnemy() {
 
   enemy.state = "cleared";
   enemy.freeze = 0;
-  state.score += 100;
-  state.effects.push({ x: enemy.x, y: enemy.y - 34, text: "+100", ttl: 50 });
+  state.combo += 1;
+  const bonus = 100 * state.combo;
+  state.score += bonus;
+  state.effects.push({ x: enemy.x, y: enemy.y - 34, text: `+${bonus}`, ttl: 50 });
   if (activeEnemies().length === 0) {
     state.exitUnlocked = true;
     state.effects.push({ x: 820, y: GROUND_Y - 95, text: "Exit open", ttl: 80 });
@@ -101,6 +109,7 @@ function enterExit() {
   state.complete = true;
   state.running = false;
   state.score += 250;
+  state.rank = calculateRank();
   completionBanner.classList.remove("hidden");
   syncHud();
   draw();
@@ -109,8 +118,20 @@ function enterExit() {
 
 function syncHud() {
   scoreEl.textContent = String(state.score);
+  comboEl.textContent = String(state.combo);
   enemiesEl.textContent = String(activeEnemies().length);
   exitEl.textContent = state.exitUnlocked ? "Open" : "Locked";
+  rankEl.textContent = state.rank;
+}
+
+function calculateRank() {
+  if (state.score >= 550 && state.combo >= 2) {
+    return "A";
+  }
+  if (state.score >= 450) {
+    return "B";
+  }
+  return "C";
 }
 
 function handleInput() {
@@ -255,6 +276,8 @@ function getSnapshot() {
     running: state.running,
     complete: state.complete,
     score: state.score,
+    combo: state.combo,
+    rank: state.rank,
     exitUnlocked: state.exitUnlocked,
     remainingEnemies: activeEnemies().length,
     frozenEnemies: state.enemies.filter((enemy) => enemy.state === "frozen").length,

@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-05-07
+更新时间：2026-05-08
 阶段：stage-00
 状态：进行中
 
@@ -8,84 +8,65 @@
 
 - Requirement IDs：REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009
 - Workstream IDs：WS-01, WS-02, WS-03
-- 当前阶段已通过 `WS-01`、`WS-02` 与 `WS-03` 完成三个真实场景的 requirements traceability 与实现验证
+- 当前阶段已通过 WS-01、WS-02、WS-03 完成三个真实场景的 requirements traceability 与实现验证。
 
 ## 当前阶段目标
 
-- 建立最小可用的 runtime / governance / verification harness 协作链路
-- 保持 repo-first 治理边界，并让 session、observation、reducer、traceability metadata 可恢复、可压缩、可验证
-- 为后续真实需求导入、阶段化开发和新项目 starter 迁移保留稳定控制面
+- 建立可恢复、可压缩、可验证的 runtime / governance / verification harness。
+- 用真实业务薄切片验证 PRD 能通过 REQ/WS 进入 harness，而不是把完整 PRD 长期放进默认上下文。
+- 把远端门禁、context budget、skill eval 和 code-shape 债务做成可复查证据。
 
 ## 当前完成度
 
-- 已完成：
-  - Runtime / Governance：Stop observation/session、metadata 自动发现、reducer handoff-first、REQ/WS/STAGE 校验、projection boundary
-  - Verification：repo-local Python runner、hook sync、code shape、governance、WS-01/WS-02/WS-03 smoke、context budget 80/90 high-water、archive candidate、change-triggered followups、CI / PR summary、check registry、repo skill / requirements / skill eval / GitHub guardrails checks
-  - PRD Sample：REQDOC-003 已完成首轮标准化，WS-03 以 repo-native 浏览器切片验证 Godot PRD 的核心玩法闭环；完整 Godot 工程仍保持 proposed / 待确认
-  - Starter：bootstrap、离线 best-effort venv、仓外复演、pre-commit 复演、no-old-truth boundary、`.agents/skills` 机制层同步
-      - Skills：`repo-governed-coding`、`harness-maintenance`、`requirements-traceability-maintenance`、`progressive-feature-development`、`prd-to-project-skills`、`team-pr-conflict-control` 均在 Codex repo-local 原生路径 `.agents/skills`，并使用 `policy.allow_implicit_invocation: false`
-  - Evidence：Candidate skill promotion 从样本登记升级为 with/without eval；REQDOC-003/WS-03 已登记为 `prd-to-project-skills` 与 `progressive-feature-development` 的 SAMPLE-001 accepted eval；PRD 导入检查现在要求技术假设状态和 verification method
-  - Code Shape：低风险文档检查器 `scripts/check_ai_docs.py` 与 `scripts/check_ai_doc_quality.py` 已拆分 oversized `main()`，code-shape hard-ceiling warning 减少 2 项
-  - GitHub：workflow 最小权限/concurrency/timeout、CODEOWNERS、PR template、Dependabot、dependency review、Windows hook runtime job、PR touch conflict checker、change-triggered advisory summary、security evidence workflow、`merge_group` 触发、required-check 策略和可运行远端 guardrails check；`check_github_guardrails.py` 已拆成 helper 模块并新增 orphan gitlink 检查；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap
-- 进行中：
-  - OPEN-01：远端 CI burn-in、GitHub branch protection / ruleset required checks 确认
-  - OPEN-07 / OPEN-08 / OPEN-09：starter 样板、行为 skill 默认化、project skill lifecycle 与 workflow skill 真实样本观察
-  - P2：继续压缩完成型 Stage-00 历史；本轮已把完成型 skill/evidence handoff 移入 archive，active handoff 从 4 降到 2
+- Runtime / Governance / Verification 主链路已可用：Stop hooks、runtime reducer、traceability metadata、repo-local Python runner、hook sync、governance、code shape、context budget、requirements shape、GitHub guardrails 和 skill eval checks 均已落地。
+- WS-01、WS-02、WS-03 均有 repo-native 实现和 smoke；WS-03 继续以浏览器薄切片验证 REQDOC-003，未引入完整 Godot 工程。
+- `new_pro_standard` 已同步机制层；当前 repo 的 REQ/WS、PR、CI、status、样本和历史 truth 不复制到 starter。
+- `.agents/skills` 已作为按需方法层接入；Candidate workflow skills 保持显式触发，不替代 requirements、status、ADR、checks 或 `AGENTS.md`。
+- GitHub 侧已有 workflow 最小权限、concurrency、timeout、CODEOWNERS、PR template、Dependabot grouping / PR limit、dependency review、security evidence、PR touch conflict、branch hygiene strict PR budget、`delete_branch_on_merge` 和 `merge_group` 触发；远端强制门禁仍需 branch protection / ruleset 证明。
 
 ## 本阶段关键成果
 
-- 三个真实 workstream 已证明当前 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
-- 默认恢复面已收缩为 `index -> working-context -> stage status -> configured active handoff budget`，archive 只在 recovery/dispute 或当前 truth surface 不足时进入。
-- `new_pro_standard` 已同步机制层，包括 Python 解析、hook sync、code shape、context surface、Task Discovery、project skill lifecycle、`.agents/skills` 与 context budget audit；当前 repo 的历史 truth 不复制进 starter。
-- `plan/workstream` 已明确为 projection surface，当前状态真相默认回收到 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
-- `REQ <-> WS <-> STAGE` 至少已有一层自动校验：`working-context` 当前 stage 与 matrix 不一致会阻断，runtime artifact 先 warning-only。
-- repo-local skills、requirements shape、Candidate skill eval samples、GitHub guardrails 与 changed-file follow-up triage 已有独立 warning-only checks；PR / main push 会展示 advisory summary 和 check level / CI coverage，避免继续膨胀 governance checker 或 `AGENTS.md`。
+- 三个 workstream 已跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
+- 默认上下文面已通过 stage compression 降到预算 warning 以下；ADR 计数也低于预算。
+- Candidate workflow skills 已有两个 accepted real-task eval samples，但仍不自动升级 always-on。
+- `new_pro_standard` 保持机制层同步，不复制当前项目 truth。
 
 ## 风险与阻塞
 
-- CI workflow 已落地并进入 PR #1 burn-in；远端失败已暴露并修复 PR merge diff、Windows Python resolution test、dependency review unsupported、security evidence checkout orphan gitlink、PR touch conflict unknown fail-closed 五类问题，PR branch push 也已收敛为只触发 PR checks，避免重复 push/pull_request CI。
-- dependency review 当前在 workflow 中保持 advisory，因为 GitHub 远端报告仓库尚未启用 dependency graph / Advanced Security；Scorecard / CodeQL / SBOM 也先作为单个顺序 `security-evidence` job 产出 artifacts，不进入 required checks。CodeQL 在 private repo 未启用 code scanning 前只生成 SARIF artifact，不上传到 Code Scanning。branch protection / ruleset 与 security analysis 仍需通过 `scripts/check_github_guardrails.py` 和人工配置确认。2026-05-05 已尝试读取 main branch protection / rulesets，但 GitHub 返回 HTTP 403，需要 GitHub Pro 或 public repo。
-- reducer 与 runtime artifact 的 stage drift 目前仍 warning-only，是否升级阻断要看后续样本。
-- active surface budget、archive candidate monitor、context budget audit 都保持 warning-only；默认面 90%、ADR 到达预算或 stage status 触线时应先压缩，真正归档仍由主 Agent 语义确认。
-- `.agents/skills`、project skill lifecycle 和 context budget audit 不替代 `AGENTS.md`、ADR、requirements 或 verification scripts；`harness-maintenance` 只下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 只下沉 PRD/REQ/WS/技术假设维护方法。
-- `scripts/check_change_triggered_followups.py` 只提示 changed files 对应的可能漏跑检查、等级、CI 覆盖状态和应读 reference；CI summary 只提高可见性，不证明命令已执行，也不升级为 blocking policy。
-- `$team-pr-conflict-control` 只下沉多人 / 多 AI PR touch-set 冲突控制方法；repo 内已新增 `scripts/check_pr_touch_conflicts.py`、PR template 和 `merge_group` workflow 触发，但远端 merge queue / branch protection 仍未被证明启用。
-- `$progressive-feature-development` 与 `$prd-to-project-skills` 仍为 1/2 accepted with/without eval samples；样本不足是当前事实，不应升级为 always-on。
-- Code-shape 历史债务仍存在于 runtime hooks、`bootstrap_harness.py`、`check_ai_governance.py`、`check_code_shape.py`、blackbox smoke 和 runtime reducer；后续应分风险等级继续拆，不应一次性重写。
-- REQDOC-003 的 WS-03 只采纳 repo-native 薄切片；Godot engine、GUT、导出 preset、素材与本地化管线仍未被真实 spike 或 ADR 采纳。
-- `security-evidence.yml` 已能被 GitHub API 识别；Scorecard 首轮失败根因是仓库误跟踪 `output/harness_rehearsal_20260419_100339` 为无 `.gitmodules` 映射的 gitlink，不是 Scorecard 规则失败。
-- Starter copied placeholder docs 仍需 `--force` 才会立刻替换成新项目名，`AGENTS.md` 仍需人工项目化。
+- OPEN-01 仍开放：`check_github_guardrails.py` 当前显示 `main` branch protection 404、branch rulesets 为空；远端 required checks、review、conversation resolved 和禁止直推 `main` 仍不能声明已强制。
+- PR #1 的已合并 Codex 分支已删除；失败的 Dependabot GitHub Actions PR #2-#6 已关闭并删除分支；当前剩余远端非 main 分支都对应 open 且 green 的 PR。active PR 预算为 total 10、Codex 3、Dependabot 4、failed open 0。
+- dependency review、Scorecard、CodeQL、SBOM 当前仍以 advisory / artifact evidence 为主；升级 blocking 需要远端能力和更多 CI burn-in。
+- runtime stage drift、archive candidate、context budget 和 change-triggered followups 继续 warning-only；升级阻断要等更多样本。
+- Code-shape 历史债务仍存在于 `check_ai_governance.py`、`bootstrap_harness.py`、runtime hooks、blackbox smoke 和 reducer；本轮只做低风险拆分。
+- REQDOC-003 的 Godot 4.6.2、GUT、导出 preset、素材、本地化和发布管线仍是 proposed / 待确认；root repo 只保留 harness 研究所需的薄业务样本。
+
+## 本轮收敛
+
+- 上下文：默认面执行 stage compression，细节下沉到按需文档；旧 ADR 开始移入 ADR archive，避免 ADR 计数长期卡预算。
+- 业务样本：WS-03 新增连击计分与评级反馈，并由 `scripts/godot_platformer_slice_smoke.py` 覆盖。
+- Skill eval：本轮登记 SAMPLE-002，`prd-to-project-skills` 与 `progressive-feature-development` 达到 2/2 accepted eval samples；是否升级仍需单独决策，不自动 always-on。
+- Code-shape：拆出 `code_shape_ast.py` 与 session snapshot renderer，减少低风险大文件压力；剩余大文件按后续 PR 继续拆。
 
 ## 下一阶段重点
 
-- 推动 OPEN-01：远端 workflow green history、required checks、CODEOWNERS review、conversation resolved 与禁止直推 `main` 的远端确认。
-- 在下一次 stage compression 时继续审查 archive candidate monitor 输出，确认候选已被 status、backlog 或 ADR 吸收。
-- 在后续真实项目中观察 `$repo-governed-coding`、`$progressive-feature-development`、`$prd-to-project-skills`、project skill lifecycle 和 context budget audit 是否需要从显式/手动能力升级。
-- 对下一批真实 PRD 导入和非平凡功能任务运行 evidence checks，把第二个 accepted with/without eval 登记到 `docs/ai/skill-usage-samples.md` 后，再判断是否升级 workflow skills。
-- 若继续推进 REQDOC-003，先确认是否新建真实 Godot engine spike；root repo 默认仍只保留 harness 研究所需的薄业务样本。
-- 在后续多人协作 PR 中验证 `$team-pr-conflict-control` 与 `scripts/check_pr_touch_conflicts.py` 是否足以降低 touch-set 冲突；若样本证明有效，再考虑进一步收紧 merge queue enforcement。
-- 继续压缩完成型 Stage-00 历史，判断 `WS-01` / `WS-02` 是保留为验证样板，还是压缩为更轻的 starter 说明。
+- 继续推动 OPEN-01：获得远端 branch protection / ruleset 证据，或明确 GitHub plan / visibility blocker 后由人工配置处理。
+- 将 `godot_platformer_slice_smoke.py` 接入独立 CI PR，避开 Dependabot workflow PR 的 touch-set 冲突。
+- 评估 Candidate workflow skills 达到 2/2 后是否保持显式调用、升级稳定 skill，或继续观察更多样本。
+- 继续压缩 Stage-00 历史：完成型 handoff 归档、status 保持摘要、ADR 旧决策归档或 supersede。
+- 分批拆 `check_ai_governance.py`、`bootstrap_harness.py`、runtime hooks 和 reducer，避免一次性重写。
 
 ## 验收判断
 
-- Stage-00 的 runtime harness foundation 已在三个真实 workstream 上验证可用。
-- REQDOC-003 的首轮 PRD 标准化和 WS-03 薄切片进一步验证了长 PRD 可以通过 REQ/WS 压缩进入 harness，而不必把整篇 PRD 放入默认上下文。
-- 当前尚未完全进入下一阶段，因为 CI burn-in、GitHub branch protection / ruleset required checks 和 Windows 真实复演仍需确认。
-- 剩余问题主要是远端守门与长期样本观察，不是本地 harness 能否使用。
+- Stage-00 已证明 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
+- 当前尚未完全进入下一阶段，因为远端强制门禁、CI burn-in、Godot engine spike 和长期 skill/PR 样本仍需确认。
+- 剩余风险主要是远端 enforcement、长期上下文增长和维护性债务，不是本地 harness 能否使用。
 
 ## 关联文档
 
-- [项目计划](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
-- [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
-- [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
-- [当前工作上下文](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
-- [当前活跃 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)
-- [已归档 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive)
-- ADR 索引：ADR-010 到 ADR-015 覆盖 context surface、task discovery、GitHub gatekeeping、project skill lifecycle、context budget 与 workflow skills。
+- [项目计划](../plan.md)
+- [Harness Remaining Work](../harness-open-items.md)
+- [AI 文档入口索引](../index.md)
+- [当前工作上下文](../working-context.md)
+- [Candidate Skill Usage Samples](../skill-usage-samples.md)
 - [ADR-014 Context Budget Audit](../adr/ADR-014-context-budget-audit.md)
 - [ADR-015 Progressive Feature And PRD Skills](../adr/ADR-015-progressive-feature-and-prd-skills.md)
-- Changelog 目录：[docs/ai/changelog](../changelog)
-- [2026-05-07 Skill Eval And Code Shape Debt First Slice](../changelog/2026-05-07-skill-eval-and-code-shape-debt.md)
-- [2026-05-07 Context Budget Growth Guardrails](../changelog/2026-05-07-context-budget-growth-guardrails.md)
-- [Candidate Skill Usage Samples](../skill-usage-samples.md)
-- [OPEN-10 使用细节](../../../--使用细节/上下文预算OPEN-10使用细节.md)

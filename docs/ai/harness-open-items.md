@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-05-07
-当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；repo 内 PR template、PR touch conflict checker、change-triggered PR summary、check registry、security evidence workflow 与 `merge_group` workflow 触发已落地，剩余项以远端 branch protection / ruleset 阻塞、CI burn-in 和真实样本观察为主
+更新时间：2026-05-08
+当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；WS-03 已补第二个 combo/rank 薄切片；Candidate workflow skills 达到 2/2 accepted eval 前置证据；剩余项以远端 branch protection / ruleset 阻塞、CI burn-in、升级决策和 code-shape 分批拆分为主
 
 ## 作用
 
@@ -16,15 +16,15 @@
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
 - `harness-trace-console`、`threejs-snake` 与 `godot-platformer-slice` 均已具备浏览器 smoke；`WS-03` 用薄切片验证长 PRD 进入 harness 的压缩路径
 - GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow；`security-evidence.yml` 已被远端 API 识别，首轮 checkout 失败根因是误跟踪的演练输出 gitlink
-- CODEOWNERS、PR template 与 Dependabot 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-05 `gh api` 配置 main protection 返回 HTTP 403，需要 GitHub Pro 或 public repo。
+- CODEOWNERS、PR template、Dependabot grouping / PR limit、branch hygiene strict PR budget 与 `delete_branch_on_merge` 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-08 `check_github_guardrails.py` 显示 main branch protection 404，branch rulesets 为空。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
-- `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用，避免把方案先行流程变成简单任务默认流程
+- `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用；SAMPLE-001 / SAMPLE-002 已达到 2/2 accepted eval 前置证据，但是否升级仍需单独决策，避免把方案先行流程变成简单任务默认流程
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_github_guardrails.py` 已拆分为 helper 模块并新增 orphan gitlink 检查，`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
 - `docs/ai/check-registry.md` 已记录 check 等级；Scorecard、CodeQL、SBOM 已作为 security evidence workflow 接入，第一阶段不作为 required checks
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - REQDOC-003 已完成首轮标准化并绑定 REQ-007 / REQ-008 / REQ-009 与 WS-03；Godot engine 仍保持 proposed，后续如继续推进应先做独立 engine spike
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
-- context budget audit 已完成首轮 OPEN-10 triage 并补充增长护栏：starter/default 目标保持 6500，当前 root Stage-00 预算为 8500，80/90 高水位、ADR 到达预算和 stage status 行数触发 warning；changed-file follow-up triage 继续 warning-only / 按需使用
+- context budget audit 已完成首轮 OPEN-10 triage 并补充增长护栏：starter/default 目标保持 6500，当前 root Stage-00 预算为 8500，80/90 高水位、ADR 到达预算和 stage status 行数触发 warning；本轮已执行默认面 compression 并开始归档旧 ADR；changed-file follow-up triage 继续 warning-only / 按需使用
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
 - 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset plan/visibility blocker + longer-term reducer/runtime sample monitoring`
 
@@ -45,7 +45,8 @@
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
   - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
   - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
-  - 若 GitHub 继续返回 branch protection / ruleset HTTP 403，则完成定义必须先改为升级 GitHub Pro、Team/Enterprise 对应能力或将仓库设为 public 后重试远端强制配置
+  - 若 GitHub 继续返回 branch protection 404 或 rulesets 为空，则完成定义必须先改为由仓库管理员配置 branch protection / ruleset 后重试远端强制确认
+  - `scripts/check_branch_hygiene.py --strict` 显示 total 3/10、Codex 1/3、Dependabot 2/4、failed open 0/0，且 stale remote/local branch 均为 0；open PR 分支通过 merge/close 消化，不直接删除
   - `scripts/check_github_guardrails.py` 能返回远端状态；未登录或缺权限时必须明确显示 `UNKNOWN`，不能伪装成 OK
   - 失败结果能直接定位到 governance、hook sync、code-shape、Windows runner、supply-chain 或 smoke 维度
 
@@ -125,7 +126,7 @@
   - ADR 已采纳并说明 skill 不替代 canonical governance truth
   - `new_pro_standard` 已同步模板和说明
   - Candidate workflow skills 已验证不会替代 requirements / AI governance truth
-  - `check_skill_usage_samples.py` 至少显示关键 Candidate skills 达到 2 个 accepted with/without eval samples，或明确记录不升级原因
+  - `check_skill_usage_samples.py` 已显示关键 Candidate skills 达到 2 个 accepted with/without eval samples；下一步是决定升级、继续观察或保持 Candidate
   - governance check 与 code-shape check 通过
   - 至少一个后续真实项目能按 `Draft -> Candidate Skill -> Stable Skill -> Promote -> Deprecate` 路径处理项目约束变更
 

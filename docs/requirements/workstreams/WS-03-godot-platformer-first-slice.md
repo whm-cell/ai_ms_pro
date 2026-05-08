@@ -1,6 +1,6 @@
 # Godot Platformer First Slice
 
-更新时间：2026-05-07
+更新时间：2026-05-08
 工作流编号：WS-03
 工作流名称：Godot Platformer First Slice
 文档定位：projection document
@@ -40,7 +40,7 @@
 ## 验收模型
 
 - 用户可打开 `apps/godot-platformer-slice/` 看到单屏平台闯关切片。
-- smoke 可验证 `load -> freeze -> throw -> clear enemies -> unlock exit -> complete -> reset`。
+- smoke 可验证 `load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset`。
 - requirements shape、AI governance 和 code shape 检查通过。
 - REQDOC-003 不再停留在 source-only 未绑定状态。
 

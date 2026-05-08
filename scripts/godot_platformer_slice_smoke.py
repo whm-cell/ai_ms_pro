@@ -40,7 +40,13 @@ def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
         open_args.append("--headed")
 
     run_pw("open", *open_args, env=env)
+    verify_initial_state(env)
+    verify_first_throw(env)
+    verify_completion(env)
+    verify_reset(env)
 
+
+def verify_initial_state(env: dict[str, str]) -> None:
     run_pw(
         "run-code",
         """
@@ -57,6 +63,8 @@ if (!initial.requirementIds.includes("REQ-007") || !initial.workstreamIds.includ
         env=env,
     )
 
+
+def verify_first_throw(env: dict[str, str]) -> None:
     run_pw(
         "run-code",
         """
@@ -65,35 +73,58 @@ if (frozen.frozenEnemies !== 1 || frozen.remainingEnemies !== 2) {
   throw new Error(`Expected one frozen enemy: ${JSON.stringify(frozen)}`);
 }
 const firstThrow = await page.evaluate(() => window.__GODOT_PLATFORMER_SLICE_TEST__.throwFrozenEnemy());
-if (firstThrow.clearedEnemies !== 1 || firstThrow.remainingEnemies !== 1 || firstThrow.exitUnlocked) {
+if (
+  firstThrow.clearedEnemies !== 1 ||
+  firstThrow.remainingEnemies !== 1 ||
+  firstThrow.exitUnlocked ||
+  firstThrow.score !== 100 ||
+  firstThrow.combo !== 1
+) {
   throw new Error(`Expected one cleared enemy and locked exit: ${JSON.stringify(firstThrow)}`);
 }
         """.strip(),
         env=env,
     )
 
+
+def verify_completion(env: dict[str, str]) -> None:
     run_pw(
         "run-code",
         """
 await page.evaluate(() => window.__GODOT_PLATFORMER_SLICE_TEST__.freezeNearestEnemy());
 const secondThrow = await page.evaluate(() => window.__GODOT_PLATFORMER_SLICE_TEST__.throwFrozenEnemy());
-if (secondThrow.clearedEnemies !== 2 || secondThrow.remainingEnemies !== 0 || !secondThrow.exitUnlocked) {
+if (
+  secondThrow.clearedEnemies !== 2 ||
+  secondThrow.remainingEnemies !== 0 ||
+  !secondThrow.exitUnlocked ||
+  secondThrow.score !== 300 ||
+  secondThrow.combo !== 2
+) {
   throw new Error(`Expected all enemies cleared and exit unlocked: ${JSON.stringify(secondThrow)}`);
 }
 const complete = await page.evaluate(() => window.__GODOT_PLATFORMER_SLICE_TEST__.enterExit());
-if (!complete.complete || complete.running || complete.title !== "Slice Complete") {
+if (!complete.complete || complete.running || complete.title !== "Slice Complete" || complete.rank !== "A") {
   throw new Error(`Expected completed slice: ${JSON.stringify(complete)}`);
 }
         """.strip(),
         env=env,
     )
 
+
+def verify_reset(env: dict[str, str]) -> None:
     run_pw(
         "run-code",
         """
 await page.locator("#reset").click();
 const afterReset = await page.evaluate(() => window.__GODOT_PLATFORMER_SLICE_TEST__.getSnapshot());
-if (!afterReset.running || afterReset.complete || afterReset.score !== 0 || afterReset.remainingEnemies !== 2) {
+if (
+  !afterReset.running ||
+  afterReset.complete ||
+  afterReset.score !== 0 ||
+  afterReset.combo !== 0 ||
+  afterReset.rank !== "Pending" ||
+  afterReset.remainingEnemies !== 2
+) {
   throw new Error(`Expected reset state: ${JSON.stringify(afterReset)}`);
 }
         """.strip(),
@@ -119,7 +150,10 @@ def main() -> int:
     try:
         wait_for_app(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS godot-platformer-slice: load -> freeze -> throw -> unlock exit -> complete -> reset")
+        print(
+            "[smoke] PASS godot-platformer-slice: "
+            "load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset"
+        )
         return 0
     finally:
         try:
