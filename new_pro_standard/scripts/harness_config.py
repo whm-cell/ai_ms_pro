@@ -27,7 +27,10 @@ DEFAULT_ACTIVE_HANDOFF_BUDGET = 5
 DEFAULT_ARCHIVE_CANDIDATE_MIN_SCORE = 3
 DEFAULT_WARN_AT_BUDGET = True
 DEFAULT_DEFAULT_SURFACE_TOKEN_BUDGET = 6500
+DEFAULT_DEFAULT_SURFACE_WARNING_PERCENT = 80
+DEFAULT_DEFAULT_SURFACE_HIGH_WARNING_PERCENT = 90
 DEFAULT_ALWAYS_ON_DOC_LINE_BUDGET = 300
+DEFAULT_STAGE_STATUS_LINE_BUDGET = 120
 DEFAULT_SKILL_DESCRIPTION_WORD_BUDGET = 30
 DEFAULT_SKILL_BODY_LINE_BUDGET = 400
 DEFAULT_ADR_COUNT_BUDGET = 15
@@ -54,7 +57,10 @@ class ContextSurfaceConfig:
 @dataclass(frozen=True)
 class ContextBudgetConfig:
     default_surface_token_budget: int
+    default_surface_warning_percent: int
+    default_surface_high_warning_percent: int
     always_on_doc_line_budget: int
+    stage_status_line_budget: int
     skill_description_word_budget: int
     skill_body_line_budget: int
     adr_count_budget: int
@@ -182,10 +188,25 @@ def _load_context_budget(raw_value: object) -> ContextBudgetConfig:
             default=DEFAULT_DEFAULT_SURFACE_TOKEN_BUDGET,
             label="context_budget.default_surface_token_budget",
         ),
+        default_surface_warning_percent=_positive_int(
+            raw_value.get("default_surface_warning_percent"),
+            default=DEFAULT_DEFAULT_SURFACE_WARNING_PERCENT,
+            label="context_budget.default_surface_warning_percent",
+        ),
+        default_surface_high_warning_percent=_positive_int(
+            raw_value.get("default_surface_high_warning_percent"),
+            default=DEFAULT_DEFAULT_SURFACE_HIGH_WARNING_PERCENT,
+            label="context_budget.default_surface_high_warning_percent",
+        ),
         always_on_doc_line_budget=_positive_int(
             raw_value.get("always_on_doc_line_budget"),
             default=DEFAULT_ALWAYS_ON_DOC_LINE_BUDGET,
             label="context_budget.always_on_doc_line_budget",
+        ),
+        stage_status_line_budget=_positive_int(
+            raw_value.get("stage_status_line_budget"),
+            default=DEFAULT_STAGE_STATUS_LINE_BUDGET,
+            label="context_budget.stage_status_line_budget",
         ),
         skill_description_word_budget=_positive_int(
             raw_value.get("skill_description_word_budget"),
@@ -261,7 +282,10 @@ def _parse_context_budget_section(section_text: str) -> dict[str, object]:
     values: dict[str, object] = {}
     for key in (
         "default_surface_token_budget",
+        "default_surface_warning_percent",
+        "default_surface_high_warning_percent",
         "always_on_doc_line_budget",
+        "stage_status_line_budget",
         "skill_description_word_budget",
         "skill_body_line_budget",
         "adr_count_budget",

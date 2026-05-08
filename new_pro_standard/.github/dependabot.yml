@@ -4,16 +4,28 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    groups:
+      github-actions-runtime:
+        patterns:
+          - "*"
 
   - package-ecosystem: "pip"
     directory: "/.codex"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    groups:
+      harness-python-runtime:
+        patterns:
+          - "*"
 
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    groups:
+      npm-runtime:
+        patterns:
+          - "*"

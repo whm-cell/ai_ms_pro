@@ -112,6 +112,14 @@ Use these default profiles:
 
 Before substantial work, state the selected profile briefly. Users do not need to add a task-type suffix to every prompt. Override phrases such as `按简单任务处理`, `按复杂任务处理`, `这是 0-1 阶段任务`, `不要读 archive`, or `需要深挖历史` are optional controls for correcting or narrowing the automatic classification.
 
+## Context Budget Guardrails
+
+- `scripts/check_context_budget.py` warns at configured `80%` / `90%` default-surface watermarks before the hard budget; treat `90%` as a compression trigger before adding always-on context.
+- ADR count warns at `context_budget.adr_count_budget`; update, supersede, or compress unless a distinct durable decision needs a new ADR.
+- Subagents default to compact task packets; use `fork_context=true` only for recovery, dispute, or tightly coupled integration, and state why.
+- Active stage `status` reaching `context_budget.stage_status_line_budget` triggers compression into changelog/ADR/backlog and completed-handoff archive.
+- Never paste complete PRDs, full diffs/transcripts, or complete runtime JSONL into prompts or governance docs; use REQ/WS, targeted excerpts, filtered JSONL, summaries, or structured extraction.
+
 ## Harness Layers
 
 This starter uses three harness layers:

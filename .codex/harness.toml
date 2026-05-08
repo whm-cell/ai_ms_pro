@@ -16,9 +16,18 @@ active_handoff_budget = 5
 archive_candidate_min_score = 3
 warn_at_budget = true
 
+[branch_hygiene]
+max_open_total_prs = 10
+max_open_codex_prs = 3
+max_open_dependabot_prs = 4
+max_failed_open_prs = 0
+
 [context_budget]
 default_surface_token_budget = 8500
+default_surface_warning_percent = 80
+default_surface_high_warning_percent = 90
 always_on_doc_line_budget = 300
+stage_status_line_budget = 120
 skill_description_word_budget = 30
 skill_body_line_budget = 400
 adr_count_budget = 15

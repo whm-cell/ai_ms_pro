@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  checks: read
   pull-requests: read
 
 concurrency:
@@ -38,10 +39,26 @@ jobs:
         continue-on-error: true
         run: python3 scripts/check_change_triggered_followups.py --base "origin/${{ github.base_ref }}" --markdown >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Add branch hygiene summary for PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          python3 scripts/check_branch_hygiene.py --markdown --strict --current-pr "${{ github.event.pull_request.number }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Add advisory follow-up summary for main push
         if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
         continue-on-error: true
         run: python3 scripts/check_change_triggered_followups.py --base "${{ github.event.before }}" --markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add branch hygiene summary for main push
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          python3 scripts/check_branch_hygiene.py --markdown --strict | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Add advisory follow-up note for merge queue
         if: github.event_name == 'merge_group'

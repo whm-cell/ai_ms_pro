@@ -9,6 +9,7 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from context_budget_warnings import build_warnings, usage_percent
 from harness_config import ContextBudgetConfig, HarnessConfigError, load_harness_config
 
 
@@ -39,11 +40,14 @@ class SkillItem:
 class ContextBudgetReport:
     default_surface_tokens: int
     default_surface_budget: int
+    default_surface_warning_percent: int
+    default_surface_high_warning_percent: int
     default_surface: list[SurfaceItem]
     active_handoff_count: int
     active_handoff_budget: int
     adr_count: int
     adr_budget: int
+    stage_status_line_budget: int
     skill_count: int
     mcp_server_count: int
     mcp_server_budget: int
@@ -206,64 +210,6 @@ def mcp_server_count(root: Path) -> int:
     return total
 
 
-def build_warnings(
-    *,
-    report_items: list[SurfaceItem],
-    skills: list[SkillItem],
-    duplicates: list[str],
-    config: ContextBudgetConfig,
-    active_handoff_count: int,
-    active_handoff_budget: int,
-    adr_count: int,
-    mcp_count: int,
-) -> list[str]:
-    warnings: list[str] = []
-    default_tokens = sum(item.estimated_tokens for item in report_items)
-    if default_tokens > config.default_surface_token_budget:
-        warnings.append(
-            "Default context surface exceeds budget "
-            f"({default_tokens} > {config.default_surface_token_budget})."
-        )
-
-    for item in report_items:
-        if item.lines > config.always_on_doc_line_budget:
-            warnings.append(
-                f"Always-on document {item.path} is long "
-                f"({item.lines} lines > {config.always_on_doc_line_budget})."
-            )
-
-    if active_handoff_count >= active_handoff_budget:
-        warnings.append(
-            "Active handoffs reached the configured surface budget "
-            f"({active_handoff_count} >= {active_handoff_budget})."
-        )
-    if adr_count > config.adr_count_budget:
-        warnings.append(f"ADR count exceeds budget ({adr_count} > {config.adr_count_budget}).")
-    if mcp_count > config.mcp_server_budget:
-        warnings.append(
-            f"MCP server count exceeds budget ({mcp_count} > {config.mcp_server_budget})."
-        )
-
-    for skill in skills:
-        if skill.description_words > config.skill_description_word_budget:
-            warnings.append(
-                f"Skill description is long in {skill.path} "
-                f"({skill.description_words} words > {config.skill_description_word_budget})."
-            )
-        if skill.lines > config.skill_body_line_budget:
-            warnings.append(
-                f"Skill body is long in {skill.path} "
-                f"({skill.lines} lines > {config.skill_body_line_budget})."
-            )
-
-    if duplicates:
-        warnings.append(
-            "Duplicate instruction lines found across always-on docs or skills; "
-            "consider moving repeated detail to an on-demand template or ADR."
-        )
-    return warnings
-
-
 def build_report(root: Path = ROOT) -> ContextBudgetReport:
     harness_config = load_harness_config(root)
     context_budget = harness_config.context_budget
@@ -287,11 +233,14 @@ def build_report(root: Path = ROOT) -> ContextBudgetReport:
     return ContextBudgetReport(
         default_surface_tokens=sum(item.estimated_tokens for item in default_items),
         default_surface_budget=context_budget.default_surface_token_budget,
+        default_surface_warning_percent=context_budget.default_surface_warning_percent,
+        default_surface_high_warning_percent=context_budget.default_surface_high_warning_percent,
         default_surface=default_items,
         active_handoff_count=active_handoff_count,
         active_handoff_budget=context_surface.active_handoff_budget,
         adr_count=adr_count,
         adr_budget=context_budget.adr_count_budget,
+        stage_status_line_budget=context_budget.stage_status_line_budget,
         skill_count=len(skills),
         mcp_server_count=mcp_count,
         mcp_server_budget=context_budget.mcp_server_budget,
@@ -304,9 +253,16 @@ def build_report(root: Path = ROOT) -> ContextBudgetReport:
 def render_report(report: ContextBudgetReport) -> str:
     lines = [
         "Context budget audit:",
-        f"- default surface: {report.default_surface_tokens} estimated tokens / budget {report.default_surface_budget}",
+        "- default surface: "
+        f"{report.default_surface_tokens} estimated tokens / budget "
+        f"{report.default_surface_budget} "
+        f"({usage_percent(report.default_surface_tokens, report.default_surface_budget):.1f}%)",
+        "- default warning thresholds: "
+        f"{report.default_surface_warning_percent}% / "
+        f"{report.default_surface_high_warning_percent}%",
         f"- active handoffs: {report.active_handoff_count} / budget {report.active_handoff_budget}",
         f"- ADR count: {report.adr_count} / budget {report.adr_budget}",
+        f"- stage status line budget: {report.stage_status_line_budget}",
         f"- skills: {report.skill_count}",
         f"- MCP servers: {report.mcp_server_count} / budget {report.mcp_server_budget}",
         "",

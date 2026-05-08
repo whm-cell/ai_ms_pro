@@ -72,7 +72,14 @@ def dependabot_check(root: Path) -> Check:
     missing = [token for token in ("github-actions", "pip", "npm") if token not in text]
     if missing:
         return Check("Dependabot", "WARN", f"missing ecosystems: {', '.join(missing)}")
-    return Check("Dependabot", "OK", "github-actions, pip, and npm update entries are present")
+    missing_controls = [
+        token
+        for token in ("open-pull-requests-limit: 1", "groups:")
+        if token not in text
+    ]
+    if missing_controls:
+        return Check("Dependabot", "WARN", f"missing PR fan-out controls: {', '.join(missing_controls)}")
+    return Check("Dependabot", "OK", "ecosystems, PR limits, and dependency groups are present")
 
 
 def pr_template_check(root: Path) -> Check:

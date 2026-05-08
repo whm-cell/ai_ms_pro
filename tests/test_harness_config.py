@@ -29,6 +29,9 @@ class HarnessConfigTest(unittest.TestCase):
         self.assertEqual(config.context_surface.archive_candidate_min_score, 3)
         self.assertTrue(config.context_surface.warn_at_budget)
         self.assertEqual(config.context_budget.default_surface_token_budget, 6500)
+        self.assertEqual(config.context_budget.default_surface_warning_percent, 80)
+        self.assertEqual(config.context_budget.default_surface_high_warning_percent, 90)
+        self.assertEqual(config.context_budget.stage_status_line_budget, 120)
         self.assertEqual(config.context_budget.skill_description_word_budget, 30)
 
     def test_context_surface_overrides_defaults(self) -> None:
@@ -47,7 +50,10 @@ warn_at_budget = false
 
 [context_budget]
 default_surface_token_budget = 1000
+default_surface_warning_percent = 70
+default_surface_high_warning_percent = 85
 always_on_doc_line_budget = 120
+stage_status_line_budget = 80
 skill_description_word_budget = 20
 skill_body_line_budget = 250
 adr_count_budget = 9
@@ -62,7 +68,10 @@ mcp_server_budget = 4
         self.assertEqual(config.context_surface.archive_candidate_min_score, 6)
         self.assertFalse(config.context_surface.warn_at_budget)
         self.assertEqual(config.context_budget.default_surface_token_budget, 1000)
+        self.assertEqual(config.context_budget.default_surface_warning_percent, 70)
+        self.assertEqual(config.context_budget.default_surface_high_warning_percent, 85)
         self.assertEqual(config.context_budget.always_on_doc_line_budget, 120)
+        self.assertEqual(config.context_budget.stage_status_line_budget, 80)
         self.assertEqual(config.context_budget.skill_description_word_budget, 20)
         self.assertEqual(config.context_budget.skill_body_line_budget, 250)
         self.assertEqual(config.context_budget.adr_count_budget, 9)
@@ -93,7 +102,10 @@ warn_at_budget = false
 
 [context_budget]
 default_surface_token_budget = 900
+default_surface_warning_percent = 75
+default_surface_high_warning_percent = 88
 always_on_doc_line_budget = 100
+stage_status_line_budget = 70
 skill_description_word_budget = 25
 skill_body_line_budget = 240
 adr_count_budget = 8
@@ -107,6 +119,9 @@ mcp_server_budget = 3
         self.assertEqual(parsed["context_surface"]["archive_candidate_min_score"], 8)
         self.assertFalse(parsed["context_surface"]["warn_at_budget"])
         self.assertEqual(parsed["context_budget"]["default_surface_token_budget"], 900)
+        self.assertEqual(parsed["context_budget"]["default_surface_warning_percent"], 75)
+        self.assertEqual(parsed["context_budget"]["default_surface_high_warning_percent"], 88)
+        self.assertEqual(parsed["context_budget"]["stage_status_line_budget"], 70)
         self.assertEqual(parsed["context_budget"]["mcp_server_budget"], 3)
 
     def test_budget_warning_can_fire_at_or_over_budget(self) -> None:

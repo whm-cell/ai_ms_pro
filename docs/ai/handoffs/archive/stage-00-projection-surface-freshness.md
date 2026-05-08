@@ -20,7 +20,7 @@
 ## 已完成内容
 
 - 在 `AGENTS.md` 中新增 projection surface boundary 规则，明确 primary truth 与 projection document 的分工
-- 新增 [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)，把这次边界决策固化为长期规则
+- 新增 [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-005-projection-surface-freshness.md)，把这次边界决策固化为长期规则
 - 更新 [docs/ai/plan.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)，加入“使用边界”并移除会漂移的当前状态表述
 - 更新 [WS-01-threejs-snake-mvp.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)，移除自维护完成态，改成“状态来源”链接
 - 更新治理脚本，使其能够识别 `plan/workstream` 中显式状态字段，并在这些 projection 文档落后于上游真相时失败
@@ -29,7 +29,7 @@
 ## 修改文件
 
 - [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
-- [docs/ai/adr/ADR-005-projection-surface-freshness.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md)
+- [docs/ai/adr/archive/ADR-005-projection-surface-freshness.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-005-projection-surface-freshness.md)
 - [docs/ai/plan.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)
 - [docs/requirements/workstreams/WS-01-threejs-snake-mvp.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)
 - [docs/ai/working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
@@ -77,4 +77,4 @@
 
 ## 下一位 Agent 的第一步动作
 
-- 先读 [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-005-projection-surface-freshness.md) 和更新后的 [docs/ai/plan.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)，再决定下一步是继续补 metadata consistency 校验，还是推进第二个真实 workstream
+- 先读 [ADR-005 Projection Surface Freshness Boundary](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-005-projection-surface-freshness.md) 和更新后的 [docs/ai/plan.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/plan.md)，再决定下一步是继续补 metadata consistency 校验，还是推进第二个真实 workstream

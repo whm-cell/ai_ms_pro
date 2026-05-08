@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from session_snapshot_render import render_session_snapshot
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
@@ -111,92 +113,26 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
     changed_paths = git_status_paths()
     now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
-    field_text = "\n".join(f"- `{path}`" for path in changed_paths[:20]) or "- 暂无检测到当前工作区变更"
     promote = should_promote(changed_paths)
     promote_reason = infer_promotion_reason(promote, changed_paths)
-
-    content = "\n".join(
-        [
-            "# Runtime Session 记录",
-            "",
-            f"更新时间：{now}",
-            f"Agent：{agent_label}",
-            f"Session 类型：{session_type}",
-            f"分支或线程：{branch_or_thread}",
-            f"Session ID：{session_id}",
-            "",
-            "## 需求与工作流标识",
-            "",
-            f"- Requirement IDs：{format_identifiers(requirement_ids)}",
-            f"- Workstream IDs：{format_identifiers(workstream_ids)}",
-            "- 若已绑定，应与 `docs/requirements/traceability-matrix.md` 保持一致",
-            "",
-            "## 当前目标",
-            "",
-            bullet(prompt_preview, "待主 Agent 基于本次 Stop 事件补充当前目标"),
-            "",
-            "## 会话范围与触发背景",
-            "",
-            bullet(
-                transcript_path,
-                "由 Stop hook 自动刷新；如需更完整背景，请结合工作区状态和共享治理文档判断",
-            ),
-            "",
-            "## 行为护栏快照",
-            "",
-            "- Assumptions：待主 Agent 补充本次实现前明确采用的假设",
-            "- Scope Boundary：待主 Agent 补充本次只改什么、不顺手改什么",
-            "- Success Criteria：待主 Agent 补充可验证的完成条件",
-            "- Verification Plan：待主 Agent 补充收尾前应运行的检查、测试或 smoke",
-            "",
-            "## 已做动作",
-            "",
-            "- Stop hook 已刷新本地 runtime session 快照",
-            "- 已记录当前工作区变更文件与最佳努力 prompt/transcript 元数据",
-            "",
-            "## 触碰文件",
-            "",
-            field_text,
-            "",
-            "## 已验证有效的路线",
-            "",
-            "- 待主 Agent 从本次会话内容提炼",
-            "",
-            "## 已验证无效的路线",
-            "",
-            "- 待主 Agent 从本次会话内容提炼",
-            "",
-            "## 当前 Open Loops",
-            "",
-            "- Stop hook 无法可靠推断全部开放问题，需主 Agent 按需补充",
-            "",
-            "## 需提升到共享治理层的内容",
-            "",
-            bullet(
-                prompt_preview,
-                "若本次 session 已形成共享结论，请提升到 handoff、status、ADR、plan 或 requirements",
-            ),
-            "",
-            "## 下次 Resume 提示",
-            "",
-            "- 先读 `docs/ai/index.md`、`docs/ai/working-context.md` 和相关 ADR",
-            bullet(
-                transcript_path,
-                "若需要还原更细的会话轨迹，优先结合 transcript 路径或当前 session 文件判断",
-            ),
-            "",
-            "## 是否需要提升为 Handoff",
-            "",
-            f"- {'是' if promote else '否'}",
-            f"- 原因：{promote_reason}",
-            "- 若为“是”，至少同步：任务目标、已完成内容、修改文件、关键实现决策、有效路线、无效路线、候选路线、未完成项、风险、下一步动作",
-            "",
-            "## Hook 元数据",
-            "",
-            bullet(transcript_path, "未检测到 transcript_path"),
-            bullet(compact_text(str(WORKING_CONTEXT_PATH)), "未检测到 working-context 路径"),
-        ]
-    ) + "\n"
+    content = render_session_snapshot(
+        {
+            "now": now,
+            "agent_label": agent_label,
+            "session_type": session_type,
+            "branch_or_thread": branch_or_thread,
+            "session_id": session_id,
+            "requirement_ids": requirement_ids,
+            "workstream_ids": workstream_ids,
+            "traceability_source": "",
+            "prompt_preview": prompt_preview,
+            "transcript_path": transcript_path,
+            "changed_paths": changed_paths,
+            "promote": promote,
+            "promote_reason": promote_reason,
+            "working_context_path": compact_text(str(WORKING_CONTEXT_PATH)),
+        }
+    )
 
     session_file.write_text(content, encoding="utf-8")
 
@@ -396,17 +332,6 @@ def compact_text(value: Any) -> str:
         return ""
     compact = " ".join(value.split())
     return compact[:MAX_FIELD_LENGTH].strip()
-
-
-def format_identifiers(values: list[str]) -> str:
-    if not values:
-        return "未绑定"
-    return ", ".join(values)
-
-
-def bullet(value: str, fallback: str) -> str:
-    text = value or fallback
-    return f"- {text}"
 
 
 def slugify(value: str) -> str:
