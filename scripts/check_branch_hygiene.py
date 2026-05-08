@@ -63,6 +63,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument("--markdown", action="store_true", help="Emit GitHub Actions summary markdown.")
     parser.add_argument("--strict", action="store_true", help="Fail when cleanup findings exist.")
+    parser.add_argument(
+        "--current-pr",
+        type=int,
+        default=0,
+        help="Ignore the current PR's own check rollup when auditing failed open PRs.",
+    )
     parser.add_argument("--delete-remote-stale", action="store_true", help="Delete remote branches whose PR is merged or closed.")
     parser.add_argument("--delete-local-stale", action="store_true", help="Delete local branches whose PR is merged or closed.")
     parser.add_argument(
@@ -164,24 +170,28 @@ def failing_checks(record: dict[str, object]) -> list[str]:
         name = str(check.get("name") or check.get("context") or "unknown-check")
         if conclusion in {"FAILURE", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED"}:
             failed.append(name)
-        elif status and status != "COMPLETED":
-            failed.append(f"{name} ({status.lower()})")
     return sorted(set(failed))
 
 
-def failed_open_pr_findings(records: list[dict[str, object]]) -> list[OpenPrFinding]:
+def record_number(record: dict[str, object]) -> int:
+    number_value = record.get("number")
+    try:
+        return int(number_value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return 0
+
+
+def failed_open_pr_findings(records: list[dict[str, object]], current_pr: int = 0) -> list[OpenPrFinding]:
     findings: list[OpenPrFinding] = []
     for record in records:
         if str(record.get("state") or "") != "OPEN":
             continue
+        number = record_number(record)
+        if current_pr and number == current_pr:
+            continue
         failed = failing_checks(record)
         if not failed:
             continue
-        number_value = record.get("number")
-        try:
-            number = int(number_value)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
-            number = 0
         branch = str(record.get("headRefName") or "")
         author = author_login(record)
         action = "review, fix, close PR, or delete branch after PR close"
@@ -201,7 +211,7 @@ def failed_open_pr_findings(records: list[dict[str, object]]) -> list[OpenPrFind
     return sorted(findings, key=lambda finding: finding.number)
 
 
-def build_report() -> BranchHygieneReport:
+def build_report(current_pr: int = 0) -> BranchHygieneReport:
     prune_remote_refs()
     repo = repository_name()
     default_branch, delete_on_merge = repo_metadata(repo)
@@ -209,7 +219,7 @@ def build_report() -> BranchHygieneReport:
     records = pr_records()
     states = branch_pr_states(records)
     open_pr_branches = sorted(branch for branch, values in states.items() if "OPEN" in values)
-    failed_prs = failed_open_pr_findings(records)
+    failed_prs = failed_open_pr_findings(records, current_pr=current_pr)
     counts = pull_request_counts(records, failed_open=len(failed_prs))
     pr_budget_findings = budget_findings(counts, budget)
     protected = {default_branch, current_branch()}
@@ -307,7 +317,7 @@ def close_failed_dependabot_prs(findings: list[OpenPrFinding]) -> None:
 def main() -> int:
     args = parse_args()
     try:
-        report = build_report()
+        report = build_report(current_pr=args.current_pr)
         if args.close_failed_dependabot_prs:
             close_failed_dependabot_prs(report.failed_open_prs)
         if args.delete_remote_stale:
@@ -315,7 +325,7 @@ def main() -> int:
         if args.delete_local_stale:
             delete_findings(report.stale_local_branches, remote=False)
         if args.delete_remote_stale or args.delete_local_stale or args.close_failed_dependabot_prs:
-            report = build_report()
+            report = build_report(current_pr=args.current_pr)
     except RuntimeError as exc:
         print(f"Branch hygiene check: FAILED\nERROR: {exc}", file=sys.stderr)
         return 1

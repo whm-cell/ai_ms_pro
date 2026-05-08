@@ -22,7 +22,7 @@
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `blocking-candidate` | manual / PR review evidence | 远端 branch protection / rulesets 可读取后再考虑阻断 |
-| `check_branch_hygiene.py` | `blocking` | PR / main push summary runs `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
+| `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
 | `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入样本证明误报可控后升级 |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary | 不直接升级；只驱动其他 checks |
 | `check_context_budget.py` | `advisory` | manual | 80/90、ADR 到达预算或 stage status 触线持续出现且可自动修复前不阻断 |

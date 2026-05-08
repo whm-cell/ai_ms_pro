@@ -41,7 +41,7 @@ Remote branch protection or ruleset should require:
 - Do not mark OPEN-01 closed until `scripts/check_github_guardrails.py` or an administrator-provided screenshot / export proves the remote settings.
 - If branch protection remains 404 or branch rulesets remain empty, the next action is remote repository settings by an administrator, not another local code change.
 - Do not delete open PR branches directly. Merge or close the PR first, then rely on `delete_branch_on_merge` or `check_branch_hygiene.py`.
-- CI blocks when active PR budgets are exceeded, failed open PRs exist, or stale/unmanaged branches are detected; explicit cleanup still requires `scripts/check_branch_hygiene.py --close-failed-dependabot-prs` or a human PR close action.
+- CI blocks when active PR budgets are exceeded, other failed open PRs exist, or stale/unmanaged branches are detected; PR runs pass `--current-pr` so the branch hygiene gate does not self-block on the current PR's own check rollup. Explicit cleanup still requires `scripts/check_branch_hygiene.py --close-failed-dependabot-prs` or a human PR close action.
 
 ## Verification
 

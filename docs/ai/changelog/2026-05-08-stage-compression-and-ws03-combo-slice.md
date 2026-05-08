@@ -6,6 +6,7 @@
 - 新增 `docs/ai/security/remote-merge-gates.md`，记录远端 branch protection / ruleset 的可证明状态。
 - 新增 `scripts/check_branch_hygiene.py`，区分 open PR 分支、merged/closed stale 分支和 unmanaged 远端分支。
 - `governance-and-smoke.yml` 的 governance job 会在 PR/main push 中以 `check_branch_hygiene.py --strict` 报告并阻断 active PR / stale branch 预算问题。
+- 真实 PR CI 暴露 branch hygiene self-check 风险后，PR job 改为传入 `--current-pr`；pending checks 不再被算作 failed open PR，当前 PR 自己的 check rollup 也不参与 failed-open-PR 判定。
 - `.github/dependabot.yml` 改为 dependency groups，并将每个 ecosystem directory 的 `open-pull-requests-limit` 收紧为 1。
 - 新增 SAMPLE-002，作为 `prd-to-project-skills` 与 `progressive-feature-development` 的第二个 accepted real-task eval。
 
