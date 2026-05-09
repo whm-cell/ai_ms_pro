@@ -1,14 +1,12 @@
 # 当前工作上下文
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 当前阶段：STAGE-00 真实场景验证与治理固化
 当前模式：Codex-first harness engineering
 
 ## 作用
 
-本文件只保留当前开发阶段最需要被下一次会话立即继承的真相。
-
-它不是长期归档，不替代 `plan`、`status`、`handoff`、`adr`。
+只保留下一次会话立即需要继承的当前真相；长期细节在 `status`、`handoff`、ADR、requirements 或 changelog。
 
 ## 同步元数据
 
@@ -20,42 +18,41 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009
 - Workstream IDs: WS-01, WS-02, WS-03
 - Last Synced From: status,manual,handoff
-- Last Synced At: 2026-05-08
+- Last Synced At: 2026-05-09
 
 ## 当前主目标
 
 - 维持短默认上下文：`index -> working-context -> current status`；requirements、handoff、ADR、archive 与 skills 都按需进入。
-- 本轮 stage status 已吸收上下文压缩、WS-03 combo/rank 薄切片、SAMPLE-002 和远端门禁证据化结论。
-- `AGENTS.md` 已压缩为 always-on 触发与边界层；projection、verification、GitHub、skill lifecycle 细则继续由 skills、references、templates 和 checks 承接。
-- REQDOC-003 已完成首轮标准化，绑定 REQ-007 / REQ-008 / REQ-009 与 WS-03；`apps/godot-platformer-slice/` 已完成首轮玩法闭环和第二轮 combo/rank 薄切片，完整 Godot 工程仍是 proposed / 待确认。
-- 收敛 Stage-00 剩余 hardening：repo 内 PR 守门已补 PR template、touch conflict checker、branch hygiene strict PR 预算与 `merge_group` workflow 触发；仓库现为 private 且账号为 GitHub Free，branch protection / rulesets 返回 plan limit HTTP 403，归类为 plan-limited future gates。
-- AI/Agent security P0/P1/P2 已落地：runtime sanitizer、source boundary metadata 与 high-impact action matrix 已接入。
-- 本轮并行 follow-up 已补 CI burn-in 证据、guardrail samples，并完成 reducer / runtime traceability / bootstrap plan / governance traceability 拆分。
+- stage status 已吸收上下文压缩、WS-03 combo/rank 薄切片、SAMPLE-002、CI burn-in 边界和远端门禁证据化结论。
+- `AGENTS.md` 只保留 always-on 触发与边界；projection、verification、GitHub、skill lifecycle 细则由 skills、references、templates 和 checks 承接。
+- REQDOC-003 已绑定 REQ-007/008/009 与 WS-03；`apps/godot-platformer-slice/` 完成两轮 thin slice，完整 Godot 工程仍 proposed。
+- repo 内 PR 守门、branch hygiene 预算、`merge_group`、workflow SHA pinning、Playwright browser / CLI 固定版本、WS-03 CI smoke、runtime/source/action guardrails、security triage 和 guardrail samples 已落地；private Free 下远端保护仍 plan-limited。
+- OPEN-14 已拆 working-context sync metadata、governance main orchestration 和 trace console blackbox 断言脚本；函数级 warning 已消除。
 - 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
-- 已将 skills 迁到 Codex repo-local 原生路径 `.agents/skills`；`harness-maintenance` 下沉 runtime / hook / compression / verification / GitHub / code-shape 细则，`requirements-traceability-maintenance` 下沉 PRD/REQ/WS/技术假设维护流程，`team-pr-conflict-control` 下沉多人 / 多 AI PR touch-set 冲突控制，Candidate workflow skills 继续显式触发。
-- 使用 warning-only evidence / follow-up checks：`check_repo_skills.py`、`check_requirements_shape.py`、`check_skill_usage_samples.py`、`check_github_guardrails.py`、`check_change_triggered_followups.py`；`check_branch_hygiene.py --strict` 已升级为 active PR / stale branch 阻断面；其中 change-triggered follow-up 已可在 CI / PR summary 展示，Scorecard / CodeQL / SBOM 先作为 security evidence 运行，GitHub guardrails 已拆成 helper 模块并检查 orphan gitlink。
+- `.agents/skills` 是按需方法层；`harness-maintenance`、`requirements-traceability-maintenance`、`team-pr-conflict-control` 与 Candidate workflow skills 继续显式触发，不替代 canonical docs / checks。
+- Warning/advisory checks 保持分层：repo skills、requirements shape、skill samples、GitHub guardrails、change-triggered followups 和 security evidence；`check_branch_hygiene.py --strict` 仍是 active PR / stale branch 阻断面。
 
 ## 当前活跃队列
 
-1. 继续推进 OPEN-01：private GitHub Free 下把本地/CI/process evidence 跑满；branch protection、rulesets、required checks、required reviews 和 merge queue 只作为升级 GitHub plan 或改 public 后的 future gates。
+1. 继续推进 OPEN-01：private GitHub Free 下把本地/CI/process evidence 跑满；远端保护只作为升级 plan 或改 public 后的 future gates。
 2. 用 `scripts/check_github_guardrails.py` 辅助区分本地已具备、远端 OK、远端 UNKNOWN / plan-limited，不再只靠人工记忆。
-3. 用 `scripts/check_branch_hygiene.py --strict` 控制 active PR 数量预算：total 10、Codex 3、Dependabot 4、failed open 0；PR CI 传入 `--current-pr`，避免把当前 PR 自身正在运行或刚失败的 checks 作为“其他失败 open PR”自阻断；`origin/pull/*` 这类 GitHub checkout 合成 refs 不进入 remote branch 审计；workflow 授予 `checks: read` 并用 `tee` 保留日志；`delete_branch_on_merge` 仅报告，不作为 Actions token 下的 strict 阻断；open PR 分支通过 merge/close 处理，不直接删除。
+3. 用 `scripts/check_branch_hygiene.py --strict` 控制 active PR 预算：total 10、Codex 3、Dependabot 4、failed open 0；PR CI 传入 `--current-pr`；Actions token 无权读 check rollup 时只降级 failed-open-PR 审计并输出 NOTE；open PR 分支通过 merge/close 处理，不直接删除。
 4. 后续 PR 通过 `.github/pull_request_template.md` 显式填写 `REQ/WS`、touch-set、overlap、verification 和 governance impact。
 5. REQDOC-003 后续若继续推进，应先决定是否新建真实 Godot engine spike；不要把完整游戏工程直接塞进 root repo 默认面。
 6. `prd-to-project-skills` 与 `progressive-feature-development` 已有 SAMPLE-001 / SAMPLE-002 两个 accepted eval；下一步是单独评估是否保持 Candidate、升级 stable，或继续观察简单任务流程税。
 7. 后续真实多人 / 多 AI PR 要用 `$team-pr-conflict-control` 记录 touch-set overlap 和 coordination action，先观察是否值得升级更多阻断策略。
-8. 后续 AI/Agent security：观察 source boundary 和 high-impact action follow-up 的真实样本与误报率；不要直接把 advisory / review-required 提示升级为 blocking。
+8. 后续 AI/Agent security：继续观察 source boundary、high-impact action follow-up 和 security evidence triage 的真实样本与误报率；不要直接把 advisory / review-required 提示升级为 blocking。
 9. 下一次 stage compression 继续清理完成型 handoff，避免 Stage-00 历史进入长期默认面。
 
 ## 当前风险与阻塞
 
 - 远端 GitHub main 保护在 private Free 下不可强制：GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403；required checks、review、conversation resolved 和禁止直推 `main` 不能声明已强制。
-- Candidate workflow skills 已达到 2/2 accepted eval 前置证据；不得自动升级 always-on，仍需评估简单任务流程税和后续样本。
+- Candidate workflow skills 已达到 2/2 accepted eval 前置证据；升级 always-on 前仍需评估流程税和后续样本。
 - PRD 技术假设检查是启发式；`requirements-traceability-maintenance` 能提示缺状态/验证方法，但不能替代人工架构判断或 ADR。
 - REQDOC-003 的 Godot 4.6.2、GUT、导出 preset、素材/本地化管线仍未被 ADR 或真实 Godot spike 采纳。
 - runtime stage drift、archive candidate 仍保持 warning-only；是否升级阻断要等更多真实样本。
-- runtime sanitizer、source boundary metadata、high-impact action matrix 和 guardrail samples 是 best-effort / review-required 防护层，不替代 secret scanning、人工确认或远端审计；2026-05-08 已清理 49 个旧 runtime 文件。
-- Code-shape 剩余债务见 OPEN-14。
+- runtime sanitizer、source boundary、高影响动作矩阵、guardrail samples 和 security triage 是 best-effort / review-required 防护层，不替代 secret scanning、人工确认或远端审计；2026-05-08 已清理 49 个旧 runtime 文件。
+- Code-shape 剩余债务见 OPEN-14：主要剩 `check_ai_governance.py` 和 `bootstrap_harness.py` 文件总长拆分。
 - context budget 已收紧为 80/90 高水位、ADR 到达预算、stage status 行数 warning；本轮已执行 stage compression，并开始把旧 ADR 移入 archive。
 - starter 仍需新项目人工改写 `AGENTS.md` 和初始 REQ/WS；bootstrap 只初始化机制，不决定业务 truth。
 - macOS/POSIX 与 Windows Python 解析已修复，但全新宿主仍需 bootstrap / hook sync 复验。
@@ -79,7 +76,7 @@
 - `new_pro_standard` 只同步机制层，不复制当前 repo 的历史 truth。
 - GitHub required-check 策略见 ADR-012；private Free 下 OPEN-01 以最大边界和 CI evidence burn-in 管理，branch protection / ruleset 等待计划或可见性升级。
 - 子 Agent 默认精简任务包；完整 PRD、diff、transcript/runtime JSONL 进入 harness 前必须摘要、筛选或结构化抽取。
-- runtime prompt preview、transcript path、SessionStart 摘要和 reducer draft 必须走 runtime sanitizer；外部 PRD / 网页 / 大段粘贴需求必须作为 evidence / data 处理；高影响 Agent 动作必须按 action guardrails 取得明确人工确认。
+- runtime prompt preview、transcript path、SessionStart 摘要和 reducer draft 必须走 runtime sanitizer；外部 PRD / 网页 / 大段粘贴需求必须作为 evidence / data 处理，`external-web` / `third-party` / `unknown` 且 `pending` 的来源只能作为待 review 证据；高影响 Agent 动作必须按 action guardrails 取得明确人工确认。
 
 ## 更新规则
 

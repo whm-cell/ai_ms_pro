@@ -12,7 +12,12 @@ def emit_text(report: Any) -> None:
     print(f"- open total PRs: {report.pr_counts.open_total} / {report.budget.max_open_total_prs}")
     print(f"- open Codex PRs: {report.pr_counts.open_codex} / {report.budget.max_open_codex_prs}")
     print(f"- open Dependabot PRs: {report.pr_counts.open_dependabot} / {report.budget.max_open_dependabot_prs}")
-    print(f"- failed open PRs: {len(report.failed_open_prs)} / {report.budget.max_failed_open_prs}")
+    if report.check_rollup_available:
+        print(f"- failed open PRs: {len(report.failed_open_prs)} / {report.budget.max_failed_open_prs}")
+    else:
+        print(f"- failed open PRs: unavailable / {report.budget.max_failed_open_prs}")
+    for note in report.notes:
+        print(f"NOTE: {note}")
     for finding in report.budget_findings:
         print(f"  - budget exceeded: {finding.name} {finding.count}/{finding.limit}; action={finding.action}")
     for finding in report.failed_open_prs:
@@ -45,7 +50,14 @@ def emit_markdown(report: Any) -> None:
     print(f"- Open Dependabot PRs: `{report.pr_counts.open_dependabot} / {report.budget.max_open_dependabot_prs}`")
     print(f"- Stale remote branches: `{len(report.stale_remote_branches)}`")
     print(f"- Stale local branches: `{len(report.stale_local_branches)}`")
-    print(f"- Failed open PRs: `{len(report.failed_open_prs)} / {report.budget.max_failed_open_prs}`")
+    if report.check_rollup_available:
+        print(f"- Failed open PRs: `{len(report.failed_open_prs)} / {report.budget.max_failed_open_prs}`")
+    else:
+        print(f"- Failed open PRs: `unavailable / {report.budget.max_failed_open_prs}`")
+    if report.notes:
+        print("")
+        for note in report.notes:
+            print(f"- NOTE: {note}")
     if report.budget_findings:
         print("")
         print("| Budget | Count | Limit | Required action |")

@@ -1,6 +1,6 @@
 # Candidate Skill Eval Samples
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 状态：收集 with/without 对照实验样本中
 
 ## 作用
@@ -20,7 +20,7 @@
 
 | Skill | 当前真实多人 / 多 AI accepted 样本 | 观察门槛 | 当前判断 |
 | --- | ---: | ---: | --- |
-| `team-pr-conflict-control` | 0 | 2 | 已有离线验证样本；仍需要真实 PR touch-set overlap 和 coordination action 样本 |
+| `team-pr-conflict-control` | 0 accepted / 1 pending | 2 | 已有离线验证样本；本轮 CI burn-in PR 先登记为 pending，待远端 checks / overlap 结果确认后再判断是否 accepted |
 
 ## 接受为有效 eval 样本的条件
 
@@ -92,6 +92,22 @@
 - verification: `python3 scripts/godot_platformer_slice_smoke.py`；`.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`；`.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py`；`.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
 - Doc Promotion: 本文件登记 accepted 样本；详细 eval 记录在 `docs/ai/skill-evals/SAMPLE-002-ws03-combo-rank-second-slice.md`；不新增或修改 Candidate skill。
 - Notes: 两个 Candidate skills 达到 2/2 只表示升级前置证据满足，不表示自动升级 always-on；仍需单独评估简单任务流程税。
+
+### SAMPLE-003 harness-ci-burn-in-pr
+
+- Date: 2026-05-09
+- Skills: team-pr-conflict-control
+- Evidence Type: real-task
+- Outcome: pending
+- Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009
+- Workstream IDs: WS-01, WS-02, WS-03
+- baseline_without_skill: 若直接提交并开 PR，容易只关注本地测试通过，忽略当前 open Dependabot PR、workflow / governance / docs high-risk touch-set、private Free 远端门禁 UNKNOWN，以及这次 PR 是否应被当作真实 burn-in 样本。
+- run_with_skill: 本轮按 `$team-pr-conflict-control` 分类为 high-risk team touch-set；本地列出 open PR、当前变更文件、高风险文件和验证命令；PR 创建后通过 `check_pr_touch_conflicts.py`、branch hygiene、GitHub Actions 和 PR body 记录 overlap / coordination action。
+- delta: 相对 baseline，PR 发布前明确了 high-risk governance / workflow 文件范围，避免把 GitHub Free 远端 UNKNOWN 写成 OK，并把 CI burn-in、WS-01/02/03 smoke 和 security evidence 观察留在 PR / docs 证据层。
+- acceptance: 暂不计入 accepted；需要远端 PR checks 完成、touch-set overlap 无阻断或已协调、PR body 记录验证后再判断是否转为 accepted。
+- verification: pending remote CI；local preflight 包括 unit tests、AI governance、code-shape、context budget、requirements shape、workflow YAML parse、workflow SHA pin scan、three representative smoke checks、GitHub guardrails、branch hygiene 和 `git diff --check`。
+- Doc Promotion: 本文件先登记 pending 样本；远端 CI 成功后把 run links / overlap 结果提升到 PR body 或 remote merge gates evidence。
+- Notes: 该样本用于观察多人 / 多 AI PR collision control，不支持直接升级 blocking。
 
 ## 复查命令
 

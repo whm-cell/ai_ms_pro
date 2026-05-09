@@ -23,7 +23,7 @@
 | PR process | CODEOWNERS, PR template, PR touch conflict checker, `merge_group` workflow triggers exist | OK |
 | Auto branch cleanup | GitHub `delete_branch_on_merge` is enabled | OK |
 | Dependabot fan-out | `.github/dependabot.yml` groups updates and limits each ecosystem directory to 1 open PR | OK |
-| Branch hygiene | `check_branch_hygiene.py --strict` reports 3/10 total open PRs, 0/3 Codex PRs, 3/4 Dependabot PRs, 0/0 failed open PRs, and 0 stale remote/local branches | OK |
+| Branch hygiene | `check_branch_hygiene.py --strict` reports 2/10 total open PRs, 0/3 Codex PRs, 2/4 Dependabot PRs, 0/0 failed open PRs, and 0 stale remote/local branches after PR #10 was merged | OK |
 | Local audit | `scripts/check_github_guardrails.py` reports local/remote guardrail status | OK |
 | Branch protection | GitHub API returns private-Free plan limit HTTP 403 | PLAN-LIMITED / UNKNOWN |
 | Required checks | Cannot be enforced on `main` through branch protection / rulesets under current plan | PLAN-LIMITED |

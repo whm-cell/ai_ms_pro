@@ -22,10 +22,7 @@ DOC_ROOTS = (
 )
 MAX_FIELD_LENGTH = 300
 MAX_CHANGED_PATHS = 20
-SESSION_ID_KEYS = (
-    "session_id",
-    "sessionId",
-)
+SESSION_ID_KEYS = ("session_id", "sessionId")
 TEXT_KEYS = (
     "user_prompt",
     "prompt",
@@ -34,10 +31,7 @@ TEXT_KEYS = (
     "content",
     "input",
 )
-TRANSCRIPT_KEYS = (
-    "transcript_path",
-    "transcriptPath",
-)
+TRANSCRIPT_KEYS = ("transcript_path", "transcriptPath")
 REQUIREMENT_ID_KEYS = (
     "requirement_ids",
     "requirementIds",

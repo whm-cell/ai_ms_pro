@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 状态：已确认
 
 ## 作用
@@ -22,14 +22,15 @@
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
-| `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
-| `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入和 source boundary metadata 样本证明误报可控后升级 |
+| `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit; Actions token 无法读取 check rollup 时 failed-open-PR 审计降级为 NOTE | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
+| WS-01 / WS-02 / WS-03 browser smoke | `blocking` | smoke job runs `threejs_snake_smoke.py`, `threejs_snake_blackbox_smoke.py`, `harness_trace_console_smoke.py`, `harness_trace_console_blackbox_smoke.py`, and `godot_platformer_slice_smoke.py` | 已强制；Playwright browser install 与 CLI package 版本继续固定 |
+| `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入、`pending` source boundary 和 external-web / third-party / unknown 样本证明误报可控后升级 |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary；包含 high-impact-agent-actions review-required advisory | 不直接升级；只驱动其他 checks 与人工确认 |
 | `check_context_budget.py` | `advisory` | manual | 80/90、ADR 到达预算或 stage status 触线持续出现且可自动修复前不阻断 |
 | `check_archive_candidates.py` | `advisory` | manual | 不自动归档；保持主 Agent 语义判断 |
 | `check_skill_usage_samples.py` | `advisory` | manual | 只证明 skill 样本是否足够，不阻断业务 |
 | `check_repo_skills.py` | `review-required` | manual / starter validation | skill 结构频繁变更后再考虑 CI |
-| Scorecard / CodeQL / SBOM | `advisory` | single `security-evidence` job with artifacts | burn-in 后按严重度和误报率逐项升级 |
+| Scorecard / CodeQL / SBOM / dependency review / secret scanning advisory | `advisory` | single `security-evidence` job with artifacts; dependency review PR job; secret scanning only when external evidence or plan supports it | 按 `docs/ai/security/security-evidence-triage.md` burn-in 后依据严重度、误报率、owner 和修复路径逐项升级 |
 
 ## 升级规则
 

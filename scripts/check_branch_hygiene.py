@@ -18,6 +18,7 @@ from branch_hygiene_budget import (
     pull_request_counts,
 )
 from branch_hygiene_output import emit_markdown, emit_text
+from branch_hygiene_prs import pr_records
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,6 +56,8 @@ class BranchHygieneReport:
     stale_remote_branches: list[BranchFinding]
     stale_local_branches: list[BranchFinding]
     unmanaged_remote_branches: list[BranchFinding]
+    check_rollup_available: bool
+    notes: list[str]
     warnings: list[str]
 
 
@@ -106,24 +109,6 @@ def repository_name() -> str:
 def repo_metadata(repo: str) -> tuple[str, bool]:
     data = json.loads(run_checked(["gh", "api", f"repos/{repo}"]))
     return str(data.get("default_branch") or "main"), bool(data.get("delete_branch_on_merge"))
-
-
-def pr_records() -> list[dict[str, object]]:
-    text = run_checked(
-        [
-            "gh",
-            "pr",
-            "list",
-            "--state",
-            "all",
-            "--limit",
-            "200",
-            "--json",
-            "number,title,state,headRefName,url,author,statusCheckRollup",
-        ]
-    )
-    data = json.loads(text)
-    return data if isinstance(data, list) else []
 
 
 def remote_branches() -> list[str]:
@@ -223,10 +208,10 @@ def build_report(current_pr: int = 0) -> BranchHygieneReport:
     repo = repository_name()
     default_branch, delete_on_merge = repo_metadata(repo)
     budget = load_branch_hygiene_budget(ROOT)
-    records = pr_records()
+    records, check_rollup_available, notes = pr_records()
     states = branch_pr_states(records)
     open_pr_branches = sorted(branch for branch, values in states.items() if "OPEN" in values)
-    failed_prs = failed_open_pr_findings(records, current_pr=current_pr)
+    failed_prs = failed_open_pr_findings(records, current_pr=current_pr) if check_rollup_available else []
     counts = pull_request_counts(records, failed_open=len(failed_prs))
     pr_budget_findings = budget_findings(counts, budget)
     protected = {default_branch, current_branch()}
@@ -280,6 +265,8 @@ def build_report(current_pr: int = 0) -> BranchHygieneReport:
         stale_remote_branches=stale_remote,
         stale_local_branches=stale_local,
         unmanaged_remote_branches=unmanaged_remote,
+        check_rollup_available=check_rollup_available,
+        notes=notes,
         warnings=warnings,
     )
 

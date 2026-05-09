@@ -26,14 +26,14 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Run OpenSSF Scorecard
         continue-on-error: true
         timeout-minutes: 10
-        uses: ossf/scorecard-action@v2.4.3
+        uses: ossf/scorecard-action@99c09fe975337306107572b4fdf4db224cf8e2f2 # ossf/scorecard-action@v2.4.3
         with:
           results_file: scorecard-results.sarif
           results_format: sarif
@@ -42,7 +42,7 @@ jobs:
       - name: Upload Scorecard results
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
         with:
           name: scorecard-results
           path: scorecard-results.sarif
@@ -51,14 +51,14 @@ jobs:
       - name: Initialize CodeQL
         id: codeql-init
         continue-on-error: true
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@5e316336eb4f107009e477d4bfbfff13d7250fae # github/codeql-action/init@v4
         with:
           languages: python,javascript-typescript
 
       - name: Perform CodeQL Analysis
         if: steps.codeql-init.outcome == 'success'
         continue-on-error: true
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@5e316336eb4f107009e477d4bfbfff13d7250fae # github/codeql-action/analyze@v4
         with:
           category: "/language:python-javascript-typescript"
           upload: never
@@ -67,7 +67,7 @@ jobs:
       - name: Upload CodeQL results
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
         with:
           name: codeql-results
           path: codeql-results
@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate SBOM
         continue-on-error: true
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0
         with:
           path: .
           format: cyclonedx-json
@@ -84,7 +84,7 @@ jobs:
       - name: Upload SBOM
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
         with:
           name: sbom-cyclonedx
           path: sbom.cyclonedx.json

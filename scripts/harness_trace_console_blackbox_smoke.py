@@ -18,17 +18,7 @@ from harness_trace_console_smoke import (
 
 
 APP_URL_PATH = "/apps/harness-trace-console/"
-
-
-def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
-    open_args = [url]
-    if headed:
-        open_args.append("--headed")
-
-    run_pw("open", *open_args, env=env)
-    run_pw(
-        "run-code",
-        """
+BLACKBOX_ASSERTION_SCRIPT = """
 await page.waitForLoadState("domcontentloaded");
 await page.locator("#row-count").waitFor();
 await page.waitForFunction(() => document.querySelectorAll(".matrix-card").length >= 1);
@@ -102,9 +92,16 @@ if (resetCount <= filteredCount) {
     `Expected clearing filters to restore more rows: ${JSON.stringify({ filteredCount, resetCount })}`,
   );
 }
-        """.strip(),
-        env=env,
-    )
+""".strip()
+
+
+def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
+    open_args = [url]
+    if headed:
+        open_args.append("--headed")
+
+    run_pw("open", *open_args, env=env)
+    run_pw("run-code", BLACKBOX_ASSERTION_SCRIPT, env=env)
 
 
 def main() -> int:
