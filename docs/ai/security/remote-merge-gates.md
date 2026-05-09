@@ -1,7 +1,7 @@
 # Remote Merge Gates Evidence
 
-更新时间：2026-05-08
-状态：private GitHub Free plan-limited；local/CI guardrail evidence present
+更新时间：2026-05-09
+状态：private GitHub Free plan-limited；首轮 PR + main push CI burn-in 已通过
 
 ## Purpose
 
@@ -23,7 +23,7 @@
 | PR process | CODEOWNERS, PR template, PR touch conflict checker, `merge_group` workflow triggers exist | OK |
 | Auto branch cleanup | GitHub `delete_branch_on_merge` is enabled | OK |
 | Dependabot fan-out | `.github/dependabot.yml` groups updates and limits each ecosystem directory to 1 open PR | OK |
-| Branch hygiene | `check_branch_hygiene.py --strict` reports 2/10 total open PRs, 0/3 Codex PRs, 2/4 Dependabot PRs, 0/0 failed open PRs, and 0 stale remote/local branches after PR #10 was merged | OK |
+| Branch hygiene | `check_branch_hygiene.py --strict` reports 2/10 total open PRs, 0/3 Codex PRs, 2/4 Dependabot PRs, 0/0 failed open PRs, and 0 stale remote/local branches after PR #11 was merged and the local stale branch was deleted | OK |
 | Local audit | `scripts/check_github_guardrails.py` reports local/remote guardrail status | OK |
 | Branch protection | GitHub API returns private-Free plan limit HTTP 403 | PLAN-LIMITED / UNKNOWN |
 | Required checks | Cannot be enforced on `main` through branch protection / rulesets under current plan | PLAN-LIMITED |
@@ -32,7 +32,7 @@
 
 ## CI Evidence Burn-in Snapshot
 
-Last audited: 2026-05-08 10:09 Asia/Shanghai.
+Last audited: 2026-05-09 18:55 Asia/Shanghai.
 
 Read-only commands used:
 
@@ -63,21 +63,22 @@ Latest proven successful PR evidence:
 
 | Workflow | Run | Event | Head | Proven jobs / steps | Conclusion |
 | --- | --- | --- | --- | --- | --- |
-| Governance And Smoke | [25532589524](https://github.com/whm-cell/ai_ms_pro/actions/runs/25532589524) | `pull_request` | `dependabot/github_actions/github-actions-runtime-0fa9a95d58` at `bfe8d7b57892f592a901fb0cd2a668c20cba66c9` | `governance`, `windows-hook-runtime`, `smoke`; hook sync, advisory summary, branch hygiene summary, PR touch conflict check, unit tests, AI governance, code-shape, Windows Python / hook runner tests, four browser smoke checks | success |
-| Dependency Review | [25532589508](https://github.com/whm-cell/ai_ms_pro/actions/runs/25532589508) | `pull_request` | same head | `dependency-review` job and Dependency Review step | success |
-| Security Evidence | [25532589506](https://github.com/whm-cell/ai_ms_pro/actions/runs/25532589506) | `pull_request` | same head | Scorecard, CodeQL initialize/analyze/upload, SBOM generate/upload | success |
+| Governance And Smoke | [25598728368](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728368) | `pull_request` | `codex/harness-ci-burn-in` at `9b23fd522586bd77126d58ab12c2c3494112cf51` | `governance`, `windows-hook-runtime`, `smoke`; hook sync, advisory summary, branch hygiene summary, PR touch conflict check, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 / WS-03 browser smoke | success |
+| Dependency Review | [25598728367](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728367) | `pull_request` | same head | `dependency-review` job and Dependency Review step | success |
+| Security Evidence | [25598728374](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728374) | `pull_request` | same head | Scorecard, CodeQL artifact, SBOM artifact | success |
 
 Latest proven successful `main` push evidence:
 
 | Workflow | Run | Event | Head | Proven jobs / steps | Conclusion |
 | --- | --- | --- | --- | --- | --- |
-| Governance And Smoke | [25532557241](https://github.com/whm-cell/ai_ms_pro/actions/runs/25532557241) | `push` | `main` at `9ef8c0dac2c838b23b816ed7ba3c1e8a2ceff427` | `governance`, `windows-hook-runtime`, `smoke`; main advisory summary, main branch hygiene summary, unit tests, AI governance, code-shape, Windows Python / hook runner tests, four browser smoke checks | success |
-| Security Evidence | [25532557228](https://github.com/whm-cell/ai_ms_pro/actions/runs/25532557228) | `push` | same head | security evidence workflow completed | success |
+| Governance And Smoke | [25599034611](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034611) | `push` | `main` at `c1f170faa701885882a0ed7a2105c1054fe956ea` | `governance`, `windows-hook-runtime`, `smoke`; main advisory summary, main branch hygiene summary, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 / WS-03 browser smoke | success |
+| Security Evidence | [25599034597](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034597) | `push` | same head | Scorecard, CodeQL analysis, `codeql-results` artifact, SBOM generation, `sbom-cyclonedx` artifact | success |
 
 Observed non-gate evidence:
 
 - `Dependabot Updates` is active. Recent dynamic update runs include successes and one `npm_and_yarn in /.` failure. This does not prove or disprove branch protection because Dependabot update runs are not the merge gate surface for `main`.
 - Older Governance And Smoke PR runs on `codex/stage-00-harness-guardrails-ci` had failures before the later successful run. Treat this as burn-in history, not as current required-check enforcement.
+- `Security Evidence` run [25599034597](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034597) succeeded, but CodeQL emitted `Code scanning is not enabled for this repository` annotations while uploading to GitHub code scanning / database endpoints. Treat this as advisory platform-setting evidence under the current private-Free boundary, not as a required-gate failure.
 
 Still not proven:
 

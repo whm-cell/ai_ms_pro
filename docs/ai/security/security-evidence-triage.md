@@ -1,7 +1,7 @@
 # Security Evidence Triage
 
 更新时间：2026-05-09
-状态：advisory evidence triage / SLO 已定义
+状态：advisory evidence triage / SLO 已定义；首轮 main push security evidence 已登记
 
 ## 作用
 
@@ -73,6 +73,13 @@ Critical secret 泄漏或可利用漏洞可以由 Security Owner / Repo Admin �
 - Dependency Review 即使配置 `fail-on-severity: high`，当前仍因 workflow `continue-on-error` 和远端 gate 边界按 advisory 处理。
 - Secret scanning / push protection 若不可用或未启用，只能作为人工报告或外部扫描 evidence；不写成远端已启用。
 - GitHub artifact attestation 在当前 Private + Free 边界下不作为完成条件；发布前先记录 digest manifest、SBOM 和 source revision。
+
+## Burn-in Observations
+
+| 日期 | Evidence | Run / commit | 观察结果 | Triage |
+| --- | --- | --- | --- | --- |
+| 2026-05-09 | PR #11 security evidence | [run 25598728374](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728374), head `9b23fd522586bd77126d58ab12c2c3494112cf51` | `security-evidence` job 通过；Scorecard、CodeQL artifact 和 SBOM artifact 均完成。 | 计入首轮 PR burn-in evidence；不升级 blocking。 |
+| 2026-05-09 | `main` push security evidence | [run 25599034597](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034597), merge commit `c1f170faa701885882a0ed7a2105c1054fe956ea` | workflow 成功；Scorecard 完成；CodeQL analysis 完成并上传 `codeql-results` artifact；SBOM 生成并上传 `sbom-cyclonedx` artifact；CodeQL 对 GitHub code scanning / database upload 输出 `Code scanning is not enabled for this repository` 注解。 | 当前按 Private Free / repository setting 边界处理：不是 required gate 失败，不开 issue，不人工 hold；后续继续观察是否重复出现，并仅在启用 code scanning 或升级计划后考虑远端上传/阻断。 |
 
 ## Closeout
 
