@@ -23,10 +23,12 @@
 - `new_pro_standard` 已同步机制层；当前 repo 的 REQ/WS、PR、CI、status、样本和历史 truth 不复制到 starter。
 - `.agents/skills` 已作为按需方法层接入；Candidate workflow skills 保持显式触发，不替代 requirements、status、ADR、checks 或 `AGENTS.md`。
 - GitHub 侧已有最小权限 workflow、full-SHA action pinning、fixed-version Playwright packages、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 和 `merge_group`；private Free 下 branch protection / rulesets 仍是 future gates。
+- PR #11 已完成首轮远端 burn-in 并合入 `main`；merge commit `c1f170f` 的 `main` push workflows 均为 success。
 
 ## 本阶段关键成果
 
 - 三个 workstream 已跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`，且 WS-01/02/03 browser smoke 已纳入 CI `smoke` job。
+- 首轮 PR + main push CI burn-in 已跑通：PR #11 和合并后的 `main` push 覆盖 governance、Windows hook runtime、WS-01/02/03 smoke、dependency review、Scorecard、CodeQL artifact 和 SBOM artifact。
 - 默认上下文面已通过 stage compression 降到预算 warning 以下；ADR 计数也低于预算。
 - Candidate workflow skills 已有两个 accepted real-task eval samples，但仍不自动升级 always-on。
 - `new_pro_standard` 保持机制层同步，不复制当前项目 truth。
@@ -36,7 +38,7 @@
 
 - OPEN-01 已调整为 private GitHub Free 最大边界：GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403；远端 required checks、review、conversation resolved 和禁止直推 `main` 不能声明已强制，但也不再作为本地代码缺口追打。
 - PR #1 的已合并 Codex 分支已删除；失败的 Dependabot GitHub Actions PR #2-#6 已关闭并删除分支；当前剩余远端非 main 分支都对应 open 且 green 的 PR。active PR 预算为 total 10、Codex 3、Dependabot 4、failed open 0。
-- dependency review、Scorecard、CodeQL、SBOM 和 secret scanning advisory 当前仍以 advisory / artifact evidence 为主；private Free 下不作为 required gate，升级 blocking 需要 GitHub 计划/可见性变化、triage 样本和更多 CI burn-in。
+- dependency review、Scorecard、CodeQL、SBOM 和 secret scanning advisory 当前仍以 advisory / artifact evidence 为主；private Free 下不作为 required gate；CodeQL code-scanning 注解已登记为 advisory platform evidence。
 - runtime stage drift、archive candidate、context budget、source boundary 和 change-triggered followups 继续 warning / review-required；高影响动作矩阵不允许 hooks 自动执行 destructive、externally visible 或 permission-changing 动作。
 - Code-shape 债务已收窄：runtime traceability、reducer、bootstrap `render_plan`、governance traceability、working-context sync metadata、governance main orchestration、trace console blackbox smoke 和 Stop observation warnings 已消除；剩余见 OPEN-14。
 - REQDOC-003 的 Godot 4.6.2、GUT、导出 preset、素材、本地化和发布管线仍是 proposed / 待确认；root repo 只保留 harness 研究所需的薄业务样本。
@@ -51,9 +53,9 @@
 
 ## 下一阶段重点
 
-- 继续推动 OPEN-01：在 private Free 能力边界内积累 CI evidence；branch protection / rulesets / required reviews 仅作为升级计划或改 public 后的 future gates。
+- OPEN-01 首轮远端 burn-in 已完成；下一步积累 scheduled / 后续 PR 样本；branch protection / rulesets / required reviews 仅作为 future gates。
 - 观察 AI/Agent guardrails 与 security evidence 真实样本：source boundary warning 误报率、高影响动作 review-required 提示、security triage SLO 是否足够清晰，以及是否需要后续升级或保持 advisory。
-- 继续观察 WS-01 / WS-02 / WS-03 browser smoke 在 CI 中的 burn-in 结果，失败时区分 Playwright 版本、浏览器安装和应用切片回归。
+- 继续观察 WS-01 / WS-02 / WS-03 browser smoke 在后续 CI 中的 burn-in 结果，失败时区分 Playwright 版本、浏览器安装和应用切片回归。
 - 评估 Candidate workflow skills 达到 2/2 后是否保持显式调用、升级稳定 skill，或继续观察更多样本。
 - 继续压缩 Stage-00 历史：完成型 handoff 归档、status 保持摘要、ADR 旧决策归档或 supersede。
 - 继续按 OPEN-14 分批拆剩余 code-shape 债务。
@@ -61,7 +63,7 @@
 ## 验收判断
 
 - Stage-00 已证明 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
-- 当前尚未完全进入下一阶段，因为 CI burn-in、Godot engine spike、长期 skill/PR 样本和 AI/Agent guardrails 真实样本仍需确认；远端强制门禁在 private Free 下已归类为 plan-limited ceiling。
+- 当前尚未完全进入下一阶段，因为 Godot engine spike、长期 skill/PR 样本、后续 CI 样本和 AI/Agent guardrails 真实样本仍需确认；远端强制门禁在 private Free 下已归类为 plan-limited ceiling。
 - 剩余风险主要是远端 enforcement 不可用时的人审纪律、长期上下文增长和维护性债务，不是本地 harness 能否使用。
 
 ## 关联文档

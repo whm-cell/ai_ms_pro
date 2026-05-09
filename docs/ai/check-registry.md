@@ -30,7 +30,7 @@
 | `check_archive_candidates.py` | `advisory` | manual | 不自动归档；保持主 Agent 语义判断 |
 | `check_skill_usage_samples.py` | `advisory` | manual | 只证明 skill 样本是否足够，不阻断业务 |
 | `check_repo_skills.py` | `review-required` | manual / starter validation | skill 结构频繁变更后再考虑 CI |
-| Scorecard / CodeQL / SBOM / dependency review / secret scanning advisory | `advisory` | single `security-evidence` job with artifacts; dependency review PR job; secret scanning only when external evidence or plan supports it | 按 `docs/ai/security/security-evidence-triage.md` burn-in 后依据严重度、误报率、owner 和修复路径逐项升级 |
+| Scorecard / CodeQL / SBOM / dependency review / secret scanning advisory | `advisory` | single `security-evidence` job with artifacts; dependency review PR job; secret scanning only when external evidence or plan supports it; 首轮 PR + main push evidence 已通过，CodeQL code-scanning 上传注解按 triage 处理 | 按 `docs/ai/security/security-evidence-triage.md` burn-in 后依据严重度、误报率、owner 和修复路径逐项升级 |
 
 ## 升级规则
 
