@@ -7,11 +7,17 @@ import os
 import re
 import subprocess
 import sys
-from collections import defaultdict
 from datetime import date
-from functools import lru_cache
 from pathlib import Path
 
+from ai_governance_traceability import (
+    extract_known_ids,
+    load_traceability_catalog,
+    stage_alignment_mismatches,
+    validate_requirement_workstream_pairings,
+    validate_requirements_traceability_alignment,
+    validate_stage_traceability_alignment,
+)
 from harness_config import ContextSurfaceConfig, HarnessConfigError, load_harness_config
 
 
@@ -23,8 +29,6 @@ WORKING_CONTEXT_PATH = AI_DOC_ROOT / "working-context.md"
 PLAN_PATH = AI_DOC_ROOT / "plan.md"
 ACTIVE_HANDOFF_DIR = AI_DOC_ROOT / "handoffs" / "active"
 STATUS_DIR = AI_DOC_ROOT / "status"
-SOURCE_DOC_DIR = REQ_DOC_ROOT / "source"
-NORMALIZED_REQ_DIR = REQ_DOC_ROOT / "normalized"
 WORKSTREAM_DIR = REQ_DOC_ROOT / "workstreams"
 TRACEABILITY_MATRIX_PATH = REQ_DOC_ROOT / "traceability-matrix.md"
 RUNTIME_SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
@@ -89,7 +93,6 @@ TRACEABILITY_METADATA_REQUIRED_KEYS = (
 SYNC_ALLOWED_SOURCE_TOKENS = {"bootstrap", "handoff", "status", "manual"}
 UNBOUND_VALUE = "未绑定"
 PLACEHOLDER_DATE = "YYYY-MM-DD"
-REQDOC_ID_PATTERN = re.compile(r"REQDOC-\d+")
 REQ_ID_PATTERN = re.compile(r"REQ-\d+")
 WS_ID_PATTERN = re.compile(r"WS-\d+")
 STAGE_TOKEN_PATTERN = re.compile(r"stage-\d+", re.IGNORECASE)
@@ -476,149 +479,6 @@ def ordered_unique(items: list[str]) -> list[str]:
     return ordered
 
 
-def first_pattern_match(text: str | None, pattern: re.Pattern[str]) -> str | None:
-    if not text:
-        return None
-    match = pattern.search(text)
-    if match is None:
-        return None
-    return match.group(0)
-
-
-def extract_ids_from_section(path: Path, heading: str, pattern: re.Pattern[str]) -> list[str]:
-    section_text = "\n".join(extract_markdown_section(path, heading))
-    return ordered_unique(pattern.findall(section_text))
-
-
-def parse_matrix_row(raw_line: str) -> dict[str, str] | None:
-    stripped = raw_line.strip()
-    if not stripped.startswith("|"):
-        return None
-
-    cells = [cell.strip() for cell in stripped.split("|")[1:-1]]
-    if len(cells) < 6:
-        return None
-    if cells[0] == "原始文档":
-        return None
-    if all(re.fullmatch(r"-+", cell) for cell in cells):
-        return None
-
-    source_id = first_pattern_match(cells[0], REQDOC_ID_PATTERN)
-    requirement_id = first_pattern_match(cells[1], REQ_ID_PATTERN)
-    workstream_id = first_pattern_match(cells[2], WS_ID_PATTERN)
-    stage_token = normalize_stage_token(cells[3])
-    if not source_id or not requirement_id or not workstream_id:
-        return None
-
-    return {
-        "source_id": source_id,
-        "requirement_id": requirement_id,
-        "workstream_id": workstream_id,
-        "stage_token": stage_token or "",
-    }
-
-
-@lru_cache(maxsize=1)
-def load_traceability_catalog() -> dict[str, object]:
-    rows: list[dict[str, str]] = []
-    if TRACEABILITY_MATRIX_PATH.exists():
-        in_matrix = False
-        for raw_line in load_text(TRACEABILITY_MATRIX_PATH).splitlines():
-            stripped = raw_line.strip()
-            if stripped == "## 矩阵":
-                in_matrix = True
-                continue
-            if in_matrix and stripped.startswith("## "):
-                break
-            if not in_matrix:
-                continue
-            row = parse_matrix_row(raw_line)
-            if row is not None:
-                rows.append(row)
-
-    req_to_ws: dict[str, set[str]] = defaultdict(set)
-    ws_to_req: dict[str, set[str]] = defaultdict(set)
-    source_ids: set[str] = set()
-    requirement_ids: set[str] = set()
-    workstream_ids: set[str] = set()
-    for row in rows:
-        source_id = row["source_id"]
-        requirement_id = row["requirement_id"]
-        workstream_id = row["workstream_id"]
-        source_ids.add(source_id)
-        requirement_ids.add(requirement_id)
-        workstream_ids.add(workstream_id)
-        req_to_ws[requirement_id].add(workstream_id)
-        ws_to_req[workstream_id].add(requirement_id)
-
-    source_doc_paths: dict[str, Path] = {}
-    for path in iter_docs(SOURCE_DOC_DIR):
-        source_id = first_pattern_match(path.name, REQDOC_ID_PATTERN)
-        if source_id:
-            source_doc_paths[source_id] = path
-
-    normalized_doc_paths: dict[str, Path] = {}
-    normalized_doc_workstreams: dict[str, list[str]] = {}
-    for path in iter_docs(NORMALIZED_REQ_DIR):
-        requirement_id = first_pattern_match(
-            read_prefixed_value(path, ("需求编号：",)),
-            REQ_ID_PATTERN,
-        )
-        if not requirement_id:
-            requirement_id = first_pattern_match(path.name, REQ_ID_PATTERN)
-        if not requirement_id:
-            continue
-        normalized_doc_paths[requirement_id] = path
-        normalized_doc_workstreams[requirement_id] = extract_ids_from_section(
-            path,
-            "## 关联工作流",
-            WS_ID_PATTERN,
-        )
-
-    workstream_doc_paths: dict[str, Path] = {}
-    workstream_doc_requirements: dict[str, list[str]] = {}
-    for path in iter_docs(WORKSTREAM_DIR):
-        workstream_id = first_pattern_match(
-            read_prefixed_value(path, ("工作流编号：",)),
-            WS_ID_PATTERN,
-        )
-        if not workstream_id:
-            workstream_id = first_pattern_match(path.name, WS_ID_PATTERN)
-        if not workstream_id:
-            continue
-        workstream_doc_paths[workstream_id] = path
-        workstream_doc_requirements[workstream_id] = extract_ids_from_section(
-            path,
-            "## 覆盖需求",
-            REQ_ID_PATTERN,
-        )
-
-    return {
-        "rows": rows,
-        "source_ids": source_ids,
-        "requirement_ids": requirement_ids,
-        "workstream_ids": workstream_ids,
-        "req_to_ws": dict(req_to_ws),
-        "ws_to_req": dict(ws_to_req),
-        "source_doc_paths": source_doc_paths,
-        "normalized_doc_paths": normalized_doc_paths,
-        "normalized_doc_workstreams": normalized_doc_workstreams,
-        "workstream_doc_paths": workstream_doc_paths,
-        "workstream_doc_requirements": workstream_doc_requirements,
-    }
-
-
-def extract_known_ids(pattern: re.Pattern[str]) -> set[str]:
-    catalog = load_traceability_catalog()
-    if pattern.pattern == REQDOC_ID_PATTERN.pattern:
-        return set(catalog["source_ids"])
-    if pattern.pattern == REQ_ID_PATTERN.pattern:
-        return set(catalog["requirement_ids"])
-    if pattern.pattern == WS_ID_PATTERN.pattern:
-        return set(catalog["workstream_ids"])
-    return set()
-
-
 def metadata_identifier_tokens(
     metadata: dict[str, str | list[str]],
     key: str,
@@ -642,224 +502,6 @@ def metadata_identifier_tokens(
             if pattern.fullmatch(token)
         )
     return ordered_unique(tokens), False
-
-
-def validate_requirement_workstream_pairings(
-    *,
-    requirement_ids: list[str],
-    workstream_ids: list[str],
-    owner_label: str,
-    errors: list[str],
-) -> None:
-    if not requirement_ids or not workstream_ids:
-        return
-
-    catalog = load_traceability_catalog()
-    req_to_ws: dict[str, set[str]] = catalog["req_to_ws"]  # type: ignore[assignment]
-    ws_to_req: dict[str, set[str]] = catalog["ws_to_req"]  # type: ignore[assignment]
-
-    unmatched_requirements = [
-        requirement_id
-        for requirement_id in requirement_ids
-        if not req_to_ws.get(requirement_id, set()).intersection(workstream_ids)
-    ]
-    if unmatched_requirements:
-        rendered = ", ".join(unmatched_requirements)
-        workstreams_rendered = ", ".join(workstream_ids)
-        errors.append(
-            f"{owner_label} declares Requirement IDs [{rendered}] that do not map to any of its "
-            f"declared Workstream IDs [{workstreams_rendered}] in "
-            "docs/requirements/traceability-matrix.md."
-        )
-
-    unmatched_workstreams = [
-        workstream_id
-        for workstream_id in workstream_ids
-        if not ws_to_req.get(workstream_id, set()).intersection(requirement_ids)
-    ]
-    if unmatched_workstreams:
-        rendered = ", ".join(unmatched_workstreams)
-        requirements_rendered = ", ".join(requirement_ids)
-        errors.append(
-            f"{owner_label} declares Workstream IDs [{rendered}] that do not map to any of its "
-            f"declared Requirement IDs [{requirements_rendered}] in "
-            "docs/requirements/traceability-matrix.md."
-        )
-
-
-def stage_alignment_mismatches(
-    *,
-    rows: list[dict[str, str]],
-    requirement_ids: list[str],
-    workstream_ids: list[str],
-    current_stage: str,
-) -> list[str]:
-    normalized_stage = normalize_stage_token(current_stage)
-    if not normalized_stage or not requirement_ids or not workstream_ids:
-        return []
-
-    requirement_set = set(requirement_ids)
-    workstream_set = set(workstream_ids)
-    mismatches: list[str] = []
-    for row in rows:
-        requirement_id = row.get("requirement_id", "")
-        workstream_id = row.get("workstream_id", "")
-        if requirement_id not in requirement_set or workstream_id not in workstream_set:
-            continue
-        matrix_stage = row.get("stage_token", "")
-        if matrix_stage != normalized_stage:
-            rendered_stage = matrix_stage or "未绑定"
-            mismatches.append(f"{requirement_id}/{workstream_id}={rendered_stage}")
-    return mismatches
-
-
-def validate_stage_traceability_alignment(
-    *,
-    requirement_ids: list[str],
-    workstream_ids: list[str],
-    current_stage: str | None,
-    owner_label: str,
-    errors: list[str],
-) -> None:
-    if not current_stage:
-        return
-    normalized_stage = normalize_stage_token(current_stage)
-    if not normalized_stage:
-        errors.append(f"{owner_label} current stage is empty.")
-        return
-
-    catalog = load_traceability_catalog()
-    rows: list[dict[str, str]] = catalog["rows"]  # type: ignore[assignment]
-    mismatches = stage_alignment_mismatches(
-        rows=rows,
-        requirement_ids=requirement_ids,
-        workstream_ids=workstream_ids,
-        current_stage=normalized_stage,
-    )
-    if mismatches:
-        rendered = ", ".join(mismatches)
-        errors.append(
-            f"{owner_label} declares stage {normalized_stage}, but these REQ/WS bindings have "
-            f"different stages in docs/requirements/traceability-matrix.md: {rendered}"
-        )
-
-
-def validate_requirements_traceability_alignment(errors: list[str]) -> None:
-    catalog = load_traceability_catalog()
-    source_doc_paths: dict[str, Path] = catalog["source_doc_paths"]  # type: ignore[assignment]
-    normalized_doc_paths: dict[str, Path] = catalog["normalized_doc_paths"]  # type: ignore[assignment]
-    normalized_doc_workstreams: dict[str, list[str]] = catalog["normalized_doc_workstreams"]  # type: ignore[assignment]
-    workstream_doc_paths: dict[str, Path] = catalog["workstream_doc_paths"]  # type: ignore[assignment]
-    workstream_doc_requirements: dict[str, list[str]] = catalog["workstream_doc_requirements"]  # type: ignore[assignment]
-    matrix_source_ids: set[str] = catalog["source_ids"]  # type: ignore[assignment]
-    matrix_requirement_ids: set[str] = catalog["requirement_ids"]  # type: ignore[assignment]
-    matrix_workstream_ids: set[str] = catalog["workstream_ids"]  # type: ignore[assignment]
-    req_to_ws: dict[str, set[str]] = catalog["req_to_ws"]  # type: ignore[assignment]
-    ws_to_req: dict[str, set[str]] = catalog["ws_to_req"]  # type: ignore[assignment]
-
-    missing_source_docs = sorted(matrix_source_ids - set(source_doc_paths))
-    if missing_source_docs:
-        rendered = ", ".join(missing_source_docs)
-        errors.append(
-            "docs/requirements/traceability-matrix.md references source ids with no matching "
-            f"source document: {rendered}"
-        )
-
-    missing_normalized_docs = sorted(matrix_requirement_ids - set(normalized_doc_paths))
-    if missing_normalized_docs:
-        rendered = ", ".join(missing_normalized_docs)
-        errors.append(
-            "docs/requirements/traceability-matrix.md references requirement ids with no matching "
-            f"normalized requirement document: {rendered}"
-        )
-
-    missing_workstream_docs = sorted(matrix_workstream_ids - set(workstream_doc_paths))
-    if missing_workstream_docs:
-        rendered = ", ".join(missing_workstream_docs)
-        errors.append(
-            "docs/requirements/traceability-matrix.md references workstream ids with no matching "
-            f"workstream document: {rendered}"
-        )
-
-    for requirement_id, path in sorted(normalized_doc_paths.items()):
-        declared_workstreams = normalized_doc_workstreams.get(requirement_id, [])
-        matrix_workstreams = sorted(req_to_ws.get(requirement_id, set()))
-        if requirement_id not in matrix_requirement_ids:
-            errors.append(
-                f"{path.relative_to(ROOT)} declares {requirement_id}, but the requirement id is "
-                "missing from docs/requirements/traceability-matrix.md."
-            )
-            continue
-        if not declared_workstreams:
-            errors.append(
-                f"{path.relative_to(ROOT)} is missing bound workstreams under '## 关联工作流' "
-                f"for matrix-backed requirement {requirement_id}."
-            )
-            continue
-
-        invalid_workstreams = [
-            workstream_id
-            for workstream_id in declared_workstreams
-            if workstream_id not in req_to_ws.get(requirement_id, set())
-        ]
-        if invalid_workstreams:
-            rendered = ", ".join(invalid_workstreams)
-            errors.append(
-                f"{path.relative_to(ROOT)} declares workstreams not mapped from {requirement_id} "
-                f"in docs/requirements/traceability-matrix.md: {rendered}"
-            )
-
-        missing_workstreams = [
-            workstream_id
-            for workstream_id in matrix_workstreams
-            if workstream_id not in declared_workstreams
-        ]
-        if missing_workstreams:
-            rendered = ", ".join(missing_workstreams)
-            errors.append(
-                f"{path.relative_to(ROOT)} omits matrix-bound workstreams for {requirement_id}: "
-                f"{rendered}"
-            )
-
-    for workstream_id, path in sorted(workstream_doc_paths.items()):
-        declared_requirements = workstream_doc_requirements.get(workstream_id, [])
-        matrix_requirements = sorted(ws_to_req.get(workstream_id, set()))
-        if workstream_id not in matrix_workstream_ids:
-            errors.append(
-                f"{path.relative_to(ROOT)} declares {workstream_id}, but the workstream id is "
-                "missing from docs/requirements/traceability-matrix.md."
-            )
-            continue
-        if not declared_requirements:
-            errors.append(
-                f"{path.relative_to(ROOT)} is missing covered requirements under '## 覆盖需求' "
-                f"for matrix-backed workstream {workstream_id}."
-            )
-            continue
-
-        invalid_requirements = [
-            requirement_id
-            for requirement_id in declared_requirements
-            if requirement_id not in ws_to_req.get(workstream_id, set())
-        ]
-        if invalid_requirements:
-            rendered = ", ".join(invalid_requirements)
-            errors.append(
-                f"{path.relative_to(ROOT)} declares requirements not mapped from {workstream_id} "
-                f"in docs/requirements/traceability-matrix.md: {rendered}"
-            )
-
-        missing_requirements = [
-            requirement_id
-            for requirement_id in matrix_requirements
-            if requirement_id not in declared_requirements
-        ]
-        if missing_requirements:
-            rendered = ", ".join(missing_requirements)
-            errors.append(
-                f"{path.relative_to(ROOT)} omits matrix-bound requirements for {workstream_id}: "
-                f"{rendered}"
-            )
 
 
 def validate_identifier_field(

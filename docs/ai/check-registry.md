@@ -21,10 +21,10 @@
 | `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
-| `check_github_guardrails.py` | `blocking-candidate` | manual / PR review evidence | 远端 branch protection / rulesets 可读取后再考虑阻断 |
+| `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
 | `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
-| `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入样本证明误报可控后升级 |
-| `check_change_triggered_followups.py` | `advisory` | PR / main push summary | 不直接升级；只驱动其他 checks |
+| `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入和 source boundary metadata 样本证明误报可控后升级 |
+| `check_change_triggered_followups.py` | `advisory` | PR / main push summary；包含 high-impact-agent-actions review-required advisory | 不直接升级；只驱动其他 checks 与人工确认 |
 | `check_context_budget.py` | `advisory` | manual | 80/90、ADR 到达预算或 stage status 触线持续出现且可自动修复前不阻断 |
 | `check_archive_candidates.py` | `advisory` | manual | 不自动归档；保持主 Agent 语义判断 |
 | `check_skill_usage_samples.py` | `advisory` | manual | 只证明 skill 样本是否足够，不阻断业务 |

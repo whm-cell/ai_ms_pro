@@ -44,6 +44,28 @@ class GitHubGuardrailsTest(unittest.TestCase):
         self.assertIn("could not be proven", actions[0])
         self.assertIn("Keep OPEN-01 blocked", actions[1])
 
+    def test_recommended_actions_call_out_private_free_plan_limit(self) -> None:
+        plan_limit = "Upgrade to GitHub Pro or make this repository public to enable this feature. (HTTP 403)"
+        checks = [
+            check_github_guardrails.Check(
+                name="branch protection",
+                status="UNKNOWN",
+                detail=plan_limit,
+            ),
+            check_github_guardrails.Check(
+                name="branch rulesets",
+                status="UNKNOWN",
+                detail=plan_limit,
+            ),
+        ]
+
+        actions = check_github_guardrails.recommended_actions(checks)
+
+        self.assertEqual(len(actions), 2)
+        self.assertIn("Private GitHub Free plan limit", actions[0])
+        self.assertIn("keep local/CI evidence gates", actions[0])
+        self.assertIn("future upgrade path", actions[1])
+
     def test_required_checks_from_nested_payload(self) -> None:
         payload = {
             "rules": [

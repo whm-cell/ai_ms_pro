@@ -18,6 +18,7 @@
 - 当前已启用 `Stop` hook 的 best-effort observation 采集；原始 observation 只追加到 `.codex/runtime/observations/*.jsonl`
 - 当前已启用 `Stop` hook 的 best-effort session 快照写入；该快照只更新本地 runtime 层，不会自动改写共享治理文档
 - 当前已启用 `SessionStart` hook 的 best-effort 最近 session 摘要读取；它只注入额外 developer context，不会替代 `docs/ai/` 共享治理文档
+- runtime prompt preview、transcript path、SessionStart 摘要和 reducer 草稿会经过 best-effort 脱敏；脱敏不是 secret scanning，不应主动把真实 secret 放入 prompt 或 runtime
 
 子目录：
 
