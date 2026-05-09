@@ -33,7 +33,7 @@ jobs:
       - name: Run OpenSSF Scorecard
         continue-on-error: true
         timeout-minutes: 10
-        uses: ossf/scorecard-action@99c09fe975337306107572b4fdf4db224cf8e2f2 # ossf/scorecard-action@v2.4.3
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # ossf/scorecard-action@v2.4.3
         with:
           results_file: scorecard-results.sarif
           results_format: sarif
@@ -51,14 +51,14 @@ jobs:
       - name: Initialize CodeQL
         id: codeql-init
         continue-on-error: true
-        uses: github/codeql-action/init@5e316336eb4f107009e477d4bfbfff13d7250fae # github/codeql-action/init@v4
+        uses: github/codeql-action/init@68bde559dea0fdcac2102bfdf6230c5f70eb485e # github/codeql-action/init@v4
         with:
           languages: python,javascript-typescript
 
       - name: Perform CodeQL Analysis
         if: steps.codeql-init.outcome == 'success'
         continue-on-error: true
-        uses: github/codeql-action/analyze@5e316336eb4f107009e477d4bfbfff13d7250fae # github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@68bde559dea0fdcac2102bfdf6230c5f70eb485e # github/codeql-action/analyze@v4
         with:
           category: "/language:python-javascript-typescript"
           upload: never
