@@ -9,6 +9,8 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from requirements_source_boundary import check_external_content_boundary_metadata
+
 
 ROOT = Path(__file__).resolve().parents[1]
 REQ_ROOT = ROOT / "docs" / "requirements"
@@ -40,9 +42,7 @@ class RequirementShapeReport:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Check REQDOC -> REQ -> WS -> traceability-matrix coverage.",
-    )
+    parser = argparse.ArgumentParser(description="Check REQDOC -> REQ -> WS -> traceability-matrix coverage.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument("--strict", action="store_true", help="Treat warnings as failures.")
     return parser.parse_args()
@@ -300,6 +300,7 @@ def build_report() -> RequirementShapeReport:
     check_index_mentions(req_docs, index_text=index_text, label="REQ", warnings=warnings)
     check_index_mentions(ws_docs, index_text=index_text, label="WS", warnings=warnings)
     check_req_source_metadata(req_docs, source_docs, errors)
+    check_external_content_boundary_metadata(source_docs, warnings, root=ROOT)
     check_matrix_coverage(
         source_docs=source_docs,
         req_docs=req_docs,
@@ -344,6 +345,5 @@ def main() -> int:
     else:
         emit_text(report)
     return 1 if report.errors or (args.strict and report.warnings) else 0
-
 if __name__ == "__main__":
     sys.exit(main())

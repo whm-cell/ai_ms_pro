@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from runtime_sanitizer import compact_text
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
@@ -59,7 +61,7 @@ def build_additional_context(payload: dict[str, Any]) -> str:
     promotion = compact(sections.get("是否需要提升为 Handoff", ""))
 
     lines = [
-        f"本地 runtime session 恢复材料：`{session_file.relative_to(ROOT)}`",
+        f"本地 runtime session 恢复材料：`{display_path(session_file)}`",
         f"启动来源：`{source}`",
     ]
     if traceability:
@@ -132,13 +134,20 @@ def compact(text: str) -> str:
     if not text:
         return ""
     merged = " ".join(part.strip() for part in text.splitlines() if part.strip())
-    return merged[:MAX_SECTION_CHARS].strip()
+    return compact_text(merged, max_length=MAX_SECTION_CHARS)
 
 
 def string_value(value: Any) -> str:
     if isinstance(value, str):
         return value.strip()
     return ""
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return compact_text(str(path), max_length=MAX_SECTION_CHARS)
 
 
 def slug_fragment(value: str) -> str:

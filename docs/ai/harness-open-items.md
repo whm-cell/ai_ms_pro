@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
 更新时间：2026-05-08
-当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；WS-03 已补第二个 combo/rank 薄切片；Candidate workflow skills 达到 2/2 accepted eval 前置证据；剩余项以远端 branch protection / ruleset 阻塞、CI burn-in、升级决策和 code-shape 分批拆分为主
+当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；WS-03 已补第二个 combo/rank 薄切片；Candidate workflow skills 达到 2/2 accepted eval 前置证据；GitHub private + Free 下 branch protection / ruleset 已确认为 plan-limited ceiling；AI/Agent P0/P1/P2 guardrails 已落地；剩余项以 CI evidence burn-in、真实样本观察、升级决策和 code-shape 分批拆分为主
 
 ## 作用
 
@@ -14,9 +14,12 @@
 - `0 -> 1 初始化可用性` 已在测试仓库和仓外 starter 复演中验证完成
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已在新仓库内跑通一轮
 - Stop hook 的 `REQ/WS` 自动发现现已覆盖 `observation -> session -> reducer draft` 流程
+- Runtime sanitizer 已覆盖 Stop observation、Stop session、SessionStart additional context 和 reducer draft；prompt preview、transcript path 与历史 runtime 读取路径会做 best-effort redaction
+- Requirements source docs 已增加 source trust、instruction handling 和 sanitization status；外部 PRD / 网页摘录 / 大段粘贴需求必须作为 evidence / data 处理，而不是 agent 可执行指令
+- 高影响动作矩阵已覆盖远端分支删除、PR close / merge、workflow permission、secret / env、deployment / release、external sending、destructive file / database operations；hooks 只允许提示、dry-run、draft 或 evidence collection
 - `harness-trace-console`、`threejs-snake` 与 `godot-platformer-slice` 均已具备浏览器 smoke；`WS-03` 用薄切片验证长 PRD 进入 harness 的压缩路径
 - GitHub workflow 已加入最小权限、concurrency、timeout、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow；`security-evidence.yml` 已被远端 API 识别，首轮 checkout 失败根因是误跟踪的演练输出 gitlink
-- CODEOWNERS、PR template、Dependabot grouping / PR limit、branch hygiene strict PR budget 与 `delete_branch_on_merge` 配置已落地；GitHub ruleset / branch protection / security analysis 仍需在远端人工确认。2026-05-08 `check_github_guardrails.py` 显示 main branch protection 404，branch rulesets 为空。
+- CODEOWNERS、PR template、Dependabot grouping / PR limit、branch hygiene strict PR budget 与 `delete_branch_on_merge` 配置已落地；仓库现为 private 且账号为 GitHub Free，GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403，因此这些能力当前只能作为 future upgrade gates，不能作为 Stage-00 本地工程阻塞项。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
 - `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用；SAMPLE-001 / SAMPLE-002 已达到 2/2 accepted eval 前置证据，但是否升级仍需单独决策，避免把方案先行流程变成简单任务默认流程
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_github_guardrails.py` 已拆分为 helper 模块并新增 orphan gitlink 检查，`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
@@ -26,14 +29,15 @@
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
 - context budget audit 已完成首轮 OPEN-10 triage 并补充增长护栏：starter/default 目标保持 6500，当前 root Stage-00 预算为 8500，80/90 高水位、ADR 到达预算和 stage status 行数触发 warning；本轮已执行默认面 compression 并开始归档旧 ADR；changed-file follow-up triage 继续 warning-only / 按需使用
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
-- 当前剩余问题不再是“能不能用”，而是 `CI burn-in + branch protection/ruleset plan/visibility blocker + longer-term reducer/runtime sample monitoring`
+- runtime reducer、runtime traceability、bootstrap `render_plan` 和 governance traceability 校验已完成低风险拆分；本轮已消除对应 code-shape warning
+- 当前剩余问题不再是“能不能用”，而是 `CI evidence burn-in + private-Free plan ceiling visibility + AI/Agent guardrails sample monitoring + runtime sample monitoring`
 
 ## P0 当前最值得做
 
-### OPEN-01 CI burn-in、required checks 与 GitHub ruleset 确认
+### OPEN-01 Private GitHub Free 最大边界与 CI evidence burn-in
 
-- 目标：让新落地的 `governance + windows-hook-runtime + smoke + dependency-review` 守门在 GitHub 远端积累稳定运行历史，并进入 branch protection / ruleset required checks
-- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、check registry、security evidence workflow、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap，远端 `UNKNOWN` 保持可见但不阻断；仍需要新一轮 green history，也不能仅从本地文件证明 GitHub ruleset / security analysis 已配置
+- 目标：在 private GitHub Free 的能力边界内，把可用的本地/CI/process 证据层跑满；branch protection、rulesets、required checks、required reviews 和 merge queue 保留为升级 GitHub 计划或改 public 后的 future gates
+- 当前缺口：repo 内 workflow、CODEOWNERS、PR template、PR touch conflict checker、advisory follow-up summary、check registry、security evidence workflow、Dependabot、dependency review 与 `scripts/check_github_guardrails.py` 已落地；PR touch conflict 在 burn-in 阶段只阻断已确认 high-risk overlap；GitHub API 已对 branch protection / rulesets 返回 private-Free plan limit HTTP 403，后续不应继续把该项当作本地代码缺口
 - 远端配置细节：[GitHub 远端配置确认细节](../../--使用细节/GitHub远端配置确认细节.md)
 - 完成定义：
   - 至少一轮远端 workflow 通过
@@ -43,14 +47,26 @@
   - `scripts/check_change_triggered_followups.py --markdown` 在 PR / main push 的 GitHub Actions Summary 中展示 advisory follow-ups
   - `python3 scripts/threejs_snake_smoke.py`、`python3 scripts/threejs_snake_blackbox_smoke.py`、`python3 scripts/harness_trace_console_smoke.py` 与 `python3 scripts/harness_trace_console_blackbox_smoke.py` 自动运行；`godot_platformer_slice_smoke.py` 已具备，待 workflow touch-set 空档再接入 CI
   - Windows runner 至少跑通 Python resolution / hook runner 相关测试
-  - dependency review job 在 PR 上可见；若 GitHub 报告 dependency review unsupported，先启用 dependency graph / Advanced Security，再把 advisory 行为收紧为 blocking
-  - GitHub branch protection / ruleset 要求 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job 通过，且要求 PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`
-  - 若 GitHub 继续返回 branch protection 404 或 rulesets 为空，则完成定义必须先改为由仓库管理员配置 branch protection / ruleset 后重试远端强制确认
-  - `scripts/check_branch_hygiene.py --strict` 显示 total 3/10、Codex 1/3、Dependabot 2/4、failed open 0/0，且 stale remote/local branch 均为 0；open PR 分支通过 merge/close 消化，不直接删除
-  - `scripts/check_github_guardrails.py` 能返回远端状态；未登录或缺权限时必须明确显示 `UNKNOWN`，不能伪装成 OK
+  - dependency review job 在 PR 上可见；private Free 下若无法作为 required check，则保持 advisory / evidence，不升级 blocking
+  - `scripts/check_github_guardrails.py` 对 branch protection / rulesets 输出 private-Free plan-limited `UNKNOWN`，并在 recommended actions 中提示“升级计划或改 public 后再启用”，而不是继续要求本地修复
+  - Future upgrade gates 记录在 `docs/ai/security/remote-merge-gates.md`：若仓库升级 GitHub plan 或改 public，再要求 `governance`、`windows-hook-runtime`、`smoke`、dependency review、PR review、CODEOWNERS review、conversation resolved 和禁止直推 `main`
+  - `scripts/check_branch_hygiene.py --strict` 显示 total 3/10、Codex 0/3、Dependabot 3/4、failed open 0/0，且 stale remote/local branch 均为 0；open PR 分支通过 merge/close 消化，不直接删除
+  - `scripts/check_github_guardrails.py` 能返回远端状态；未登录、缺权限或 plan-limited 时必须明确显示 `UNKNOWN`，不能伪装成 OK
   - 失败结果能直接定位到 governance、hook sync、code-shape、Windows runner、supply-chain 或 smoke 维度
 
 ## 本轮已关闭
+
+### OPEN-12 Runtime 敏感信息脱敏闭环
+
+- 结果：新增 runtime sanitizer，Stop observation、Stop session、SessionStart additional context 和 reducer draft 已统一脱敏；2026-05-08 已按人工指令清理 49 个旧 runtime observation/session 文件
+- 关闭原因：已补测试覆盖 secret / token / email / phone / transcript path，不再只靠 `compact_text()` 截断
+- 备注：这是 best-effort 防扩散层，不替代 secret scanning；历史本地 runtime 文件若要彻底清理，仍需人工删除或重建
+
+### OPEN-13 Prompt injection 边界与高影响动作矩阵
+
+- 结果：`docs/requirements/source/_template.md` 与现有 source docs 已补 `来源可信度`、`指令处理`、`清洗状态`；`scripts/check_requirements_shape.py` 会对缺失或语义不清的边界元数据输出 review-required warning；新增 `docs/ai/security/agent-action-guardrails.md`，并在 `scripts/check_change_triggered_followups.py` 中加入 `high-impact-agent-actions` advisory follow-up
+- 关闭原因：外部内容已明确作为 evidence / data 处理，不作为 agent 可执行指令；高影响动作已具备人工确认、允许工具、验证证据和 hook automation boundary 的可审计矩阵
+- 备注：P1/P2 均先保持 warning / review-required，不直接升级 blocking；后续用真实 PRD、GitHub、deployment 或 external-send 样本观察误报率和 reviewer 负担
 
 ### OPEN-02 外部独立路径复演
 
@@ -86,6 +102,13 @@
 - 备注：未来如果 context budget 再次持续 warning，再开新的 triage 项，而不是把 OPEN-10 长期保持开放
 
 ## P1 次高优先级
+
+### OPEN-14 Code-shape 分批拆分
+
+- 目标：继续把大 harness 脚本拆成可审查的小模块，保持行为不变、验证先行
+- 当前缺口：`check_ai_governance.py` 文件总长及 `validate_working_context_sync_metadata` / `main` 仍超阈值；`bootstrap_harness.py` 文件总长、`stop_runtime_observation.py` 和 `harness_trace_console_blackbox_smoke.py::smoke_steps` 仍 warning
+- 已完成：`reduce_runtime_observations.py` 渲染拆分、`runtime_traceability.py` catalog 拆分、`bootstrap_harness.py::render_plan` 拆分、`check_ai_governance.py` traceability catalog / alignment 拆分
+- 完成定义：剩余 warning 分批消除；每批保持 CLI 行为不变，并跑相关 unittest、`check_code_shape.py --all`、`check_ai_governance.py` 与 `git diff --check`
 
 ### OPEN-11 多人 / 多 AI PR touch-set 冲突控制验证
 
