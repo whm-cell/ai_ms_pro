@@ -34,7 +34,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
     def test_github_change_triggers_guardrails(self) -> None:
         names = self.followup_names(".github/workflows/governance-and-smoke.yml")
 
-        self.assertEqual(names, {"github-guardrails"})
+        self.assertEqual(names, {"github-guardrails", "high-impact-agent-actions"})
 
     def test_supply_chain_workflow_triggers_security_evidence(self) -> None:
         names = self.followup_names(".github/workflows/security-evidence.yml")
@@ -108,6 +108,20 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertEqual(supply_chain.level, "advisory")
         self.assertIn("not a required check", supply_chain.ci_coverage)
+
+    def test_agent_action_matrix_triggers_review_required_followup(self) -> None:
+        names = self.followup_names("docs/ai/security/agent-action-guardrails.md")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("supply-chain-evidence", names)
+        self.assertIn("high-impact-agent-actions", names)
+
+    def test_high_impact_followup_is_review_required_and_advisory(self) -> None:
+        followups = check_change_triggered_followups.build_followups((".github/workflows/governance-and-smoke.yml",))
+        high_impact = next(item for item in followups if item.name == "high-impact-agent-actions")
+
+        self.assertEqual(high_impact.level, "review-required")
+        self.assertIn("explicit user confirmation", high_impact.ci_coverage)
 
     def test_markdown_summary_handles_no_followups(self) -> None:
         output = self.markdown_for("README.md")

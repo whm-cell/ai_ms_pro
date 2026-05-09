@@ -39,7 +39,7 @@
 - PR 上应出现 `governance`、`windows-hook-runtime`、`smoke` 和 dependency review job。
 - GitHub 远端 ruleset 应要求 required checks、PR review、CODEOWNERS review、conversation resolved，并禁止直接 push 到 `main`。
 - 团队并行开发任务应通过 `$team-pr-conflict-control` 显式记录 touch-set overlap 与协调动作；`scripts/check_pr_touch_conflicts.py` 在 PR 上补充 high-risk overlap 阻断，但不替代 GitHub branch protection 或 CODEOWNERS review。
-- 2026-05-05 曾遇到 GitHub API 403；2026-05-08 当前 guardrails check 显示 `main` branch protection 404 且 branch rulesets 为空，因此当前不能宣称远端已禁止直推 `main`。
+- 2026-05-05 曾遇到 GitHub API 403；2026-05-08 当前仓库切换为 private 且账号为 GitHub Free 后，GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403。因此当前最大边界是本地/CI/process evidence，不能宣称远端已禁止直推 `main`；升级 GitHub plan 或改 public 后再启用 future required gates。
 - CI 中 `check_code_shape.py --all` 作为 warning-aware gate 运行；当前 legacy warning 不阻断。
 - `WS-01` 与 `WS-02` 都具备黑盒浏览器回归路径。
 

@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from runtime_sanitizer import compact_text, compact_transcript_path
 from runtime_traceability import resolve_runtime_traceability
 
 
@@ -21,10 +22,7 @@ DOC_ROOTS = (
 )
 MAX_FIELD_LENGTH = 300
 MAX_CHANGED_PATHS = 20
-SESSION_ID_KEYS = (
-    "session_id",
-    "sessionId",
-)
+SESSION_ID_KEYS = ("session_id", "sessionId")
 TEXT_KEYS = (
     "user_prompt",
     "prompt",
@@ -33,10 +31,7 @@ TEXT_KEYS = (
     "content",
     "input",
 )
-TRANSCRIPT_KEYS = (
-    "transcript_path",
-    "transcriptPath",
-)
+TRANSCRIPT_KEYS = ("transcript_path", "transcriptPath")
 REQUIREMENT_ID_KEYS = (
     "requirement_ids",
     "requirementIds",
@@ -123,9 +118,9 @@ def append_observation(payload: dict[str, Any]) -> None:
         "agent": infer_agent_label(payload),
         "session_kind": "resume" if infer_resumed(payload) else "active",
         "branch_or_thread": infer_branch_or_thread(payload, session_id),
-        "cwd": compact_text(string_value(payload.get("cwd"))) or str(ROOT),
-        "transcript_path": compact_text(first_value(payload, TRANSCRIPT_KEYS)),
-        "prompt_preview": compact_text(first_value(payload, TEXT_KEYS)),
+        "cwd": compact_text(string_value(payload.get("cwd")), MAX_FIELD_LENGTH) or str(ROOT),
+        "transcript_path": compact_transcript_path(first_value(payload, TRANSCRIPT_KEYS), MAX_FIELD_LENGTH),
+        "prompt_preview": compact_text(first_value(payload, TEXT_KEYS), MAX_FIELD_LENGTH),
         "changed_paths": changed_paths[:MAX_CHANGED_PATHS],
         "changed_path_count": len(changed_paths),
         "docs_changed": any(is_under_doc_root(path_text) for path_text in changed_paths),
@@ -339,13 +334,6 @@ def is_meaningful(value: Any) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
     return True
-
-
-def compact_text(value: Any) -> str:
-    if not isinstance(value, str):
-        return ""
-    compact = " ".join(value.split())
-    return compact[:MAX_FIELD_LENGTH].strip()
 
 
 def string_value(value: Any) -> str:

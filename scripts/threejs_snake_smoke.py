@@ -18,6 +18,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 APP_URL_PATH = "/apps/threejs-snake/?smoke=1"
+PLAYWRIGHT_BROWSER_VERSION = os.environ.get("PLAYWRIGHT_VERSION", "1.59.1")
+PLAYWRIGHT_CLI_VERSION = os.environ.get("PLAYWRIGHT_CLI_VERSION", "0.1.13")
 
 
 def parse_args() -> argparse.Namespace:
@@ -98,7 +100,7 @@ def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
         "npx",
         "--yes",
         "--package",
-        "@playwright/cli",
+        f"@playwright/cli@{PLAYWRIGHT_CLI_VERSION}",
         "playwright-cli",
         "--session",
         env["PLAYWRIGHT_CLI_SESSION"],
@@ -112,7 +114,7 @@ def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
     details = "\n".join(part for part in [result.stdout.strip(), result.stderr.strip()] if part)
     help_note = (
         "\nOne-time browser install may be required: "
-        "`npx --yes --package=playwright playwright install chromium`"
+        f"`npx --yes --package=playwright@{PLAYWRIGHT_BROWSER_VERSION} playwright install chromium`"
     )
     raise RuntimeError(f"Playwright CLI command failed: {' '.join(cmd)}\n{details}{help_note}")
 

@@ -1,8 +1,8 @@
 # AI 文档入口索引
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 当前阶段：STAGE-00 真实场景验证与治理固化
-当前判断：harness 可用；下一步聚焦远端门禁、上下文压缩、code-shape 债务和真实样本证据。
+当前判断：harness 可用；GitHub private Free 远端强制门禁已到计划边界；CI action pinning、Playwright smoke browser / CLI 版本固定、WS-01 / WS-02 / WS-03 browser smoke、security evidence triage 和首批 Agent guardrail samples 已补齐；下一步聚焦 CI burn-in、真实样本、上下文和 code-shape 债务。
 
 ## 入口说明
 
@@ -24,8 +24,10 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 - [Active Handoffs](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)：resume、recovery 或相关 profile 需要时再进入。
 - [ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)：长期决策背景需要时再进入。
 - [Check Registry](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/check-registry.md)：确认 check 等级和 CI 覆盖。
-- [Supply Chain And Provenance Plan](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/supply-chain-provenance-plan.md)：修改 security evidence 时再进入。
-- [Remote Merge Gates Evidence](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/remote-merge-gates.md)：确认 branch protection / ruleset 远端强制状态时再进入。
+- [Supply Chain And Provenance Plan](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/supply-chain-provenance-plan.md)：security evidence。
+- [Security Evidence Triage](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/security-evidence-triage.md)：Scorecard、CodeQL、SBOM、dependency review 和 secret scanning advisory 的 triage / SLO。
+- [Remote Merge Gates Evidence](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/remote-merge-gates.md)：private Free plan limit、CI evidence 和 future gates。
+- [Agent Harness Security](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agent-harness-security.md)：runtime redaction、source boundary、action matrix 和 samples 入口。
 - [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)：评估 Candidate skill 证据时再进入。
 - [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)：写详细 eval 记录时再进入。
 
@@ -45,6 +47,7 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 - `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_change_triggered_followups.py --markdown`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_branch_hygiene.py --strict`
 
 ## 当前锚点
@@ -53,7 +56,7 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [working-context](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的同步元数据为准。
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-08 Stage Compression And WS-03 Combo Slice](./changelog/2026-05-08-stage-compression-and-ws03-combo-slice.md)
+- 最新 changelog：[2026-05-09 Godot Smoke CI](./changelog/2026-05-09-godot-smoke-ci.md)
 
 ## 维护规则
 

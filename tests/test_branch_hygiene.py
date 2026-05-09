@@ -3,7 +3,9 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+from subprocess import CompletedProcess
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +17,15 @@ from branch_hygiene_budget import (  # noqa: E402
     load_branch_hygiene_budget,
     pull_request_counts,
 )
-from check_branch_hygiene import failed_open_pr_findings, failing_checks, is_github_synthetic_ref  # noqa: E402
+from check_branch_hygiene import (  # noqa: E402
+    failed_open_pr_findings,
+    failing_checks,
+    is_github_synthetic_ref,
+)
+from branch_hygiene_prs import (  # noqa: E402
+    CHECK_ROLLUP_PERMISSION_NOTE,
+    pr_records,
+)
 
 
 class BranchHygieneBudgetTest(unittest.TestCase):
@@ -113,6 +123,34 @@ max_failed_open_prs = 0
         self.assertTrue(is_github_synthetic_ref("pull/9/merge"))
         self.assertTrue(is_github_synthetic_ref("pull/9/head"))
         self.assertFalse(is_github_synthetic_ref("codex/stage-00"))
+
+    def test_pr_records_degrades_when_actions_token_cannot_read_check_rollups(self) -> None:
+        def fake_run(args: list[str]) -> CompletedProcess[str]:
+            fields = args[-1]
+            if "statusCheckRollup" in fields:
+                return CompletedProcess(
+                    args,
+                    1,
+                    "",
+                    (
+                        "GraphQL: Resource not accessible by integration "
+                        "(repository.pullRequests.nodes.0.commits.nodes.0.commit."
+                        "statusCheckRollup.contexts.nodes.0.checkSuite.workflowRun)"
+                    ),
+                )
+            return CompletedProcess(
+                args,
+                0,
+                '[{"number":11,"state":"OPEN","headRefName":"codex/harness-ci-burn-in"}]',
+                "",
+            )
+
+        with patch("branch_hygiene_prs.run", side_effect=fake_run):
+            records, check_rollup_available, notes = pr_records()
+
+        self.assertFalse(check_rollup_available)
+        self.assertEqual(notes, [CHECK_ROLLUP_PERMISSION_NOTE])
+        self.assertEqual(records[0]["number"], 11)
 
 
 if __name__ == "__main__":

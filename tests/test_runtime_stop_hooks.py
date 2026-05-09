@@ -40,6 +40,37 @@ class RuntimeStopHooksTest(unittest.TestCase):
                 stop_runtime_observation.OBSERVATION_DIR = original_dir
                 stop_runtime_observation.git_status_paths = original_git_status_paths
 
+    def test_stop_observation_redacts_sensitive_prompt_and_transcript_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            observation_dir = Path(tempdir) / "observations"
+            original_dir = stop_runtime_observation.OBSERVATION_DIR
+            original_git_status_paths = stop_runtime_observation.git_status_paths
+            try:
+                stop_runtime_observation.OBSERVATION_DIR = observation_dir
+                stop_runtime_observation.git_status_paths = lambda: ["docs/ai/working-context.md"]
+
+                stop_runtime_observation.append_observation(
+                    {
+                        "session_id": "session-sensitive-observation",
+                        "prompt": "Use password=plainsecret and sk-abcdefghijklmnopqrstuvwxyz123456 for user@example.com",
+                        "transcript_path": "/Users/alice/.codex/sessions/rollout-sensitive.jsonl",
+                    }
+                )
+
+                payload = json.loads(next(observation_dir.glob("*.jsonl")).read_text(encoding="utf-8").strip())
+                rendered = json.dumps(payload, ensure_ascii=False)
+                self.assertIn("[REDACTED_SECRET]", rendered)
+                self.assertIn("[REDACTED_OPENAI_KEY]", rendered)
+                self.assertIn("[REDACTED_EMAIL]", rendered)
+                self.assertIn("[REDACTED_PATH]/rollout-sensitive.jsonl", rendered)
+                self.assertNotIn("plainsecret", rendered)
+                self.assertNotIn("sk-abcdefghijklmnopqrstuvwxyz123456", rendered)
+                self.assertNotIn("user@example.com", rendered)
+                self.assertNotIn("/Users/alice", rendered)
+            finally:
+                stop_runtime_observation.OBSERVATION_DIR = original_dir
+                stop_runtime_observation.git_status_paths = original_git_status_paths
+
     def test_stop_session_auto_discovers_traceability_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             session_dir = Path(tempdir) / "sessions"
@@ -61,6 +92,37 @@ class RuntimeStopHooksTest(unittest.TestCase):
                 self.assertIn("- Traceability Source：module-path", text)
                 self.assertIn("## 行为护栏快照", text)
                 self.assertIn("Success Criteria：待主 Agent 补充可验证的完成条件", text)
+            finally:
+                stop_runtime_session.SESSION_DIR = original_dir
+                stop_runtime_session.git_branch = original_git_branch
+                stop_runtime_session.git_status_paths = original_git_status_paths
+
+    def test_stop_session_redacts_sensitive_prompt_and_transcript_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            session_dir = Path(tempdir) / "sessions"
+            original_dir = stop_runtime_session.SESSION_DIR
+            original_git_branch = stop_runtime_session.git_branch
+            original_git_status_paths = stop_runtime_session.git_status_paths
+            try:
+                stop_runtime_session.SESSION_DIR = session_dir
+                stop_runtime_session.git_branch = lambda: "test-branch"
+                stop_runtime_session.git_status_paths = lambda: ["docs/ai/working-context.md"]
+
+                stop_runtime_session.write_session_snapshot(
+                    {
+                        "session_id": "session-sensitive-session",
+                        "prompt": "Token token=secret-token-value and phone 13812345678",
+                        "transcript_path": "/Users/alice/.codex/sessions/rollout-sensitive.jsonl",
+                    }
+                )
+
+                text = next(session_dir.glob("*.md")).read_text(encoding="utf-8")
+                self.assertIn("[REDACTED_SECRET]", text)
+                self.assertIn("[REDACTED_PHONE]", text)
+                self.assertIn("[REDACTED_PATH]/rollout-sensitive.jsonl", text)
+                self.assertNotIn("secret-token-value", text)
+                self.assertNotIn("13812345678", text)
+                self.assertNotIn("/Users/alice", text)
             finally:
                 stop_runtime_session.SESSION_DIR = original_dir
                 stop_runtime_session.git_branch = original_git_branch

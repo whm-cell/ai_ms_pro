@@ -133,6 +133,19 @@ RULES: tuple[FollowupRule, ...] = (
         reason="Scorecard, CodeQL, SBOM, or provenance evidence changed.",
     ),
     FollowupRule(
+        name="high-impact-agent-actions",
+        level="review-required",
+        ci_coverage="advisory follow-up only; high-impact actions still require explicit user confirmation",
+        patterns=(
+            "docs/ai/security/agent-action-guardrails.md", ".github/workflows/**", ".github/CODEOWNERS",
+            ".github/dependabot.yml", "scripts/check_branch_hygiene.py", "scripts/check_github_guardrails.py",
+            "scripts/check_pr_touch_conflicts.py", "scripts/check_change_triggered_followups.py",
+        ),
+        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_change_triggered_followups.py", ".codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py"),
+        references=("docs/ai/security/agent-action-guardrails.md", "docs/ai/security/remote-merge-gates.md"),
+        reason="A high-impact agent action surface changed; review confirmation and automation boundaries.",
+    ),
+    FollowupRule(
         name="harness-code-shape",
         level="blocking-candidate",
         ci_coverage="covered by code shape job for committed code",
@@ -177,9 +190,7 @@ RULES: tuple[FollowupRule, ...] = (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Suggest follow-up checks from changed files without expanding AGENTS.md.",
-    )
+    parser = argparse.ArgumentParser(description="Suggest follow-up checks from changed files without expanding AGENTS.md.")
     parser.add_argument("--root", default=str(ROOT), help="Repository root to inspect.")
     parser.add_argument("--files", nargs="*", help="Explicit changed-file list, useful for tests.")
     parser.add_argument("--staged", action="store_true", help="Inspect staged changes only.")

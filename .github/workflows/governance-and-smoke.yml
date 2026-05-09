@@ -12,6 +12,10 @@ permissions:
   checks: read
   pull-requests: read
 
+env:
+  PLAYWRIGHT_VERSION: "1.59.1"
+  PLAYWRIGHT_CLI_VERSION: "0.1.13"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -22,12 +26,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -89,10 +93,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -114,20 +118,20 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # actions/setup-node@v6
         with:
           node-version: "20"
 
       - name: Install Chromium For Playwright
-        run: npx --yes --package=playwright playwright install --with-deps chromium
+        run: npx --yes --package="playwright@${PLAYWRIGHT_VERSION}" playwright install --with-deps chromium
 
       - name: Run Three.js Snake smoke
         run: python3 scripts/threejs_snake_smoke.py
@@ -140,3 +144,6 @@ jobs:
 
       - name: Run Harness Trace Console blackbox smoke
         run: python3 scripts/harness_trace_console_blackbox_smoke.py
+
+      - name: Run Godot Platformer Slice smoke
+        run: python3 scripts/godot_platformer_slice_smoke.py
