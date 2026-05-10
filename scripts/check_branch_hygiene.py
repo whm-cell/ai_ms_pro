@@ -158,7 +158,6 @@ def failing_checks(record: dict[str, object]) -> list[str]:
         if not isinstance(check, dict):
             continue
         conclusion = str(check.get("conclusion") or "").upper()
-        status = str(check.get("status") or "").upper()
         name = str(check.get("name") or check.get("context") or "unknown-check")
         if conclusion in {"FAILURE", "CANCELLED", "TIMED_OUT", "ACTION_REQUIRED"}:
             failed.append(name)

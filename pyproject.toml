@@ -1,0 +1,14 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+  ".codex/.venv",
+  ".codex/runtime",
+  "new_pro_standard",
+]
+
+[tool.ruff.lint]
+select = [
+  "E9",
+  "F",
+]

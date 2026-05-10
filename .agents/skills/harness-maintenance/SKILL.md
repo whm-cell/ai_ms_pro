@@ -1,6 +1,6 @@
 ---
 name: harness-maintenance
-description: Maintain Codex harness runtime, hooks, reducers, GitHub guardrails, and code-shape checks through scoped references without expanding always-on AGENTS guidance.
+description: Maintain Codex harness runtime, hooks, reducers, GitHub guardrails, agentic standards, trace/eval/tool contracts, and code-shape checks through scoped references without expanding always-on AGENTS guidance.
 ---
 
 # Harness Maintenance
@@ -11,7 +11,7 @@ Stable
 
 ## Scope
 
-Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, handoff compression, GitHub workflows or repository guardrails, code-shape budgets, or related verification scripts.
+Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, handoff compression, GitHub workflows or repository guardrails, agentic standards, trace/eval/tool contracts, code-shape budgets, or related verification scripts.
 
 Do not use this skill for ordinary product features, simple edits, PRD normalization, or task implementation that only consumes the harness.
 
@@ -23,6 +23,7 @@ Do not use this skill for ordinary product features, simple edits, PRD normaliza
 - Session promotion / compression: use `references/runtime-governance-compression.md`.
 - GitHub guardrails: use `references/github-guardrails.md`.
 - Supply-chain evidence: use `references/supply-chain-security.md`.
+- Agentic standards / trace / eval / tool contracts: use `references/agentic-standards.md`.
 - Code shape: use `references/code-shape-budget.md`.
 - Verification commands: use `references/verification-commands.md`.
 
@@ -66,5 +67,6 @@ Revise this skill through status, ADR, or changelog when harness maintenance tas
 - [runtime-governance-compression.md](references/runtime-governance-compression.md)
 - [github-guardrails.md](references/github-guardrails.md)
 - [supply-chain-security.md](references/supply-chain-security.md)
+- [agentic-standards.md](references/agentic-standards.md)
 - [code-shape-budget.md](references/code-shape-budget.md)
 - [verification-commands.md](references/verification-commands.md)

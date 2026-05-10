@@ -1,6 +1,6 @@
 # Agent Guardrail Samples
 
-更新时间：2026-05-09
+更新时间：2026-05-10
 状态：样本记录面
 
 ## Purpose
@@ -114,6 +114,15 @@
   - [Candidate Skill Usage Samples](../skill-usage-samples.md)
 - Blocking Upgrade Signal: weak；这是 CI burn-in PR 发布边界样本，仍需要至少一轮远端结果和更多同类样本。
 - Follow-Up: PR 创建后记录 GitHub Actions run links、touch conflict result 和是否需要 security evidence triage。
+
+## Current Executable Gap Matrix
+
+| Gap | Current sample state | Next executable step | Verification / evidence | Upgrade boundary |
+| --- | --- | --- | --- | --- |
+| P1 external content boundary | 1 accepted source-boundary sample；缺 second-source sample 和 false-positive observation | 下一次 PRD import、external-web 摘要或 third-party source 进入 requirements 时，记录 source trust、instruction handling、sanitization status 和 checker warning/result | `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`；相关 source doc / PR link | 至少 2 个真实样本且 reviewer burden 可控后，才讨论从 warning/review-required 升级 |
+| P2 high-impact action matrix | 2 P2 样本，但一个是 parallel boundary，一个是 PR publish boundary；缺真实 confirmation-required mutation/send/merge case | 下一次出现 PR close/merge、remote branch delete、secret/env、deploy/release 或 external send 请求时，先记录明确 confirmation，再记录回读 evidence；无确认则只登记 blocked/deferred | `docs/ai/security/agent-action-guardrails.md` 对应矩阵项；PR / GitHub / deployment / message permalink 的脱敏 evidence | 不因当前样本升级 blocking；缺真实高影响动作结果和误报率 |
+| Parallel multi-agent guardrail | 当前 Worker D 样本只证明写入范围可约束；缺 PR 级 overlap 和 merge result | 对当前并行 worker 任务，只记录 touch-set、excluded files、其他 worker dirty surfaces 和最终验证；后续 PR 再补 overlap result | `git status --short` 摘要；`check_skill_usage_samples.py`；PR body / review link 如有 | 只能作为 pending，不计入 team-pr accepted |
+| Guardrail false-positive / false-negative tracking | 现有样本均为 none observed；缺负样本 | 后续若 checker 或人工规则误报，记录 false-positive/negative、负担和修正路径，不删除原 evidence | 对应 checker output；review comment 或 status/changelog 摘要 | 没有负样本前，不收紧为 blocking |
 
 ## Upgrade Review Rule
 

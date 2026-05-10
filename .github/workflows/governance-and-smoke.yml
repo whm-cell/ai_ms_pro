@@ -35,6 +35,28 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install Python harness dependencies
+        run: python3 -m pip install -r .codex/requirements.txt
+
+      - name: Check whitespace errors
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$BASE_REF" ]; then
+            git diff --check "origin/${BASE_REF}...HEAD"
+          elif [ "$EVENT_NAME" = "push" ] && [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            git diff --check "${BEFORE_SHA}...HEAD"
+          elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check "HEAD^...HEAD"
+          else
+            git diff --check
+          fi
+
+      - name: Run Ruff checks
+        run: python3 -m ruff check .codex/hooks scripts tests
+
       - name: Check hook config sync
         run: python3 scripts/sync_hooks_config.py --check
 
@@ -84,6 +106,24 @@ jobs:
 
       - name: Run AI governance checks
         run: python3 scripts/check_ai_governance.py
+
+      - name: Run agent trace schema checks
+        run: python3 scripts/check_agent_trace_schema.py
+
+      - name: Run agent eval dataset checks
+        run: python3 scripts/check_agent_eval_dataset.py
+
+      - name: Run agent eval runner dry-run
+        run: python3 scripts/run_agent_eval_dataset.py --dry-run
+
+      - name: Run agent trace local export check
+        run: python3 scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl > /tmp/agent-trace-export.json
+
+      - name: Run harness sample gap collector
+        run: python3 scripts/collect_harness_sample_gaps.py > /tmp/harness-sample-gaps.md
+
+      - name: Run tool contract checks
+        run: python3 scripts/check_tool_contracts.py
 
       - name: Run code shape checks
         run: python3 scripts/check_code_shape.py --all

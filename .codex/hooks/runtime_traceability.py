@@ -6,26 +6,13 @@ import re
 from pathlib import Path
 
 from runtime_traceability_catalog import (
-    BACKTICK_RE,
-    NORMALIZED_REQ_DIR,
     REQDOC_ID_PATTERN,
     REQ_ID_PATTERN,
     ROOT,
-    SOURCE_DOC_DIR,
-    TRACEABILITY_MATRIX_PATH,
-    WORKING_CONTEXT_PATH,
-    WORKSTREAM_DIR,
     WS_ID_PATTERN,
-    extract_backtick_paths,
-    extract_markdown_section,
-    first_pattern_match,
     infer_unambiguous_working_context_ids,
-    iter_docs,
     load_traceability_catalog,
-    normalize_doc_path_token,
     ordered_unique,
-    parse_matrix_row,
-    read_prefixed_value,
 )
 
 

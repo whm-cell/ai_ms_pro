@@ -10,7 +10,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from context_budget_warnings import build_warnings, usage_percent
-from harness_config import ContextBudgetConfig, HarnessConfigError, load_harness_config
+from harness_config import (
+    ContextBudgetConfig as ContextBudgetConfig,
+    HarnessConfigError,
+    load_harness_config,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]

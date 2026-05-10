@@ -1,6 +1,6 @@
 # Security Evidence Triage
 
-更新时间：2026-05-09
+更新时间：2026-05-10
 状态：advisory evidence triage / SLO 已定义；首轮 main push security evidence 已登记
 
 ## 作用
@@ -8,6 +8,8 @@
 定义 Scorecard、CodeQL artifact、SBOM、dependency review 和 secret scanning advisory 的审阅节奏、owner 占位、严重度处理和升级边界。
 
 当前策略不改变 `docs/ai/check-registry.md` 的分级：这些 security evidence 仍是 advisory / review-required 证据，不伪装成 required gate。blocking 升级必须另有 burn-in、误报率、修复路径和 ADR / status 决策支撑。
+
+风险到控制面的总表见 [Agentic Control Matrix](./agentic-control-matrix.md)。安全证据 triage 结束时应能指向对应 control id，或者明确说明该证据暂不属于 agentic harness 控制面。
 
 ## Owner 占位
 
@@ -80,6 +82,17 @@ Critical secret 泄漏或可利用漏洞可以由 Security Owner / Repo Admin �
 | --- | --- | --- | --- | --- |
 | 2026-05-09 | PR #11 security evidence | [run 25598728374](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728374), head `9b23fd522586bd77126d58ab12c2c3494112cf51` | `security-evidence` job 通过；Scorecard、CodeQL artifact 和 SBOM artifact 均完成。 | 计入首轮 PR burn-in evidence；不升级 blocking。 |
 | 2026-05-09 | `main` push security evidence | [run 25599034597](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034597), merge commit `c1f170faa701885882a0ed7a2105c1054fe956ea` | workflow 成功；Scorecard 完成；CodeQL analysis 完成并上传 `codeql-results` artifact；SBOM 生成并上传 `sbom-cyclonedx` artifact；CodeQL 对 GitHub code scanning / database upload 输出 `Code scanning is not enabled for this repository` 注解。 | 当前按 Private Free / repository setting 边界处理：不是 required gate 失败，不开 issue，不人工 hold；后续继续观察是否重复出现，并仅在启用 code scanning 或升级计划后考虑远端上传/阻断。 |
+
+## Current Executable Next-Step Matrix
+
+| Evidence gap | Current state | Next executable step | Required proof | Still needs external sample |
+| --- | --- | --- | --- | --- |
+| Scheduled security evidence | 只有 PR #11 和 main push 两类首轮 evidence；缺 scheduled burn-in | 等下一次 schedule 或手动 dispatch 后登记 run、head SHA、artifact names 和 conclusion | `gh run view` / Actions URL；Scorecard、CodeQL artifact、SBOM artifact 可回读 | 需要真实 scheduled 或后续 PR run |
+| CodeQL code-scanning annotation | main push 已观察到 private-Free / repository setting 注解；当前不阻断 | 再观察一轮 PR 或 scheduled run 是否重复；若启用 code scanning、升级 plan 或改 public，再重新评估上传失败是否进入 blocking 候选 | run annotation 摘要；repository plan / setting evidence | 需要 plan/setting 变化或第二轮注解样本 |
+| Dependency Review advisory | PR workflow 已运行；当前 `continue-on-error`，不作为 required gate | 下一次依赖变更 PR 记录新增/升级依赖、severity、license result 和 triage 结论 | Dependency Review job / PR check link；如有 CVE，记录脱敏 issue 或 owner decision | 需要真实依赖变更 PR |
+| SBOM release readiness | 当前只有 CI artifact；无 release / package publish 场景 | 发布前重新生成或引用最新 SBOM，并登记 source revision、artifact digest 和 owner sign-off | SBOM artifact URL/name；digest manifest；source commit | 需要真实 release 或 release-candidate |
+| Secret scanning advisory | 当前没有远端 alert evidence；private Free 下不声明 push protection 或 alert gate 已强制 | 若 GitHub、外部扫描或 reviewer 报告疑似 secret，只记录 redacted type/scope、owner、rotation/disable evidence，不写 secret 值 | 脱敏 issue / private triage note；rotation verification | 需要真实 alert 或人工报告 |
+| Security owner assignment | owner 仍是占位；triage 可执行但责任人未实名 | 项目方确认 Security / Dependency / Repo Admin / Release Owner 后替换占位，或在 PR 中明确临时代管人 | owner 确认记录；PR / status / issue link | 需要人工确认 |
 
 ## Closeout
 

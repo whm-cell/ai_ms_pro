@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-05-09
-当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；WS-03 Godot thin-slice smoke 已接入 CI；Candidate workflow skills 达到 2/2 accepted eval 前置证据；GitHub private + Free 下 branch protection / ruleset 已确认为 plan-limited ceiling；CI action pinning、Playwright smoke browser / CLI 版本固定、security evidence triage、AI/Agent P0/P1/P2 guardrails 和首批 guardrail samples 已落地；OPEN-01 首轮 PR + main push 远端 CI burn-in 已完成；剩余项以真实样本观察、升级决策和 code-shape 分批拆分为主
+更新时间：2026-05-10
+当前状态：核心链路已在测试仓库、仓外 starter 复演和 REQDOC-003 -> WS-03 薄业务切片中跑通；WS-03 Godot thin-slice smoke 已接入 CI；Candidate workflow skills 达到 3/2 accepted eval / control samples 但保持 Candidate；agentic standards、P0 Ruff linter、security / guardrail evidence 和 code-shape 主债务已落地；agentic standards 维护细则下沉到 `.agents/skills/harness-maintenance/references/agentic-standards.md`；GitHub private + Free 下 branch protection / ruleset 已确认为 plan-limited ceiling；OPEN-01 首轮 PR + main push 远端 CI burn-in 已完成；剩余项以真实样本观察、升级决策和远端 plan ceiling 为主
 
 ## 作用
 
@@ -21,16 +21,19 @@
 - GitHub workflow 已加入最小权限、concurrency、timeout、full-SHA action pinning、fixed-version Playwright smoke browser / CLI packages、WS-01 / WS-02 / WS-03 browser smoke、code-shape、Windows hook runtime job、PR touch conflict check、change-triggered advisory summary、`merge_group` 触发、dependency review workflow 和 security evidence workflow；`security-evidence.yml` 已被远端 API 识别，首轮 checkout 失败根因是误跟踪的演练输出 gitlink
 - CODEOWNERS、PR template、Dependabot grouping / PR limit、branch hygiene strict PR budget 与 `delete_branch_on_merge` 配置已落地；仓库现为 private 且账号为 GitHub Free，GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403，因此这些能力当前只能作为 future upgrade gates，不能作为 Stage-00 本地工程阻塞项。
 - Karpathy-style 行为护栏已进入 starter 机制层，但仍保持显式调用，不替代仓库治理文档或检查脚本
-- `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用；SAMPLE-001 / SAMPLE-002 已达到 2/2 accepted eval 前置证据，但是否升级仍需单独决策，避免把方案先行流程变成简单任务默认流程
+- `$progressive-feature-development` 与 `$prd-to-project-skills` 已进入 root 和 starter 的 `.agents/skills` 机制层，作为 Candidate skills 显式调用；SAMPLE-001 / SAMPLE-002 / SAMPLE-005 已达到 3/2 accepted eval / control samples，2026-05-10 复核后仍保持 Candidate，避免把方案先行流程变成简单任务默认流程
 - `scripts/check_repo_skills.py`、`scripts/check_requirements_shape.py`、`scripts/check_skill_usage_samples.py`、`scripts/check_github_guardrails.py` 与 `scripts/check_change_triggered_followups.py` 已落地为 warning-only evidence / follow-up checks；`check_github_guardrails.py` 已拆分为 helper 模块并新增 orphan gitlink 检查，`check_change_triggered_followups.py --markdown` 已接入 PR / main push 的 GitHub Actions Summary 并显示 check level / CI coverage
+- Agentic standards 相关 trace / eval / tool-contract / sample-gap checks 已落地为可校验 contract；维护规则、互通边界和最小验证命令见 `$harness-maintenance` `references/agentic-standards.md`。
+- P0 linter 已落地为 `pyproject.toml` + pinned Ruff + `git diff --check`；当前只覆盖保守 Python lint 和 whitespace，不替代 semantic standards review、security policy 或 tool-contract checks。
+- External standards crosswalk 与 agentic control matrix 已落地；第一阶段只作为 evidence / gap review，不把 hosted trace/eval、MCP/A2A 或外部 collector 视为已完成。
 - `docs/ai/check-registry.md` 已记录 check 等级；Scorecard、CodeQL、SBOM 和 dependency review 已作为 security evidence / advisory evidence 接入，第一阶段不作为 required checks；triage / SLO 见 `docs/ai/security/security-evidence-triage.md`
 - Candidate skill promotion 已从“样本登记”升级为 with/without 对照 eval；PRD 技术假设检查要求状态和 verification method
 - REQDOC-003 已完成首轮标准化并绑定 REQ-007 / REQ-008 / REQ-009 与 WS-03；Godot engine 仍保持 proposed，后续如继续推进应先做独立 engine spike
 - project architecture/style/dependency skill 生命周期已进入模板与 ADR；默认不进入短链路，也不新增 blocking checker
 - context budget audit 已完成首轮 OPEN-10 triage 并补充增长护栏：starter/default 目标保持 6500，当前 root Stage-00 预算为 8500，80/90 高水位、ADR 到达预算和 stage status 行数触发 warning；本轮已执行默认面 compression 并开始归档旧 ADR；changed-file follow-up triage 继续 warning-only / 按需使用
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook
-- runtime reducer、runtime traceability、bootstrap `render_plan`、governance traceability 和 working-context sync metadata 校验已完成低风险拆分；本轮已消除对应 code-shape warning
-- 当前剩余问题不再是“能不能用”，而是 `post-burn-in sample monitoring + private-Free plan ceiling visibility + security evidence triage samples + AI/Agent guardrails sample monitoring + runtime sample monitoring`
+- runtime reducer、runtime traceability、bootstrap `render_plan`、governance traceability、working-context sync metadata、bootstrap harness、governance checker 和 eval checker 已完成低风险拆分；当前 code-shape 检查无 warning
+- 当前剩余问题不再是“能不能用”，而是 `post-burn-in sample monitoring + private-Free plan ceiling visibility + security evidence triage samples + AI/Agent guardrails sample monitoring + runtime / trace interop sample monitoring`
 
 ## P0 当前最值得做
 
@@ -64,6 +67,18 @@
 - 后续观察：继续积累至少一轮 scheduled / 后续 PR security evidence 样本，确认 CodeQL code-scanning 注解是否持续出现；除非升级 GitHub plan、改 public 或启用 code scanning，不把该注解升级为 blocking
 
 ## 本轮已关闭
+
+### Eval Runner、Trace Local / OTLP Pilot Adapter 与 Sample Gap Collector
+
+- 结果：新增 `scripts/run_agent_eval_dataset.py`、`scripts/export_agent_trace.py`、`scripts/collect_harness_sample_gaps.py` 和对应单测；governance workflow 已接入 runner `--dry-run`、trace sample local export 和 sample gap collector；eval runner 执行模式会绑定 trace id / artifact / redaction state；trace exporter 新增 no-network `otlp-http-json` pilot，显式 `--send --endpoint` 才会 POST。
+- 关闭原因：eval runner + deterministic grader + trace evidence binding、本地 `agent-trace/v1` export adapter、OTLP HTTP JSON pilot、security / guardrail / workflow sample collection harness 已具备本地可验证路径。
+- 备注：`--使用细节/真实场景覆盖缺口待确认.md` 记录尚未真实覆盖的问题点；OpenAI hosted trace/eval、MCP / A2A 真实互通、外部 collector、scheduled / PR / 跨 workstream 真实样本仍是 future work，不因为本地 adapter 或 collector 通过而视为完成。
+
+### P0 Linter、Trace Producer 与 External Standards Crosswalk
+
+- 结果：新增 P0 Ruff linter、CI `git diff --check`、Stop hook `agent-trace/v1` producer、external standards crosswalk，并把 Ruff / whitespace check 写入 tool contract registry。
+- 关闭原因：linter、trace producer、external standards crosswalk 已转为 repo 内可检查或可路由 artifact；剩余 W3C/OpenTelemetry/OpenAI exporter、MCP/A2A interoperability、semantic standards-honesty linter 仍是后续升级项。
+- 备注：Ruff 当前启用 `E9` 与 Pyflakes `F`；Stop trace 仍是 `.codex/runtime/*` 本地原料，不自动成为共享治理真相。
 
 ### OPEN-12 Runtime 敏感信息脱敏闭环
 
@@ -110,14 +125,13 @@
 - 关闭原因：已完成本轮“是否调整预算、是否压缩默认面、是否接 Stop hook”的判断；context budget audit 继续保持 warning-only 手动运行，不自动 compact，不自动归档
 - 备注：未来如果 context budget 再次持续 warning，再开新的 triage 项，而不是把 OPEN-10 长期保持开放
 
-## P1 次高优先级
-
 ### OPEN-14 Code-shape 分批拆分
 
-- 目标：继续把大 harness 脚本拆成可审查的小模块，保持行为不变、验证先行
-- 当前缺口：`check_ai_governance.py` 和 `bootstrap_harness.py` 文件总长仍 warning；剩余主要是大文件模块边界继续拆分，不再有本轮已知的 hard-ceiling function warning
-- 已完成：`reduce_runtime_observations.py` 渲染拆分、`runtime_traceability.py` catalog 拆分、`bootstrap_harness.py::render_plan` 拆分、`check_ai_governance.py` traceability catalog / alignment / working-context sync metadata / main orchestration 拆分，`harness_trace_console_blackbox_smoke.py::smoke_steps` 断言脚本提取，以及 `stop_runtime_observation.py` 小幅压缩到阈值内
-- 完成定义：剩余 warning 分批消除；每批保持 CLI 行为不变，并跑相关 unittest、`check_code_shape.py --all`、`check_ai_governance.py` 与 `git diff --check`
+- 结果：`check_ai_governance.py`、`bootstrap_harness.py` 与 `check_agent_eval_dataset.py` 已拆分到 code-shape 阈值内；新增 helper 模块保持 CLI / facade 行为不变。
+- 关闭原因：`check_code_shape.py --all` 当前无 warning；原有两个大文件 warning 和本轮新增 eval checker warning 都已清掉。
+- 备注：后续若新增 warning，应作为新的 code-shape batch 处理，不重开 OPEN-14。
+
+## P1 次高优先级
 
 ### OPEN-11 多人 / 多 AI PR touch-set 冲突控制验证
 
@@ -152,13 +166,13 @@
 ### OPEN-09 Project architecture/style/dependency skill 生命周期真实样本观察
 
 - 目标：验证 `docs/ai/templates/project-skill-lifecycle.md` 是否足以指导新项目在架构、样式和依赖约束变化时创建、升级、偏离或废弃项目 skill
-- 当前缺口：模板、ADR、starter 同步、两个 Candidate workflow skills 与 with/without eval registry 已落地；`check_skill_usage_samples.py` 当前显示两个 workflow skills 都是 0/2 accepted eval samples
+- 当前缺口：模板、ADR、starter 同步、两个 Candidate workflow skills 与 with/without eval registry 已落地；Candidate workflow skills 已达到 3/2 accepted eval / control samples，但仍保持 Candidate
 - 完成定义：
   - 模板存在且不进入默认短链路
   - ADR 已采纳并说明 skill 不替代 canonical governance truth
   - `new_pro_standard` 已同步模板和说明
   - Candidate workflow skills 已验证不会替代 requirements / AI governance truth
-  - `check_skill_usage_samples.py` 已显示关键 Candidate skills 达到 2 个 accepted with/without eval samples；下一步是决定升级、继续观察或保持 Candidate
+  - 关键 Candidate skills 已达到 3/2 accepted eval / control samples；下一步是决定升级、继续观察或保持 Candidate
   - governance check 与 code-shape check 通过
   - 至少一个后续真实项目能按 `Draft -> Candidate Skill -> Stable Skill -> Promote -> Deprecate` 路径处理项目约束变更
 

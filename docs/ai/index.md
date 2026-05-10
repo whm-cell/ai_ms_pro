@@ -1,8 +1,8 @@
 # AI 文档入口索引
 
-更新时间：2026-05-09
+更新时间：2026-05-10
 当前阶段：STAGE-00 真实场景验证与治理固化
-当前判断：harness 可用；GitHub private Free 远端强制门禁已到计划边界；WS-01 / WS-02 / WS-03 smoke、security evidence triage 和 Agent guardrail samples 已补齐；OPEN-01 首轮 PR + main push CI burn-in 已完成；下一步聚焦后续真实样本、上下文和 code-shape 债务。
+当前判断：harness 可用；agentic standards 与 code-shape 主债务已处理；GitHub private Free 远端强制门禁已到计划边界；下一步聚焦真实样本和策略升级决策。
 
 ## 入口说明
 
@@ -26,10 +26,12 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 - [Check Registry](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/check-registry.md)：确认 check 等级和 CI 覆盖。
 - [Supply Chain And Provenance Plan](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/supply-chain-provenance-plan.md)：security evidence。
 - [Security Evidence Triage](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/security-evidence-triage.md)：Scorecard、CodeQL、SBOM、dependency review 和 secret scanning advisory 的 triage / SLO。
+- [Agentic Control Matrix](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agentic-control-matrix.md)：agentic security control 映射。
 - [Remote Merge Gates Evidence](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/remote-merge-gates.md)：private Free plan limit、CI evidence 和 future gates。
 - [Agent Harness Security](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agent-harness-security.md)：runtime redaction、source boundary、action matrix 和 samples 入口。
+- Agentic standards：[Trace](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards/agent-trace-schema.md)、[Evals](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/evals/README.md)、[Tool Contracts](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/tool-contracts/README.md)、[External Crosswalk](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards/agentic-harness-crosswalk.md)；维护细则见 `$harness-maintenance`。
 - [Candidate Skill Usage Samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)：评估 Candidate skill 证据时再进入。
-- [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)：写详细 eval 记录时再进入。
+- [Candidate Skill Eval Protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)：写详细 eval 或升级复核时再进入。
 
 ## 按需 Skills
 
@@ -42,13 +44,12 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 ## 常用检查
 
 - `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`
+- `.codex/.venv/bin/python -m ruff check .codex/hooks scripts tests`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_change_triggered_followups.py --markdown`
-- `.codex/hooks/run_with_repo_python.sh scripts/check_branch_hygiene.py --strict`
+- `git diff --check`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`
+- Agentic standards：按 `$harness-maintenance` `references/agentic-standards.md` 选择 trace / eval / tool-contract checks。
+- 其他按 changed-file follow-up 或 [verification commands](/Volumes/usd/codes/go_projects/ai_ms_pro/.agents/skills/harness-maintenance/references/verification-commands.md) 选择。
 
 ## 当前锚点
 
@@ -56,7 +57,7 @@ requirements、handoff、ADR、archive、skills、PRD 原文、runtime JSONL 和
 - 当前 hardening backlog：[Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
 - 当前 active handoff 精确集合：以 [working-context](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的同步元数据为准。
 - 最新 ADR：[ADR-015 Progressive Feature And PRD Skills](./adr/ADR-015-progressive-feature-and-prd-skills.md)
-- 最新 changelog：[2026-05-09 CI Burn-in Evidence](./changelog/2026-05-09-ci-burn-in-evidence.md)
+- 最新 changelog：[2026-05-10 Agentic Standards Harness](./changelog/2026-05-10-agentic-standards-harness.md)
 
 ## 维护规则
 

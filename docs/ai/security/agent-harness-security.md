@@ -23,6 +23,8 @@ P2 高影响动作矩阵已落地到 [Agent Action Guardrails](./agent-action-gu
 
 该矩阵覆盖远端分支删除、PR close / merge、workflow permission 变更、secret / env 变更、部署 / release、外部消息发送、destructive file operation 和 destructive database operation。默认规则是：Agent 可审计、可提示、可 dry-run、可准备草稿，但不得由 hook 或后台自动执行 destructive、externally visible 或 permission-changing 动作。
 
+[Agentic Control Matrix](./agentic-control-matrix.md) 将 source boundary、runtime redaction、高影响动作、tool contracts、supply-chain evidence、trace/eval integrity 和 remote gate 边界映射到 OWASP / NIST 风格控制面。该矩阵是 review-required 证据面，不把单次 advisory evidence 自动升级为 blocking。
+
 ## Runtime Redaction Scope
 
 当前 sanitizer 覆盖：
