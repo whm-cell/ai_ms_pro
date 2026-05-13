@@ -11,7 +11,9 @@ Use this reference to select checks after harness, governance, requirement, or s
 - Default context, AGENTS, status, ADR, or skill surface grew: `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`
 - Active handoffs reached budget or stage compression is planned: `.codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py`
 - Repo-local skills changed: `.codex/hooks/run_with_repo_python.sh scripts/check_repo_skills.py`
-- PRD, `REQDOC`, `REQ`, `WS`, matrix, or technical assumptions changed: `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`
+- Third-party `.codex/skills`, skill catalog/lock, vendor/proxy metadata, or skill/tool output scan policy changed: `.codex/hooks/run_with_repo_python.sh scripts/check_skill_catalog.py`
+- Skill/tool output artifact needs prompt-injection-style scan: `.codex/hooks/run_with_repo_python.sh scripts/check_skill_catalog.py --check-output <file>`
+- PRD, `REQDOC`, `REQ`, `WS`, matrix, technical assumptions, raw evidence, or source quarantine metadata changed: `.codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py`
 - Candidate skills are being promoted or evaluated: `.codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py`
 - Agent trace schema or trace samples changed: `.codex/hooks/run_with_repo_python.sh scripts/check_agent_trace_schema.py`
 - Agent trace local / OTLP pilot export adapter changed: `.codex/hooks/run_with_repo_python.sh scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl` and `.codex/hooks/run_with_repo_python.sh scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl --format otlp-http-json`
@@ -33,8 +35,11 @@ Use `.codex/hooks/run_with_repo_python.ps1` with the same script path when worki
 - `check_change_triggered_followups.py` is advisory. It suggests checks and references from changed files; CI summary output still does not prove those commands have already run.
 - `check_github_guardrails.py` may report remote `UNKNOWN` when credentials, permissions, or GitHub configuration are unavailable. Do not restate `UNKNOWN` as OK.
 - `check_skill_usage_samples.py` may report `0/2` for Candidate skills. That is evidence against always-on promotion, not a failure to hide.
+- `check_skill_catalog.py` treats downloaded `.codex/skills` as dependency-like assets. Large third-party `SKILL.md` files should be hidden behind a short proxy/catalog entry instead of becoming discovery text. Enabled catalog/lock entries should carry source URL, commit/hash, license, trust/risk, permission booleans, and enabled state. `--check-output` scans bounded output bytes for dangerous instruction-like tool/skill text; it does not replace human review of truncated content.
+- `check_requirements_shape.py` treats external source content as evidence/data, not executable agent instructions. Raw PRD evidence and quarantined material should be summarized, excerpted, sanitized, or reviewed before use as implementation basis; use `--strict` only when a project intentionally promotes warnings.
 - `run_agent_eval_dataset.py --dry-run` only proves eval routing and grading wiring. A real eval run requires explicitly selecting and executing eval items; trace evidence is read only in execute mode.
 - `export_agent_trace.py` defaults to local / no-network export. `--format otlp-http-json` without `--send` is still no-network; external export requires explicit `--send --endpoint` and does not prove OpenAI, MCP, or A2A remote interoperability.
 - `collect_harness_sample_gaps.py` lists missing real-scenario evidence. It does not create security, guardrail, or workflow proof by itself.
-- `check_context_budget.py` and `check_archive_candidates.py` are warning-only unless the project explicitly changes their policy.
+- `check_context_budget.py` is blocking by default for default-surface high-watermark, hard-budget, always-on line-budget, and active stage-status compression gates; use `--warning-only` only for manual audits.
+- `check_archive_candidates.py` is warning-only and does not archive without main-agent judgment.
 - Existing legacy code-shape warnings should be reported, not automatically rewritten outside the requested scope.

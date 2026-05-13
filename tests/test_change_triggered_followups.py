@@ -66,6 +66,18 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("default-context-budget", names)
         self.assertIn("repo-local-skills", names)
 
+    def test_codex_skill_change_triggers_catalog_discoverability_and_budget(self) -> None:
+        names = self.followup_names(".codex/skills/ui-ux-pro-max/SKILL.md")
+
+        self.assertIn("default-context-budget", names)
+        self.assertIn("repo-local-skills", names)
+
+    def test_skill_catalog_change_triggers_catalog_discoverability_and_budget(self) -> None:
+        names = self.followup_names(".codex/skills.catalog.json")
+
+        self.assertIn("default-context-budget", names)
+        self.assertIn("repo-local-skills", names)
+
     def test_harness_python_triggers_code_shape(self) -> None:
         names = self.followup_names("scripts/check_github_guardrails.py")
 

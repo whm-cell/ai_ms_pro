@@ -7,5 +7,8 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 echo "Running AI docs governance check..."
 "$REPO_ROOT/.codex/hooks/run_with_repo_python.sh" scripts/check_ai_governance.py
 
+echo "Running context budget gate..."
+"$REPO_ROOT/.codex/hooks/run_with_repo_python.sh" scripts/check_context_budget.py
+
 echo "Running code shape check..."
 "$REPO_ROOT/.codex/hooks/run_with_repo_python.sh" scripts/check_code_shape.py --staged

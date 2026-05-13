@@ -40,12 +40,17 @@
 - `$team-pr-conflict-control`：多人或多 AI 并行开发、open PR changed-file overlap、PR template、CODEOWNERS 或 merge queue / `merge_group` readiness 任务再调用
 - `scripts/check_repo_skills.py`：确认 `.agents/skills` 是否 Codex discoverable、repo-local only 或 globally installed 时手动运行
 - `scripts/check_requirements_shape.py`：导入 PRD / REQ / WS 后检查 traceability、技术假设状态和 verification method 时手动运行
+- `scripts/extract_requirement_source.py`：大型或 instruction-like raw PRD/source 先进入 `docs/requirements/source-raw/quarantine/`，并生成 bounded sanitized excerpt / REQDOC draft
+- `scripts/check_skill_catalog.py`：第三方 `.codex/skills`、catalog/lock、vendor/proxy metadata 或 skill/tool output scan policy 变化时手动运行；`--check-output <file>` 可扫描 bounded 输出
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
 - `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 可使用 `--markdown` 输出 check level / CI coverage，仍为 advisory
+- `scripts/check_agent_eval_dataset.py`：校验 `docs/ai/evals/agent-harness-evals.jsonl` 的 starter-safe eval 数据集
+- `scripts/run_agent_eval_dataset.py --dry-run`：列出 eval case 的本地检查，不调用模型 API 或外部服务
+- `scripts/check_agent_trace_schema.py` / `scripts/export_agent_trace.py` / `scripts/check_tool_contracts.py`：维护本地 trace schema、adapter sample 和 tool-contract registry 时运行
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_branch_hygiene.py --strict`：控制 active PR 数量预算、failed open PR 和 stale branch，CI / PR summary 也会运行
 - `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap
-- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule 膨胀排查时手动运行；会提示 80/90 高水位、ADR 到达预算和 stage status 行数压缩
+- `scripts/check_context_budget.py`：默认上下文变重、stage compression 前或 skill/rule/source 膨胀排查时手动运行；会提示 80/90 高水位、ADR 到达预算、stage status 行数、skill catalog、raw source 和 static task packet 预算
 - [handoffs/active](./handoffs/active)
 - [status](./status)
 - [changelog](./changelog)

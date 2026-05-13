@@ -1,6 +1,6 @@
 # 项目计划
 
-更新时间：2026-05-07
+更新时间：2026-05-10
 文档定位：阶段规划与范围控制视图
 
 ## 使用边界
@@ -19,8 +19,8 @@
 
 ### 当前范围
 
-- 导入多个真实需求场景，并验证 harness 在第二个和第三个 workstream 上可复用
-- 实现至少三个桌面浏览器可运行的 repo-native 静态应用切片
+- 导入多个真实需求场景，并验证 harness 在后续 workstream 上可复用
+- 实现多个桌面浏览器可运行的 repo-native 静态应用切片，其中 WS-04 承接 2D 平台闯关游戏 MVP
 - 继续强化 runtime harness、governance harness 和 requirements traceability 的协同
 
 ### 暂不纳入范围
@@ -51,12 +51,12 @@
 - 目标：完成 harness 骨架、引入首个真实需求场景并落下最小可运行垂直切片
 - 验收：形成 requirements 体系、首批 ADR、首个阶段 status 和可运行场景
 
-### 第 1 阶段：核心基础设施
+### 第 1 阶段：游戏 MVP 开发
 
-- 目标：基于真实样本收紧 traceability、一致性校验和 reducer 压缩策略
-- 验收：metadata 与 traceability matrix 的同步规则稳定，治理脚本可继续增强
+- 目标：基于 REQDOC-003 / `prd_game.md` 落地可玩、可打开、可 smoke 的 repo-native 2D 平台闯关 MVP
+- 验收：三关 MVP、核心操作、清场结算、HUD/存档/本地化种子和 smoke 验证链路成立；Godot 工程仍按后续 spike 决策
 
-### 第 2 阶段：核心业务流程
+### 第 2 阶段：核心业务流程与引擎化候选
 
 - 目标：在更多真实功能切片上复用已验证的 harness 流程
 - 验收：不止一个 workstream 能稳定走通 requirements -> implementation -> status/adr

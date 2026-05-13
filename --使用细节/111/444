@@ -1,0 +1,73 @@
+我查完后的判断：**最佳路线不是继续压缩第三方 skill 本身，而是把 skill 当成“外部依赖/工具包”，在它前面加一层可审计、可预算、可隔离的 harness broker。**
+
+这条路线有实证支撑：Anthropic 的 Skills 设计明确依赖 progressive disclosure，启动只读 metadata，触发后再读 `SKILL.md`，资源按需加载；MCP 官方也给出类似结论，工具定义全量加载可到约 150k tokens，而 progressive discovery 可降到约 2k tokens，并建议 1%-5% context 阈值后切换按需发现。见 [Claude Skills overview](https://claude.com/docs/skills/overview) 和 [MCP client best practices](https://modelcontextprotocol.io/docs/develop/clients/client-best-practices)。
+
+**最佳路线**
+1. **把 `.codex/skills` 分成“可发现代理层”和“第三方原始层”**  
+   不直接让下载来的大 `SKILL.md` 进入自动发现面。做法是：
+   - `.codex/skills/<name>/SKILL.md` 只保留一个很短的 proxy skill：名称、30-50 词触发描述、风险等级、入口脚本。
+   - 原始开源 skill 放到 `.codex/vendor-skills/<name>/` 或 `.codex/skills/<name>/vendor/`。
+   - proxy 明确写“需要时读取 vendor/SKILL.md 的指定章节”，而不是默认读全文。  
+   这对应 Anthropic 推荐的“详细内容放 references/assets/scripts，按需加载”，不是强行控制开源 skill 大小。
+
+2. **建立 `skills.lock` / `skills.catalog.json`，把 skill 当供应链依赖管理**  
+   每个 skill 记录：来源 URL、commit/hash、许可证、信任等级、是否可写文件、是否可执行命令、是否访问网络、是否可触发外部服务、默认是否启用。  
+   这解决你说的“开源 skill 控制不了大小”：控制点不在原文件，而在 broker 是否允许它被发现、加载、执行。
+
+3. **把 skill/tool 发现改成三层：Catalog -> Inspect -> Execute**  
+   MCP 官方推荐的 progressive discovery 正是这个结构：先只给模型一个轻量 `search_tools`，再按需取 full schema，最后执行。skill 也应该同构：
+   - Catalog：短描述 + tags + risk
+   - Inspect：加载 proxy 或指定 reference
+   - Execute：运行脚本/读取 vendor，带权限和预算  
+   这个方案直接解决“skill 很多、description 很长、上下文被吃光”的问题。
+
+4. **默认上下文预算要升级成多预算，而不是只看 AGENTS/working-context**  
+   当前 harness 缺的是这些预算面：
+   - always-on budget：`AGENTS.md`、index、working-context
+   - skill catalog budget：所有 proxy metadata 总量
+   - activated skill budget：本轮实际加载 skill 内容
+   - raw source budget：REQDOC 原文和外部材料
+   - task packet budget：本轮交给 agent 的最终上下文包  
+   对 `tags_agents` 这种项目，raw source 和 activated skill budget 必须单独拦截。
+
+5. **外部文档进入 quarantine，而不是直接进入 requirements/source**  
+   `Project 👾⚡ (1).txt` 这种含伪系统指令的材料，不能和可信需求同级。路线是：
+   - `docs/requirements/source-raw/quarantine/`
+   - 强制元数据：source trust、instruction handling、sanitization status
+   - 只允许抽取后的 excerpt 进入 `REQDOC`
+   - `REQDOC` 是证据索引 + 摘要，不是全文搬运  
+   Microsoft 对间接 prompt injection 的建议是“假设攻击会发生、隔离不可信内容、使用 IFC/spotlighting、运行时监控”，见 [Microsoft guidance](https://learn.microsoft.com/en-us/security/zero-trust/sfi/defend-indirect-prompt-injection)。OWASP 也把 prompt injection、插件/工具风险列为核心 LLM 风险，见 [OWASP LLM Top 10](https://owasp.org/www-project-top-10-for-large-language-model-applications/)。
+
+6. **AGENTS.md 必须更短，而不是更全**  
+   有一篇 2026 年实证研究发现，repo context files 会增加 20%+ 推理成本，并且不必要规则会降低任务成功率；结论是只写最小必要规则。见 [Evaluating AGENTS.md](https://arxiv.org/abs/2602.11988)。  
+   所以最佳实践不是把 9 个风险全塞进 AGENTS，而是 AGENTS 只保留触发规则，细则下沉到 checks、catalog、quarantine、skills broker。
+
+7. **混合栈 code-shape 要扩展到 TS/TSX/CSS/SQL**  
+   当前 harness 偏 Python/shell，对 `tags_agents` 的 `App.tsx`、`styles.css`、API tests、SQL migration 治理不够。应新增：
+   - TS/TSX 文件行数、组件复杂度、test 文件长度
+   - CSS selector/文件行数预算
+   - SQL migration 长度和 destructive DDL 检查
+   - Python service 继续保留函数/class 预算  
+   SWE-agent 论文的实证结论是：agent-computer interface 设计会显著影响 coding agent 表现，好的 harness/interface 本身就是性能来源，见 [SWE-agent](https://arxiv.org/abs/2405.15793)。
+
+8. **用 trace/eval 证明 skill 和 harness 改动有效**  
+   不能只靠“规则写了”。OpenAI Agents SDK 支持 tracing，trace eval 用于系统性评估 agent 决策、tool calls、guardrails，见 [OpenAI tracing](https://openai.github.io/openai-agents-python/tracing/) 和 [trace grading](https://developers.openai.com/api/docs/guides/trace-grading)。  
+   对这个项目应建 20-30 个 eval case：
+   - 是否误读 quarantine prompt injection
+   - 是否加载过大的 vendor skill
+   - 是否绕过 skill broker
+   - 是否把大 PRD 全文塞进 handoff
+   - 是否正确选择 TS/CSS/SQL 检查
+
+9. **MCP/skill 输出一律按“不可信工具输出”处理**  
+   OWASP 的 MCP Tool Poisoning 明确指出：工具响应里的隐藏指令会进入 LLM context，并可能触发受限工具或泄露数据，见 [OWASP MCP Tool Poisoning](https://owasp.org/www-community/attacks/MCP_Tool_Poisoning)。  
+   所以 broker 层必须做：输出截断、指令样式扫描、跨工具数据流限制、高风险动作人工确认、最小权限。
+
+**落地优先级**
+P0：先做 `skills.catalog.json`、proxy skill 目录、quarantine source 目录、`.gitignore` 修正。  
+P1：扩展 context budget：skill catalog、activated skill、raw source、task packet。  
+P2：做 PRD 抽取器：raw -> sanitized excerpts -> REQDOC -> REQ/WS。  
+P3：扩展 code-shape 到 TS/TSX/CSS/SQL/Python service。  
+P4：加 eval/trace：用固定案例证明不会误读污染源、不会全量加载大 skill、不会让大文档进入默认面。
+
+这条路线的核心是：**不要和开源 skill 的体积对抗；把它们依赖化、代理化、按需化、可审计化。**

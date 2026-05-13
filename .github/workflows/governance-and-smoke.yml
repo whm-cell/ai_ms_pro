@@ -107,6 +107,9 @@ jobs:
       - name: Run AI governance checks
         run: python3 scripts/check_ai_governance.py
 
+      - name: Run context budget gate
+        run: python3 scripts/check_context_budget.py
+
       - name: Run agent trace schema checks
         run: python3 scripts/check_agent_trace_schema.py
 
@@ -127,6 +130,9 @@ jobs:
 
       - name: Run code shape checks
         run: python3 scripts/check_code_shape.py --all
+
+      - name: Run skill catalog checks
+        run: python3 scripts/check_skill_catalog.py
 
   windows-hook-runtime:
     runs-on: windows-latest

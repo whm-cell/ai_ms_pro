@@ -39,6 +39,9 @@ skill_description_word_budget = 3
 skill_body_line_budget = 3
 adr_count_budget = 1
 mcp_server_budget = 1
+skill_catalog_token_budget = 2
+raw_source_token_budget = 2
+static_packet_token_budget = 3
 """,
             )
             repeated = "- repeat this important instruction across files to find duplicated guidance\n"
@@ -55,6 +58,8 @@ mcp_server_budget = 1
             write(root / "docs/ai/handoffs/active/current.md", "# Handoff\n")
             write(root / "docs/ai/adr/ADR-001.md", "# ADR 1\n")
             write(root / "docs/ai/adr/ADR-002.md", "# ADR 2\n")
+            write(root / ".codex/skills.catalog.json", '{"skills": ["' + ("x" * 40) + '"]}')
+            write(root / "docs/requirements/source/REQDOC-001.md", "raw source " + ("x" * 40))
             write(
                 root / ".agents/skills/example/SKILL.md",
                 """---
@@ -81,7 +86,21 @@ description: this description is intentionally too long
         self.assertIn("ADR count reached budget", warning_text)
         self.assertIn("Skill description is long", warning_text)
         self.assertIn("Skill body is long", warning_text)
+        self.assertIn("Skill Catalog exceeds budget", warning_text)
+        self.assertIn("Raw Source exceeds budget", warning_text)
+        self.assertIn("Static Task Packet exceeds budget", warning_text)
         self.assertTrue(report.duplicate_instructions)
+
+        blocking_text = "\n".join(check_context_budget.blocking_findings(report))
+        self.assertIn("Default context surface exceeds hard budget", blocking_text)
+        self.assertIn("Always-on document AGENTS.md exceeds line budget", blocking_text)
+        self.assertIn("Skill Catalog exceeds hard budget", blocking_text)
+        self.assertIn("Raw Source exceeds hard budget", blocking_text)
+        self.assertIn("Static Task Packet exceeds hard budget", blocking_text)
+        self.assertIn(
+            "Stage status docs/ai/status/stage-00.md reached compression line budget",
+            blocking_text,
+        )
 
     def test_default_surface_warns_at_percentage_thresholds_before_hard_budget(self) -> None:
         config = check_context_budget.ContextBudgetConfig(
@@ -134,6 +153,17 @@ description: this description is intentionally too long
             "Default context surface reached high warning threshold",
             "\n".join(high_warnings),
         )
+
+    def test_raw_source_budget_counts_quarantine_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "docs/requirements/source/REQDOC-001.md", "short source")
+            write(root / "docs/requirements/source-raw/quarantine/raw-attachment.txt", "x" * 400)
+
+            usages = {item.name: item for item in check_context_budget.budget_usages(root)}
+
+        self.assertGreaterEqual(usages["raw source"].used_tokens, 100)
+        self.assertGreaterEqual(usages["static task packet"].used_tokens, 100)
 
 
 if __name__ == "__main__":

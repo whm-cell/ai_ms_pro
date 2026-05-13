@@ -31,6 +31,9 @@ class Config:
     python_function: Limit
     python_class: Limit
     shell_file: Limit
+    typescript_file: Limit
+    stylesheet_file: Limit
+    sql_file: Limit
 
 @dataclass(frozen=True)
 class Candidate:
@@ -69,6 +72,9 @@ def load_config() -> Config:
         python_function=Limit(**thresholds["python_function"]),
         python_class=Limit(**thresholds["python_class"]),
         shell_file=Limit(**thresholds["shell_file"]),
+        typescript_file=Limit(**thresholds.get("typescript_file", thresholds["python_file"])),
+        stylesheet_file=Limit(**thresholds.get("stylesheet_file", thresholds["shell_file"])),
+        sql_file=Limit(**thresholds.get("sql_file", thresholds["shell_file"])),
     )
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -104,6 +110,12 @@ def detect_kind(path: str) -> str | None:
     pure = PurePosixPath(path)
     if pure.suffix == ".py":
         return "python"
+    if pure.suffix in {".ts", ".tsx"}:
+        return "typescript"
+    if pure.suffix in {".css", ".scss"}:
+        return "stylesheet"
+    if pure.suffix == ".sql":
+        return "sql"
     if pure.suffix == ".sh" or path == ".githooks/pre-commit":
         return "shell"
     return None
@@ -154,7 +166,10 @@ def load_all_candidates(config: Config) -> list[Candidate]:
         kind = detect_kind(path)
         if kind is None:
             continue
-        text = decode_text((ROOT / path).read_bytes(), path)
+        candidate_path = ROOT / path
+        if not candidate_path.exists():
+            continue
+        text = decode_text(candidate_path.read_bytes(), path)
         candidates.append(Candidate(path=path, kind=kind, is_new=False, text=text))
     return candidates
 
@@ -247,6 +262,42 @@ def check_candidate(
             label="class",
             limit=config.python_class,
             items=classes,
+            is_new=candidate.is_new,
+        )
+        return
+
+    if candidate.kind == "typescript":
+        add_length_findings(
+            errors,
+            warnings,
+            path=candidate.path,
+            label="TypeScript file",
+            limit=config.typescript_file,
+            actual=line_count,
+            is_new=candidate.is_new,
+        )
+        return
+
+    if candidate.kind == "stylesheet":
+        add_length_findings(
+            errors,
+            warnings,
+            path=candidate.path,
+            label="stylesheet file",
+            limit=config.stylesheet_file,
+            actual=line_count,
+            is_new=candidate.is_new,
+        )
+        return
+
+    if candidate.kind == "sql":
+        add_length_findings(
+            errors,
+            warnings,
+            path=candidate.path,
+            label="SQL file",
+            limit=config.sql_file,
+            actual=line_count,
             is_new=candidate.is_new,
         )
         return

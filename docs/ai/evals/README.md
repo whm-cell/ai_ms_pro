@@ -23,7 +23,7 @@ Each JSONL item must contain:
 
 - `id`: Stable unique ID, using `EVAL-NNN-kebab-name`.
 - `title`: Short human-readable task name.
-- `category`: One of `simple-code`, `requirements-traceability`, `high-impact-guardrail`, or `resume-runtime`.
+- `category`: One of `simple-code`, `requirements-traceability`, `high-impact-guardrail`, `resume-runtime`, or `skill-harness`.
 - `task_prompt`: The task an agent would receive.
 - `expected_artifacts`: List of repo-relative files or directories expected to be touched, created, or inspected.
 - `expected_checks`: List of check objects with `command`, `expected_outcome`, and `rationale`.
@@ -85,6 +85,8 @@ Browser and app smoke tests prove concrete slices still run. Skill eval samples 
 The dataset should stay small, readable, and dependency-free. New evals should prefer checks that are already documented in `docs/ai/tool-contracts/contracts.json`.
 
 `EVAL-005-stop-trace-evidence-contract` is the first trace-aware case. It connects the Stop trace producer, the `agent-trace/v1` schema checker, and the `stop_runtime_observation` tool contract while keeping runtime trace files local-only evidence.
+
+`EVAL-006` through `EVAL-020` cover skill-harness hardening: third-party skill catalog/proxy/lock handling, skill/tool output scanning, source quarantine, mixed-stack code-shape, changed-file follow-up routing, multi-surface context budget, and starter portability.
 
 ## Validation
 

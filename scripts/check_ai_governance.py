@@ -83,6 +83,10 @@ from ai_governance_traceability_metadata import (
     validate_traceability_metadata_docs,
 )
 from ai_governance_working_context import validate_working_context_sync_metadata
+from check_context_budget import (
+    build_report as build_context_budget_report,
+)
+from context_budget_warnings import blocking_findings as context_budget_blocking_findings
 from harness_config import HarnessConfigError, load_harness_config
 
 
@@ -148,6 +152,16 @@ def run_child_checks() -> list[tuple[str, str, str]]:
     return failures
 
 
+def validate_context_budget_gate(errors: list[str]) -> None:
+    try:
+        report = build_context_budget_report(ROOT)
+    except HarnessConfigError as exc:
+        errors.append(str(exc))
+        return
+
+    errors.extend(context_budget_blocking_findings(report))
+
+
 def print_result(
     *,
     errors: list[str],
@@ -192,6 +206,7 @@ def main() -> int:
         context_surface=context_surface,
         warnings=warnings,
     )
+    validate_context_budget_gate(errors)
 
     sync_errors, sync_warnings = validate_working_context_sync_metadata(
         active_handoffs=active_handoffs,

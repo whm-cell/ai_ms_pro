@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Freeze Platformer MVP</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage" aria-label="Pixel Freeze Platformer MVP">
+        <canvas id="game" width="960" height="540"></canvas>
+        <div class="overlay hidden" id="overlay">
+          <strong id="overlay-title">Paused</strong>
+          <span id="overlay-detail">WS-04</span>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="Game status">
+        <header class="masthead">
+          <p id="subtitle">STAGE-01 / WS-04</p>
+          <h1 id="title">Pixel Freeze Platformer</h1>
+        </header>
+
+        <div class="toolbar" aria-label="Actions">
+          <button id="start" type="button">Start</button>
+          <button id="pause" type="button">Pause</button>
+          <button id="retry" type="button">Retry</button>
+        </div>
+
+        <div class="stats" aria-live="polite">
+          <div><span id="label-level">Level</span><strong id="level">1-1</strong></div>
+          <div><span id="label-lives">Lives</span><strong id="lives">3</strong></div>
+          <div><span id="label-score">Score</span><strong id="score">0</strong></div>
+          <div><span id="label-combo">Combo</span><strong id="combo">0</strong></div>
+          <div><span id="label-time">Time</span><strong id="time">90</strong></div>
+          <div><span id="label-enemies">Enemies</span><strong id="enemies">3</strong></div>
+          <div><span id="label-exit">Exit</span><strong id="exit">Locked</strong></div>
+          <div><span id="label-rank">Rank</span><strong id="rank">Pending</strong></div>
+        </div>
+
+        <div class="progress-row">
+          <label id="label-language" for="language">Language</label>
+          <select id="language">
+            <option value="en">English</option>
+            <option value="zh">简体中文</option>
+          </select>
+        </div>
+
+        <div class="progress-row">
+          <span id="label-best">Best</span>
+          <strong id="best">0</strong>
+        </div>
+
+        <div class="toolbar lower" aria-label="Progress">
+          <button id="next" type="button">Next Level</button>
+          <button id="reset-progress" type="button">Reset Progress</button>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

@@ -29,3 +29,6 @@ skill_description_word_budget = 30
 skill_body_line_budget = 400
 adr_count_budget = 15
 mcp_server_budget = 10
+skill_catalog_token_budget = 2000
+raw_source_token_budget = 30000
+static_packet_token_budget = 32000
