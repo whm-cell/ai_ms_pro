@@ -228,87 +228,71 @@ def add_definition_findings(
         )
 
 
-def check_candidate(
+def check_python_candidate(
     candidate: Candidate,
     config: Config,
     errors: list[str],
     warnings: list[str],
 ) -> None:
     line_count = len(candidate.text.splitlines())
-    if candidate.kind == "python":
-        add_length_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="Python file",
-            limit=config.python_file,
-            actual=line_count,
-            is_new=candidate.is_new,
-        )
-        functions, classes = collect_python_shapes(candidate.text)
-        add_definition_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="function/method",
-            limit=config.python_function,
-            items=functions,
-            is_new=candidate.is_new,
-        )
-        add_definition_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="class",
-            limit=config.python_class,
-            items=classes,
-            is_new=candidate.is_new,
-        )
-        return
-
-    if candidate.kind == "typescript":
-        add_length_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="TypeScript file",
-            limit=config.typescript_file,
-            actual=line_count,
-            is_new=candidate.is_new,
-        )
-        return
-
-    if candidate.kind == "stylesheet":
-        add_length_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="stylesheet file",
-            limit=config.stylesheet_file,
-            actual=line_count,
-            is_new=candidate.is_new,
-        )
-        return
-
-    if candidate.kind == "sql":
-        add_length_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="SQL file",
-            limit=config.sql_file,
-            actual=line_count,
-            is_new=candidate.is_new,
-        )
-        return
-
     add_length_findings(
         errors,
         warnings,
         path=candidate.path,
-        label="shell file",
-        limit=config.shell_file,
+        label="Python file",
+        limit=config.python_file,
         actual=line_count,
+        is_new=candidate.is_new,
+    )
+    functions, classes = collect_python_shapes(candidate.text)
+    add_definition_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label="function/method",
+        limit=config.python_function,
+        items=functions,
+        is_new=candidate.is_new,
+    )
+    add_definition_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label="class",
+        limit=config.python_class,
+        items=classes,
+        is_new=candidate.is_new,
+    )
+
+
+def simple_kind_budget(candidate: Candidate, config: Config) -> tuple[str, Limit]:
+    if candidate.kind == "typescript":
+        return ("TypeScript file", config.typescript_file)
+    if candidate.kind == "stylesheet":
+        return ("stylesheet file", config.stylesheet_file)
+    if candidate.kind == "sql":
+        return ("SQL file", config.sql_file)
+    return ("shell file", config.shell_file)
+
+
+def check_candidate(
+    candidate: Candidate,
+    config: Config,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    if candidate.kind == "python":
+        check_python_candidate(candidate, config, errors, warnings)
+        return
+
+    label, limit = simple_kind_budget(candidate, config)
+    add_length_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label=label,
+        limit=limit,
+        actual=len(candidate.text.splitlines()),
         is_new=candidate.is_new,
     )
 

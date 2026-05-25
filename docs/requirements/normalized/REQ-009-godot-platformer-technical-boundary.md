@@ -1,6 +1,6 @@
 # Godot PRD 技术边界与业务范围
 
-更新时间：2026-05-07
+更新时间：2026-05-21
 需求编号：REQ-009
 来源文档：REQDOC-003
 需求标题：Godot PRD 技术边界与业务范围
@@ -9,7 +9,7 @@
 ## 背景
 
 - REQDOC-003 包含 Godot、素材生成、音频、本地化、测试插件和 CI 导出建议。
-- 这些内容中有一部分是产品需求，有一部分是 proposed 工程前提；验证方式：WS-03 smoke 只验证薄切片，真实 Godot spike / ADR 采纳前不能写成已采纳架构事实。
+- 这些内容中有一部分是产品需求，有一部分是 proposed 工程前提；WS-03 历史 smoke 只验证过薄切片，真实 Godot spike / ADR 采纳前不能写成已采纳架构事实。
 
 ## 目标
 
@@ -20,7 +20,7 @@
 ### 包含
 
 - 保留 Godot 4.6.2、Compatibility renderer、GUT、导出 preset 等为 proposed / 待确认；验证方式：后续 Godot engine spike、Godot smoke 与 ADR 采纳。
-- 明确首轮切片使用 repo-native 浏览器实现，服务 harness 验证。
+- 明确首轮切片曾使用 repo-native 浏览器实现服务 harness 验证；当前 active harness capability validation 已回到 WS-01 Three.js Snake。
 - 将后续 Godot engine spike、素材管线、存档、本地化和导出流水线排入未来候选范围。
 
 ### 不包含

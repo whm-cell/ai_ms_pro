@@ -1,7 +1,7 @@
 # 需求追踪矩阵
 
-更新时间：2026-05-10
-当前状态：已建立四个真实场景追踪；REQDOC-003 的 raw PRD evidence 已归并到 canonical source，WS-04 repo-native 游戏 MVP 已完成 smoke 验证
+更新时间：2026-05-21
+当前状态：已建立四个真实场景追踪；WS-01 Three.js Snake 是当前 harness capability validation sample；WS-03 Godot browser slice 已退出 active validation；REQDOC-003 的 raw PRD evidence 已归并到 canonical source，WS-04 repo-native 游戏 MVP 已完成 smoke 验证
 
 ## 目的
 
@@ -25,9 +25,9 @@
 | REQDOC-002 | REQ-004 | WS-02 | STAGE-00 | 已完成 | `apps/harness-trace-console/` 已直接读取 `working-context`、stage status 与 `traceability-matrix`，展示当前阶段、摘要卡片和活跃队列 |
 | REQDOC-002 | REQ-005 | WS-02 | STAGE-00 | 已完成 | 控制台支持按 `stage/workstream/status/search` 过滤 traceability，并可查看单条 requirement 详情 |
 | REQDOC-002 | REQ-006 | WS-02 | STAGE-00 | 已完成 | `python3 scripts/harness_trace_console_smoke.py` 已验证 load -> WS-02 filter -> REQ-006 search；runtime hooks 与 reducer 已用显式 metadata 跑通一次 |
-| REQDOC-003 | REQ-007 | WS-03 | STAGE-00 | 已完成 | `apps/godot-platformer-slice/` 已验证 move/jump -> freeze -> throw -> combo/rank -> clear enemies -> unlock exit -> complete 的玩法反馈闭环；Godot 工程仍未采纳 |
-| REQDOC-003 | REQ-008 | WS-03 | STAGE-00 | 已完成 | `python3 scripts/godot_platformer_slice_smoke.py` 已验证 load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset；CI 接入因 workflow touch-set 冲突拆到后续 PR |
-| REQDOC-003 | REQ-009 | WS-03 | STAGE-00 | 已完成 | Godot 4.6.2、Compatibility renderer、GUT、导出 preset 等保持 proposed / 待确认；本轮只采纳 repo-native 首轮切片作为 harness 验证样本 |
+| REQDOC-003 | REQ-007 | WS-03 | STAGE-00 | 历史完成；非 active validation | WS-03 曾用 repo-native browser slice 验证 move/jump -> freeze -> throw -> combo/rank -> clear enemies -> unlock exit -> complete 的玩法反馈闭环；当前 Godot slice 已从 active worktree / CI 移除，Godot 工程仍未采纳 |
+| REQDOC-003 | REQ-008 | WS-03 | STAGE-00 | 历史完成；非 active validation | WS-03 曾用 browser smoke 验证 load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset；当前 blocking browser smoke 改由 WS-01 Three.js Snake 与 WS-02 Trace Console 承载 |
+| REQDOC-003 | REQ-009 | WS-03 | STAGE-00 | 已完成 | Godot 4.6.2、Compatibility renderer、GUT、导出 preset 等保持 proposed / 待确认；WS-03 历史 browser slice 不再作为当前 harness 验证样本；后续 Godot 需独立 engine spike / ADR / smoke |
 | REQDOC-003 | REQ-010 | WS-04 | STAGE-01 | 已完成 | `apps/pixel-freeze-platformer/` 作为 repo-native 可玩 MVP；`scripts/pixel_freeze_platformer_smoke.py` 覆盖 load -> validate content -> controls -> clear level -> next level -> campaign complete -> locale/reset |
 | REQDOC-003 | REQ-011 | WS-04 | STAGE-01 | 已完成 | MVP 关卡数据、敌人、道具和评级目标由 `validateContent()` 与 smoke 校验；后续 Godot JSON / Resource 迁移仍 proposed |
 | REQDOC-003 | REQ-012 | WS-04 | STAGE-01 | 已完成 | MVP HUD、暂停、重开、本地保存和中英语言切换由 UI 与 smoke API 验证 |

@@ -10,6 +10,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from requirements_source_boundary import check_external_content_boundary_metadata
+from requirements_technical_assumptions import check_technical_assumption_lines
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,11 +25,6 @@ REQDOC_RE = re.compile(r"REQDOC-\d+")
 REQ_RE = re.compile(r"REQ-\d+")
 WS_RE = re.compile(r"WS-\d+")
 STAGE_RE = re.compile(r"STAGE-\d+", re.IGNORECASE)
-TECH_ASSUMPTION_HEADING_RE = re.compile(r"^(#+)\s+.*(技术假设|技术栈|技术选型|框架选型|数据库选型|架构事实)")
-TECH_ASSUMPTION_LABEL_RE = re.compile(r"(技术假设|技术栈假设|技术选型|框架选型|数据库选型|架构事实)")
-TECH_STATUS_RE = re.compile(r"\b(accepted|proposed|rejected|deferred)\b|(状态\s*[：:]\s*)?(已采纳|已接受|候选|拟议|提议|已拒绝|拒绝|暂缓|推迟)", re.IGNORECASE)
-WEAK_STATUS_RE = re.compile(r"(待确认|待澄清|未确认|待定|需要决定|需要确认)")
-VERIFICATION_METHOD_RE = re.compile(r"\bverification method\b|验证方式|验证方法|验收方式|验收方法|测试方式|测试方法|验证命令|测试命令|\b(smoke|test|pytest|go test|pnpm test|npm test|manual review|code review|pending)\b|待验证|待确认", re.IGNORECASE)
 SOURCE_EVIDENCE_TYPE_PREFIXES = ("文档类型：", "文档类型:", "Document type:", "Document Type:")
 LINKED_REQDOC_PREFIXES = ("关联文档：", "关联文档:", "关联 REQDOC：", "关联 REQDOC:", "Linked REQDOC:", "Linked Source:")
 SOURCE_EVIDENCE_RE = re.compile(r"(source-evidence|raw-prd-evidence|原始证据|原始附件)", re.IGNORECASE)
@@ -246,67 +242,6 @@ def check_workstream_links(
                 warnings.append(f"WS coverage not present in traceability matrix: {ws_id} -> {req_id}")
 
 
-def is_candidate_assumption_line(raw_line: str, in_assumption_section: bool) -> bool:
-    stripped = raw_line.strip()
-    if not stripped or (stripped.startswith("|") and re.fullmatch(r"[\s|:-]+", stripped)):
-        return False
-    if stripped.startswith("|"):
-        return bool(in_assumption_section or TECH_ASSUMPTION_LABEL_RE.search(stripped))
-    if stripped.startswith(("-", "*", "+")):
-        return bool(in_assumption_section or TECH_ASSUMPTION_LABEL_RE.search(stripped))
-    return bool(TECH_ASSUMPTION_LABEL_RE.search(stripped))
-
-
-def technical_assumption_record(raw_line: str) -> str:
-    stripped = raw_line.strip()
-    if stripped.startswith("|"):
-        cells = [cell.strip() for cell in stripped.split("|")[1:-1]]
-        normalized = [cell.lower() for cell in cells]
-        if {"claim", "status"}.issubset(set(normalized)) or {"技术假设", "状态"}.issubset(set(cells)):
-            return ""
-        return " | ".join(cells)
-    return stripped.lstrip("-*+").strip()
-
-
-def check_technical_assumption_record(path: Path, number: int, line: str, warnings: list[str]) -> None:
-    record = technical_assumption_record(line)
-    if not record:
-        return
-    location = f"{relative(path)}:{number}"
-    if not TECH_STATUS_RE.search(record):
-        if WEAK_STATUS_RE.search(record):
-            warnings.append(
-                f"technical assumption has unresolved status, use accepted/proposed/rejected/deferred: {location}: {record}"
-            )
-        else:
-            warnings.append(
-                f"technical assumption missing status accepted/proposed/rejected/deferred: {location}: {record}"
-            )
-    if not VERIFICATION_METHOD_RE.search(record):
-        warnings.append(f"technical assumption missing verification method: {location}: {record}")
-
-
-def check_technical_assumption_lines(paths: list[Path], warnings: list[str]) -> None:
-    for path in paths:
-        in_assumption_section = False
-        section_level = 0
-        for number, raw_line in enumerate(read_text(path).splitlines(), start=1):
-            stripped = raw_line.strip()
-            heading = re.match(r"^(#+)\s+", stripped)
-            if heading:
-                level = len(heading.group(1))
-                matched = bool(TECH_ASSUMPTION_HEADING_RE.search(stripped))
-                if matched:
-                    in_assumption_section = True
-                    section_level = level
-                elif in_assumption_section and level <= section_level:
-                    in_assumption_section = False
-                continue
-            if not is_candidate_assumption_line(raw_line, in_assumption_section):
-                continue
-            check_technical_assumption_record(path, number, raw_line, warnings)
-
-
 def check_source_evidence_attachments(
     attachment_paths: list[Path],
     source_docs: dict[str, Path],
@@ -363,6 +298,7 @@ def build_report() -> RequirementShapeReport:
     check_technical_assumption_lines(
         [*source_docs.values(), *source_evidence_attachments, *req_docs.values(), *ws_docs.values()],
         warnings,
+        root=ROOT,
     )
 
     return RequirementShapeReport(

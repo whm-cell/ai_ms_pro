@@ -13,7 +13,7 @@
 ## 当前阶段目标
 
 - 把原始 PRD 的“移动/跳跃 -> 冻结 -> 投掷连锁 -> 清场出口 -> 结算评级”落成可打开、可操作、可 smoke 的浏览器 MVP。
-- 保留 Godot 4.6.2、GUT、导出 preset、正式素材、音频、移动端和发布流水线为后续独立 spike / workstream。
+- 保留 Godot 4.6.2、GUT、导出 preset、正式素材、音频、移动端和发布流水线为后续独立 spike / workstream；已退出 active validation 的 WS-03 browser slice 不再作为当前 Godot 证据。
 - 用 WS-04 再次验证 requirements -> implementation -> smoke -> governance docs 的 harness 闭环。
 
 ## 当前完成度
@@ -32,9 +32,9 @@
 
 ## 风险与阻塞
 
-- 本阶段完成的是浏览器 MVP，不证明 Godot engine、GUT、导出模板、移动端、正式素材或商业发布能力。
+- 本阶段完成的是浏览器 MVP，不证明 Godot engine、GUT、导出模板、移动端、正式素材或商业发布能力；当前 harness capability validation 另由 WS-01 Three.js Snake 承载。
 - `pytest` 在当前系统 Python 和 repo-local venv 中不可用；requirements shape 相关单测需用 `unittest` 或先安装测试依赖。
-- `scripts/check_requirements_shape.py` 仍有既有 code-shape warning：文件行数超过 350，后续维护时应拆分。
+- Code-shape 主债务已清掉；`check_code_shape.py --all` 当前无 warning。
 
 ## 下一阶段重点
 

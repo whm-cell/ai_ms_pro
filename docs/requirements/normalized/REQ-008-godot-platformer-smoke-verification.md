@@ -1,10 +1,10 @@
 # Godot PRD 首轮切片 Smoke 验证
 
-更新时间：2026-05-08
+更新时间：2026-05-21
 需求编号：REQ-008
 来源文档：REQDOC-003
 需求标题：Godot PRD 首轮切片 Smoke 验证
-状态：已完成
+状态：历史完成；当前不作为 active validation
 
 ## 背景
 
@@ -19,10 +19,9 @@
 
 ### 包含
 
-- 新增 `scripts/godot_platformer_slice_smoke.py`。
-- smoke 自动启动静态服务器并打开 `apps/godot-platformer-slice/?smoke=1`。
-- smoke 验证初始状态、冻结、投掷、连击计分、出口解锁、评级、完成与重置。
-- CI 接入暂缓到后续 PR，避免与当前 Dependabot workflow PR 的 touch-set 冲突。
+- 历史 smoke 自动启动静态服务器并打开 repo-native Godot browser slice。
+- 历史 smoke 验证初始状态、冻结、投掷、连击计分、出口解锁、评级、完成与重置。
+- 当前 Godot browser slice 和 smoke 脚本已退出 active validation；blocking browser smoke 由 WS-01 Three.js Snake 与 WS-02 Trace Console 承载。
 
 ### 不包含
 
@@ -31,13 +30,12 @@
 
 ## 验收条件
 
-- `python3 scripts/godot_platformer_slice_smoke.py` 通过，并覆盖 combo/rank 反馈。
-- 需求追踪矩阵记录该验证命令。
+- 历史 WS-03 smoke 曾覆盖 combo/rank 反馈。
+- 需求追踪矩阵记录 WS-03 为历史完成 / 非 active validation，并记录当前 active smoke 边界。
 
 ## 依赖与前置条件
 
-- 依赖 `npx` 与 Playwright CLI，沿用现有 smoke 脚本方式。
-- CI runner 需要能安装 Chromium。
+- 当前不再依赖 Godot browser slice smoke；若后续恢复 Godot 验证，需要新建 engine spike / ADR / smoke。
 
 ## 风险与待澄清项
 

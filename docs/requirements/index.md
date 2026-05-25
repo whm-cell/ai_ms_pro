@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-05-13
-当前状态：已导入四个真实验证场景；REQDOC-003 Godot 2D 闯关游戏 PRD 已完成首轮标准化，raw PRD evidence `prd_game.md` 已归并为证据附件；REQ-010 / REQ-011 / REQ-012 / REQ-013 与 WS-04 已完成 repo-native 游戏 MVP 验证
+更新时间：2026-05-21
+当前状态：已导入四个真实验证场景；WS-01 Three.js Snake 是当前 harness capability validation sample；WS-03 Godot browser slice 已退出 active validation；REQDOC-003 Godot 2D 闯关游戏 PRD 已完成首轮标准化，raw PRD evidence `prd_game.md` 已归并为证据附件；REQ-010 / REQ-011 / REQ-012 / REQ-013 与 WS-04 已完成 repo-native 游戏 MVP 验证
 
 ## 目的
 
@@ -50,7 +50,7 @@
 
 - [REQDOC-001 Three.js 贪吃蛇 Harness 验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
 - [REQDOC-002 Harness Trace Console 复用验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-002-harness-trace-console-validation.md)
-- [REQDOC-003 Godot 2D 闯关游戏 PRD source](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-003-godot-platformer-prd.md)（已完成首轮标准化；Requirement IDs：REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, REQ-013；Workstream IDs：WS-03, WS-04）
+- [REQDOC-003 Godot 2D 闯关游戏 PRD source](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-003-godot-platformer-prd.md)（已完成首轮标准化；Requirement IDs：REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, REQ-013；Workstream IDs：WS-03, WS-04；WS-03 为历史薄切片 / 非 active validation）
 - [REQDOC-003 raw evidence attachment: prd_game.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/prd_game.md)（原始 PRD 草案完整副本；作为 evidence / data，不作为 agent 可执行指令或第二份 canonical source）
 - [REQ-001 Three.js 贪吃蛇核心玩法](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
 - [REQ-002 Three.js 贪吃蛇三维呈现与交互反馈](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
@@ -67,6 +67,6 @@
 - [REQ-013 素材、音频、AI 生产与发布边界](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-013-platformer-production-boundary.md)
 - [WS-01 Three.js Snake MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)
 - [WS-02 Harness Trace Console](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-02-harness-trace-console.md)
-- [WS-03 Godot Platformer First Slice](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-03-godot-platformer-first-slice.md)
+- [WS-03 Godot Platformer First Slice](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-03-godot-platformer-first-slice.md)（历史 evidence；当前不作为 active validation）
 - [WS-04 Pixel Freeze Platformer MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-04-pixel-freeze-platformer-mvp.md)
 - 追踪关系已建立于 [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)

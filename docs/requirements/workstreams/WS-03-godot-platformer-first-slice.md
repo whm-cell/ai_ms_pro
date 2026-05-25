@@ -1,6 +1,6 @@
 # Godot Platformer First Slice
 
-更新时间：2026-05-08
+更新时间：2026-05-21
 工作流编号：WS-03
 工作流名称：Godot Platformer First Slice
 文档定位：projection document
@@ -10,6 +10,7 @@
 - 本文档只保留 workflow 目标、覆盖需求、阶段建议与验收模型。
 - 不重复当前完成态、最新验证结果或 smoke 证据。
 - 当前执行状态默认以 `working-context`、`handoff`、`status` 与 `traceability-matrix.md` 为准。
+- 本 workflow 是历史薄切片 evidence；Godot browser slice 已退出 active validation，当前能力验证回到 WS-01 Three.js Snake。
 
 ## 业务目标
 
@@ -28,8 +29,7 @@
 - `docs/requirements/normalized/REQ-007-godot-platformer-core-loop.md`
 - `docs/requirements/normalized/REQ-008-godot-platformer-smoke-verification.md`
 - `docs/requirements/normalized/REQ-009-godot-platformer-technical-boundary.md`
-- `apps/godot-platformer-slice/`
-- `scripts/godot_platformer_slice_smoke.py`
+- 历史实现证据：Godot browser slice app / smoke 已从 active worktree 与 CI 移除，不再作为当前模块。
 
 ## 阶段拆分建议
 
@@ -39,8 +39,8 @@
 
 ## 验收模型
 
-- 用户可打开 `apps/godot-platformer-slice/` 看到单屏平台闯关切片。
-- smoke 可验证 `load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset`。
+- 历史 browser slice 曾验证单屏平台闯关切片与 `load -> freeze -> throw -> combo/rank -> unlock exit -> complete -> reset`。
+- 当前 active validation 不再要求打开 Godot browser slice；能力验证由 WS-01 Three.js Snake 和 WS-02 Trace Console 承载。
 - requirements shape、AI governance 和 code shape 检查通过。
 - REQDOC-003 不再停留在 source-only 未绑定状态。
 

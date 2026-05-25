@@ -42,7 +42,22 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Launch the browser in headed mode for manual observation.",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--url",
+        default="",
+        help="Use an already-served app URL instead of starting a local static server.",
+    )
+    parser.add_argument(
+        "--no-server",
+        action="store_true",
+        help="Require --url and do not bind a local static server.",
+    )
+    args = parser.parse_args()
+    if args.no_server and not args.url:
+        parser.error("--no-server requires --url.")
+    if args.url and not args.url.startswith(("http://", "https://")):
+        parser.error("--url must be an http:// or https:// URL.")
+    return args
 
 
 def find_free_port(host: str) -> int:
@@ -76,6 +91,18 @@ def wait_for_server(host: str, port: int, timeout: float = 5.0) -> None:
         except Exception:
             time.sleep(0.1)
     raise RuntimeError(f"Static server did not become ready in time: {url}")
+
+
+def wait_for_url(url: str, timeout: float = 5.0) -> None:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=0.5) as response:
+                if 200 <= response.status < 400:
+                    return
+        except Exception:
+            time.sleep(0.1)
+    raise RuntimeError(f"External app URL did not become ready in time: {url}")
 
 
 def run_command(cmd: list[str], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -135,6 +162,9 @@ const snapshot = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.restart
 if (!snapshot.running || snapshot.gameOver || !snapshot.overlayHidden || snapshot.score !== 0) {
   throw new Error(`Unexpected initial snapshot: ${JSON.stringify(snapshot)}`);
 }
+if (!snapshot.requirementIds.includes("REQ-001") || !snapshot.workstreamIds.includes("WS-01")) {
+  throw new Error(`Expected WS-01 metadata in snapshot, got ${JSON.stringify(snapshot)}`);
+}
         """.strip(),
         env=env,
     )
@@ -182,18 +212,30 @@ def main() -> int:
     ensure_npx()
 
     host = args.host
-    port = args.port or find_free_port(host)
-    server, thread, bound_port = start_static_server(host, port)
+    server = None
+    thread = None
+    if args.url:
+        bound_port = args.port
+        url = args.url
+    else:
+        port = args.port or find_free_port(host)
+        server, thread, bound_port = start_static_server(host, port)
+        url = f"http://{host}:{bound_port}{APP_URL_PATH}"
     session_name = f"snake-{os.getpid()}-{int(time.time())}"
     env = os.environ.copy()
     env["PLAYWRIGHT_CLI_SESSION"] = session_name
-    url = f"http://{host}:{bound_port}{APP_URL_PATH}"
 
-    print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
+    if server is None:
+        print(f"[smoke] using external app URL {url}")
+    else:
+        print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
     print(f"[smoke] opening {url}")
 
     try:
-        wait_for_server(host, bound_port)
+        if server is None:
+            wait_for_url(url)
+        else:
+            wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
         print("[smoke] PASS threejs-snake: load -> eat -> game over -> restart")
         return 0
@@ -202,9 +244,11 @@ def main() -> int:
             run_pw("close", env=env)
         except Exception:
             pass
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=1.0)
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=1.0)
         shutil.rmtree(REPO_ROOT / ".playwright-cli", ignore_errors=True)
 
 

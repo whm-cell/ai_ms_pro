@@ -1,10 +1,10 @@
 # Godot 2D 平台闯关核心玩法闭环
 
-更新时间：2026-05-08
+更新时间：2026-05-21
 需求编号：REQ-007
 来源文档：REQDOC-003
 需求标题：Godot 2D 平台闯关核心玩法闭环
-状态：已完成
+状态：历史完成；当前不作为 active validation
 
 ## 背景
 
@@ -36,6 +36,7 @@
 - 用户可在浏览器切片中完成核心闭环。
 - smoke 可用稳定测试 API 验证冻结、投掷、连击计分、清屏、出口解锁、评级与完成状态。
 - traceability matrix 绑定 REQDOC-003、REQ-007、WS-03 与 STAGE-00。
+- 当前 Godot browser slice 已从 active worktree / CI 移除；该需求只保留历史验证结论，不作为当前 blocking smoke。
 
 ## 依赖与前置条件
 

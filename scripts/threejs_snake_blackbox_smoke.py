@@ -75,18 +75,32 @@ def main() -> int:
     ensure_npx()
 
     host = args.host
-    port = args.port or find_free_port(host)
-    server, thread, bound_port = start_static_server(host, port)
+    server = None
+    thread = None
+    if args.url:
+        bound_port = args.port
+        url = args.url
+    else:
+        port = args.port or find_free_port(host)
+        server, thread, bound_port = start_static_server(host, port)
+        url = f"http://{host}:{bound_port}{APP_URL_PATH}"
     session_name = f"snake-blackbox-{os.getpid()}-{int(time.time())}"
     env = os.environ.copy()
     env["PLAYWRIGHT_CLI_SESSION"] = session_name
-    url = f"http://{host}:{bound_port}{APP_URL_PATH}"
 
-    print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
+    if server is None:
+        print(f"[smoke] using external app URL {url}")
+    else:
+        print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
     print(f"[smoke] opening {url}")
 
     try:
-        wait_for_server(host, bound_port)
+        if server is None:
+            from threejs_snake_smoke import wait_for_url
+
+            wait_for_url(url)
+        else:
+            wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
         print("[smoke] PASS threejs-snake blackbox: load -> keyboard turn -> game over -> enter restart")
         return 0
@@ -95,9 +109,11 @@ def main() -> int:
             run_pw("close", env=env)
         except Exception:
             pass
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=1.0)
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=1.0)
         shutil.rmtree(REPO_ROOT / ".playwright-cli", ignore_errors=True)
 
 

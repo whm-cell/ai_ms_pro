@@ -1,6 +1,6 @@
 # 使用Codex与Godot开发单屏平台闯关游戏的PRD与技术方案
 
-更新时间：2026-05-07
+更新时间：2026-05-21
 文档编号：REQDOC-003
 文档标题：Godot 2D 单屏平台闯关游戏 PRD 与技术方案
 来源：用户提供的 PRD 草案
@@ -11,7 +11,7 @@
 标准化状态：已拆分首轮 REQ / WS；已追加 WS-04 MVP 需求；完整 Godot 工程仍未采纳
 Requirement IDs：REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, REQ-013
 Workstream IDs：WS-03, WS-04
-技术假设状态：proposed / 待确认；验证方式：已通过 requirements normalization、traceability-matrix、repo-native 首轮垂直切片 smoke 与 WS-04 浏览器 MVP smoke 验证核心玩法闭环；Godot engine spike / smoke 和用户验收仍待后续确认；未经本仓库 ADR 或 Godot 实现 spike 采纳
+技术假设状态：proposed / 待确认；验证方式：已通过 requirements normalization、traceability-matrix、历史 repo-native 首轮垂直切片 smoke 与 WS-04 浏览器 MVP smoke 验证核心玩法闭环；WS-03 Godot browser slice 已退出 active validation；Godot engine spike / smoke 和用户验收仍待后续确认；未经本仓库 ADR 或 Godot 实现 spike 采纳
 
 ## 执行摘要
 

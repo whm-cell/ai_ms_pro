@@ -1,6 +1,6 @@
 # 工作流：Three.js Snake MVP
 
-更新时间：2026-04-18
+更新时间：2026-05-21
 工作流编号：WS-01
 工作流名称：Three.js Snake MVP
 状态来源：当前完成度与验收证据以 `docs/requirements/traceability-matrix.md`、阶段 `status` 和相关 `handoff` 为准
@@ -9,6 +9,7 @@
 
 - 本文件只保留工作流目标、覆盖需求、阶段建议和验收模型。
 - 当前状态、最新验证结论和 smoke 证据不在这里重复承载，避免与主真相文档漂移。
+- 当前 active capability validation 由 `apps/threejs-snake/`、`scripts/threejs_snake_smoke.py` 和 `scripts/threejs_snake_blackbox_smoke.py` 承载。
 
 ## 业务目标
 
@@ -48,6 +49,6 @@
 
 - 需求追踪矩阵：[traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)
 - 当前阶段 `status`：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
-- 相关 `handoff`：
-  - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-threejs-snake-mvp.md)
-  - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-requirement-workstream-metadata.md)
+- 历史 `handoff`：
+  - [Three.js Snake MVP Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive/stage-00-threejs-snake-mvp.md)
+  - [Requirement Workstream Metadata Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/archive/stage-00-requirement-workstream-metadata.md)
