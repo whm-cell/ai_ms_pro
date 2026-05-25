@@ -10,7 +10,6 @@ from runtime_traceability_catalog import (
     REQ_ID_PATTERN,
     ROOT,
     WS_ID_PATTERN,
-    infer_unambiguous_working_context_ids,
     load_traceability_catalog,
     ordered_unique,
 )
@@ -92,10 +91,6 @@ def infer_runtime_traceability(changed_paths: list[str]) -> tuple[list[str], lis
     if requirement_list or workstream_list:
         source = ",".join(ordered_unique(reasons)) or "auto-discovery"
         return requirement_list, workstream_list, source
-
-    fallback_requirement_ids, fallback_workstream_ids = infer_unambiguous_working_context_ids()
-    if fallback_requirement_ids or fallback_workstream_ids:
-        return fallback_requirement_ids, fallback_workstream_ids, "working-context-fallback"
 
     return [], [], "unbound"
 

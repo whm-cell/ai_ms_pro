@@ -19,9 +19,27 @@ class HooksConfigRenderTest(unittest.TestCase):
             with self.subTest(system=system):
                 rendered = render_hooks_config(root=ROOT, system=system)
                 config = json.loads(rendered)
-                command = config["hooks"]["Stop"][0]["hooks"][0]["command"]
-                self.assertEqual(command, ".codex/hooks/run_hook.py stop_runtime_observation.py")
-                self.assertNotIn("powershell", command.lower())
+                pre_tool_commands = [
+                    hook["command"] for hook in config["hooks"]["PreToolUse"][0]["hooks"]
+                ]
+                self.assertEqual(
+                    pre_tool_commands,
+                    [".codex/hooks/run_hook.py pre_tool_use_preflight.py"],
+                )
+                commands = [hook["command"] for hook in config["hooks"]["Stop"][0]["hooks"]]
+                self.assertEqual(
+                    commands,
+                    [
+                        ".codex/hooks/run_hook.py stop_runtime_observation.py",
+                        ".codex/hooks/run_hook.py stop_runtime_session.py",
+                        ".codex/hooks/run_hook.py stop_runtime_token_pressure.py",
+                        ".codex/hooks/run_hook.py stop_loop_scope_monitor.py",
+                        ".codex/hooks/run_hook.py stop_ai_docs_check.py",
+                    ],
+                )
+                self.assertTrue(
+                    all("powershell" not in command.lower() for command in [*pre_tool_commands, *commands])
+                )
 
     def test_render_windows_uses_powershell_launcher(self) -> None:
         rendered = render_hooks_config(root=ROOT, system="Windows")

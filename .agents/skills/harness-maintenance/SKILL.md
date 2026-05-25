@@ -21,6 +21,7 @@ Do not use this skill for ordinary product features, simple edits, PRD normaliza
 - Python runtime / hooks: use `references/python-runtime-and-hooks.md`.
 - Runtime observation / reducer: use `references/runtime-observation-reduction.md`.
 - Session promotion / compression: use `references/runtime-governance-compression.md`.
+- Runtime transcript token pressure: use `references/runtime-token-budget.md`.
 - GitHub guardrails: use `references/github-guardrails.md`.
 - Supply-chain evidence: use `references/supply-chain-security.md`.
 - Agentic standards / trace / eval / tool contracts: use `references/agentic-standards.md`.
@@ -65,6 +66,7 @@ Revise this skill through status, ADR, or changelog when harness maintenance tas
 - [python-runtime-and-hooks.md](references/python-runtime-and-hooks.md)
 - [runtime-observation-reduction.md](references/runtime-observation-reduction.md)
 - [runtime-governance-compression.md](references/runtime-governance-compression.md)
+- [runtime-token-budget.md](references/runtime-token-budget.md)
 - [github-guardrails.md](references/github-guardrails.md)
 - [supply-chain-security.md](references/supply-chain-security.md)
 - [agentic-standards.md](references/agentic-standards.md)

@@ -5,6 +5,8 @@
 !.codex/runtime/sessions/_template.md
 .codex/runtime/observations/*
 !.codex/runtime/observations/README.md
+.codex/runtime/tool-outputs/*
+!.codex/runtime/tool-outputs/README.md
 docs/requirements/source-raw/quarantine/*
 !docs/requirements/source-raw/quarantine/.gitkeep
 **/*/__pycache__/

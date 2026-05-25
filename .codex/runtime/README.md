@@ -25,3 +25,4 @@
 
 - `sessions/`：单次会话的本地恢复材料
 - `observations/`：运行过程中的本地观察材料、agent trace JSONL 与 reducer 输入原料
+- `tool-outputs/`：大工具输出、本地日志和完整 diff 的本地原文；进入 prompt 前应先摘要或定点截取

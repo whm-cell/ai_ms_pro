@@ -80,6 +80,19 @@ class RuntimeTraceabilityTest(unittest.TestCase):
         self.assertEqual(workstream_ids, [])
         self.assertEqual(source, "unbound")
 
+    def test_unknown_changed_path_stays_unbound(self) -> None:
+        requirement_ids, workstream_ids, source = runtime_traceability.resolve_runtime_traceability(
+            [],
+            [],
+            [],
+            [],
+            ["--使用细节/新项目初始化约束提示词.md"],
+        )
+
+        self.assertEqual(requirement_ids, [])
+        self.assertEqual(workstream_ids, [])
+        self.assertEqual(source, "unbound")
+
 
 if __name__ == "__main__":
     unittest.main()
