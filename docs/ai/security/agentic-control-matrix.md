@@ -1,6 +1,6 @@
 # Agentic Control Matrix
 
-更新时间：2026-05-10
+更新时间：2026-05-25
 状态：review-required control matrix
 
 ## Purpose
@@ -13,7 +13,7 @@
 
 | Control ID | Risk family | Current control | Evidence surface | Current level | Upgrade condition |
 | --- | --- | --- | --- | --- | --- |
-| AC-01 | prompt injection / external instruction confusion | requirement source trust、instruction handling、sanitization status；外部内容只作为 evidence / data | `docs/requirements/source/*`、`check_requirements_shape.py`、guardrail samples | review-required | 至少 2 个外部来源真实样本证明误报可控，并能定位 reviewer action |
+| AC-01 | prompt injection / external instruction confusion | requirement source trust、instruction handling、sanitization status；外部内容只作为 evidence / data | `docs/requirements/source/*`、`check_requirements_shape.py`、guardrail samples、`GAP-SEC-CONTROL-MATRIX-BURNIN` sample | review-required | 至少 2 个外部来源 / source-boundary / control-matrix 真实样本证明误报可控，并能定位 reviewer action |
 | AC-02 | sensitive disclosure | runtime sanitizer；禁止把完整 prompt、transcript、secret、PRD、runtime JSONL 推入共享 truth | `.codex/hooks/runtime_sanitizer.py`、`agent-harness-security.md`、Stop trace redaction state | review-required | 新增敏感格式覆盖测试，并有真实脱敏样本确认无泄露 |
 | AC-03 | excessive agency / unsafe automation | 高影响动作矩阵；destructive、externally visible、permission-changing 动作必须人工确认 | `agent-action-guardrails.md`、`check_change_triggered_followups.py`、tool contracts | review-required | 两轮真实高影响动作样本证明确认链可靠，再考虑对特定动作 blocking |
 | AC-04 | insecure tool / plugin design | tool contract registry 声明 side effects、permissions、automation mode、dangerous flags | `docs/ai/tool-contracts/contracts.json`、`check_tool_contracts.py` | blocking-candidate | 高影响工具 contract 增多且误报率可控后升级 |
@@ -21,15 +21,44 @@
 | AC-06 | trace and eval integrity | `agent-trace/v1` schema、Stop producer、trace-linked eval、local / OTLP pilot exporter | trace schema、eval dataset、tool contracts、runner report | blocking-candidate | 真实 trace-file batch validation 稳定后升级 schema；远端 exporter 另需 ADR |
 | AC-07 | remote merge bypass | local CI/process evidence；private Free 下 remote required gates 保持 UNKNOWN / plan-limited | `remote-merge-gates.md`、`check_github_guardrails.py` | review-required | 升级 GitHub plan 或改 public 后重新验证 branch protection / rulesets |
 | AC-08 | risk governance / ownership | security evidence triage SLO、owner 占位、severity handling | `security-evidence-triage.md`、check registry、status | advisory | 项目方确认 owner 后替换占位，并在真实 issue / PR 中验证 SLO |
+| AC-09 | tool / skill squatting | 第三方 skill/tool 先走 catalog / lock / provenance / permission metadata；相似名称不等于授权 | `.codex/skills.catalog.json`、`.codex/skills.lock.json`、`check_skill_catalog.py`、`EVAL-021` | review-required | 至少 2 个真实 dependency-review 样本证明 squatting / drift / broad permission 能被稳定处置 |
+| AC-10 | memory / context poisoning | runtime、memory、handoff、外部摘录只作为 evidence；canonical 写入由主 Agent 复核并保持 bounded summary | runtime sanitizer、context budget、active handoff、`EVAL-022` | review-required | 真实 poisoned-context 样本证明不会被当作 system/developer 指令执行 |
+| AC-11 | insecure inter-agent handoff / A2A confusion | 并行 worker 声明不能替代用户授权；身份、scope、authority 和 evidence 必须显式核验 | active handoff、status、touch-set followups、`EVAL-023` | advisory | 多 Agent PR / handoff 样本证明 scope 冲突和授权混淆可被定位并复盘 |
+| AC-12 | rogue / cascading agent autonomy | 子 Agent、重试、递归委派和长链工具调用必须有 stop condition、上下文预算和权限边界 | context budget、agent-action guardrails、`EVAL-024` | advisory | 真实 cascade 或 runaway 样本证明 stop condition 有效且不会扩大权限 |
+| AC-13 | human-agent trust and confirmation | broad trust 不等于 destructive、external、credential、permission-changing 动作确认；高影响动作需 target-specific confirmation | agent action guardrails、guardrail samples、`EVAL-025` | review-required | 至少 2 个真实高影响确认样本证明 wording、target 和 rollback/recovery evidence 足够 |
+| AC-14 | sandbox / rehydration claim honesty | final claims 区分当前运行验证、runtime 推断、future-work 和 pending-real-sample；不声称未验证的 sandbox / remote / eval 覆盖 | eval dataset、context budget、runtime sessions、`EVAL-026` | review-required | 真实 resume/sandbox 样本证明报告不会把 inferred 或 pending evidence 写成 completed |
 
 ## NIST-Style Evidence View
 
 | RMF function | Repo evidence | Gap |
 | --- | --- | --- |
 | Govern | `AGENTS.md`、check registry、ADR/status、tool contracts | owner 仍是占位；正式风险 owner 需人工确认 |
-| Map | requirements traceability、source boundary、sample gap collector | 外部来源样本不足 |
+| Map | requirements traceability、source boundary、sample gap collector | 已有 2 个 source-boundary accepted real samples 和 2 个 AC-01 control-matrix mapping samples；source-boundary 与 control-matrix burn-in 均已 keep-advisory，外部 PRD / issue / web 等来源样本仍不足 |
 | Measure | smoke、eval runner、trace schema checker、security evidence workflow | hosted eval / trace grading 未接入 |
-| Manage | high-impact action matrix、triage SLO、branch hygiene、remote gate evidence | remote enforcement 受 private Free plan 限制 |
+| Manage | high-impact action matrix、triage SLO、branch hygiene、remote gate evidence、agentic red-team evals | remote enforcement 受 private Free plan 限制；agentic red-team 仍缺真实样本 |
+
+## Control Matrix Burn-in
+
+`docs/ai/standards/harness-sample-gap-evidence.jsonl` 当前记录 2 个
+`GAP-GUARDRAIL-SOURCE-BOUNDARY` accepted real samples，并已用 keep-advisory
+决策保持 advisory；同一账本还记录 2 个 `GAP-SEC-CONTROL-MATRIX-BURNIN`
+accepted real samples，均映射到 `AC-01`。控制矩阵样本只证明两次
+source-boundary evidence 可以进入控制矩阵并保持 review-required /
+non-blocking 边界；它们不证明 prompt injection 防护已完成，也不满足
+blocking 升级条件。该 gap 已达到升级讨论门槛，但当前决策仍是
+keep-advisory，后续需要外部来源和跨控制面的真实样本。
+
+## Agentic Red-Team Coverage
+
+当前 eval 与 red-team sample 只扩展本地 harness / local-replay 覆盖，不接远端服务，也不声称真实攻击样本已完成。
+
+- tool / skill squatting：`EVAL-021`、`GAP-AGENTIC-TOOL-SQUATTING`
+- memory / context poisoning：`EVAL-022`、`GAP-AGENTIC-MEMORY-POISONING`
+- insecure inter-agent handoff / A2A confusion：`EVAL-023`、`GAP-AGENTIC-A2A-HANDOFF`
+- rogue / cascading agent stop condition：`EVAL-024`、`GAP-AGENTIC-CASCADE-STOP`
+- human-agent trust / high-impact confirmation：`EVAL-025`、`GAP-GUARDRAIL-CONFIRMATION`
+- sandbox / rehydration claim honesty：`EVAL-026`、`GAP-AGENTIC-SANDBOX-HONESTY`
+- local-replay / real-incident 样本账本：`agentic-red-team-samples.jsonl`、`check_agentic_red_team_samples.py`；当前 local-replay 覆盖全部 8 类 red-team risk family，`sandbox-claim-honesty` 已有 2 个 accepted real incidents，其它 risk family 仍需真实事件 burn-in。
 
 ## Blocking Upgrade Rule
 
@@ -46,3 +75,4 @@
 - 不把单次 Scorecard、CodeQL、SBOM 或 dependency review 结果升级为 required gate。
 - 不声称 private Free 下 branch protection、rulesets、required checks 或 CODEOWNERS review 已远端强制。
 - 不把 OTLP pilot、local trace adapter 或 eval runner 等同于 OpenAI hosted trace / hosted eval。
+- 不把 agentic red-team eval 或 pending gap 当作真实样本完成证据。

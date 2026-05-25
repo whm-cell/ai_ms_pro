@@ -11,7 +11,8 @@ ADR_DIR = AI_DOC_ROOT / "adr"
 WORKING_CONTEXT_PATH = AI_DOC_ROOT / "working-context.md"
 RUNTIME_SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
 RUNTIME_OBSERVATION_DIR = ROOT / ".codex" / "runtime" / "observations"
-RUNTIME_STATE_ROOTS = (RUNTIME_SESSION_DIR, RUNTIME_OBSERVATION_DIR)
+RUNTIME_TOOL_OUTPUT_DIR = ROOT / ".codex" / "runtime" / "tool-outputs"
+RUNTIME_STATE_ROOTS = (RUNTIME_SESSION_DIR, RUNTIME_OBSERVATION_DIR, RUNTIME_TOOL_OUTPUT_DIR)
 GOVERNANCE_IMPLEMENTATION_ROOTS = (
     ROOT / "scripts",
     ROOT / ".codex" / "hooks",

@@ -88,6 +88,10 @@ The dataset should stay small, readable, and dependency-free. New evals should p
 
 `EVAL-006` through `EVAL-020` cover skill-harness hardening: third-party skill catalog/proxy/lock handling, skill/tool output scanning, source quarantine, mixed-stack code-shape, changed-file follow-up routing, multi-surface context budget, and starter portability.
 
+`EVAL-027-runtime-token-budget-audit` covers the runtime token pressure layer: large tool output, last-input spikes, fresh-input/cache-miss spikes, and long-session warnings remain separate from static default-context budget.
+
+`EVAL-028-tool-output-artifact-summary` covers artifact-preserving compression: raw tool output stays in `.codex/runtime/tool-outputs/`, while the transcript receives bounded summaries and line windows.
+
 ## Validation
 
 Run:

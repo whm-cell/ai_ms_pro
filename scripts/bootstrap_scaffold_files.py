@@ -16,6 +16,7 @@ SCAFFOLD_DIRECTORY_PARTS = [
     (".codex", "runtime"),
     (".codex", "runtime", "sessions"),
     (".codex", "runtime", "observations"),
+    (".codex", "runtime", "tool-outputs"),
     ("docs", "ai"),
     ("docs", "ai", "handoffs", "active"),
     ("docs", "ai", "handoffs", "archive"),

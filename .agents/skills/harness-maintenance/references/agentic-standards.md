@@ -9,7 +9,7 @@ Use this reference when changing repo-local agentic standards: trace schema, tra
 - Eval: `docs/ai/evals/*`, `scripts/check_agent_eval_dataset.py`, `scripts/run_agent_eval_dataset.py`, and trace evidence helpers.
 - Tool contracts: `docs/ai/tool-contracts/contracts.json`, `scripts/check_tool_contracts.py`.
 - Security controls: `docs/ai/security/agentic-control-matrix.md` plus security triage docs.
-- Sample gaps: `scripts/collect_harness_sample_gaps.py` and `--使用细节/真实场景覆盖缺口待确认.md`.
+- Sample gaps: `scripts/collect_harness_sample_gaps.py`, generic bounded intake `scripts/check_harness_sample_gap_evidence.py`, real-sample queue `scripts/plan_harness_sample_collection.py`, generated-template drift check `scripts/check_harness_sample_templates.py`, grouped intake bundle `scripts/build_harness_sample_intake_bundle.py`, pending sample slot audit `scripts/check_harness_pending_samples.py`, future-work contract precondition check `scripts/check_harness_future_work_contracts.py`, and `--使用细节/真实场景覆盖缺口待确认.md`.
 
 ## Rules
 
@@ -29,6 +29,12 @@ Use `references/verification-commands.md` for the full command matrix. Minimum c
 - `.codex/hooks/run_with_repo_python.sh scripts/check_agent_eval_dataset.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --dry-run`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_tool_contracts.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_harness_sample_gap_evidence.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/collect_harness_sample_gaps.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/plan_harness_sample_collection.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_harness_sample_templates.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/build_harness_sample_intake_bundle.py --summary`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_harness_pending_samples.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_harness_future_work_contracts.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py`

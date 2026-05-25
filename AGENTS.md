@@ -82,6 +82,7 @@ Before substantial work, state the selected profile briefly. Users do not need t
 - Subagents default to compact task packets; use `fork_context=true` only for recovery, dispute, or tightly coupled integration, and state why.
 - Active stage `status` reaching `context_budget.stage_status_line_budget` triggers compression into changelog/ADR/backlog and completed-handoff archive.
 - Never paste complete PRDs, full diffs/transcripts, or complete runtime JSONL into prompts or governance docs; use REQ/WS, targeted excerpts, filtered JSONL, summaries, or structured extraction.
+- Runtime token pressure has its own budget: keep large raw output as local runtime artifacts, and use `$harness-maintenance` `references/runtime-token-budget.md` for transcript audits and bounded summaries.
 
 ## Harness Layers
 
