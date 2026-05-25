@@ -3,13 +3,13 @@
 更新时间：2026-04-16
 阶段：stage-00
 任务：observation-reducer
-状态：进行中
+状态：已归档（历史 observation reducer handoff，当前真相已吸收到 status / closeout handoff）
 
 ## 需求与工作流标识
 
 - Requirement IDs：未绑定
 - Workstream IDs：未绑定
-- 当前 reducer 已支持 metadata 位点，但项目尚未导入真实需求绑定
+- 历史语境：当时 reducer 已支持 metadata 位点，但项目尚未导入真实需求绑定
 
 ## 本任务目标
 
@@ -76,9 +76,9 @@
 - 在 reducer 中增加重复模式识别，只有跨 session 稳定出现时才建议压缩到 `status` 或 `ADR`
 - 在真实需求导入后，用 `--requirement-id` / `--workstream-id` 运行 reducer，验证 metadata 是否足够支撑后续追踪
 
-## 下一位 Agent 的第一步动作
+## 后续参考动作
 
-- 先用真实 runtime observation 样本运行 [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)，再结合当前 active handoff 和 `working-context.md` 判断是否要发布新的 canonical handoff
+- 若后续要复核 reducer，再用真实 runtime observation 样本运行 [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)，并结合当前 active closeout handoff 和 `working-context.md` 判断是否要发布新的 canonical handoff
 
 ## 建议同步更新
 

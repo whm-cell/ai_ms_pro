@@ -3,13 +3,13 @@
 更新时间：2026-04-16
 阶段：stage-00
 任务：runtime-hooks
-状态：进行中
+状态：已归档（历史 runtime hook handoff，当前真相已吸收到 status / closeout handoff）
 
 ## 需求与工作流标识
 
 - Requirement IDs：未绑定
 - Workstream IDs：未绑定
-- 当前仍处于治理骨架阶段，尚未导入真实 requirement/workstream 绑定
+- 历史语境：当时仍处于治理骨架阶段，尚未导入真实 requirement/workstream 绑定
 
 ## 本任务目标
 
@@ -88,9 +88,9 @@
 - 当前 `Stop` runtime writer 对 hook payload schema 采用弱依赖解析；如果上游字段变化，最坏情况是 session 内容变得不完整，但不应阻断主流程
 - 当前 observation 记录按 Stop 事件追加，若会话很长，原始 observation 噪音可能较多，需要后续 reducer 或聚合策略
 - session 文件会记录当前工作区变更列表；如果工作区长期脏，快照里的“触碰文件”可能比真实本次会话更宽
-- 当前仓库仍处于 STAGE-00，runtime harness 已有最小自动化链路，但 observations 的提升/压缩规则尚未自动化
+- 历史语境：当时仓库仍处于 STAGE-00；当前阶段与活跃任务以 `docs/ai/working-context.md` 和 active closeout handoff 为准
 
-## 下一位 Agent 的第一步动作
+## 后续参考动作
 
 - 先读 [working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[ADR-001-harness-layering.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)、[ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)，再决定 observation reducer 应先对接 `handoff` 还是长期经验提炼
 
