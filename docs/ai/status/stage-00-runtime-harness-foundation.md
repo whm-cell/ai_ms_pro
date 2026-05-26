@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-05-25
+更新时间：2026-05-26
 阶段：stage-00
 状态：进行中
 
@@ -20,7 +20,7 @@
 
 - Runtime / Governance / Verification 主链路已可用，并已扩展到 P0 linter、agentic standards 和 code-shape 主债务拆分。
 - WS-01、WS-02 具备 repo-native 实现和 browser smoke；WS-01 已补 pause/resume 与 reset-best 作为真实业务小切片，它们仍是当前 active capability / governance UI validation sample。
-- `new_pro_standard` 只同步机制层；当前 repo 的 REQ/WS、PR、CI、status、样本和历史 truth 不复制。
+- `new_pro_standard` 已同步 starter-safe 机制层与关键 harness 能力：runtime warning hooks、sanitizer、traceability / local trace producer、context-budget pre-commit、Ruff / whitespace gate、空样本账本和 no-write sample evidence checker；当前 repo 的 REQ/WS、PR、CI 历史、真实 accepted samples、runtime artifacts 和 demo apps 不复制。
 - GitHub 侧已具备最小权限 workflow、SHA pinning、固定 Playwright、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 和 `merge_group`；private Free 下 branch protection / rulesets 仍是 future gates。
 - 2026-05-24 / 2026-05-25 harness burn-in 已进入 closeout / split：当前缺口不再是“能不能用”，而是分批 review、future real-event sample monitoring 和 advisory / blocking 升级决策。
 

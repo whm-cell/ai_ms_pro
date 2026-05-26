@@ -1,13 +1,23 @@
 # Harness Real Sample Watchlist
 
 更新时间：YYYY-MM-DD
-状态：starter template
+状态：starter template + empty-ledger loop
 
 ## 作用
 
 本文件保存暂时无法主动验证、只能等真实事件发生后再采集的 harness 样本缺口。
 
 它不是每日待办，也不是要求 Agent 构造场景补齐覆盖率。真实事件发生后，先走 no-write review gate，再决定是否写入样本账本、status、ADR 或 check registry。
+
+starter 附带一条最小可执行闭环：
+
+- gap 目录：`scripts/collect_harness_sample_gaps.py`
+- 采集计划 / candidate 模板：`scripts/plan_harness_sample_collection.py`
+- 空账本：`docs/ai/standards/harness-sample-gap-evidence.jsonl`
+- no-write 复核：`scripts/check_harness_sample_gap_evidence.py`
+- candidate 说明：`docs/ai/templates/harness-sample-gap-evidence-record.md`
+
+这些文件只证明 starter 机制可跑通。新项目仍需根据自己的 check registry、风险、ADR 和真实事件重命名或替换 `GAP-STARTER-*`。
 
 ## 执行规则
 
@@ -26,35 +36,33 @@
 1. 从当前项目的 `docs/ai/check-registry.md` 找到 `advisory`、`review-required`、`blocking-candidate` 检查。
 2. 对每个暂时缺真实样本的检查，补一行触发器。
 3. 对已经达到讨论门槛但暂不升级的检查，补到 “Ready 但不升级” 表。
-4. 若项目引入 sample ledger / intake 脚本，再把 `First review command` 改成真实命令；否则写 `人工复核：<文档或检查名>`。
+4. 若项目保留 starter sample ledger / intake 脚本，把 `GAP-STARTER-*` 改成项目 gap id；否则把 `First review command` 改成 `人工复核：<文档或检查名>`。
 5. 保持本文件为观察入口，不把它变成当前状态总表。
 
 ## 当前快照
 
-- 来源：未绑定
-- tracked gaps：未绑定
-- actionable real-sample lanes：未绑定
-- append-new-pending-slot：未绑定
-- fill-existing-placeholder：未绑定
-- ready-for-upgrade-discussion：未绑定
-- local-sample-only：未绑定
-- contract / ADR blockers：未绑定
+- 来源：starter template registry, `scripts/collect_harness_sample_gaps.py --include-future --json`
+- tracked starter template gaps：8
+- actionable real-sample lanes：7
+- future-work / ADR-or-contract-first：1
+- accepted real samples：0
+- pending samples：0
+- local-sample-only：0
 
-若项目没有 sample-gap checker，上述字段保持 `未绑定`，不要编造计数。
+这些数字只描述 starter 模板目录和空账本，不描述新项目当前风险或成熟度。不要把它们当成项目事实。
 
 ## 唤醒触发器
 
 | Trigger | Gap IDs | What qualifies | First review command |
 | --- | --- | --- | --- |
-| 真实动作前风险 warning | `未绑定` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action taken / false-positive 结论 | `人工复核：check-registry / guardrail doc` |
-| 真实长会话或 scope warning | `未绑定` | 长 session、重复命令、重复失败、过度验证或 scope churn 真实触发 warning | `人工复核：runtime / context budget doc` |
-| 跨任务 resume | `未绑定` | 非 harness 维护任务中使用 checkpoint / handoff 恢复，并证明减少重复探索或避免遗漏验证 | `人工复核：status / handoff / checkpoint doc` |
-| 不同任务类 trace summary | `未绑定` | 非默认任务类生成 no-network local trace summary，并带 bounded evidence | `人工复核：trace docs` |
-| 真实 security workflow / dependency event | `未绑定` | scheduled/manual security evidence run、dependency PR、release、CodeQL、SBOM 或 dependency-review 真实事件 | `人工复核：security evidence / PR evidence` |
-| 显式用户确认的高影响动作 | `未绑定` | 真实 destructive、externally visible、permission-changing、secret/env、deploy/release 等动作，且用户明确确认 | `人工复核：guardrail doc` |
-| workflow skill 真实任务 | `未绑定` | 跨 workstream 技能加载、简单任务明确跳过技能、多 Agent / 多人 PR touch overlap 的真实样本 | `人工复核：skill eval / PR evidence` |
-| 真实 red-team incident | `未绑定` | 工具或 skill 冒名、memory poisoning、A2A/handoff 权限混乱、cascade/rogue loop 等真实 incident | `人工复核：security / red-team doc` |
-| 真实 remote interop probe | `未绑定` | 带真实 auth / endpoint / redaction / cost boundary 的 OpenAI、OTLP、MCP、A2A 或其他 remote interop probe | `人工复核：ADR / trace evidence` |
+| 显式用户确认的高影响动作 | `GAP-STARTER-HIGH-IMPACT-ACTION` | 真实 destructive、externally visible、permission-changing、secret/env、deploy/release 等动作，且用户明确确认或取消 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 真实动作前风险 warning | `GAP-STARTER-PRETOOL-WARNING` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action taken / false-positive 结论 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 真实长会话或 scope warning | `GAP-STARTER-STOP-WARNING` | 长 session、重复命令、重复失败、过度验证或 scope churn 真实触发 warning | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 跨任务 resume | `GAP-STARTER-CROSS-TASK-RESUME` | 非 harness 维护任务中使用 checkpoint / handoff 恢复，并证明减少重复探索或避免遗漏验证 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 真实 security workflow / dependency event | `GAP-STARTER-SECURITY-EVIDENCE` | scheduled/manual security evidence run、dependency PR、release、CodeQL、SBOM 或 dependency-review 真实事件 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| workflow skill 真实任务 | `GAP-STARTER-WORKFLOW-SKILL` | 跨 workstream 技能加载、简单任务明确跳过技能、多 Agent / 多人 PR touch overlap 的真实样本 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| PR overlap / 多人协作事件 | `GAP-STARTER-PR-OVERLAP` | 多人或多 AI PR touch-set overlap 的真实样本 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 真实 remote interop probe | `GAP-STARTER-REMOTE-INTEROP` | 带真实 auth / endpoint / redaction / cost boundary 的 OpenAI、OTLP、MCP、A2A 或其他 remote interop probe；必须先有项目 ADR 或 contract | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
 
 ## Ready 但不升级的缺口
 
@@ -63,6 +71,8 @@
 | Gap ID | Current decision | Reopen when |
 | --- | --- | --- |
 | `未绑定` | `未绑定` | 出现新的来源类型、false-positive、process tax、reviewer cost、外部集成证据或 owner 决策 |
+
+starter 不预置任何 ready-for-upgrade 结论。达到门槛后再由项目 `status` 或 ADR 记录 `keep-advisory`、`keep-candidate`、`promote` 或 `defer`。
 
 ## Local-only 缺口
 
@@ -78,7 +88,7 @@
 ## 唤醒流程
 
 1. 确认事件是真实发生，不是为了补样本专门构造。
-2. 从上表找到 gap id、target checker 或人工复核入口。
+2. 从上表找到 gap id、target checker 或人工复核入口；也可运行 `scripts/plan_harness_sample_collection.py --sample-template` 生成 pending candidate 模板。
 3. 生成 bounded candidate，只保留必要 evidence refs；不要粘贴 raw transcript、secret、完整 payload 或完整工具输出。
 4. 先跑 no-write review gate 或人工复核。
 5. review 通过后，再更新目标样本账本、status、ADR 或 check registry。

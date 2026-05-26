@@ -14,6 +14,8 @@ include = [
   ".codex/hooks/**/*.py",
   ".codex/hooks/*.sh",
   ".codex/hooks/**/*.sh",
+  ".agents/skills/*/scripts/*.py",
+  ".agents/skills/**/scripts/**/*.py",
   ".githooks/pre-commit",
   ".codex/skills/*/scripts/*.py",
   ".codex/skills/**/scripts/**/*.py",
@@ -21,7 +23,6 @@ include = [
 exclude = [
   ".codex/.venv/**",
   ".codex/runtime/**",
-  "new_pro_standard/**",
   "output/**",
   "**/__pycache__/**",
   "**/dist/**",

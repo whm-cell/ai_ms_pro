@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-05-25
+更新时间：2026-05-26
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前模式：Codex-first harness + Three.js capability sample + sample-gap advisory
 
@@ -17,7 +17,7 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
-- Last Synced At: 2026-05-25
+- Last Synced At: 2026-05-26
 
 ## 当前主目标
 
@@ -70,6 +70,8 @@
 - 2026-05-25 真实样本缺口改为 watchlist 管理：无法主动验证的样本只在 `docs/ai/harness-real-sample-watchlist.md` 保留触发条件和 no-write review route，未来遇到真实事件再唤醒。
 - 2026-05-25 当前 capability validation boundary 已同步为 WS-01 / WS-02 only。
 - 2026-05-25 WS-01 pause/resume 与 reset-best 作为真实小任务进入 `GAP-WORKFLOW-SIMPLE-SKIP` 样本账本；该 gap 当前 2/2，并已记录 keep-advisory upgrade decision。
+- 2026-05-26 `new_pro_standard` 已同步当前 harness 的 starter-safe 关键能力：PreToolUse / Stop warning hooks、runtime sanitizer / traceability / local trace producer、context-budget pre-commit gate、Ruff / whitespace CI gate、空样本账本与 no-write sample evidence checker；当前项目真实 REQ/WS、accepted sample rows、runtime artifacts 和 demo apps 仍不复制进 starter。
+- 2026-05-26 runtime tool-output policy 已落地保守版 bounded output / compression：PreToolUse risk catalog 覆盖 broad search/listing、logs、secret/env、常见 test/build/install 和 full diff 大输出风险；`capture_tool_output.py` 保留原始 artifact 并只回传 bounded summary；Stop token-pressure 只写 runtime-only compression draft，不改 canonical docs；仍保持 warning-only，不自动改写用户命令。
 
 ## 更新规则
 

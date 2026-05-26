@@ -32,3 +32,11 @@ mcp_server_budget = 10
 skill_catalog_token_budget = 2000
 raw_source_token_budget = 30000
 static_packet_token_budget = 32000
+
+[runtime_token_budget]
+tool_output_token_budget = 5000
+last_input_token_budget = 100000
+fresh_input_token_budget = 50000
+task_complete_budget = 8
+token_snapshot_budget = 160
+session_minutes_budget = 90

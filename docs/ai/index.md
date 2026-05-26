@@ -1,6 +1,6 @@
 # AI 文档入口索引
 
-更新时间：2026-05-25
+更新时间：2026-05-26
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前判断：harness 可用；stopped burn-in session 已进入 closeout / split 阶段；context budget 是 strict gate；当前 capability validation 只以 WS-01 Three.js Snake（含 pause/resume 与 reset-best smoke）和 WS-02 Harness Trace Console 为准。
 
@@ -57,7 +57,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 当前 active handoff 精确集合：以 [working-context](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md) 的同步元数据为准。
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog 目录：[docs/ai/changelog](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/changelog)。当前重点集中在 sample-gap evidence、readiness / pending / upgrade-decision accounting、burn-in closeout、context-surface compression 与 trace / cascade boundary；完整逐项记录以 changelog 目录为准，不在默认索引重复展开。
+- 最新 changelog：[Runtime Compression And Bounded Tool Output](./changelog/2026-05-26-runtime-compression-bounded-output.md)。当前重点集中在 runtime tool-output token pressure、starter-safe harness 同步、sample-gap evidence、readiness / pending / upgrade-decision accounting、burn-in closeout、context-surface compression 与 trace / cascade boundary；完整逐项记录以 changelog 目录为准，不在默认索引重复展开。
 
 ## 维护规则
 

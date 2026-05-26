@@ -1,7 +1,7 @@
 # Harness Remaining Work
 
-更新时间：2026-05-25
-当前状态：核心链路已在测试仓库、仓外 starter 复演、WS-01 Three.js Snake capability sample 和 WS-02 Harness Trace Console governance UI sample 中跑通；WS-01 pause/resume 与 reset-best 已作为 workflow simple-skip 真实样本纳入账本并记录 keep-advisory 决策；当前 blocking browser smoke 保留 WS-01 / WS-02；剩余项以真实样本观察、远端 plan ceiling 和 closeout review 为主。
+更新时间：2026-05-26
+当前状态：核心链路已在测试仓库、仓外 starter 复演、WS-01 Three.js Snake capability sample 和 WS-02 Harness Trace Console governance UI sample 中跑通；`new_pro_standard` 已补齐 starter-safe runtime hooks、context / lint gates 和空样本闭环；WS-01 pause/resume 与 reset-best 已作为 workflow simple-skip 真实样本纳入账本并记录 keep-advisory 决策；当前 blocking browser smoke 保留 WS-01 / WS-02；剩余项以真实样本观察、远端 plan ceiling 和 closeout review 为主。
 
 ## 作用
 
@@ -32,6 +32,7 @@
 - archive candidate monitor 已落地为 warning-only 检查；自动归档仍不纳入默认 hook。
 - runtime reducer、runtime traceability、bootstrap `render_plan`、governance traceability、working-context sync metadata、bootstrap harness、governance checker、eval checker、code-shape checker 和 requirements-shape checker 已完成低风险拆分；`check_code_shape.py --all` 当前无 warning，后续新增 warning 按新的 code-shape batch 处理。
 - 当前剩余问题不再是“能不能用”，而是 `post-burn-in event-driven sample watchlist + private-Free plan ceiling visibility + security evidence triage samples + AI/Agent guardrails sample monitoring + runtime / trace interop sample monitoring`；`GAP-WORKFLOW-SIMPLE-SKIP` 已达到 2/2 但保持 keep-advisory，下一步需要 WS-01 之外的 simple-skip、negative 或 process-tax 样本；无法主动验证的真实样本统一留存在 [Harness Real Sample Watchlist](./harness-real-sample-watchlist.md)，以后遇到真实事件再唤醒。
+- `new_pro_standard` 现在可作为复制到新项目的 starter：已包含 PreToolUse / Stop warning hooks、runtime sanitizer、traceability / local trace producer、Ruff / whitespace gate、context-budget gate、starter sample-gap 空账本和 no-write checker；它仍有意排除当前 repo 的真实样本 ledger、upgrade decision 结论、runtime 原料和 WS-01 / WS-02 demo apps。
 
 ## P0 当前最值得做
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -258,6 +259,7 @@ def ensure_directories() -> None:
         ROOT / ".codex" / "runtime",
         ROOT / ".codex" / "runtime" / "sessions",
         ROOT / ".codex" / "runtime" / "observations",
+        ROOT / ".codex" / "runtime" / "tool-outputs",
         ROOT / "docs" / "ai",
         ROOT / "docs" / "ai" / "handoffs" / "active",
         ROOT / "docs" / "ai" / "handoffs" / "archive",
@@ -292,13 +294,33 @@ def render_harness_config() -> str:
         archive_candidate_min_score = 3
         warn_at_budget = true
 
+        [branch_hygiene]
+        max_open_total_prs = 10
+        max_open_codex_prs = 3
+        max_open_dependabot_prs = 4
+        max_failed_open_prs = 0
+
         [context_budget]
         default_surface_token_budget = 6500
+        default_surface_warning_percent = 80
+        default_surface_high_warning_percent = 90
         always_on_doc_line_budget = 300
+        stage_status_line_budget = 120
         skill_description_word_budget = 30
         skill_body_line_budget = 400
         adr_count_budget = 15
         mcp_server_budget = 10
+        skill_catalog_token_budget = 2000
+        raw_source_token_budget = 30000
+        static_packet_token_budget = 32000
+
+        [runtime_token_budget]
+        tool_output_token_budget = 5000
+        last_input_token_budget = 100000
+        fresh_input_token_budget = 50000
+        task_complete_budget = 8
+        token_snapshot_budget = 160
+        session_minutes_budget = 90
         """
     )
 
@@ -314,57 +336,81 @@ def render_requirements_txt() -> str:
     )
 
 
-def render_hooks_config() -> str:
-    if is_windows_host():
-        hook_runner = "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
-    else:
-        hook_runner = ".codex/hooks/run_hook.sh"
-
-    return textwrap.dedent(
-        f"""\
-        {{
-          "hooks": {{
+def render_hooks_config(system: str | None = None) -> str:
+    hook_runner = resolve_hook_runner_command(system)
+    config = {
+        "hooks": {
+            "PreToolUse": [
+                {
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} pre_tool_use_preflight.py",
+                            "statusMessage": "Checking tool preflight risks",
+                            "timeout": 30,
+                        }
+                    ],
+                }
+            ],
             "SessionStart": [
-              {{
-                "matcher": "startup|resume",
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} session_start_runtime_context.py",
-                    "statusMessage": "Loading runtime session context",
-                    "timeout": 30
-                  }}
-                ]
-              }}
+                {
+                    "matcher": "startup|resume",
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} session_start_runtime_context.py",
+                            "statusMessage": "Loading runtime session context",
+                            "timeout": 30,
+                        }
+                    ],
+                }
             ],
             "Stop": [
-              {{
-                "hooks": [
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_observation.py",
-                    "statusMessage": "Capturing runtime observations",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_runtime_session.py",
-                    "statusMessage": "Persisting runtime session snapshot",
-                    "timeout": 30
-                  }},
-                  {{
-                    "type": "command",
-                    "command": "{hook_runner} stop_ai_docs_check.py",
-                    "statusMessage": "Checking AI docs governance",
-                    "timeout": 30
-                  }}
-                ]
-              }}
-            ]
-          }}
-        }}
-        """
-    )
+                {
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} stop_runtime_observation.py",
+                            "statusMessage": "Capturing runtime observations",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} stop_runtime_session.py",
+                            "statusMessage": "Persisting runtime session snapshot",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} stop_runtime_token_pressure.py",
+                            "statusMessage": "Checking runtime token pressure",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} stop_loop_scope_monitor.py",
+                            "statusMessage": "Checking loop and scope drift",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{hook_runner} stop_ai_docs_check.py",
+                            "statusMessage": "Checking AI docs governance",
+                            "timeout": 30,
+                        },
+                    ],
+                }
+            ],
+        }
+    }
+    return json.dumps(config, ensure_ascii=False, indent=2) + "\n"
+
+
+def resolve_hook_runner_command(system: str | None = None) -> str:
+    normalized = (system or ("Windows" if is_windows_host() else os.name)).strip().lower()
+    if normalized == "windows" or normalized == "nt":
+        return "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
+    return ".codex/hooks/run_hook.py"
 
 
 def bootstrap_python_environment(
