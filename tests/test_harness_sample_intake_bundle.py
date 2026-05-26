@@ -35,12 +35,12 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         targets = {target.target_artifact: target.entry_count for target in report.targets}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(15, report.item_count)
+        self.assertEqual(14, report.item_count)
         self.assertEqual(6, report.target_count)
-        self.assertEqual({"P0": 1, "P1": 6, "P2": 7, "P3": 1}, report.priority_counts)
-        self.assertEqual({"none": 13, "placeholder": 2}, report.pending_slot_status_counts)
-        self.assertEqual({"append-new-pending-slot": 13, "fill-existing-placeholder": 2}, report.ledger_action_counts)
-        self.assertEqual({"needs-first-real-sample": 14, "needs-more-real-samples": 1}, report.readiness_counts)
+        self.assertEqual({"P0": 1, "P1": 6, "P2": 6, "P3": 1}, report.priority_counts)
+        self.assertEqual({"none": 12, "placeholder": 2}, report.pending_slot_status_counts)
+        self.assertEqual({"append-new-pending-slot": 12, "fill-existing-placeholder": 2}, report.ledger_action_counts)
+        self.assertEqual({"needs-first-real-sample": 13, "needs-more-real-samples": 1}, report.readiness_counts)
         self.assertEqual(
             {
                 "replace-placeholder-after-real-event": 2,
@@ -51,18 +51,18 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
                 "requires-distinct-task-class-report": 1,
                 "requires-security-workflow-event": 2,
                 "requires-user-confirmed-high-impact-action": 1,
-                "requires-workflow-task-event": 3,
+                "requires-workflow-task-event": 2,
             },
             report.capture_gate_counts,
         )
-        self.assertEqual({"placeholder": 15}, report.template_review_state_counts)
-        self.assertEqual(7, report.schema_counts["harness-sample-gap-evidence/v1"])
+        self.assertEqual({"placeholder": 14}, report.template_review_state_counts)
+        self.assertEqual(6, report.schema_counts["harness-sample-gap-evidence/v1"])
         self.assertEqual(4, report.schema_counts["agentic-red-team-sample/v1"])
         self.assertEqual(1, report.schema_counts["local-trace-summary-sample/v1"])
         self.assertEqual(1, report.schema_counts["pre-tool-use-preflight-sample/v1"])
         self.assertEqual(1, report.schema_counts["loop-scope-monitor-sample/v1"])
         self.assertEqual(1, report.schema_counts["stage-checkpoint-resume-sample/v1"])
-        self.assertEqual(7, targets["docs/ai/standards/harness-sample-gap-evidence.jsonl"])
+        self.assertEqual(6, targets["docs/ai/standards/harness-sample-gap-evidence.jsonl"])
         self.assertEqual(4, targets["docs/ai/security/agentic-red-team-samples.jsonl"])
         self.assertEqual(1, targets["docs/ai/standards/pre-tool-use-preflight-samples.jsonl"])
         self.assertEqual(1, targets["docs/ai/standards/loop-scope-monitor-samples.jsonl"])
@@ -76,6 +76,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", ids)
         self.assertNotIn("GAP-AGENTIC-SANDBOX-HONESTY", ids)
         self.assertNotIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", ids)
+        self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertNotIn("GAP-TRACE-OTLP-PILOT-BURNIN", ids)
         entries = {entry.gap_id: entry for target in report.targets for entry in target.entries}
         self.assertEqual("placeholder", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slot_status)
@@ -259,17 +260,18 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         entries = {entry.gap_id: entry for target in report.targets for entry in target.entries}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(4, report.item_count)
+        self.assertEqual(5, report.item_count)
         self.assertEqual(1, report.target_count)
-        self.assertEqual({"P1": 2, "P2": 2}, report.priority_counts)
-        self.assertEqual({"none": 4}, report.pending_slot_status_counts)
-        self.assertEqual({"review-upgrade-decision": 4}, report.ledger_action_counts)
-        self.assertEqual({"upgrade-decision-review": 4}, report.capture_gate_counts)
-        self.assertEqual({"harness-upgrade-decision/v1": 4}, report.schema_counts)
-        self.assertEqual({"not-applicable": 4}, report.template_review_state_counts)
+        self.assertEqual({"P1": 2, "P2": 3}, report.priority_counts)
+        self.assertEqual({"none": 5}, report.pending_slot_status_counts)
+        self.assertEqual({"review-upgrade-decision": 5}, report.ledger_action_counts)
+        self.assertEqual({"upgrade-decision-review": 5}, report.capture_gate_counts)
+        self.assertEqual({"harness-upgrade-decision/v1": 5}, report.schema_counts)
+        self.assertEqual({"not-applicable": 5}, report.template_review_state_counts)
         self.assertIn("GAP-AGENTIC-SANDBOX-HONESTY", entries)
         self.assertIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", entries)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", entries)
+        self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", entries)
         entry = entries["GAP-WORKFLOW-TASK-PROFILE-AUDIT"]
         self.assertEqual("docs/ai/standards/harness-upgrade-decisions.jsonl", entry.target_artifact)
         self.assertEqual("harness-upgrade-decision/v1", entry.schema_version)
@@ -297,11 +299,11 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         )
 
         self.assertEqual([], report.errors)
-        self.assertEqual(4, report.item_count)
-        self.assertEqual({"ready-for-upgrade-discussion": 4}, report.readiness_counts)
-        self.assertEqual({"review-upgrade-decision": 4}, report.ledger_action_counts)
-        self.assertEqual({"upgrade-decision-review": 4}, report.capture_gate_counts)
-        self.assertEqual({"harness-upgrade-decision/v1": 4}, report.schema_counts)
+        self.assertEqual(5, report.item_count)
+        self.assertEqual({"ready-for-upgrade-discussion": 5}, report.readiness_counts)
+        self.assertEqual({"review-upgrade-decision": 5}, report.ledger_action_counts)
+        self.assertEqual({"upgrade-decision-review": 5}, report.capture_gate_counts)
+        self.assertEqual({"harness-upgrade-decision/v1": 5}, report.schema_counts)
 
     def test_text_output_declares_stdout_only_and_no_ledger_writes(self) -> None:
         report = build_harness_sample_intake_bundle.build_report(
@@ -672,11 +674,12 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             check=True,
         )
 
-        self.assertIn("- draft templates: 4", result.stdout)
+        self.assertIn("- draft templates: 5", result.stdout)
         self.assertIn("review-upgrade-decision", result.stdout)
         self.assertIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", result.stdout)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", result.stdout)
         self.assertIn("GAP-AGENTIC-SANDBOX-HONESTY", result.stdout)
+        self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", result.stdout)
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", result.stdout)
         self.assertIn("docs/ai/standards/harness-upgrade-decisions.jsonl", result.stdout)
         self.assertIn("Upgrade Decision Review", result.stdout)
@@ -701,10 +704,11 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             check=True,
         )
 
-        self.assertIn("- draft templates: 4", result.stdout)
-        self.assertIn("readiness counts: {'ready-for-upgrade-discussion': 4}", result.stdout)
+        self.assertIn("- draft templates: 5", result.stdout)
+        self.assertIn("readiness counts: {'ready-for-upgrade-discussion': 5}", result.stdout)
         self.assertIn("Upgrade Decision Review", result.stdout)
         self.assertIn("check_harness_upgrade_decision_candidate.py <candidate-jsonl>", result.stdout)
+        self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", result.stdout)
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", result.stdout)
         self.assertNotIn("```json", result.stdout)
 

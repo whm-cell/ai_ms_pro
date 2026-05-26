@@ -180,11 +180,11 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
 
         self.assertGreater(report.needs_first_real_sample, 0)
         self.assertGreater(report.needs_more_real_samples, 0)
-        self.assertEqual(4, report.ready_for_upgrade_discussion)
-        self.assertEqual({"keep-advisory": 4}, report.upgrade_decision_counts)
+        self.assertEqual(5, report.ready_for_upgrade_discussion)
+        self.assertEqual({"keep-advisory": 5}, report.upgrade_decision_counts)
         self.assertEqual(report.item_count, sum(report.capture_gate_counts.values()))
         self.assertEqual(2, report.capture_gate_counts["replace-placeholder-after-real-event"])
-        self.assertEqual(4, report.capture_gate_counts["upgrade-decision-review"])
+        self.assertEqual(5, report.capture_gate_counts["upgrade-decision-review"])
         self.assertEqual(
             {
                 "GAP-RUNTIME-STAGE-CHECKPOINT-RESUME": (
@@ -199,6 +199,7 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
         self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.readiness_gap_ids["needs-first-real-sample"])
         self.assertEqual(["GAP-TRACE-LOCAL-SUMMARY-BURNIN"], report.readiness_gap_ids["needs-more-real-samples"])
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.readiness_gap_ids["ready-for-upgrade-discussion"])
+        self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", report.readiness_gap_ids["ready-for-upgrade-discussion"])
         self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.capture_gate_gap_ids["replace-placeholder-after-real-event"])
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", report.capture_gate_gap_ids["replace-placeholder-after-real-event"])
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.capture_gate_gap_ids["upgrade-decision-review"])
@@ -238,7 +239,7 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
         self.assertEqual([], report.errors)
         self.assertEqual(("needs-first-real-sample",), report.readiness_filter)
         self.assertEqual(report.item_count, report.needs_first_real_sample)
-        self.assertEqual(14, report.item_count)
+        self.assertEqual(13, report.item_count)
         self.assertEqual(0, report.ready_for_upgrade_discussion)
         self.assertEqual(0, report.needs_more_real_samples)
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in report.items))

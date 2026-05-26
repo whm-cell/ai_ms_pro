@@ -33,7 +33,7 @@ def observation(**overrides: object) -> dict[str, object]:
         "changed_path_count": 2,
         "docs_changed": True,
         "runtime_only_changes": False,
-        "requirement_ids": ["REQ-007"],
+        "requirement_ids": ["REQ-001"],
         "workstream_ids": ["WS-01"],
         "traceability_source": "changed-path:req",
         "needs_governance_promotion": True,
@@ -61,7 +61,7 @@ def trace(**overrides: object) -> dict[str, object]:
             "needs_governance_promotion": True,
             "changed_paths": ["docs/ai/index.md"],
         },
-        "requirement_ids": ["REQ-007"],
+        "requirement_ids": ["REQ-001"],
         "workstream_ids": ["WS-01"],
         "redaction": {"state": "redacted", "rule": "runtime sanitizer applied"},
     }
@@ -83,7 +83,7 @@ class SummarizeRuntimeTracesTest(unittest.TestCase):
         self.assertEqual(summary.session_count, 1)
         self.assertEqual(summary.trace_count, 1)
         self.assertEqual(summary.promotion_needed_count, 1)
-        self.assertEqual(summary.requirement_ids[0].value, "REQ-007")
+        self.assertEqual(summary.requirement_ids[0].value, "REQ-001")
         self.assertEqual(summary.workstream_ids[0].value, "WS-01")
         self.assertEqual(summary.changed_paths[0].value, "docs/ai/index.md")
 

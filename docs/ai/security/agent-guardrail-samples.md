@@ -102,7 +102,7 @@
 - Date: 2026-05-09
 - Guardrail: P2 high-impact action matrix
 - Triggered Rule: 外部可见 PR 发布、workflow 变更和远端 CI burn-in 需要用户明确要求、限定目标分支，并回读 GitHub evidence；不得自动 merge、close PR、delete branch 或修改远端 branch protection / rulesets。
-- Source / Action Summary: 用户要求继续执行 CI burn-in、接入 WS-03 smoke，并允许并行 subagent；本轮动作限定为 repo 文件变更、分支 push、draft PR、GitHub Actions 只读回读和 plan-limited guardrail reporting。
+- Source / Action Summary: 用户要求继续执行 CI burn-in，并允许并行 subagent；本轮动作限定为 repo 文件变更、分支 push、draft PR、GitHub Actions 只读回读和 plan-limited guardrail reporting。
 - Decision: needs-review
 - Result: 本样本在 PR 创建前先记录边界；远端 CI 完成后再补 PR / run evidence，不提前声明 burn-in 成功。
 - False Positive / False Negative: none observed so far；当前没有发现未确认的 destructive、permission-increasing、remote settings mutation 或 external-send 动作。

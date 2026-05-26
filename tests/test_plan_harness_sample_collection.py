@@ -235,6 +235,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
                 "GAP-AGENTIC-SANDBOX-HONESTY",
+                "GAP-WORKFLOW-SIMPLE-SKIP",
                 "GAP-WORKFLOW-TASK-PROFILE-AUDIT",
             ],
             [item.gap_id for item in items],
@@ -269,7 +270,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             readinesses={"needs-first-real-sample"},
         )
 
-        self.assertEqual(14, len(items))
+        self.assertEqual(13, len(items))
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in items))
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", {item.gap_id for item in items})
         self.assertNotIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", {item.gap_id for item in items})
@@ -363,7 +364,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         )
         ids = {item.gap_id for item in items}
 
-        self.assertEqual(13, len(items))
+        self.assertEqual(12, len(items))
         self.assertIn("GAP-RUNTIME-STAGE-CHECKPOINT-RESUME", ids)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", ids)
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", ids)
@@ -371,6 +372,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertNotIn("GAP-AGENTIC-SANDBOX-HONESTY", ids)
         self.assertNotIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", ids)
         self.assertNotIn("GAP-SEC-CONTROL-MATRIX-BURNIN", ids)
+        self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertNotIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", ids)
         self.assertNotIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
         self.assertNotIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
@@ -386,7 +388,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         )
         ids = {item.gap_id for item in items}
 
-        self.assertEqual(15, len(items))
+        self.assertEqual(14, len(items))
         self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
         self.assertIn("GAP-RUNTIME-STAGE-CHECKPOINT-RESUME", ids)
@@ -396,6 +398,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertNotIn("GAP-AGENTIC-SANDBOX-HONESTY", ids)
         self.assertNotIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", ids)
         self.assertNotIn("GAP-SEC-CONTROL-MATRIX-BURNIN", ids)
+        self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertNotIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", ids)
         self.assertNotIn("GAP-TRACE-OTLP-PILOT-BURNIN", ids)
         self.assertTrue(all(plan_harness_sample_collection.is_actionable_sample_item(item) for item in items))
@@ -509,16 +512,16 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertIn("- queued gaps: 19", text)
         self.assertIn("- priority counts: P0=1, P1=8, P2=9, P3=1", text)
         self.assertIn(
-            "- readiness counts: needs-first-real-sample=14, needs-more-real-samples=1, ready-for-upgrade-discussion=4",
+            "- readiness counts: needs-first-real-sample=13, needs-more-real-samples=1, ready-for-upgrade-discussion=5",
             text,
         )
         self.assertIn("- pending slot status counts: none=17, placeholder=2", text)
         self.assertIn(
-            "- ledger action counts: append-new-pending-slot=13, fill-existing-placeholder=2, review-upgrade-decision=4",
+            "- ledger action counts: append-new-pending-slot=12, fill-existing-placeholder=2, review-upgrade-decision=5",
             text,
         )
         self.assertIn("replace-placeholder-after-real-event=2", text)
-        self.assertIn("upgrade-decision-review=4", text)
+        self.assertIn("upgrade-decision-review=5", text)
 
     def test_empty_filtered_capture_card_reports_empty_state(self) -> None:
         result = subprocess.run(

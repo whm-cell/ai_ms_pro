@@ -65,6 +65,7 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
                 "GAP-AGENTIC-SANDBOX-HONESTY",
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
+                "GAP-WORKFLOW-SIMPLE-SKIP",
                 "GAP-WORKFLOW-TASK-PROFILE-AUDIT",
             ],
             report.ready_gap_ids,
@@ -74,11 +75,12 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
                 "GAP-AGENTIC-SANDBOX-HONESTY",
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
+                "GAP-WORKFLOW-SIMPLE-SKIP",
                 "GAP-WORKFLOW-TASK-PROFILE-AUDIT",
             ],
             report.decided_ready_gap_ids,
         )
-        self.assertEqual({"keep-advisory": 4}, report.decision_counts)
+        self.assertEqual({"keep-advisory": 5}, report.decision_counts)
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.next_evidence_needed_by_gap)
         self.assertIn(
             "more real tasks outside the initial simple/complex/0-1-stage profile set",
@@ -179,8 +181,8 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         payload = json.loads(result.stdout)
 
         self.assertEqual([], payload["errors"])
-        self.assertEqual(4, payload["ready_gap_count"])
-        self.assertEqual({"keep-advisory": 4}, payload["decision_counts"])
+        self.assertEqual(5, payload["ready_gap_count"])
+        self.assertEqual({"keep-advisory": 5}, payload["decision_counts"])
         self.assertIn("next_evidence_needed_by_gap", payload)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", payload["next_evidence_needed_by_gap"])
 

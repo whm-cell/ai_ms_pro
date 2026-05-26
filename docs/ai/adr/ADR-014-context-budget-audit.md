@@ -41,7 +41,7 @@
 
 - 手动 warning-only 能暴露上下文膨胀来源，但不会在简单任务中增加默认上下文或 hook 噪音。
 - Context budget audit 与 archive candidate monitor 分工不同：前者审计默认上下文成本，后者只审查 active handoff 归档候选。
-- 真实 REQDOC-003 样本已经让默认短链路接近硬预算；因此需要 80/90 高水位提前报警，而不是等超过硬预算才发现。
+- 真实 requirements / workstream 样本已经让默认短链路接近硬预算；因此需要 80/90 高水位提前报警，而不是等超过硬预算才发现。
 - 当前仍没有足够样本证明自动 compact 应阻断任务，因此保留 warning-only，但把达到预算和高水位的提示变得更早、更明确。
 - 2026-05-21 的长会话样本显示，默认文档面已经受控，但 broad `rg`、完整 skill 读取、完整 diff 和高 cache-miss turn 能把单次工具输出或单次 input 推到高水位；因此需要把 runtime token pressure 从静态文档预算中拆出单独审计。
 

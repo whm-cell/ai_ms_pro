@@ -10,7 +10,7 @@
 
 ## 修复问题
 
-- 修复 `docs/ai/working-context.md` 或未知路径作为 changed path 时会回退绑定到当前 WS-04 的问题。
+- 修复 `docs/ai/working-context.md` 或未知路径作为 changed path 时会回退绑定到当前 active workstream 的问题。
 - Stop runtime traceability 现在只根据显式 payload/env、REQ/WS/REQDOC path 或 module path 做自动发现；无法归因的全局文档和未知路径保持 `unbound`。
 
 ## 行为变化

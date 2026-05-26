@@ -72,7 +72,7 @@ class SessionStartRuntimeContextTest(unittest.TestCase):
                 session_dir,
                 "2026-05-23_main_main_session.md",
                 {
-                    "需求与工作流标识": "- " + ("REQ-010 " * 200),
+                    "需求与工作流标识": "- " + ("REQ-001 " * 200),
                     "当前目标": "- " + ("A" * 1000),
                     "当前 Open Loops": "- " + ("B" * 1000),
                     "下次 Resume 提示": "- " + ("C" * 1000),

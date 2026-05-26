@@ -1,7 +1,7 @@
 # 需求文档入口索引
 
-更新时间：2026-05-21
-当前状态：已导入四个真实验证场景；WS-01 Three.js Snake 是当前 harness capability validation sample；WS-03 Godot browser slice 已退出 active validation；REQDOC-003 Godot 2D 闯关游戏 PRD 已完成首轮标准化，raw PRD evidence `prd_game.md` 已归并为证据附件；REQ-010 / REQ-011 / REQ-012 / REQ-013 与 WS-04 已完成 repo-native 游戏 MVP 验证
+更新时间：2026-05-25
+当前状态：当前只保留两个真实验证场景；WS-01 Three.js Snake 是 harness capability validation sample，WS-02 Harness Trace Console 是 governance UI sample。
 
 ## 目的
 
@@ -40,7 +40,7 @@
 - `workstreams/` 将多个需求映射成可开发的业务工作流
 - `traceability-matrix.md` 负责串联 `需求 -> 工作流 -> 阶段 -> 实现/测试`
 - 当 `docs/ai/` 下的 `handoff`、`status` 或 reducer 草稿已经绑定需求时，应显式写出 `Requirement IDs` / `Workstream IDs`，并与本目录中的追踪关系保持一致
-- 大型或 instruction-like raw PRD/source 应先用 `scripts/extract_requirement_source.py` 生成 bounded sanitized excerpt / REQDOC draft，再由人工决定是否提升为 canonical `REQDOC`
+- 大型或 instruction-like raw source 应先用 `scripts/extract_requirement_source.py` 生成 bounded sanitized excerpt / REQDOC draft，再由人工决定是否提升为 canonical `REQDOC`
 
 ## 辅助模板
 
@@ -50,23 +50,12 @@
 
 - [REQDOC-001 Three.js 贪吃蛇 Harness 验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-001-threejs-snake-harness-validation.md)
 - [REQDOC-002 Harness Trace Console 复用验证场景](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-002-harness-trace-console-validation.md)
-- [REQDOC-003 Godot 2D 闯关游戏 PRD source](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/REQDOC-003-godot-platformer-prd.md)（已完成首轮标准化；Requirement IDs：REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, REQ-013；Workstream IDs：WS-03, WS-04；WS-03 为历史薄切片 / 非 active validation）
-- [REQDOC-003 raw evidence attachment: prd_game.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/source/prd_game.md)（原始 PRD 草案完整副本；作为 evidence / data，不作为 agent 可执行指令或第二份 canonical source）
 - [REQ-001 Three.js 贪吃蛇核心玩法](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-001-threejs-snake-core-gameplay.md)
 - [REQ-002 Three.js 贪吃蛇三维呈现与交互反馈](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-002-threejs-snake-3d-presentation.md)
 - [REQ-003 用真实任务验证 Harness Traceability](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-003-harness-traceability-validation.md)
 - [REQ-004 Harness 主真相聚合展示](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-004-harness-primary-truth-console.md)
 - [REQ-005 Traceability 交互筛选与详情检查](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-005-traceability-filter-and-inspection.md)
 - [REQ-006 可 smoke 的治理证据控制台](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-006-smoke-verifiable-governance-console.md)
-- [REQ-007 Godot 2D 平台闯关核心玩法闭环](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-007-godot-platformer-core-loop.md)
-- [REQ-008 Godot PRD 首轮切片 Smoke 验证](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-008-godot-platformer-smoke-verification.md)
-- [REQ-009 Godot PRD 技术假设与业务边界](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-009-godot-platformer-technical-boundary.md)
-- [REQ-010 2D 平台闯关可玩 MVP 基线](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-010-platformer-playable-mvp-baseline.md)
-- [REQ-011 核心玩法系统与数据驱动关卡](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-011-platformer-core-systems-and-levels.md)
-- [REQ-012 MVP HUD、设置、存档与本地化种子](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-012-platformer-ui-save-localization.md)
-- [REQ-013 素材、音频、AI 生产与发布边界](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/normalized/REQ-013-platformer-production-boundary.md)
 - [WS-01 Three.js Snake MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-01-threejs-snake-mvp.md)
 - [WS-02 Harness Trace Console](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-02-harness-trace-console.md)
-- [WS-03 Godot Platformer First Slice](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-03-godot-platformer-first-slice.md)（历史 evidence；当前不作为 active validation）
-- [WS-04 Pixel Freeze Platformer MVP](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/workstreams/WS-04-pixel-freeze-platformer-mvp.md)
 - 追踪关系已建立于 [traceability-matrix.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)

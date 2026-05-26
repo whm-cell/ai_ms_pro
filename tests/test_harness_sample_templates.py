@@ -110,15 +110,15 @@ class HarnessSampleTemplateTest(unittest.TestCase):
                 "requires-distinct-task-class-report": 1,
                 "requires-security-workflow-event": 2,
                 "requires-user-confirmed-high-impact-action": 1,
-                "requires-workflow-task-event": 3,
-                "upgrade-decision-review": 4,
+                "requires-workflow-task-event": 2,
+                "upgrade-decision-review": 5,
             },
             report.capture_gate_counts,
         )
-        self.assertEqual({"not-applicable": 4, "placeholder": 15}, report.template_review_state_counts)
-        self.assertEqual(7, report.schema_counts["harness-sample-gap-evidence/v1"])
+        self.assertEqual({"not-applicable": 5, "placeholder": 14}, report.template_review_state_counts)
+        self.assertEqual(6, report.schema_counts["harness-sample-gap-evidence/v1"])
         self.assertEqual(4, report.schema_counts["agentic-red-team-sample/v1"])
-        self.assertEqual(4, report.schema_counts["harness-upgrade-decision/v1"])
+        self.assertEqual(5, report.schema_counts["harness-upgrade-decision/v1"])
 
     def test_no_sample_collection_items_do_not_emit_templates(self) -> None:
         item = plan_harness_sample_collection.build_queue(
@@ -167,12 +167,11 @@ class HarnessSampleTemplateTest(unittest.TestCase):
         ids = {validation.gap_id for validation in report.validations}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(3, report.template_count)
+        self.assertEqual(2, report.template_count)
         self.assertEqual(
             {
                 "GAP-WORKFLOW-CROSS-WS",
                 "GAP-WORKFLOW-PR-OVERLAP",
-                "GAP-WORKFLOW-SIMPLE-SKIP",
             },
             ids,
         )
@@ -226,15 +225,16 @@ class HarnessSampleTemplateTest(unittest.TestCase):
         ids = {validation.gap_id for validation in report.validations}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(13, report.template_count)
-        self.assertEqual({"placeholder": 13}, report.template_review_state_counts)
-        self.assertEqual(7, report.schema_counts["harness-sample-gap-evidence/v1"])
+        self.assertEqual(12, report.template_count)
+        self.assertEqual({"placeholder": 12}, report.template_review_state_counts)
+        self.assertEqual(6, report.schema_counts["harness-sample-gap-evidence/v1"])
         self.assertEqual(4, report.schema_counts["agentic-red-team-sample/v1"])
         self.assertEqual(1, report.schema_counts["local-trace-summary-sample/v1"])
         self.assertNotIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
         self.assertNotIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
         self.assertNotIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", ids)
         self.assertNotIn("GAP-SEC-CONTROL-MATRIX-BURNIN", ids)
+        self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", ids)
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", ids)
         self.assertNotIn("GAP-TRACE-OTLP-PILOT-BURNIN", ids)
@@ -249,8 +249,8 @@ class HarnessSampleTemplateTest(unittest.TestCase):
         ids = {validation.gap_id for validation in report.validations}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(15, report.template_count)
-        self.assertEqual({"placeholder": 15}, report.template_review_state_counts)
+        self.assertEqual(14, report.template_count)
+        self.assertEqual({"placeholder": 14}, report.template_review_state_counts)
         self.assertEqual(1, report.schema_counts["pre-tool-use-preflight-sample/v1"])
         self.assertEqual(1, report.schema_counts["loop-scope-monitor-sample/v1"])
         self.assertEqual(1, report.schema_counts["local-trace-summary-sample/v1"])
@@ -259,6 +259,7 @@ class HarnessSampleTemplateTest(unittest.TestCase):
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
         self.assertNotIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", ids)
         self.assertNotIn("GAP-SEC-CONTROL-MATRIX-BURNIN", ids)
+        self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", ids)
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", ids)
         self.assertIn("GAP-AGENTIC-CASCADE-STOP", ids)
