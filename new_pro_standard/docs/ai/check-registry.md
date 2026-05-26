@@ -41,4 +41,5 @@
 
 - 一个 advisory 或 review-required check 不能直接升为 blocking。
 - 升级前必须至少有两次真实样本，且记录误报、修复路径、CI 成本和 reviewer 负担。
+- 暂时无法主动验证的真实样本进入 `docs/ai/harness-real-sample-watchlist.md`，不要用 synthetic、placeholder、local-only 或模板草稿代替 accepted real evidence。
 - 升级决策进入 `status` 或 `ADR`；`AGENTS.md` 只补触发句，不展开完整执行细节。

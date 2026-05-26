@@ -216,10 +216,13 @@ Run `scripts/check_github_guardrails.py` after configuring the GitHub repository
 
 Use `docs/ai/check-registry.md` to decide whether a check is advisory, review-required, blocking-candidate, or blocking. Use `docs/ai/security/supply-chain-provenance-plan.md` before promoting Scorecard, CodeQL, SBOM, or SLSA provenance from evidence to enforcement.
 
+Use `docs/ai/harness-real-sample-watchlist.md` for real-event-only validation gaps. The starter ships the observation logic, not old-project sample counts or accepted conclusions.
+
 ## Included Guides
 
 - `docs/ai/harness-portability-guide.md`
 - `docs/ai/check-registry.md`
+- `docs/ai/harness-real-sample-watchlist.md`
 - `docs/ai/security/supply-chain-provenance-plan.md`
 - `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/ai/new-project-agents-rewrite-guide.md`

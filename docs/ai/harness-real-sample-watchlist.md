@@ -1,6 +1,6 @@
 # Harness Real Sample Watchlist
 
-更新时间：2026-05-25
+更新时间：2026-05-26
 状态：event-driven watchlist
 
 ## 作用
@@ -21,12 +21,14 @@
 
 - 来源：`scripts/check_harness_burn_in_readiness.py --include-future --include-accepted`
 - tracked gaps：20
-- actionable real-sample lanes：15
-- append-new-pending-slot：13
+- actionable real-sample lanes：14
+- append-new-pending-slot：12
 - fill-existing-placeholder：2
-- ready-for-upgrade-discussion：4，全部 `keep-advisory`
+- ready-for-upgrade-discussion：5，全部 `keep-advisory`
 - local-sample-only：1
 - contract / ADR blockers：0
+
+以 `scripts/check_harness_burn_in_readiness.py --include-future --include-accepted` 和 `scripts/check_harness_pending_samples.py` 的输出为准；本快照只做人工路由锚点。
 
 ## 唤醒触发器
 
@@ -38,7 +40,7 @@
 | 不同 task class 的 local trace report | `GAP-TRACE-LOCAL-SUMMARY-BURNIN` | 非 `harness-hardening` 任务生成 no-network local trace summary，并带 bounded evidence | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 | 真实 security workflow / dependency event | `GAP-SEC-SCHEDULED-RUN`, `GAP-SEC-PR-DEPENDENCY` | scheduled/manual security evidence run、dependency PR、release、CodeQL、SBOM 或 dependency-review 真实事件 | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 | 显式用户确认的高影响动作 | `GAP-GUARDRAIL-CONFIRMATION` | 真实 destructive、externally visible、permission-changing、secret/env、deploy/release 等动作，且用户明确确认 | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
-| workflow skill 真实任务 | `GAP-WORKFLOW-CROSS-WS`, `GAP-WORKFLOW-SIMPLE-SKIP`, `GAP-WORKFLOW-PR-OVERLAP` | 跨 workstream 技能加载、简单任务明确跳过技能、多 Agent / 多人 PR touch overlap 的真实样本 | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
+| workflow skill 真实任务 | `GAP-WORKFLOW-CROSS-WS`, `GAP-WORKFLOW-PR-OVERLAP` | 跨 workstream 技能加载、多 Agent / 多人 PR touch overlap 的真实样本 | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 | 真实 red-team incident | `GAP-AGENTIC-TOOL-SQUATTING`, `GAP-AGENTIC-MEMORY-POISONING`, `GAP-AGENTIC-A2A-HANDOFF`, `GAP-AGENTIC-CASCADE-STOP` | 工具/skill 冒名、memory poisoning、A2A/handoff 权限混乱、cascade/rogue loop 等真实 incident | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 | 真实 remote interop probe | `GAP-TRACE-REMOTE-INTEROP` | 带真实 auth / endpoint / redaction / cost boundary 的 OpenAI、OTLP、MCP 或 A2A remote interop probe | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 
@@ -50,6 +52,7 @@
 | --- | --- | --- |
 | `GAP-GUARDRAIL-SOURCE-BOUNDARY` | `keep-advisory` | 出现 PRD、issue、web、Slack、粘贴 source 等更多来源类型，或有 harmless source-priority correction 的 false-positive 复核 |
 | `GAP-SEC-CONTROL-MATRIX-BURNIN` | `keep-advisory` | 出现外部来源类型、多 control mapping 或 reviewer cost evidence |
+| `GAP-WORKFLOW-SIMPLE-SKIP` | `keep-advisory` | 出现 WS-01 之外的 simple-skip、使用 Candidate workflow skill 反而明显改善结果的 negative sample，或简单任务误触发重流程的 process-tax / false-positive 复核 |
 | `GAP-WORKFLOW-TASK-PROFILE-AUDIT` | `keep-advisory` | 出现 simple / complex / 0-1-stage 之外的真实任务，或 profile selection dispute 的 false-positive 复核 |
 | `GAP-AGENTIC-SANDBOX-HONESTY` | `keep-advisory` | 出现 local continuation honesty 之外的真实 incident，或 native sandbox / hosted trace / MCP / A2A / external provider boundary evidence |
 

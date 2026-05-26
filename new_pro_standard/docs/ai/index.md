@@ -27,6 +27,7 @@
 - [项目计划](./plan.md)：阶段目标、范围与验收框架需要确认时再进入
 - [Harness 可迁移清单](./harness-portability-guide.md)
 - [Check Registry](./check-registry.md)：评估某个 check 是否 advisory、review-required、blocking-candidate 或 blocking 时再进入
+- [Harness Real Sample Watchlist](./harness-real-sample-watchlist.md)：记录只能等真实事件发生后再采集的样本缺口；不要把 starter 模板计数当成项目事实
 - [Supply Chain And Provenance Plan](./security/supply-chain-provenance-plan.md)：修改 Scorecard、CodeQL、SBOM、SLSA 或 release provenance 时再进入
 - [Candidate Skill Usage Samples](./skill-usage-samples.md)：记录真实 with/without eval 样本时再进入
 - [新项目 AGENTS 改写指南](./new-project-agents-rewrite-guide.md)
