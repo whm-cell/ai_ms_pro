@@ -19,12 +19,22 @@ REQUIRED_IDS = {
     "game",
     "score",
     "best",
+    "status",
+    "reset-best",
     "overlay",
     "title",
     "message",
     "restart",
 }
-REQUIRED_SMOKE_METHODS = {"getSnapshot", "restart", "placeFoodAhead", "step"}
+REQUIRED_SMOKE_METHODS = {
+    "getSnapshot",
+    "restart",
+    "pause",
+    "resume",
+    "resetBestScore",
+    "placeFoodAhead",
+    "step",
+}
 REQUIRED_REQUIREMENTS = {"REQ-001", "REQ-002", "REQ-003"}
 REQUIRED_WORKSTREAMS = {"WS-01"}
 
@@ -150,7 +160,12 @@ def validate_main_js(main_js: str, errors: list[str]) -> None:
     if missing_methods:
         errors.append(f"main.js smoke API missing methods: {', '.join(missing_methods)}")
 
-    if "overlayHidden" not in main_js or "restartLabel" not in main_js:
+    if (
+        "overlayHidden" not in main_js
+        or "restartLabel" not in main_js
+        or "resetBestLabel" not in main_js
+        or "paused" not in main_js
+    ):
         errors.append("main.js smoke snapshot must include UI state fields used by smoke tests.")
 
 

@@ -33,7 +33,13 @@ await page.waitForLoadState("domcontentloaded");
 await page.locator("#game").waitFor();
 await page.locator("#score").waitFor();
 await page.locator("#best").waitFor();
+await page.locator("#status").waitFor();
+await page.locator("#reset-best").waitFor();
 await page.locator(".hint").waitFor();
+
+await page.evaluate(() => localStorage.setItem("threejs-snake-best-score", "7"));
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.locator("#reset-best").waitFor();
 
 const canvasBox = await page.locator("#game").boundingBox();
 if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
@@ -41,9 +47,35 @@ if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
 }
 
 await page.waitForFunction(() => document.querySelector("#overlay")?.classList.contains("hidden"));
+const seededBest = (await page.locator("#best").textContent() || "").trim();
+if (seededBest !== "7") {
+  throw new Error(`Expected seeded best score 7, got ${JSON.stringify(seededBest)}`);
+}
+await page.locator("#reset-best").click();
+await page.waitForFunction(() => (document.querySelector("#best")?.textContent || "").trim() === "0");
+
 const initialScore = (await page.locator("#score").textContent() || "").trim();
 if (initialScore !== "0") {
   throw new Error(`Expected initial score 0, got ${JSON.stringify(initialScore)}`);
+}
+const initialStatus = (await page.locator("#status").textContent() || "").trim();
+if (initialStatus !== "Running") {
+  throw new Error(`Expected initial status Running, got ${JSON.stringify(initialStatus)}`);
+}
+
+await page.keyboard.press("p");
+await page.waitForFunction(() => (document.querySelector("#title")?.textContent || "").trim() === "Paused");
+const pausedStatus = (await page.locator("#status").textContent() || "").trim();
+const resumeLabel = (await page.locator("#restart").textContent() || "").trim();
+if (pausedStatus !== "Paused" || resumeLabel !== "Resume") {
+  throw new Error(`Expected pause UI, got ${JSON.stringify({ pausedStatus, resumeLabel })}`);
+}
+
+await page.keyboard.press(" ");
+await page.waitForFunction(() => document.querySelector("#overlay")?.classList.contains("hidden"));
+const resumedStatus = (await page.locator("#status").textContent() || "").trim();
+if (resumedStatus !== "Running") {
+  throw new Error(`Expected resumed status Running, got ${JSON.stringify(resumedStatus)}`);
 }
 
 await page.keyboard.press("ArrowDown");
@@ -102,7 +134,7 @@ def main() -> int:
         else:
             wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS threejs-snake blackbox: load -> keyboard turn -> game over -> enter restart")
+        print("[smoke] PASS threejs-snake blackbox: load -> reset best -> keyboard turn -> game over -> enter restart")
         return 0
     finally:
         try:

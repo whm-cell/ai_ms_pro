@@ -146,15 +146,16 @@ def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
     raise RuntimeError(f"Playwright CLI command failed: {' '.join(cmd)}\n{details}{help_note}")
 
 
-def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
-    open_args = [url]
-    if headed:
-        open_args.append("--headed")
-
-    run_pw("open", *open_args, env=env)
-
+def run_browser_code(source: str, env: dict[str, str]) -> None:
     run_pw(
         "run-code",
+        source.strip(),
+        env=env,
+    )
+
+
+def verify_initial_state(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 await page.waitForLoadState("domcontentloaded");
 await page.waitForFunction(() => Boolean(window.__THREEJS_SNAKE_TEST__));
@@ -162,49 +163,97 @@ const snapshot = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.restart
 if (!snapshot.running || snapshot.gameOver || !snapshot.overlayHidden || snapshot.score !== 0) {
   throw new Error(`Unexpected initial snapshot: ${JSON.stringify(snapshot)}`);
 }
+if (snapshot.paused || snapshot.status !== "Running") {
+  throw new Error(`Expected running status in initial snapshot, got ${JSON.stringify(snapshot)}`);
+}
 if (!snapshot.requirementIds.includes("REQ-001") || !snapshot.workstreamIds.includes("WS-01")) {
   throw new Error(`Expected WS-01 metadata in snapshot, got ${JSON.stringify(snapshot)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_pause_resume(env: dict[str, str]) -> None:
+    run_browser_code(
+        """
+const paused = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.pause());
+if (!paused.paused || paused.running || paused.overlayHidden || paused.title !== "Paused" || paused.restartLabel !== "Resume") {
+  throw new Error(`Expected pause state, got ${JSON.stringify(paused)}`);
+}
+const resumed = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.resume());
+if (resumed.paused || !resumed.running || !resumed.overlayHidden || resumed.status !== "Running") {
+  throw new Error(`Expected resume state, got ${JSON.stringify(resumed)}`);
+}
+        """,
+        env=env,
+    )
+
+
+def verify_food_pickup(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 const afterEat = await page.evaluate(() => {
   window.__THREEJS_SNAKE_TEST__.placeFoodAhead();
   return window.__THREEJS_SNAKE_TEST__.step(1);
 });
-if (afterEat.score !== 1 || !afterEat.running || afterEat.gameOver) {
+if (afterEat.score !== 1 || afterEat.best !== 1 || !afterEat.running || afterEat.gameOver) {
   throw new Error(`Expected a successful food pickup, got ${JSON.stringify(afterEat)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_reset_best(env: dict[str, str]) -> None:
+    run_browser_code(
+        """
+const afterResetBest = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.resetBestScore());
+if (afterResetBest.best !== 0 || afterResetBest.resetBestLabel !== "Reset Best") {
+  throw new Error(`Expected best score reset, got ${JSON.stringify(afterResetBest)}`);
+}
+        """,
+        env=env,
+    )
+
+
+def verify_crash(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 const afterCrash = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.step(9));
 if (!afterCrash.gameOver || afterCrash.running || afterCrash.title !== "Game Over") {
   throw new Error(`Expected a wall collision game over, got ${JSON.stringify(afterCrash)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_restart(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 await page.locator("#restart").click();
 const afterRestart = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.getSnapshot());
 if (!afterRestart.running || afterRestart.gameOver || afterRestart.score !== 0 || !afterRestart.overlayHidden) {
   throw new Error(`Expected restart to reset the game, got ${JSON.stringify(afterRestart)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
+
+
+def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
+    open_args = [url]
+    if headed:
+        open_args.append("--headed")
+
+    run_pw("open", *open_args, env=env)
+    verify_initial_state(env)
+    verify_pause_resume(env)
+    verify_food_pickup(env)
+    verify_reset_best(env)
+    verify_crash(env)
+    verify_restart(env)
 
 
 def main() -> int:
@@ -237,7 +286,7 @@ def main() -> int:
         else:
             wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS threejs-snake: load -> eat -> game over -> restart")
+        print("[smoke] PASS threejs-snake: load -> pause -> resume -> reset best -> game over -> restart")
         return 0
     finally:
         try:

@@ -70,6 +70,25 @@ body {
   color: var(--snake);
 }
 
+.hud-button {
+  pointer-events: auto;
+  margin: 0 0 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: rgba(8, 11, 16, 0.72);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hud-button:focus-visible {
+  outline: 3px solid rgba(95, 255, 215, 0.45);
+  outline-offset: 3px;
+}
+
 .hint {
   margin: 0;
   color: var(--muted);

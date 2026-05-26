@@ -11,10 +11,12 @@ const WORKSTREAM_IDS = Object.freeze(["WS-01"]);
 const canvas = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
+const statusEl = document.getElementById("status");
 const overlayEl = document.getElementById("overlay");
 const titleEl = document.getElementById("title");
 const messageEl = document.getElementById("message");
 const restartButton = document.getElementById("restart");
+const resetBestButton = document.getElementById("reset-best");
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080b10);
@@ -104,6 +106,7 @@ let foodMesh = null;
 
 const state = {
   running: false,
+  paused: false,
   gameOver: false,
   score: 0,
   best: Number(localStorage.getItem(STORAGE_KEY) || 0),
@@ -183,6 +186,15 @@ function spawnFood() {
 function syncHud() {
   scoreEl.textContent = String(state.score);
   bestEl.textContent = String(state.best);
+  if (state.gameOver) {
+    statusEl.textContent = "Game Over";
+  } else if (state.paused) {
+    statusEl.textContent = "Paused";
+  } else if (state.running) {
+    statusEl.textContent = "Running";
+  } else {
+    statusEl.textContent = "Ready";
+  }
 }
 
 function resetGame() {
@@ -195,6 +207,7 @@ function resetGame() {
   state.queuedDirection = { x: 1, z: 0 };
   state.score = 0;
   state.gameOver = false;
+  state.paused = false;
   state.running = true;
   state.lastMoveAt = performance.now();
 
@@ -209,10 +222,56 @@ function resetGame() {
 
 function endGame() {
   state.gameOver = true;
+  state.paused = false;
   state.running = false;
+  syncHud();
   overlayEl.classList.remove("hidden");
   titleEl.textContent = "Game Over";
   messageEl.textContent = `Score ${state.score}. Press Enter or click restart to play again.`;
+  restartButton.textContent = "Restart";
+}
+
+function pauseGame() {
+  if (!state.running || state.gameOver) {
+    return;
+  }
+
+  state.running = false;
+  state.paused = true;
+  syncHud();
+  overlayEl.classList.remove("hidden");
+  titleEl.textContent = "Paused";
+  messageEl.textContent = "Press P, Space, or click resume to keep playing.";
+  restartButton.textContent = "Resume";
+}
+
+function resumeGame() {
+  if (!state.paused || state.gameOver) {
+    return;
+  }
+
+  state.paused = false;
+  state.running = true;
+  state.lastMoveAt = performance.now();
+  syncHud();
+  overlayEl.classList.add("hidden");
+  titleEl.textContent = "Snake";
+  messageEl.textContent = "Eat the glowing food, avoid walls and yourself.";
+  restartButton.textContent = "Restart";
+}
+
+function togglePauseState() {
+  if (state.paused) {
+    resumeGame();
+  } else {
+    pauseGame();
+  }
+}
+
+function resetBestScore() {
+  state.best = 0;
+  localStorage.removeItem(STORAGE_KEY);
+  syncHud();
 }
 
 function setDirection(next) {
@@ -337,6 +396,7 @@ function getSmokeSnapshot() {
     requirementIds: [...REQUIREMENT_IDS],
     workstreamIds: [...WORKSTREAM_IDS],
     running: state.running,
+    paused: state.paused,
     gameOver: state.gameOver,
     score: state.score,
     best: state.best,
@@ -347,6 +407,8 @@ function getSmokeSnapshot() {
     title: titleEl.textContent,
     message: messageEl.textContent,
     restartLabel: restartButton.textContent,
+    resetBestLabel: resetBestButton.textContent,
+    status: statusEl.textContent,
   };
 }
 
@@ -362,6 +424,22 @@ function installSmokeApi() {
     restart() {
       resetGame();
       updateSnakeMeshes();
+      return getSmokeSnapshot();
+    },
+    pause() {
+      pauseGame();
+      return getSmokeSnapshot();
+    },
+    resume() {
+      resumeGame();
+      return getSmokeSnapshot();
+    },
+    togglePause() {
+      togglePauseState();
+      return getSmokeSnapshot();
+    },
+    resetBestScore() {
+      resetBestScore();
       return getSmokeSnapshot();
     },
     placeFoodAhead() {
@@ -410,16 +488,29 @@ window.addEventListener("keydown", (event) => {
   } else if (key === "arrowright" || key === "d") {
     event.preventDefault();
     setDirection({ x: 1, z: 0 });
-  } else if (key === "enter" || key === " ") {
+  } else if (key === "p" || key === " ") {
     event.preventDefault();
-    if (!state.running) {
+    togglePauseState();
+  } else if (key === "enter") {
+    event.preventDefault();
+    if (state.paused) {
+      resumeGame();
+    } else if (!state.running) {
       resetGame();
     }
   }
 });
 
 restartButton.addEventListener("click", () => {
-  resetGame();
+  if (state.paused) {
+    resumeGame();
+  } else {
+    resetGame();
+  }
+});
+
+resetBestButton.addEventListener("click", () => {
+  resetBestScore();
 });
 
 resize();
