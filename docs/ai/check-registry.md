@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-05-25
+更新时间：2026-05-31
 状态：已确认
 
 ## 作用
@@ -19,7 +19,7 @@
 | Check | Level | CI coverage | 升级条件 |
 | --- | --- | --- | --- |
 | `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
-| `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
+| `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / CSS / SQL / Rust | 新增大文件误报可控后保持或收紧 |
 | Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; scope is `E9` plus Pyflakes `F` | 先观察 P0 误报和修复成本；后续再决定是否扩大到 style / import sorting / complexity 或纳入 hooks |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
@@ -29,8 +29,12 @@
 | `check_agent_trace_schema.py` | `blocking-candidate` | governance job; runtime stop-hook tests validate producer output against the schema; local export adapter runs against the sample | Stop producer 与本地 adapter 已接入；后续若扩大到真实 trace-file batch validation，再根据误报率决定是否升级为 blocking |
 | `export_agent_trace.py` | `advisory` | governance job runs local sample export | 本地 `local-otel-json` adapter 只证明转换层；OpenAI / OTLP / MCP / A2A 真实互通需要单独 contract 和 ADR |
 | `export_agent_trace.py --format otlp-http-json` | `advisory` | local/unit tests cover explicit endpoint send; default CI path remains no-network | OTLP HTTP JSON pilot 只证明显式 endpoint + `network_exported` 证据链；外部 collector / OpenAI / MCP / A2A 仍需单独 ADR |
+| `check_remote_trace_interop_report.py` | `advisory` | governance job validates report shape; local/unit tests cover localhost vs verified-remote boundary | 用于区分 `local-only` / `pilot-remote` / `verified-remote` claim level；不自动证明广义 remote interop |
 | `check_agent_eval_dataset.py` | `advisory` | governance job | 已包含 skill-harness 回归样本；真实 eval 执行、误报率、CI 成本和模型质量结论需要后续样本 |
 | `run_agent_eval_dataset.py` | `advisory` | governance job runs `--dry-run`; selected local evals are manual | deterministic grader 已落地；真实 eval 执行、误报率、CI 成本和模型质量结论需要后续样本 |
+| `check_task_outcome_eval_dataset.py` | `advisory` | governance job validates dataset shape | task outcome eval 只提供本地 benchmark 结构和 cost proxy，不等于 hosted grading 或模型最终质量结论 |
+| `run_task_outcome_eval_dataset.py` | `advisory` | governance job runs `--dry-run`; executed outcome evals remain local | 输出 `task_outcome`、`overreach`、`resume_stability`、`guardrail_posture` 与成本 proxy；真实长期趋势仍需更多运行样本 |
+| `check_agent_run_provenance.py` | `advisory` | manual / follow-up summary | 校验 local-first `agent-run-provenance/v1` 记录的 REQ/WS 绑定或显式 unbound、authority、canonical write、changed files、tool contracts、validation evidence 和 claim boundaries；不读取 raw runtime、不声明 GitHub plan 升级、Copilot cloud agent task、hosted trace、MCP/A2A、OpenAI sandbox 或外部 OTLP 互通 |
 | `check_tool_contracts.py` | `blocking-candidate` | governance job | MCP-like tools 或高影响工具 contract 增多后，根据误报率和 automation mode 使用情况升级 |
 | `check_threejs_snake_contract.py` | `blocking` | governance job | 已强制；它是 WS-01 static contract gate，不替代 browser smoke |
 | `collect_harness_sample_gaps.py` | `advisory` | governance job writes sample-gap markdown + JSON and appends the gap table to the step summary | 列出 security / guardrail / workflow 真实样本缺口，并从现有样本 checker 与通用 gap evidence ledger 汇总当前 evidence 计数；不自动生成证据，不升级 blocking |
@@ -63,7 +67,9 @@
 | `stop_loop_scope_monitor.py` | `advisory` | Stop hook warning-only; unit tests cover repeated tool commands, repeated failed tool outputs, excessive validation/test loops, possible task-scope churn, finding/recommendation-code output, sample-capture guidance, and bounded `additionalContext`; sample checker validates burn-in artifact | 只提醒下一轮 checkpoint / 新 session / 缩小验证面，不输出 `continue: false`，不自动 compact，不自动归档；warning 会显示 finding / recommendation codes 和 placeholder replacement gate，方便真实长会话 warning 后填 bounded sample；若未来考虑阻断，必须先记录真实长会话样本、误报率和任务中断成本 |
 | `check_loop_scope_monitor_samples.py` | `advisory` | governance job validates loop/scope monitor sample artifact; accepted real warning samples remain burn-in | 校验 `loop-scope-monitor-sample/v1` JSONL 的 finding / recommendation、outcome、false_positive、action_taken、存在的 repo-relative `evidence_refs`（允许 selector）和 raw runtime 边界；synthetic 样本不计入真实 burn-in，当前 accepted real warning sample 为 0 |
 | `check_stage_checkpoints.py` | `advisory` | governance job validates checkpoint artifact and resume samples; cross-task usefulness remains burn-in | 校验 `stage-checkpoint/v1` 与 `stage-checkpoint-resume-sample/v1` JSONL 的 stage/status、恢复提示、下一步、evidence、REQ/WS、`resume_scope`、存在的 repo-relative resume sample `evidence_refs`（允许 selector）和 raw runtime 边界；不做 execution engine，不自动写 canonical docs，不允许 raw transcript / prompt / `.codex/runtime/*` 进入 checkpoint；当前 2/2 accepted samples、0 个 accepted cross-task sample，只证明同一 harness-hardening 线程内有用，保持 advisory；新增 pending cross-task 样本还需通过 append gate，不能沿用模板里的 harness-hardening checkpoint id |
+| `check_runtime_execution_snapshots.py` | `advisory` | governance job validates local execution snapshot artifacts | 校验 `runtime-execution-snapshot/v1` 的 state、authority、tool contract 绑定和 local-only claim；它只证明 bounded checkpoint / resume 原料存在，不等于通用 execution engine |
 | `summarize_runtime_traces.py` | `advisory` | governance job runs no-network summary smoke; unit tests cover local observation and agent-trace summaries; sample checker validates no-network report evidence | 只读 `.codex/runtime/observations/*.jsonl` 与 `agent-traces/*.agent-trace.jsonl`，输出本地 Markdown / JSON 摘要；不上传、不阻断、不声明 OpenAI / OTLP / MCP / A2A 互通；当前有 3 个 accepted real local JSON report 样本，但 accepted distinct task class 仍只有 1 个（`harness-hardening`），若未来考虑升级，必须先记录更多真实 task class、误报率、redaction 边界和治理 promotion 修复路径 |
+| `summarize_harness_capabilities.py` | `advisory` | governance job appends compact capability summary to the step summary | 只压缩 durability / interop / task-eval / high-impact guardrail coverage；不生成新证据，不升级 control level |
 | `check_local_trace_summary_samples.py` | `advisory` | governance job validates Local Trace Summary sample artifact; external interop remains future work | 校验 `local-trace-summary-sample/v1` JSONL 的 no-network/local-only、task_class、计数、redaction state、存在的 repo-relative `evidence_refs`（允许 selector）和 raw runtime 边界；accepted real task class 只证明本地 summary 对该类任务有用，不证明外部 tracing 互通 |
 | `summarize_tool_output.py` | `advisory` | supporting tool for `check_runtime_token_budget.py`; no standalone CI gate | raw artifact 留在 `.codex/runtime/tool-outputs/`，transcript 只进入摘要、错误匹配、tail 和行窗；不单独升级 blocking |
 | `check_task_profile_audit.py` | `advisory` | governance job validates sample artifact; real task audits remain manual / burn-in | 校验 task profile audit JSONL 中的 profile、实际读取面、改动文件、验证命令、traceability closure、real/synthetic 样本类型、存在的 repo-relative `evidence_refs`（允许 selector）、accepted real profile 计数和 raw runtime 边界；当前已有 accepted real simple / complex / 0-1-stage 样本各 1 个，达到升级讨论的 profile 覆盖门槛；升级前必须继续记录更多真实样本、误报率和流程税，并单独决策 |

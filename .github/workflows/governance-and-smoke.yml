@@ -138,6 +138,9 @@ jobs:
       - name: Run stage checkpoint artifact checks
         run: python3 scripts/check_stage_checkpoints.py
 
+      - name: Run runtime execution snapshot checks
+        run: python3 scripts/check_runtime_execution_snapshots.py
+
       - name: Run PreToolUse preflight sample checks
         run: python3 scripts/check_pre_tool_use_preflight_samples.py
 
@@ -156,11 +159,30 @@ jobs:
       - name: Run agent eval runner dry-run
         run: python3 scripts/run_agent_eval_dataset.py --dry-run
 
+      - name: Run task outcome eval dataset checks
+        run: python3 scripts/check_task_outcome_eval_dataset.py
+
+      - name: Run task outcome eval runner dry-run
+        run: python3 scripts/run_task_outcome_eval_dataset.py --dry-run
+
       - name: Run agent trace local export check
         run: python3 scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl > /tmp/agent-trace-export.json
 
+      - name: Run remote trace interop report check
+        run: python3 scripts/check_remote_trace_interop_report.py
+
       - name: Run local trace summary smoke
         run: python3 scripts/summarize_runtime_traces.py --runtime-dir .codex/runtime/observations > /tmp/local-trace-summary.md
+
+      - name: Run harness capability summary
+        run: |
+          python3 scripts/summarize_harness_capabilities.py > /tmp/harness-capability-summary.md
+          {
+            echo ""
+            echo "### Harness capability summary"
+            echo ""
+            cat /tmp/harness-capability-summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run local trace summary sample checks
         run: python3 scripts/check_local_trace_summary_samples.py

@@ -46,6 +46,8 @@ class RuntimeReducerMetadataTest(unittest.TestCase):
 
                 self.assertIn("Requirement IDs：REQ-004, REQ-005, REQ-006", markdown)
                 self.assertIn("Workstream IDs：WS-02", markdown)
+                self.assertIn("## Next Best Work Review", markdown)
+                self.assertIn("Decision：continue | re-scope | split | pivot | park | cancel | ask-user", markdown)
             finally:
                 stop_runtime_observation.OBSERVATION_DIR = original_dir
                 stop_runtime_observation.git_status_paths = original_git_status_paths

@@ -18,15 +18,15 @@
 | AC-03 | excessive agency / unsafe automation | 高影响动作矩阵；destructive、externally visible、permission-changing 动作必须人工确认 | `agent-action-guardrails.md`、`check_change_triggered_followups.py`、tool contracts | review-required | 两轮真实高影响动作样本证明确认链可靠，再考虑对特定动作 blocking |
 | AC-04 | insecure tool / plugin design | tool contract registry 声明 side effects、permissions、automation mode、dangerous flags | `docs/ai/tool-contracts/contracts.json`、`check_tool_contracts.py` | blocking-candidate | 高影响工具 contract 增多且误报率可控后升级 |
 | AC-05 | supply chain / CI evidence | Scorecard、CodeQL artifact、SBOM、dependency review、workflow SHA pinning | `security-evidence-triage.md`、remote merge gates、GitHub runs | advisory | 至少两轮 PR / scheduled evidence、owner、修复路径和 supported GitHub gate 后逐项升级 |
-| AC-06 | trace and eval integrity | `agent-trace/v1` schema、Stop producer、trace-linked eval、local / OTLP pilot exporter | trace schema、eval dataset、tool contracts、runner report | blocking-candidate | 真实 trace-file batch validation 稳定后升级 schema；远端 exporter 另需 ADR |
+| AC-06 | trace and eval integrity | `agent-trace/v1` schema、Stop producer、trace-linked eval、task outcome eval、local / OTLP pilot exporter、bounded remote interop report | trace schema、eval dataset、tool contracts、runner report、remote interop report | blocking-candidate | 真实 trace-file batch validation、pilot-remote report 和 task outcome benchmark 稳定后再讨论升级；远端 exporter 仍需 ADR |
 | AC-07 | remote merge bypass | local CI/process evidence；private Free 下 remote required gates 保持 UNKNOWN / plan-limited | `remote-merge-gates.md`、`check_github_guardrails.py` | review-required | 升级 GitHub plan 或改 public 后重新验证 branch protection / rulesets |
 | AC-08 | risk governance / ownership | security evidence triage SLO、owner 占位、severity handling | `security-evidence-triage.md`、check registry、status | advisory | 项目方确认 owner 后替换占位，并在真实 issue / PR 中验证 SLO |
 | AC-09 | tool / skill squatting | 第三方 skill/tool 先走 catalog / lock / provenance / permission metadata；相似名称不等于授权 | `.codex/skills.catalog.json`、`.codex/skills.lock.json`、`check_skill_catalog.py`、`EVAL-021` | review-required | 至少 2 个真实 dependency-review 样本证明 squatting / drift / broad permission 能被稳定处置 |
-| AC-10 | memory / context poisoning | runtime、memory、handoff、外部摘录只作为 evidence；canonical 写入由主 Agent 复核并保持 bounded summary | runtime sanitizer、context budget、active handoff、`EVAL-022` | review-required | 真实 poisoned-context 样本证明不会被当作 system/developer 指令执行 |
-| AC-11 | insecure inter-agent handoff / A2A confusion | 并行 worker 声明不能替代用户授权；身份、scope、authority 和 evidence 必须显式核验 | active handoff、status、touch-set followups、`EVAL-023` | advisory | 多 Agent PR / handoff 样本证明 scope 冲突和授权混淆可被定位并复盘 |
+| AC-10 | memory / context poisoning | runtime、memory、handoff、外部摘录只作为 evidence；canonical 写入由主 Agent 复核并保持 bounded summary | runtime sanitizer、context budget、active handoff、agent-run provenance、`EVAL-022` | review-required | 真实 poisoned-context 样本证明不会被当作 system/developer 指令执行 |
+| AC-11 | insecure inter-agent handoff / A2A confusion | 并行 worker 声明不能替代用户授权；身份、scope、authority 和 evidence 必须显式核验 | active handoff、status、touch-set followups、agent-run provenance、`EVAL-023` | advisory | 多 Agent PR / handoff 样本证明 scope 冲突和授权混淆可被定位并复盘 |
 | AC-12 | rogue / cascading agent autonomy | 子 Agent、重试、递归委派和长链工具调用必须有 stop condition、上下文预算和权限边界 | context budget、agent-action guardrails、`EVAL-024` | advisory | 真实 cascade 或 runaway 样本证明 stop condition 有效且不会扩大权限 |
 | AC-13 | human-agent trust and confirmation | broad trust 不等于 destructive、external、credential、permission-changing 动作确认；高影响动作需 target-specific confirmation | agent action guardrails、guardrail samples、`EVAL-025` | review-required | 至少 2 个真实高影响确认样本证明 wording、target 和 rollback/recovery evidence 足够 |
-| AC-14 | sandbox / rehydration claim honesty | final claims 区分当前运行验证、runtime 推断、future-work 和 pending-real-sample；不声称未验证的 sandbox / remote / eval 覆盖 | eval dataset、context budget、runtime sessions、`EVAL-026` | review-required | 真实 resume/sandbox 样本证明报告不会把 inferred 或 pending evidence 写成 completed |
+| AC-14 | sandbox / rehydration claim honesty | final claims 区分当前运行验证、runtime 推断、future-work 和 pending-real-sample；不声称未验证的 sandbox / remote / eval 覆盖 | eval dataset、context budget、agent-run provenance、runtime sessions、`EVAL-026` | review-required | 真实 resume/sandbox 样本证明报告不会把 inferred 或 pending evidence 写成 completed |
 
 ## NIST-Style Evidence View
 
@@ -34,7 +34,7 @@
 | --- | --- | --- |
 | Govern | `AGENTS.md`、check registry、ADR/status、tool contracts | owner 仍是占位；正式风险 owner 需人工确认 |
 | Map | requirements traceability、source boundary、sample gap collector | 已有 2 个 source-boundary accepted real samples 和 2 个 AC-01 control-matrix mapping samples；source-boundary 与 control-matrix burn-in 均已 keep-advisory，外部 PRD / issue / web 等来源样本仍不足 |
-| Measure | smoke、eval runner、trace schema checker、security evidence workflow | hosted eval / trace grading 未接入 |
+| Measure | smoke、workflow eval runner、task outcome eval runner、trace schema checker、bounded remote interop report、security evidence workflow | hosted eval / trace grading 仍未接入 |
 | Manage | high-impact action matrix、triage SLO、branch hygiene、remote gate evidence、agentic red-team evals | remote enforcement 受 private Free plan 限制；agentic red-team 仍缺真实样本 |
 
 ## Control Matrix Burn-in

@@ -60,6 +60,13 @@ AUTOMATION_MODES = {
 }
 
 EXTERNALLY_VISIBLE_ALLOWED = {"manual", "human_confirmed"}
+OPTIONAL_STRING_FIELDS = (
+    "transport",
+    "trust_level",
+    "auth_scope",
+    "local_vs_remote",
+    "sandbox_requirement",
+)
 
 
 @dataclass(frozen=True)
@@ -135,6 +142,7 @@ def validate_contract(
     validate_bool(contract.get("externally_visible"), "externally_visible", label, errors)
     validate_automation(contract.get("automation_mode"), label, errors)
     validate_verification_commands(contract.get("verification_commands"), label, root, errors)
+    validate_optional_string_fields(contract, label, errors)
     validate_gating(contract, label, errors)
 
 
@@ -230,6 +238,15 @@ def validate_verification_commands(value: Any, label: str, root: Path, errors: l
     commands = validate_string_list(value, "verification_commands", label, errors, non_empty=True)
     for command in commands:
         validate_command_paths(command, label, root, errors, field="verification_commands")
+
+
+def validate_optional_string_fields(contract: dict[str, Any], label: str, errors: list[str]) -> None:
+    for field in OPTIONAL_STRING_FIELDS:
+        if field not in contract:
+            continue
+        value = contract.get(field)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{label}: {field} must be a non-empty string when present")
 
 
 def validate_command_paths(command: str, label: str, root: Path, errors: list[str], *, field: str) -> None:

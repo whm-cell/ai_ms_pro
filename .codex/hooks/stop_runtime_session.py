@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime_sanitizer import compact_text, compact_transcript_path
+from runtime_execution_snapshot import build_execution_snapshot, write_snapshot
 from runtime_traceability import resolve_runtime_traceability
 from session_snapshot_render import render_session_snapshot
 
@@ -142,6 +143,20 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
     )
 
     session_file.write_text(content, encoding="utf-8")
+    execution_snapshot = build_execution_snapshot(
+        payload=payload,
+        session_id=session_id,
+        agent_label=agent_label,
+        branch_or_thread=branch_or_thread,
+        session_type=session_type,
+        requirement_ids=requirement_ids,
+        workstream_ids=workstream_ids,
+        traceability_source=traceability_source,
+        changed_paths=changed_paths,
+        prompt_preview=prompt_preview,
+        transcript_path=transcript_path,
+    )
+    write_snapshot(execution_snapshot)
 
 
 def find_or_create_session_file(session_id: str, agent_label: str, branch_or_thread: str) -> Path:

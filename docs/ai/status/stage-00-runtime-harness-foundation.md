@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-05-26
+更新时间：2026-06-01
 阶段：stage-00
 状态：进行中
 
@@ -15,10 +15,12 @@
 - 建立可恢复、可压缩、可验证的 runtime / governance / verification harness。
 - 用真实业务薄切片验证 requirements 能通过 REQ/WS 进入 harness，而不是把完整来源材料长期放进默认上下文。
 - 把 GitHub private Free 最大边界、AI/Agent security guardrails、context budget、skill eval 和 code-shape 债务做成可复查证据。
+- 在保持三层 harness 边界不变的前提下，把阶段心态从 closeout 转向 capability 增量建设：runtime durability、bounded observability / interop、task-quality eval。
 
 ## 当前完成度
 
 - Runtime / Governance / Verification 主链路已可用，并已扩展到 P0 linter、agentic standards 和 code-shape 主债务拆分。
+- Code-shape checker 与 `new_pro_standard` starter template 已覆盖 Rust `.rs` 文件 scope；新增 Rust 大文件按 `rust_file` 阈值进入同一检查路径。
 - WS-01、WS-02 具备 repo-native 实现和 browser smoke；WS-01 已补 pause/resume 与 reset-best 作为真实业务小切片，它们仍是当前 active capability / governance UI validation sample。
 - `new_pro_standard` 已同步 starter-safe 机制层与关键 harness 能力：runtime warning hooks、sanitizer、traceability / local trace producer、context-budget pre-commit、Ruff / whitespace gate、空样本账本和 no-write sample evidence checker；当前 repo 的 REQ/WS、PR、CI 历史、真实 accepted samples、runtime artifacts 和 demo apps 不复制。
 - GitHub 侧已具备最小权限 workflow、SHA pinning、固定 Playwright、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 和 `merge_group`；private Free 下 branch protection / rulesets 仍是 future gates。
@@ -45,20 +47,32 @@
 - 上下文已 stage compression，旧 ADR 开始移入 archive；后续继续避免默认面膨胀。
 - Candidate workflow skills 保持 Candidate；升级 always-on 需要更多跨场景样本和单独决策。
 - Agentic standards、P0 linter、external crosswalk 与 code-shape 拆分已同步到 checks / registry / index；细则从默认上下文迁入 `$harness-maintenance` reference。
+- Agent-run provenance 已按 local-first 边界落地：`agent-run-provenance/v1` 记录 authority、REQ/WS、changed files、tool contracts、validation evidence 和 claim boundaries，不依赖 GitHub plan 升级或 cloud agent task。
+- Next Best Work Review 已作为 advisory 机制接入 governance checklist、status 模板和 handoff 草稿，用于完成需求或 checkpoint 后判断计划中的下一项是否仍适合当前阶段；当前不升级为 blocking gate。
 - Stage Checkpoint、PreToolUse preflight、Loop / Scope Monitor、Local Trace Summary、Harness Sample Gap Evidence、Candidate Check Burn-in Ledger、future-work contract 和 upgrade-decision gates 已形成 warning-only / advisory closeout 面。
 - 5 个 ready-for-upgrade-discussion gap（Source Boundary、Control Matrix Burn-in、Task Profile Audit、Sandbox Honesty、Workflow Simple Skip）均保持 `keep-advisory`；PreToolUse real warning、Loop / Scope real warning、cross-task resume、distinct task class trace、remote interop 和 cascade stop 仍需未来真实样本。
+- Bounded tool-output capture 已保留 raw artifact、summary、metadata 与 exit code 行为，并补齐 subprocess stdout pipe 释放，避免全量 unittest 出现未关闭文件 `ResourceWarning`。
 - Stopped long session 的 canonical 入口是 [Stage-00 Harness Burn-in Closeout Handoff](../handoffs/active/stage-00-harness-burn-in-closeout.md)；`.codex/runtime/*` 只保留为本地恢复材料，不替代 status / handoff / ADR。
+- 本轮新增 capability bootstrap：Stop hook 会并行写入 `runtime-execution-snapshot/v1`；新增 bounded remote interop report、task outcome eval dataset/runner 和 capability summary，不改变 local-first / no-overclaim 边界。
 
 ## 下一阶段重点
 
-- 先按 closeout handoff 拆分 dirty worktree：closeout docs、runtime hook controls、sample ledger machinery、CI expansion、validation boundary switch、ADR/security boundaries 分批 review / commit。
+- 后续优先处理 runtime durability、bounded remote interop 和 task outcome eval 的独立小切片；提交前按 changed-file follow-up、governance 和 context-budget gate 验证，不再把 sample-gap 扩张当主建设面。
 - OPEN-01 首轮远端 burn-in 已完成；下一步积累 scheduled / 后续 PR 样本。
+- GitHub 继续只作为 CI / PR / security artifact evidence 面；当前没有升级 GitHub plan 或把 Copilot cloud agent task 作为一等 harness surface 的计划。
 - 观察 AI/Agent guardrails、agentic control matrix 与 security evidence 真实样本，再决定是否升级 advisory / review-required 层。
 - 继续观察 WS-01 / WS-02 browser smoke 在后续 CI 中的 burn-in 结果，失败时区分 Playwright 版本、浏览器安装和应用切片回归。
 - 继续观察 Candidate workflow skills 的跨 workstream 样本和 negative 样本；`GAP-WORKFLOW-SIMPLE-SKIP` 已达到 2/2 但 keep-advisory，不主动制造 synthetic evidence。
-- 观察 agentic standards 的真实维护成本，再决定是否发展外部 OpenTelemetry/OpenAI exporter、MCP-like tool policy 或更强语义检查。
+- 观察 execution snapshot 的 resume 收益、remote interop report 的真实 probe 成本、task outcome eval 的稳定性，再决定是否进一步发展 execution engine、外部 OpenTelemetry/OpenAI exporter、MCP-like tool policy 或更强语义检查。
 - 继续压缩 Stage-00 历史：完成型 handoff 归档、status 保持摘要、ADR 旧决策归档或 supersede。
 - 继续关注 code-shape 新增 warning。
+
+## 下一步选择判断
+
+- Planned next work：继续处理独立、可验证的 Stage-00 harness 维护小切片。
+- Decision：continue
+- Reason：Next Best Work Review 本轮只补 advisory 机制和提示面，不改变当前 stage goal、REQ/WS 范围或 blocking policy。
+- User confirmation required：no
 
 ## 验收判断
 

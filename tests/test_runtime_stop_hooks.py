@@ -15,6 +15,7 @@ import check_agent_trace_schema  # noqa: E402
 import runtime_trace_producer  # noqa: E402
 import runtime_traceability  # noqa: E402
 import stop_runtime_observation  # noqa: E402
+import runtime_execution_snapshot  # noqa: E402
 import stop_runtime_session  # noqa: E402
 
 
@@ -132,13 +133,16 @@ class RuntimeStopHooksTest(unittest.TestCase):
     def test_stop_session_auto_discovers_traceability_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
             session_dir = Path(tempdir) / "sessions"
+            snapshot_dir = Path(tempdir) / "execution-snapshots"
             original_dir = stop_runtime_session.SESSION_DIR
             original_git_branch = stop_runtime_session.git_branch
             original_git_status_paths = stop_runtime_session.git_status_paths
+            original_snapshot_dir = runtime_execution_snapshot.SNAPSHOT_DIR
             try:
                 stop_runtime_session.SESSION_DIR = session_dir
                 stop_runtime_session.git_branch = lambda: "test-branch"
                 stop_runtime_session.git_status_paths = lambda: ["apps/harness-trace-console/main.js"]
+                runtime_execution_snapshot.SNAPSHOT_DIR = snapshot_dir
 
                 stop_runtime_session.write_session_snapshot({"session_id": "session-auto-session"})
 
@@ -150,10 +154,17 @@ class RuntimeStopHooksTest(unittest.TestCase):
                 self.assertIn("- Traceability Source：module-path", text)
                 self.assertIn("## 行为护栏快照", text)
                 self.assertIn("Success Criteria：待主 Agent 补充可验证的完成条件", text)
+                snapshot_files = list(snapshot_dir.glob("*.json"))
+                self.assertEqual(len(snapshot_files), 1)
+                snapshot = json.loads(snapshot_files[0].read_text(encoding="utf-8"))
+                self.assertEqual(snapshot["state"], "resumable")
+                self.assertEqual(snapshot["requirement_ids"], ["REQ-004", "REQ-005", "REQ-006"])
+                self.assertEqual(snapshot["workstream_ids"], ["WS-02"])
             finally:
                 stop_runtime_session.SESSION_DIR = original_dir
                 stop_runtime_session.git_branch = original_git_branch
                 stop_runtime_session.git_status_paths = original_git_status_paths
+                runtime_execution_snapshot.SNAPSHOT_DIR = original_snapshot_dir
 
     def test_stop_session_redacts_sensitive_prompt_and_transcript_path(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

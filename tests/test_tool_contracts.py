@@ -66,6 +66,27 @@ class ToolContractValidationTest(unittest.TestCase):
         self.assertFalse(contract["externally_visible"])
         self.assertIn("--send", contract["dangerous_flags"])
         self.assertIn("network_exported evidence flag", "\n".join(contract["outputs"]))
+        self.assertEqual(contract["transport"], "otlp-http-json")
+        self.assertEqual(contract["local_vs_remote"], "local-pilot-to-remote-ready")
+
+    def test_runtime_execution_snapshot_contract_is_local_checkpoint_only(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_runtime_execution_snapshots")
+
+        self.assertEqual(contract["side_effects"], ["read_repo", "read_runtime"])
+        self.assertEqual(contract["local_vs_remote"], "local-only")
+        self.assertIn(".codex/runtime/execution-snapshots/*.json", contract["inputs"])
+
+    def test_remote_trace_interop_contract_stays_pilot_by_default(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "verify_remote_trace_interop")
+
+        self.assertEqual(contract["transport"], "otlp-http-json")
+        self.assertEqual(contract["local_vs_remote"], "bounded-remote-interop")
+        self.assertIn("--verified-remote", contract["dangerous_flags"])
+        self.assertIn("does not auto-upgrade pilot-remote", contract["notes"])
 
     def test_runtime_trace_summary_contract_is_local_read_only(self) -> None:
         data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)

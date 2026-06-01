@@ -34,6 +34,7 @@ class Config:
     typescript_file: Limit
     stylesheet_file: Limit
     sql_file: Limit
+    rust_file: Limit
 
 @dataclass(frozen=True)
 class Candidate:
@@ -75,6 +76,7 @@ def load_config() -> Config:
         typescript_file=Limit(**thresholds.get("typescript_file", thresholds["python_file"])),
         stylesheet_file=Limit(**thresholds.get("stylesheet_file", thresholds["shell_file"])),
         sql_file=Limit(**thresholds.get("sql_file", thresholds["shell_file"])),
+        rust_file=Limit(**thresholds.get("rust_file", thresholds.get("typescript_file", thresholds["python_file"]))),
     )
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -116,6 +118,8 @@ def detect_kind(path: str) -> str | None:
         return "stylesheet"
     if pure.suffix == ".sql":
         return "sql"
+    if pure.suffix == ".rs":
+        return "rust"
     if pure.suffix == ".sh" or path == ".githooks/pre-commit":
         return "shell"
     return None
@@ -272,6 +276,8 @@ def simple_kind_budget(candidate: Candidate, config: Config) -> tuple[str, Limit
         return ("stylesheet file", config.stylesheet_file)
     if candidate.kind == "sql":
         return ("SQL file", config.sql_file)
+    if candidate.kind == "rust":
+        return ("Rust file", config.rust_file)
     return ("shell file", config.shell_file)
 
 

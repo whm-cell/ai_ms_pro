@@ -1,9 +1,9 @@
 # Stage-00 Harness Burn-in Closeout Handoff
 
-更新时间：2026-05-25
+更新时间：2026-06-01
 阶段：stage-00
 任务：harness-burn-in-closeout
-状态：待接力
+状态：接力中
 
 ## 需求与工作流标识
 
@@ -16,6 +16,7 @@
 - 将已停止的 2026-05-24 / 2026-05-25 长 session 从 `.codex/runtime/*` 恢复材料提升为 canonical closeout 结论。
 - 明确当前不是继续追加 harness 功能或强行制造真实样本，而是做分批 review、校验、提交和 PR 收口。
 - 给下一位 Agent 一个可执行的拆分顺序，避免把 hooks、CI、apps、runtime artifacts 和会计文档混成一个不可审查的大变更。
+- 2026-06-01 起，本 handoff 也承担阶段转向说明：closeout 主线保留，但后续能力建设优先落在 execution snapshot、bounded remote interop、task outcome eval 与 capability summary。
 
 ## 已完成内容
 
@@ -24,6 +25,7 @@
 - `GAP-GUARDRAIL-SOURCE-BOUNDARY`、`GAP-SEC-CONTROL-MATRIX-BURNIN`、`GAP-WORKFLOW-TASK-PROFILE-AUDIT`、`GAP-AGENTIC-SANDBOX-HONESTY` 已达到 ready-for-upgrade-discussion，并都有 bounded `keep-advisory` 决策。
 - `GAP-TRACE-REMOTE-INTEROP` 与 `GAP-AGENTIC-CASCADE-STOP` 已经由 ADR-017 / ADR-016 批准进入 bounded sampling path，但 accepted real sample 仍为 0。
 - 当前 repo-native browser capability validation 保持在 WS-01 / WS-02 / Three.js smoke 边界。
+- 新增 capability bootstrap 已落地到实现面：`runtime-execution-snapshot/v1`、bounded remote interop report、task outcome eval dataset/runner、capability summary。
 
 ## 修改文件
 
@@ -74,7 +76,7 @@
 
 ## 尚未尝试但建议的路线
 
-- 按以下顺序拆分 review / commit：
+- 如果后续再次出现跨面大变更，按以下顺序拆分 review / commit：
   1. closeout / accounting docs only
   2. runtime token / loop / preflight hook controls
   3. burn-in / sample ledger machinery
@@ -86,7 +88,7 @@
 
 ## 当前未完成项
 
-- 分支 dirty worktree 很大，仍需按上面 6 批 review / stage / commit；不要一次性合并。
+- 先前长 session 的大批量 dirty worktree 已不再是当前待拆分状态；后续只处理独立小切片，并按 changed-file follow-up / governance gate 验证。
 - `docs/ai/status/stage-00-runtime-harness-foundation.md` 仍需要保持摘要化，避免把 5/24-5/25 全量 changelog 堆回默认面。
 - Context budget 接近 warning line，ADR count 已超过预算，需要后续归档 / supersede / 压缩。
 - AI governance 仍可能提示 runtime session / observation 带旧 metadata；这是 runtime recovery warning，不是当前 stage truth。
@@ -101,10 +103,17 @@
 
 ## 下一位 Agent 的第一步动作
 
-- 先读 `docs/ai/index.md -> docs/ai/working-context.md -> this handoff -> docs/ai/harness-open-items.md`，然后从 closeout / accounting docs only 批次开始 review and stage。
+- 先读 `docs/ai/index.md -> docs/ai/working-context.md -> this handoff -> docs/ai/harness-open-items.md`，再从 changed-file follow-up 或明确的新小切片开始；不要按旧长 session 批次寻找不存在的 dirty surface。
 
-## 建议同步更新
+## 已同步更新
 
-- 更新 `docs/ai/working-context.md` 的 Active Handoff Sources 和当前活跃队列。
-- 更新 `docs/ai/index.md` 当前锚点，明确本 handoff 是 stopped burn-in session 的 canonical closeout 入口。
-- 对 `docs/ai/status/stage-00-runtime-harness-foundation.md` 做摘要同步，不粘贴完整 runtime transcript 或全量 changelog。
+- `docs/ai/working-context.md` 已保留 Active Handoff Sources，并把当前活跃队列改为独立小切片 / event-driven watchlist。
+- `docs/ai/index.md` 已把最新 changelog 锚点同步到 2026-05-29 agent-run provenance；capture 修复保留为同日独立 changelog。
+- `docs/ai/status/stage-00-runtime-harness-foundation.md` 已做摘要同步，没有粘贴 runtime transcript 或全量 changelog。
+
+## Next Best Work Review
+
+- Planned next work：继续沿 capability model 推进 execution snapshot、bounded remote interop、task outcome eval 与 capability summary 的独立小切片。
+- Decision：continue
+- Reason：这些能力增强保持 local-first / no-overclaim 边界，不要求切换项目定位，也不需要把 sample-gap 扩张继续当主建设面。
+- User confirmation required：no

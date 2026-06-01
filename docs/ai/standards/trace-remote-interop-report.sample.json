@@ -1,0 +1,21 @@
+{
+  "schema_version": "trace-remote-interop-report/v1",
+  "recorded_at": "2026-06-01T00:00:00Z",
+  "input_path": "docs/ai/standards/agent-trace-sample.jsonl",
+  "export_format": "otlp-http-json",
+  "endpoint_scope": "external-test-endpoint",
+  "capability_level": "pilot-remote",
+  "network_exported": true,
+  "endpoint": "https://collector.example.test/v1/traces",
+  "remote_status": {
+    "http_status": 200,
+    "ok": true
+  },
+  "trace_mapping": {
+    "span_count": 1,
+    "original_trace_id": "trace-stop-observation-sample",
+    "otlp_span_count": 1
+  },
+  "claim_boundary": "bounded-remote-interop",
+  "note": "Sample shape only. It demonstrates a bounded pilot-remote probe report and does not count as accepted real external interop evidence."
+}

@@ -164,7 +164,37 @@
         "python3 tests/test_runtime_stop_hooks.py",
         ".codex/hooks/run_with_repo_python.sh scripts/check_agent_trace_schema.py"
       ],
+      "local_vs_remote": "local-only",
+      "trust_level": "repo-local-runtime-writer",
+      "sandbox_requirement": "repo-local filesystem only",
       "notes": "Writes local runtime evidence only; it does not export to OpenTelemetry, OpenAI, or any remote trace backend."
+    },
+    {
+      "name": "stop_runtime_session",
+      "purpose": "Persist the local runtime session markdown and execution snapshot used for bounded checkpoint and resume.",
+      "path": ".codex/hooks/stop_runtime_session.py",
+      "command": ".codex/hooks/run_with_repo_python.sh .codex/hooks/stop_runtime_session.py",
+      "inputs": ["Codex Stop hook JSON payload on stdin", "git status", "docs/ai/working-context.md"],
+      "outputs": [
+        ".codex/runtime/sessions/*.md",
+        ".codex/runtime/execution-snapshots/*.json",
+        "process exit code"
+      ],
+      "side_effects": ["read_repo", "git_read", "write_runtime"],
+      "permissions": ["read-repo", "git-read", "write-runtime"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "hook",
+      "verification_commands": [
+        "python3 tests/test_runtime_stop_hooks.py",
+        "python3 tests/test_runtime_execution_snapshots.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/check_runtime_execution_snapshots.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "repo-local-runtime-writer",
+      "sandbox_requirement": "repo-local filesystem only",
+      "notes": "Writes local resume artifacts only. The execution snapshot supports bounded checkpoint and resume but does not promote runtime files to canonical governance truth."
     },
     {
       "name": "check_threejs_snake_contract",
@@ -265,6 +295,49 @@
       "notes": "The default contract command is dry-run. Running without --dry-run executes each selected eval item's expected repo-local checks and should be an explicit local action."
     },
     {
+      "name": "check_task_outcome_eval_dataset",
+      "purpose": "Validate the task outcome eval dataset that measures real task completion quality beside workflow-only evals.",
+      "path": "scripts/check_task_outcome_eval_dataset.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_task_outcome_eval_dataset.py",
+      "inputs": ["docs/ai/evals/task-outcome-evals.jsonl", "repository check scripts"],
+      "outputs": ["stdout report", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_task_outcome_eval_dataset.py",
+        "python3 tests/test_task_outcome_eval_dataset.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "repo-local-dataset-validator",
+      "sandbox_requirement": "none"
+    },
+    {
+      "name": "run_task_outcome_eval_dataset",
+      "purpose": "Dry-run or execute the task outcome eval dataset with outcome, overreach, resume-stability, and cost proxies.",
+      "path": "scripts/run_task_outcome_eval_dataset.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run",
+      "inputs": ["docs/ai/evals/task-outcome-evals.jsonl", "repository check scripts"],
+      "outputs": ["stdout report", "optional JSON output file", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 300,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run",
+        "python3 tests/test_task_outcome_eval_dataset.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "repo-local-deterministic-eval-runner",
+      "sandbox_requirement": "none",
+      "notes": "The default contract command is dry-run. Executing without --dry-run runs repo-local checks only and reports task outcome plus bounded cost proxies."
+    },
+    {
       "name": "export_agent_trace_local",
       "purpose": "Convert agent-trace/v1 JSONL into a local JSON adapter payload without remote network export.",
       "path": "scripts/export_agent_trace.py",
@@ -300,8 +373,61 @@
         ".codex/hooks/run_with_repo_python.sh scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl --format otlp-http-json",
         "python3 tests/test_agent_trace_export.py"
       ],
+      "transport": "otlp-http-json",
+      "auth_scope": "explicit endpoint only when --send is used",
+      "local_vs_remote": "local-pilot-to-remote-ready",
+      "trust_level": "pilot-interop-adapter",
+      "sandbox_requirement": "explicit operator send decision for network path",
       "dangerous_flags": ["--send", "--endpoint"],
       "notes": "Default command is no-network. Using --send performs an OTLP HTTP POST and must be treated as explicit manual interop evidence, not OpenAI/MCP/A2A completion."
+    },
+    {
+      "name": "verify_remote_trace_interop",
+      "purpose": "Run one bounded OTLP probe and emit a local-only interop report that distinguishes local-only, pilot-remote, and verified-remote claim levels.",
+      "path": "scripts/verify_remote_trace_interop.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/verify_remote_trace_interop.py --input docs/ai/standards/agent-trace-sample.jsonl",
+      "inputs": ["agent-trace/v1 JSONL", "explicit endpoint only when --send is used", "docs/ai/adr/ADR-017-trace-remote-interop-boundary.md"],
+      "outputs": ["stdout JSON report", "optional JSON output file", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 60,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/verify_remote_trace_interop.py --input docs/ai/standards/agent-trace-sample.jsonl",
+        "python3 tests/test_remote_trace_interop.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/check_remote_trace_interop_report.py"
+      ],
+      "transport": "otlp-http-json",
+      "auth_scope": "bounded single probe with explicit endpoint and optional verified-remote review",
+      "local_vs_remote": "bounded-remote-interop",
+      "trust_level": "pilot-remote-evidence",
+      "sandbox_requirement": "explicit operator send decision for network path",
+      "dangerous_flags": ["--send", "--endpoint", "--verified-remote"],
+      "notes": "The default command is local-only and no-network. A verified-remote claim requires a successful bounded probe plus separate operator review; the script does not auto-upgrade pilot-remote to broad interop completion."
+    },
+    {
+      "name": "check_remote_trace_interop_report",
+      "purpose": "Validate bounded remote trace interop reports and prevent local capture-server evidence from being misreported as verified remote interoperability.",
+      "path": "scripts/check_remote_trace_interop_report.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_remote_trace_interop_report.py",
+      "inputs": ["docs/ai/standards/trace-remote-interop-report.sample.json"],
+      "outputs": ["stdout report", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_remote_trace_interop_report.py",
+        "python3 tests/test_remote_trace_interop.py"
+      ],
+      "transport": "otlp-http-json",
+      "local_vs_remote": "bounded-remote-interop",
+      "trust_level": "interop-report-validator",
+      "sandbox_requirement": "none"
     },
     {
       "name": "summarize_runtime_traces",
@@ -321,6 +447,49 @@
         ".codex/hooks/run_with_repo_python.sh scripts/summarize_runtime_traces.py --runtime-dir .codex/runtime/observations"
       ],
       "notes": "This report is local evidence only. It does not upload traces, claim OpenAI/OTLP/MCP/A2A interoperability, or replace canonical docs."
+    },
+    {
+      "name": "check_runtime_execution_snapshots",
+      "purpose": "Validate local execution snapshot artifacts used for bounded checkpoint and resume.",
+      "path": "scripts/check_runtime_execution_snapshots.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_runtime_execution_snapshots.py",
+      "inputs": [".codex/runtime/execution-snapshots/*.json", "docs/ai/tool-contracts/contracts.json"],
+      "outputs": ["stdout report", "process exit code"],
+      "side_effects": ["read_repo", "read_runtime"],
+      "permissions": ["read-repo", "read-runtime"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_runtime_execution_snapshots.py",
+        "python3 tests/test_runtime_execution_snapshots.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "runtime-checkpoint-validator",
+      "sandbox_requirement": "none"
+    },
+    {
+      "name": "summarize_harness_capabilities",
+      "purpose": "Summarize durability, interop, task-eval, and high-impact guardrail coverage into a compact control-plane view.",
+      "path": "scripts/summarize_harness_capabilities.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/summarize_harness_capabilities.py",
+      "inputs": [".codex/runtime/execution-snapshots/*.json", ".codex/runtime/trace-interop/*.json", ".codex/runtime/task-outcome-evals/*.json", "docs/ai/standards/harness-sample-gap-evidence.jsonl", "docs/ai/security/agentic-red-team-samples.jsonl"],
+      "outputs": ["stdout markdown report", "optional stdout JSON report"],
+      "side_effects": ["read_repo", "read_runtime"],
+      "permissions": ["read-repo", "read-runtime"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/summarize_harness_capabilities.py",
+        "python3 tests/test_summarize_harness_capabilities.py"
+      ],
+      "local_vs_remote": "local-control-plane-summary",
+      "trust_level": "summary-report",
+      "sandbox_requirement": "none",
+      "notes": "This summary compresses existing evidence surfaces; it does not create new evidence or upgrade advisory controls by itself."
     },
     {
       "name": "collect_harness_sample_gaps",
@@ -1133,6 +1302,34 @@
         "python3 tests/test_check_burn_in_ledger.py"
       ],
       "notes": "This checker validates evidence shape and upgrade-decision consistency only. CI writes markdown plus JSON ledger output and appends the ledger audit to the GitHub step summary. Markdown and JSON now expose decision_counts, total_remaining_samples, checks_needing_samples, upgrade_eligible_checks, upgrade_review_needed_checks, and per-check rows carrying accepted_samples, sample_target, remaining_samples, evidence_refs, current_decision, next_evidence, repair_path, cost, false_positives, upgrade_eligible, and upgrade_review_needed so blocking-candidate calibration can be routed without manually parsing the ledger table. Accepted samples greater than zero must carry existing repo-relative evidence_refs; markdown anchors, pytest node ids, and JSONL line selectors are allowed when the underlying path exists. 2/2 keep-candidate rows must route Next evidence to upgrade decision review. upgrade_eligible only means the sample target is met; it does not generate samples, upgrade checks, or block checks by itself."
+    },
+    {
+      "name": "check_agent_run_provenance",
+      "purpose": "Validate local-first agent-run provenance records, authority boundaries, validation evidence, and claim-honesty fields.",
+      "path": "scripts/check_agent_run_provenance.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py",
+      "inputs": [
+        "docs/ai/standards/agent-run-provenance-sample.jsonl",
+        "docs/ai/tool-contracts/contracts.json",
+        "repository evidence refs"
+      ],
+      "outputs": [
+        "stdout provenance audit",
+        "optional JSON report",
+        "referenced tool contract list",
+        "process exit code"
+      ],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py",
+        "python3 tests/test_agent_run_provenance.py"
+      ],
+      "notes": "This checker is local-first. It validates repo evidence, REQ/WS bindings or explicit unbound state, authority/canonical-write claims, validation commands, and claim boundaries. It forbids raw .codex/runtime references and does not treat GitHub Copilot cloud agent tasks, hosted traces, MCP/A2A interop, OpenAI sandbox, or GitHub plan upgrades as current provenance sources."
     },
     {
       "name": "check_tool_contracts",

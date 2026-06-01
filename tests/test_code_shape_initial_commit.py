@@ -25,6 +25,7 @@ class CodeShapeInitialCommitTest(unittest.TestCase):
             typescript_file=check_code_shape.Limit(warn=450, error=800),
             stylesheet_file=check_code_shape.Limit(warn=700, error=1200),
             sql_file=check_code_shape.Limit(warn=250, error=500),
+            rust_file=check_code_shape.Limit(warn=450, error=800),
         )
 
     def test_added_file_is_treated_as_existing_on_initial_commit(self) -> None:
@@ -73,6 +74,7 @@ class CodeShapeInitialCommitTest(unittest.TestCase):
         self.assertEqual(check_code_shape.detect_kind("apps/web/src/App.tsx"), "typescript")
         self.assertEqual(check_code_shape.detect_kind("apps/web/src/styles.css"), "stylesheet")
         self.assertEqual(check_code_shape.detect_kind("db/init/01_schema.sql"), "sql")
+        self.assertEqual(check_code_shape.detect_kind("crates/core/src/lib.rs"), "rust")
 
 
 if __name__ == "__main__":

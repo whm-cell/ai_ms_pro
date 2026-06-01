@@ -34,6 +34,7 @@ class Config:
     typescript_file: Limit
     stylesheet_file: Limit
     sql_file: Limit
+    rust_file: Limit
 
 @dataclass(frozen=True)
 class Candidate:
@@ -75,6 +76,7 @@ def load_config() -> Config:
         typescript_file=Limit(**thresholds.get("typescript_file", thresholds["python_file"])),
         stylesheet_file=Limit(**thresholds.get("stylesheet_file", thresholds["shell_file"])),
         sql_file=Limit(**thresholds.get("sql_file", thresholds["shell_file"])),
+        rust_file=Limit(**thresholds.get("rust_file", thresholds.get("typescript_file", thresholds["python_file"]))),
     )
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -116,6 +118,8 @@ def detect_kind(path: str) -> str | None:
         return "stylesheet"
     if pure.suffix == ".sql":
         return "sql"
+    if pure.suffix == ".rs":
+        return "rust"
     if pure.suffix == ".sh" or path == ".githooks/pre-commit":
         return "shell"
     return None
@@ -297,6 +301,18 @@ def check_candidate(
             path=candidate.path,
             label="SQL file",
             limit=config.sql_file,
+            actual=line_count,
+            is_new=candidate.is_new,
+        )
+        return
+
+    if candidate.kind == "rust":
+        add_length_findings(
+            errors,
+            warnings,
+            path=candidate.path,
+            label="Rust file",
+            limit=config.rust_file,
             actual=line_count,
             is_new=candidate.is_new,
         )

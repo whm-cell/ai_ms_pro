@@ -169,6 +169,17 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("governance-surface", names)
         self.assertIn("stage-checkpoints", names)
 
+    def test_runtime_execution_snapshot_change_triggers_checkpoint_check(self) -> None:
+        names = self.followup_names(".codex/runtime/execution-snapshots/demo.json")
+
+        self.assertIn("stage-checkpoints", names)
+
+    def test_task_outcome_eval_change_triggers_standard_eval_followup(self) -> None:
+        names = self.followup_names("docs/ai/evals/task-outcome-evals.jsonl")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("standard-agent-eval", names)
+
     def test_harness_python_triggers_code_shape(self) -> None:
         names = self.followup_names("scripts/check_github_guardrails.py")
 
@@ -191,6 +202,12 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("harness-code-shape", names)
         self.assertIn("local summary smoke", trace.ci_coverage)
 
+    def test_remote_trace_report_change_triggers_trace_check(self) -> None:
+        names = self.followup_names("docs/ai/standards/trace-remote-interop-report.sample.json")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("agent-trace-standard", names)
+
     def test_local_trace_summary_sample_change_triggers_sample_check(self) -> None:
         names = self.followup_names("docs/ai/standards/local-trace-summary-samples.jsonl")
 
@@ -202,6 +219,29 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertIn("governance-surface", names)
         self.assertIn("standard-agent-eval", names)
+
+    def test_agent_run_provenance_change_triggers_provenance_check(self) -> None:
+        names = self.followup_names("docs/ai/standards/agent-run-provenance-sample.jsonl")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("agent-run-provenance", names)
+
+    def test_next_best_work_review_change_triggers_review_checks(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("scripts/ai_governance_next_best_work.py",))
+        names = {item.name for item in followups}
+        review = next(item for item in followups if item.name == "next-best-work-review")
+        commands = "\n".join(review.commands)
+
+        self.assertIn("next-best-work-review", names)
+        self.assertIn("harness-code-shape", names)
+        self.assertIn("tests/test_next_best_work_review.py", commands)
+        self.assertIn("scripts/check_ai_governance.py", commands)
+
+    def test_next_best_work_template_change_triggers_review_checks(self) -> None:
+        names = self.followup_names("docs/ai/templates/next-best-work-review.md")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("next-best-work-review", names)
 
     def test_agentic_red_team_sample_change_triggers_sample_check(self) -> None:
         names = self.followup_names("docs/ai/security/agentic-red-team-samples.jsonl")

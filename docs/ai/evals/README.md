@@ -5,17 +5,26 @@ Status: standard lightweight dataset
 
 ## Purpose
 
-This directory defines a repo-local standard eval dataset for agent workflow behavior.
+This directory now carries two repo-local eval layers:
 
-It is not a hosted eval service and does not judge model quality by itself. The dataset gives future agents, reviewers, and harness maintainers a small set of realistic tasks with expected artifacts, expected checks, grading signals, and risk tags. A checker validates the dataset shape, and a local runner can execute declared repo-local checks with a deterministic pass / warn / review-required / fail grader.
+- `agent-harness-evals.jsonl`: workflow / guardrail / tooling behavior
+- `task-outcome-evals.jsonl`: task completion quality and bounded cost proxies
+
+Neither layer is a hosted eval service. Together they let the harness distinguish:
+
+- whether an agent followed the harness correctly
+- whether the harness helped the agent finish a real task without overreach
 
 ## Files
 
-- `agent-harness-evals.jsonl`: JSONL dataset. Each line is one eval item.
-- `scripts/check_agent_eval_dataset.py`: stdlib-only dataset validator.
-- `scripts/run_agent_eval_dataset.py`: local eval runner and deterministic grader.
-- `tests/test_agent_eval_dataset.py`: unit tests for the validator.
-- `tests/test_agent_eval_runner.py`: unit tests for the runner and grader.
+- `agent-harness-evals.jsonl`: workflow behavior dataset
+- `task-outcome-evals.jsonl`: task outcome dataset
+- `scripts/check_agent_eval_dataset.py`: workflow dataset validator
+- `scripts/run_agent_eval_dataset.py`: workflow dataset runner
+- `scripts/check_task_outcome_eval_dataset.py`: task outcome dataset validator
+- `scripts/run_task_outcome_eval_dataset.py`: task outcome dataset runner
+- `tests/test_agent_eval_dataset.py`, `tests/test_agent_eval_runner.py`
+- `tests/test_task_outcome_eval_dataset.py`
 
 ## Dataset Item Fields
 
@@ -64,6 +73,29 @@ The deterministic grader is intentionally simple:
 
 This runner is local-only. It does not call model APIs, hosted eval services, OpenTelemetry, OpenAI trace backends, MCP servers, or A2A systems.
 
+## Task Outcome Eval Layer
+
+`task-outcome-evals.jsonl` adds a second deterministic layer for benchmark-like task slices.
+
+It records:
+
+- benchmark group
+- expected repo-local validation commands
+- bounded overreach expectation
+- resume-stability expectation
+- guardrail posture expectation
+
+`scripts/run_task_outcome_eval_dataset.py` reports:
+
+- `task_outcome`
+- `command_count`
+- `timeout_budget_seconds`
+- `overreach`
+- `resume_stability`
+- `guardrail_posture`
+
+This is still local-only. It does not judge model quality from hidden grader prompts or external telemetry, but it gives the harness a stable way to compare “workflow passed” against “task outcome passed”.
+
 ## Grading Outcomes
 
 The dataset uses outcome signals rather than hidden scoring:
@@ -92,6 +124,8 @@ The dataset should stay small, readable, and dependency-free. New evals should p
 
 `EVAL-028-tool-output-artifact-summary` covers artifact-preserving compression: raw tool output stays in `.codex/runtime/tool-outputs/`, while the transcript receives bounded summaries and line windows.
 
+`task-outcome-evals.jsonl` starts with five benchmark groups: `simple-fix`, `cross-file`, `docs-sync`, `risk-judgment`, and `tool-selection`.
+
 ## Validation
 
 Run:
@@ -100,6 +134,9 @@ Run:
 .codex/hooks/run_with_repo_python.sh scripts/check_agent_eval_dataset.py
 .codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --dry-run
 .codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --id EVAL-005-stop-trace-evidence-contract
+.codex/hooks/run_with_repo_python.sh scripts/check_task_outcome_eval_dataset.py
+.codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run
 .codex/.venv/bin/python tests/test_agent_eval_dataset.py
 .codex/.venv/bin/python tests/test_agent_eval_runner.py
+python3 tests/test_task_outcome_eval_dataset.py
 ```

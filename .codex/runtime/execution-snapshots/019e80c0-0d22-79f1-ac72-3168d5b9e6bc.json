@@ -1,0 +1,55 @@
+{
+  "agent": "main",
+  "artifacts": {
+    "transcript_path": "[REDACTED_PATH]/rollout-2026-06-01T09-15-30-019e80c0-0d22-79f1-ac72-3168d5b9e6bc.jsonl",
+    "working_context_path": "docs/ai/working-context.md"
+  },
+  "authority": {
+    "canonical_promotion_required": true,
+    "level": "main-agent"
+  },
+  "branch_or_thread": "codex/harness-burn-in-docs",
+  "changed_path_count": 68,
+  "changed_paths": [
+    ".agents/skills/harness-maintenance/references/agentic-standards.md",
+    ".agents/skills/harness-maintenance/references/code-shape-budget.md",
+    ".agents/skills/harness-maintenance/references/verification-commands.md",
+    ".agents/skills/repo-governed-coding/references/governance-checklist.md",
+    ".codex/code_shape.toml",
+    ".codex/hooks/session_snapshot_render.py",
+    ".codex/hooks/session_start_runtime_context.py",
+    ".codex/hooks/stop_runtime_session.py",
+    ".github/workflows/governance-and-smoke.yml",
+    "docs/ai/check-registry.md",
+    "docs/ai/evals/README.md",
+    "docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md",
+    "docs/ai/index.md",
+    "docs/ai/security/agentic-control-matrix.md",
+    "docs/ai/security/remote-merge-gates.md",
+    "docs/ai/standards/agentic-harness-crosswalk.md",
+    "docs/ai/status/_template.md",
+    "docs/ai/status/stage-00-runtime-harness-foundation.md",
+    "docs/ai/tool-contracts/README.md",
+    "docs/ai/tool-contracts/contracts.json"
+  ],
+  "claim_boundary": "local-only",
+  "recorded_at": "2026-06-01T04:37:31Z",
+  "requirement_ids": [
+    "未绑定"
+  ],
+  "schema_version": "runtime-execution-snapshot/v1",
+  "session_id": "019e80c0-0d22-79f1-ac72-3168d5b9e6bc",
+  "session_type": "pause-before-exit",
+  "stage": "STAGE-00 Runtime Harness Foundation",
+  "state": "resumable",
+  "state_reason": "Stop hook captured the current local task as resumable without promoting runtime artifacts to canonical truth.",
+  "task_summary": "Local runtime execution snapshot captured without a task summary.",
+  "tool_contracts": [
+    "stop_runtime_observation",
+    "stop_runtime_session"
+  ],
+  "traceability_source": "unbound",
+  "workstream_ids": [
+    "未绑定"
+  ]
+}

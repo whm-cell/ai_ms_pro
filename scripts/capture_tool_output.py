@@ -143,11 +143,15 @@ def unique_path(path: Path) -> Path:
 
 
 def run_and_capture(command: list[str], artifact_path: Path) -> int:
-    with artifact_path.open("wb") as output:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    with artifact_path.open("wb") as output, subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    ) as process:
         assert process.stdout is not None
-        for chunk in iter(lambda: process.stdout.read(DEFAULT_CHUNK_SIZE), b""):
-            output.write(chunk)
+        with process.stdout:
+            for chunk in iter(lambda: process.stdout.read(DEFAULT_CHUNK_SIZE), b""):
+                output.write(chunk)
         return int(process.wait())
 
 

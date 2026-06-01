@@ -15,6 +15,7 @@ It is not an implementation claim. Items that are not present in the repository 
 Current local standards:
 
 - [Agent Trace Schema](./agent-trace-schema.md): repo-local `agent-trace/v1` JSONL span/event contract.
+- [Agent Run Provenance](./agent-run-provenance.md): local-first run evidence, authority, validation, and claim-boundary contract.
 - [Agent Harness Eval Protocol](../evals/README.md): lightweight eval dataset plus local deterministic runner.
 - [Standard Tool Contracts](../tool-contracts/README.md): tool side-effect, permission, and automation-mode registry.
 - [Harness Remaining Work](../harness-open-items.md): current backlog and known limits.
@@ -25,6 +26,7 @@ Current local hardening tracks:
 | --- | --- | --- |
 | P0 lint / whitespace gate | Ruff plus `git diff --check` around harness scripts, hooks, and tests. | Does not enforce semantic standards-honesty claims. |
 | Trace producer and local / OTLP pilot adapter | Stop hook runtime trace producer and `scripts/export_agent_trace.py`; default output is local/no-network. | Does not prove OpenAI, MCP, A2A, W3C, or external collector interoperability. |
+| Agent-run provenance | `agent-run-provenance/v1` records REQ/WS bindings, authority, changed files, tool contracts, validation, and claim boundaries. | Does not depend on GitHub Copilot cloud agent tasks, GitHub plan upgrades, hosted traces, or raw runtime records. |
 | Eval runner | `scripts/run_agent_eval_dataset.py` deterministic local checks plus optional trace evidence binding in execute mode. | Does not run hosted AgentKit / OpenAI evals or trace grading. |
 | Tool contracts | Local MCP-like contract registry for tool side effects, permissions, and automation mode. | Not an MCP server/client, protocol schema, authorization layer, or dynamic capability system. |
 | Security controls | Runtime sanitizer, source boundary, high-impact action matrix, workspace sandbox manifest checker, security evidence, red-team evals, local-replay sample ledger, and sample-gap collection. | Best-effort repo governance; local replay is not a replacement for native sandbox isolation, identity, monitoring, real red-team incidents, or remote policy enforcement. |
@@ -77,7 +79,7 @@ Official references checked for this refresh:
 ## Current Non-Goals
 
 - No OpenAI, MCP, A2A, W3C Trace Context, or default external OpenTelemetry interoperability is claimed by this document.
-- No hosted eval service, trace grading backend, AgentKit workflow, or model-quality dashboard is introduced by this document.
+- No hosted eval service, trace grading backend, AgentKit workflow, GitHub Copilot cloud agent task surface, or model-quality dashboard is introduced by this document.
 - No native sandbox provider, enforced subagent isolation runtime, or executable snapshot/rehydration runtime is introduced by this document; the local workspace manifest is a claim-honesty contract only.
 - No runtime payload capture policy changes are introduced by this document.
 

@@ -1,8 +1,8 @@
 # AI 文档入口索引
 
-更新时间：2026-05-26
+更新时间：2026-06-01
 当前阶段：STAGE-00 Runtime Harness Foundation
-当前判断：harness 可用；stopped burn-in session 已进入 closeout / split 阶段；context budget 是 strict gate；当前 capability validation 只以 WS-01 Three.js Snake（含 pause/resume 与 reset-best smoke）和 WS-02 Harness Trace Console 为准。
+当前判断：harness 可用；当前阶段从 closeout 转向 capability 增量建设；context budget 是 strict gate；当前 capability validation 仍以 WS-01 Three.js Snake（含 pause/resume 与 reset-best smoke）和 WS-02 Harness Trace Console 为准，并新增 execution snapshot / bounded remote interop / task outcome eval 基础件。
 
 ## 入口说明
 
@@ -21,7 +21,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - Resume / decisions：[Harness Real Sample Watchlist](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-real-sample-watchlist.md)、[Stage Checkpoints](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/checkpoints/README.md)、[Active Handoffs](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)、[ADR 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr)。
 - Checks / burn-in：[Registry](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/check-registry.md)、[Burn-in Ledger](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/check-burn-in-ledger.md)。
 - Security / agentic：[Supply Chain](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/supply-chain-provenance-plan.md)、[Security Evidence Triage](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/security-evidence-triage.md)、[Agentic Control Matrix](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agentic-control-matrix.md)、[Remote Merge Gates](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/remote-merge-gates.md)、[Agent Harness Security](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agent-harness-security.md)。
-- Standards / skills：[standards](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards)、[evals](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/evals/README.md)、[tool contracts](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/tool-contracts/README.md)、[security samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agentic-red-team-samples.md)、[skill samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)、[skill eval protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)。
+- Standards / skills：[standards](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards)、[harness capability model](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-capability-model.md)、[runtime execution snapshot](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards/runtime-execution-snapshot.md)、[trace remote interop report](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards/trace-remote-interop-report.md)、[agent-run provenance](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/standards/agent-run-provenance.md)、[Next Best Work Review 模板](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/templates/next-best-work-review.md)、[evals](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/evals/README.md)、[tool contracts](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/tool-contracts/README.md)、[security samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/security/agentic-red-team-samples.md)、[skill samples](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-usage-samples.md)、[skill eval protocol](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/skill-evals/README.md)。
 
 ## 按需 Skills
 
@@ -33,7 +33,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 
 ## 常用检查
 
-- Core：`check_ai_governance.py`、`ruff check .codex/hooks scripts tests`、`check_code_shape.py --all`、`git diff --check`、`check_context_budget.py`。
+- Core：`check_ai_governance.py`、`ruff check .codex/hooks scripts tests`、`check_code_shape.py --all`（含 Python / TS / CSS / SQL / Rust scope）、`git diff --check`、`check_context_budget.py`。
 - Game/static：`check_threejs_snake_contract.py`，其他 smoke 按当前 workstream/status 选择。
 - Harness/sample/security：按 changed-file follow-up、[check registry](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/check-registry.md) 或 [verification commands](/Volumes/usd/codes/go_projects/ai_ms_pro/.agents/skills/harness-maintenance/references/verification-commands.md) 选择，不把完整命令矩阵放在默认索引。
 
@@ -42,7 +42,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Runtime Compression And Bounded Tool Output](./changelog/2026-05-26-runtime-compression-bounded-output.md)
+- 最新 changelog：[Harness Capability Bootstrap](./changelog/2026-06-01-harness-capability-bootstrap.md)
 
 ## 维护规则
 

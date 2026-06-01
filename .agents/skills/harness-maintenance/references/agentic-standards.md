@@ -7,6 +7,7 @@ Use this reference when changing repo-local agentic standards: trace schema, tra
 - Trace contract: `docs/ai/standards/agent-trace-schema.md`, schema/sample JSON, `scripts/check_agent_trace_schema.py`.
 - Trace export: `scripts/export_agent_trace.py`; default local/no-network export, explicit `--send --endpoint` only for OTLP HTTP JSON pilot evidence.
 - Eval: `docs/ai/evals/*`, `scripts/check_agent_eval_dataset.py`, `scripts/run_agent_eval_dataset.py`, and trace evidence helpers.
+- Agent-run provenance: `docs/ai/standards/agent-run-provenance.md`, `docs/ai/standards/agent-run-provenance-sample.jsonl`, and `scripts/check_agent_run_provenance.py`.
 - Tool contracts: `docs/ai/tool-contracts/contracts.json`, `scripts/check_tool_contracts.py`.
 - Security controls: `docs/ai/security/agentic-control-matrix.md` plus security triage docs.
 - Sample gaps: `scripts/collect_harness_sample_gaps.py`, generic bounded intake `scripts/check_harness_sample_gap_evidence.py`, real-sample queue `scripts/plan_harness_sample_collection.py`, generated-template drift check `scripts/check_harness_sample_templates.py`, grouped intake bundle `scripts/build_harness_sample_intake_bundle.py`, pending sample slot audit `scripts/check_harness_pending_samples.py`, future-work contract precondition check `scripts/check_harness_future_work_contracts.py`, and `--使用细节/真实场景覆盖缺口待确认.md`.
@@ -28,6 +29,7 @@ Use `references/verification-commands.md` for the full command matrix. Minimum c
 - `.codex/hooks/run_with_repo_python.sh scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl --format otlp-http-json`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_agent_eval_dataset.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --dry-run`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_tool_contracts.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_harness_sample_gap_evidence.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/collect_harness_sample_gaps.py`

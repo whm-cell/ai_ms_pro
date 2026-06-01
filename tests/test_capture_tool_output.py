@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import gc
 import json
 import sys
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
 
@@ -56,6 +58,20 @@ class CaptureToolOutputTest(unittest.TestCase):
             self.assertIn("exit code: 7", report)
             self.assertTrue(metadata.exists())
             self.assertEqual(json.loads(metadata.read_text(encoding="utf-8"))["exit_code"], 7)
+
+    def test_capture_closes_subprocess_stdout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "tool-outputs"
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always", ResourceWarning)
+                capture_tool_output.capture_command(
+                    [sys.executable, "-c", "print('closed pipe')"],
+                    slug="close",
+                    output_dir=output_dir,
+                )
+                gc.collect()
+
+        self.assertFalse([item for item in caught if issubclass(item.category, ResourceWarning)])
 
 
 if __name__ == "__main__":

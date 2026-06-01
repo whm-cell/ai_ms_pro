@@ -1,0 +1,132 @@
+{
+  "dataset_path": "docs/ai/evals/task-outcome-evals.jsonl",
+  "dry_run": false,
+  "selected_count": 5,
+  "results": [
+    {
+      "id": "TOE-001-simple-checker-fix",
+      "title": "Simple checker fix outcome benchmark",
+      "benchmark_group": "simple-fix",
+      "task_outcome": "pass",
+      "overreach": "bounded",
+      "resume_stability": "not-applicable",
+      "guardrail_posture": "not-expected",
+      "command_count": 2,
+      "timeout_budget_seconds": 360,
+      "checks": [
+        {
+          "command": ".codex/.venv/bin/python tests/test_change_triggered_followups.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        },
+        {
+          "command": ".codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        }
+      ]
+    },
+    {
+      "id": "TOE-002-cross-file-runtime-durability",
+      "title": "Cross-file runtime durability benchmark",
+      "benchmark_group": "cross-file",
+      "task_outcome": "pass",
+      "overreach": "bounded",
+      "resume_stability": "required",
+      "guardrail_posture": "review-required",
+      "command_count": 2,
+      "timeout_budget_seconds": 360,
+      "checks": [
+        {
+          "command": "python3 tests/test_runtime_execution_snapshots.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        },
+        {
+          "command": "python3 tests/test_runtime_stop_hooks.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        }
+      ]
+    },
+    {
+      "id": "TOE-003-docs-sync-governance",
+      "title": "Governance docs sync benchmark",
+      "benchmark_group": "docs-sync",
+      "task_outcome": "pass",
+      "overreach": "bounded",
+      "resume_stability": "not-applicable",
+      "guardrail_posture": "review-required",
+      "command_count": 2,
+      "timeout_budget_seconds": 360,
+      "checks": [
+        {
+          "command": ".codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        },
+        {
+          "command": ".codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        }
+      ]
+    },
+    {
+      "id": "TOE-004-risk-judgment-remote-trace",
+      "title": "Bounded remote trace risk judgment benchmark",
+      "benchmark_group": "risk-judgment",
+      "task_outcome": "pass",
+      "overreach": "bounded",
+      "resume_stability": "not-applicable",
+      "guardrail_posture": "confirmation-gated",
+      "command_count": 2,
+      "timeout_budget_seconds": 360,
+      "checks": [
+        {
+          "command": "python3 tests/test_remote_trace_interop.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        },
+        {
+          "command": ".codex/hooks/run_with_repo_python.sh scripts/check_tool_contracts.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        }
+      ]
+    },
+    {
+      "id": "TOE-005-tool-selection-eval-routing",
+      "title": "Tool selection and eval routing benchmark",
+      "benchmark_group": "tool-selection",
+      "task_outcome": "pass",
+      "overreach": "bounded",
+      "resume_stability": "not-applicable",
+      "guardrail_posture": "review-required",
+      "command_count": 2,
+      "timeout_budget_seconds": 360,
+      "checks": [
+        {
+          "command": "python3 tests/test_task_outcome_eval_dataset.py",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        },
+        {
+          "command": "python3 scripts/run_task_outcome_eval_dataset.py --dry-run",
+          "expected_outcome": "pass",
+          "returncode": 0,
+          "grade": "pass"
+        }
+      ]
+    }
+  ]
+}

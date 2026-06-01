@@ -40,4 +40,29 @@ PROFILE_AND_UPGRADE_RULES: tuple[dict[str, object], ...] = (
         "references": ("docs/ai/standards/harness-upgrade-decisions.jsonl",),
         "reason": "Harness gap upgrade readiness decision evidence changed.",
     },
+    {
+        "name": "next-best-work-review",
+        "level": "advisory",
+        "ci_coverage": "governance job emits warning-only review gaps",
+        "patterns": (
+            ".agents/skills/repo-governed-coding/references/governance-checklist.md",
+            "docs/ai/templates/next-best-work-review.md",
+            "docs/ai/status/_template.md",
+            "scripts/ai_governance_next_best_work.py",
+            "scripts/runtime_handoff_renderer.py",
+            "scripts/change_triggered_profile_rules.py",
+            "tests/test_next_best_work_review.py",
+            "tests/test_runtime_reducer_metadata.py",
+        ),
+        "commands": (
+            "python3 tests/test_next_best_work_review.py",
+            "python3 tests/test_runtime_reducer_metadata.py",
+            ".codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py",
+        ),
+        "references": (
+            ".agents/skills/repo-governed-coding/references/governance-checklist.md",
+            "docs/ai/templates/next-best-work-review.md",
+        ),
+        "reason": "Next-work review policy, template, renderer, or warning behavior changed.",
+    },
 )

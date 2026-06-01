@@ -47,6 +47,7 @@ from ai_governance_metadata import (
     split_metadata_field as split_metadata_field,
     validate_identifier_field as validate_identifier_field,
 )
+from ai_governance_next_best_work import next_best_work_review_warnings
 from ai_governance_projection import (
     PLAN_PATH as PLAN_PATH,
     PLAN_STATE_LABELS as PLAN_STATE_LABELS,
@@ -224,6 +225,7 @@ def main() -> int:
         errors=errors,
         warnings=warnings,
     )
+    warnings.extend(next_best_work_review_warnings(active_handoffs + status_docs))
     errors.extend(
         projection_freshness_errors(active_handoffs=active_handoffs, status_docs=status_docs)
     )

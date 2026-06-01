@@ -6,6 +6,8 @@ include = [
   "apps/**/*.ts",
   "apps/**/*.tsx",
   "apps/**/*.css",
+  "crates/**/*.rs",
+  "src/**/*.rs",
   "scripts/*.py",
   "scripts/**/*.py",
   "services/**/*.py",
@@ -35,6 +37,7 @@ python_file = 300
 python_function = 60
 python_class = 180
 shell_file = 80
+rust_file = 350
 
 [thresholds.python_file]
 warn = 350
@@ -51,6 +54,10 @@ error = 350
 [thresholds.shell_file]
 warn = 120
 error = 200
+
+[thresholds.rust_file]
+warn = 450
+error = 800
 
 [thresholds.typescript_file]
 warn = 450

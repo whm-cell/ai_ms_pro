@@ -1,0 +1,36 @@
+{
+  "agent": "main",
+  "artifacts": {
+    "transcript_path": "[REDACTED_PATH]/rollout-sensitive.jsonl",
+    "working_context_path": "docs/ai/working-context.md"
+  },
+  "authority": {
+    "canonical_promotion_required": true,
+    "level": "main-agent"
+  },
+  "branch_or_thread": "test-branch",
+  "changed_path_count": 1,
+  "changed_paths": [
+    "docs/ai/working-context.md"
+  ],
+  "claim_boundary": "local-only",
+  "recorded_at": "2026-06-01T04:35:26Z",
+  "requirement_ids": [
+    "未绑定"
+  ],
+  "schema_version": "runtime-execution-snapshot/v1",
+  "session_id": "session-sensitive-session",
+  "session_type": "new",
+  "stage": "STAGE-00 Runtime Harness Foundation",
+  "state": "resumable",
+  "state_reason": "Stop hook captured the current local task as resumable without promoting runtime artifacts to canonical truth.",
+  "task_summary": "Token token=[REDACTED_SECRET] and phone [REDACTED_PHONE]",
+  "tool_contracts": [
+    "stop_runtime_observation",
+    "stop_runtime_session"
+  ],
+  "traceability_source": "unbound",
+  "workstream_ids": [
+    "未绑定"
+  ]
+}

@@ -36,6 +36,20 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
   - architecture, API shape, storage strategy, deployment strategy, or major constraints changed
 - Always update `docs/ai/index.md` after changing `plan`, `handoff`, `status`, `changelog`, or `adr`.
 
+## Next Best Work Review
+
+Run a lightweight next-work review after a meaningful `REQ/WS` completion, stage checkpoint, pause/resume boundary, or when new evidence suggests the planned next task may no longer fit the current stage.
+
+Answer these questions:
+
+- What was just completed, and what evidence proves completion?
+- What new evidence, blocker, risk, or changed assumption appeared?
+- Is the planned next task still the best current-stage work?
+- Which decision applies: `continue`, `re-scope`, `split`, `pivot`, `park`, `cancel`, or `ask-user`?
+- Which truth surfaces need updates: `handoff`, `status`, `ADR`, `traceability-matrix`, `working-context`, or `index`?
+
+Use `ask-user` before changing to a different `REQ/WS`, changing the stage goal, cancelling planned work, or starting a user-unconfirmed direction. Simple tasks may record `continue` inline or skip the review when there is no meaningful next-work decision.
+
 ## Traceability
 
 - Carry `Requirement IDs` and `Workstream IDs` in `handoff`, `status`, runtime session files, and reducer output when known.
