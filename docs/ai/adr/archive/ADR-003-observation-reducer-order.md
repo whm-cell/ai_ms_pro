@@ -3,7 +3,7 @@
 更新时间：2026-04-16
 编号：ADR-003
 标题：Runtime Observation Reducer 先产出 Handoff 草稿
-状态：已采纳
+状态：已归档；当前规则由 `$harness-maintenance` runtime governance compression reference 与 reducer/checks 承接
 
 ## 背景
 
@@ -46,6 +46,6 @@
 - [项目规则 AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
 - [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 - [ADR-001 Harness 分层决策](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)
-- [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+- [ADR-002 Session 到 Handoff 的提升规则](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-002-session-to-handoff-promotion.md)
 - [Runtime Observations README](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/observations/README.md)
 - [Observation Reducer 脚本](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)

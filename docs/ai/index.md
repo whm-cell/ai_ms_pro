@@ -1,8 +1,8 @@
 # AI 文档入口索引
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 当前阶段：STAGE-00 Runtime Harness Foundation
-当前判断：harness 可用；当前阶段从 closeout 转向 capability 增量建设；context budget 是 strict gate；当前 capability validation 仍以 WS-01 Three.js Snake（含 pause/resume 与 reset-best smoke）和 WS-02 Harness Trace Console 为准，并新增 execution snapshot / bounded remote interop / task outcome eval 基础件。
+当前判断：harness 可用；当前阶段从 closeout 转向 capability 增量建设；context budget 是 strict gate；当前 capability validation 仍以 WS-01 Three.js Snake（含 pause/resume 与 reset-best smoke）和 WS-02 Harness Trace Console 为准，并把 execution snapshot / bounded remote interop / task outcome eval 基础件推进到结构化 state、evidence 和 aggregate 指标。
 
 ## 入口说明
 
@@ -42,7 +42,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Harness Capability Bootstrap](./changelog/2026-06-01-harness-capability-bootstrap.md)
+- 最新 changelog：[Harness Follow-up Convergence](./changelog/2026-06-03-harness-followup-convergence.md)
 
 ## 维护规则
 

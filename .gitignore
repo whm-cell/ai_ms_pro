@@ -7,6 +7,9 @@
 !.codex/runtime/observations/README.md
 .codex/runtime/tool-outputs/*
 !.codex/runtime/tool-outputs/README.md
+.codex/runtime/execution-snapshots/*
+.codex/runtime/task-outcome-evals/*
+.codex/runtime/trace-interop/*
 docs/requirements/source-raw/quarantine/*
 !docs/requirements/source-raw/quarantine/.gitkeep
 **/*/__pycache__/

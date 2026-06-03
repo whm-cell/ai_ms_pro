@@ -3,7 +3,7 @@
 更新时间：2026-04-16
 编号：ADR-002
 标题：Runtime Session 到共享 Handoff 的提升规则
-状态：已采纳
+状态：已归档；当前规则由 AGENTS.md、runtime governance compression reference 与 handoff/status 流程承接
 
 ## 背景
 

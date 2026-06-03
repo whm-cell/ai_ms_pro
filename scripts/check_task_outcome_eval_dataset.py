@@ -12,9 +12,30 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET = ROOT / "docs" / "ai" / "evals" / "task-outcome-evals.jsonl"
-ALLOWED_GROUPS = {"simple-fix", "cross-file", "docs-sync", "risk-judgment", "tool-selection"}
+ALLOWED_GROUPS = {
+    "simple-fix",
+    "cross-file",
+    "docs-sync",
+    "risk-judgment",
+    "tool-selection",
+    "resume-durability",
+    "trace-interop-boundary",
+    "warning-review-signal",
+    "overreach-prevention",
+}
 ALLOWED_RESUME = {"not-applicable", "required"}
 ALLOWED_GUARDRAIL = {"not-expected", "review-required", "confirmation-gated"}
+ALLOWED_EXPECTED_OUTCOMES = {"pass", "warn", "review-required"}
+ALLOWED_COMMAND_CLASSES = {
+    "focused-regression",
+    "governance-check",
+    "runtime-check",
+    "interop-check",
+    "eval-check",
+    "capability-summary",
+    "code-shape-check",
+}
+ALLOWED_OVERREACH = {"bounded"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,6 +71,11 @@ def validate_item(line_no: int, item: dict[str, Any], errors: list[str]) -> None
     if item.get("benchmark_group") not in ALLOWED_GROUPS:
         errors.append(f"{prefix}: benchmark_group must be one of {sorted(ALLOWED_GROUPS)}")
     string_list(item.get("expected_artifacts"), f"{prefix}: expected_artifacts", errors)
+    string_list(item.get("expected_changed_surface"), f"{prefix}: expected_changed_surface", errors)
+    if item.get("expected_command_class") not in ALLOWED_COMMAND_CLASSES:
+        errors.append(f"{prefix}: expected_command_class must be one of {sorted(ALLOWED_COMMAND_CLASSES)}")
+    if item.get("overreach_expectation") not in ALLOWED_OVERREACH:
+        errors.append(f"{prefix}: overreach_expectation must be one of {sorted(ALLOWED_OVERREACH)}")
     checks = item.get("expected_checks")
     if not isinstance(checks, list) or not checks:
         errors.append(f"{prefix}: expected_checks must be a non-empty list")
@@ -61,6 +87,11 @@ def validate_item(line_no: int, item: dict[str, Any], errors: list[str]) -> None
             for field in ("command", "expected_outcome", "rationale"):
                 if not isinstance(check.get(field), str) or not str(check[field]).strip():
                     errors.append(f"{prefix}: expected_checks[{index}].{field} must be a non-empty string")
+            expected_outcome = check.get("expected_outcome")
+            if expected_outcome not in ALLOWED_EXPECTED_OUTCOMES:
+                errors.append(
+                    f"{prefix}: expected_checks[{index}].expected_outcome must be one of {sorted(ALLOWED_EXPECTED_OUTCOMES)}"
+                )
             command = check.get("command")
             if isinstance(command, str):
                 validate_command(command, f"{prefix}: expected_checks[{index}].command", errors)
@@ -74,6 +105,12 @@ def validate_item(line_no: int, item: dict[str, Any], errors: list[str]) -> None
             errors.append(f"{prefix}: scorecard.guardrail_posture must be one of {sorted(ALLOWED_GUARDRAIL)}")
         if not isinstance(scorecard.get("overreach_must_stay_bounded"), bool):
             errors.append(f"{prefix}: scorecard.overreach_must_stay_bounded must be a boolean")
+        if item.get("resume_stability_expectation") != scorecard.get("resume_stability"):
+            errors.append(f"{prefix}: resume_stability_expectation must match scorecard.resume_stability")
+        if item.get("guardrail_posture_expectation") != scorecard.get("guardrail_posture"):
+            errors.append(f"{prefix}: guardrail_posture_expectation must match scorecard.guardrail_posture")
+        if item.get("overreach_expectation") == "bounded" and scorecard.get("overreach_must_stay_bounded") is not True:
+            errors.append(f"{prefix}: bounded overreach_expectation requires scorecard.overreach_must_stay_bounded=true")
     tags = item.get("risk_tags")
     if not isinstance(tags, list) or not tags or not all(isinstance(tag, str) and tag.strip() for tag in tags):
         errors.append(f"{prefix}: risk_tags must be a non-empty list of strings")

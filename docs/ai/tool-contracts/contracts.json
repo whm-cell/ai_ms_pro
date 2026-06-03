@@ -335,7 +335,7 @@
       "local_vs_remote": "local-only",
       "trust_level": "repo-local-deterministic-eval-runner",
       "sandbox_requirement": "none",
-      "notes": "The default contract command is dry-run. Executing without --dry-run runs repo-local checks only and reports task outcome plus bounded cost proxies."
+      "notes": "The default contract command is dry-run. Executing without --dry-run runs repo-local checks only and reports task outcome, aggregate pass/warn/review/fail counts, blocked resume/guardrail counts, and bounded cost proxies."
     },
     {
       "name": "export_agent_trace_local",
@@ -383,11 +383,11 @@
     },
     {
       "name": "verify_remote_trace_interop",
-      "purpose": "Run one bounded OTLP probe and emit a local-only interop report that distinguishes local-only, pilot-remote, and verified-remote claim levels.",
+      "purpose": "Run one bounded OTLP probe and emit an interop report that distinguishes local-only, pilot-remote, and verified-remote claim levels.",
       "path": "scripts/verify_remote_trace_interop.py",
       "command": ".codex/hooks/run_with_repo_python.sh scripts/verify_remote_trace_interop.py --input docs/ai/standards/agent-trace-sample.jsonl",
       "inputs": ["agent-trace/v1 JSONL", "explicit endpoint only when --send is used", "docs/ai/adr/ADR-017-trace-remote-interop-boundary.md"],
-      "outputs": ["stdout JSON report", "optional JSON output file", "process exit code"],
+      "outputs": ["stdout JSON report", "structured export_attempt / endpoint_evidence / claim_evidence fields", "optional JSON output file", "process exit code"],
       "side_effects": ["read_repo"],
       "permissions": ["read-repo"],
       "timeout_seconds": 60,
@@ -405,7 +405,7 @@
       "trust_level": "pilot-remote-evidence",
       "sandbox_requirement": "explicit operator send decision for network path",
       "dangerous_flags": ["--send", "--endpoint", "--verified-remote"],
-      "notes": "The default command is local-only and no-network. A verified-remote claim requires a successful bounded probe plus separate operator review; the script does not auto-upgrade pilot-remote to broad interop completion."
+      "notes": "The default command is local-only and no-network. A verified-remote claim requires a successful bounded probe plus explicit operator review evidence; the script does not auto-upgrade pilot-remote to broad interop completion and withholds raw request/response payloads."
     },
     {
       "name": "check_remote_trace_interop_report",
@@ -425,6 +425,7 @@
         "python3 tests/test_remote_trace_interop.py"
       ],
       "transport": "otlp-http-json",
+      "auth_scope": "no auth by default; report validation only",
       "local_vs_remote": "bounded-remote-interop",
       "trust_level": "interop-report-validator",
       "sandbox_requirement": "none"
@@ -489,7 +490,7 @@
       "local_vs_remote": "local-control-plane-summary",
       "trust_level": "summary-report",
       "sandbox_requirement": "none",
-      "notes": "This summary compresses existing evidence surfaces; it does not create new evidence or upgrade advisory controls by itself."
+      "notes": "This summary compresses existing evidence surfaces including resume readiness, local/pilot/verified interop counts, endpoint failure mode, task-eval aggregate counts, and blocked resume/guardrail reasons; it does not create new evidence or upgrade advisory controls by itself."
     },
     {
       "name": "collect_harness_sample_gaps",

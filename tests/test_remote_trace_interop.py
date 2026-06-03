@@ -29,6 +29,9 @@ class RemoteTraceInteropTest(unittest.TestCase):
 
         self.assertEqual(report["capability_level"], "local-only")
         self.assertFalse(report["network_exported"])
+        self.assertEqual(report["export_attempt"]["send"], False)
+        self.assertEqual(report["endpoint_evidence"]["failure_mode"], "not-sent")
+        self.assertIn("request_body", report["withheld_payloads"])
 
     def test_pilot_remote_report_with_local_capture_server(self) -> None:
         with local_capture_server() as server:
@@ -45,6 +48,23 @@ class RemoteTraceInteropTest(unittest.TestCase):
         self.assertEqual(report["capability_level"], "pilot-remote")
         self.assertTrue(report["network_exported"])
         self.assertEqual(report["remote_status"], {"http_status": 200, "ok": True})
+        self.assertEqual(report["endpoint_evidence"]["endpoint_scope"], "external-test-endpoint")
+        self.assertEqual(report["endpoint_evidence"]["failure_mode"], "none")
+
+    def test_verified_remote_requires_operator_review_marker(self) -> None:
+        with local_capture_server() as server:
+            endpoint = f"http://127.0.0.1:{server.server_port}/v1/traces"
+            report = verify_remote_trace_interop.build_report(
+                input_path=verify_remote_trace_interop.DEFAULT_INPUT,
+                endpoint=endpoint,
+                send=True,
+                timeout=5,
+                endpoint_scope="user-confirmed-collector",
+                verified_remote=True,
+            )
+
+        self.assertEqual(report["capability_level"], "verified-remote")
+        self.assertTrue(report["claim_evidence"]["operator_review_confirmed"])
 
     def test_report_validator_rejects_verified_remote_for_local_scope(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -77,6 +97,34 @@ class RemoteTraceInteropTest(unittest.TestCase):
             errors = check_remote_trace_interop_report.validate_report(report, path)
 
         self.assertTrue(any("verified-remote cannot use local-capture-server scope" in item for item in errors))
+
+    def test_report_validator_rejects_raw_payload_body(self) -> None:
+        report = verify_remote_trace_interop.build_report(
+            input_path=verify_remote_trace_interop.DEFAULT_INPUT,
+            endpoint=None,
+            send=False,
+            timeout=5,
+            endpoint_scope=None,
+            verified_remote=False,
+        )
+        report["request_body"] = {"raw": "payload"}
+
+        errors = check_remote_trace_interop_report.validate_report(report, Path("report.json"))
+
+        self.assertTrue(any("must not be present" in item for item in errors))
+
+    def test_write_report_creates_parent_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            output_path = Path(tempdir) / "nested" / "report.json"
+            report = {"schema_version": "trace-remote-interop-report/v1"}
+
+            verify_remote_trace_interop.write_report(
+                str(output_path),
+                json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+            )
+
+            self.assertTrue(output_path.exists())
+            self.assertEqual(json.loads(output_path.read_text(encoding="utf-8")), report)
 
 
 class CaptureHandler(BaseHTTPRequestHandler):

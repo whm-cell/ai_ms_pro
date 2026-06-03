@@ -16,6 +16,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = export_agent_trace.DEFAULT_INPUT
 SCHEMA_VERSION = "trace-remote-interop-report/v1"
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+WITHHELD_PAYLOADS = [
+    "raw_trace_payload",
+    "request_body",
+    "response_body",
+    "prompt",
+    "transcript",
+    "secret",
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -75,6 +83,7 @@ def build_report(
     )
     remote_ok = bool(export_report.remote_status and export_report.remote_status.get("ok"))
     scope = infer_endpoint_scope(endpoint, endpoint_scope)
+    failure = infer_failure_mode(send=send, remote_status=export_report.remote_status)
     report = {
         "schema_version": SCHEMA_VERSION,
         "recorded_at": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -90,12 +99,45 @@ def build_report(
             "original_trace_id": first_original_trace_id(export_report.output),
             "otlp_span_count": count_otlp_spans(export_report.output),
         },
+        "export_attempt": {
+            "send": send,
+            "network_exported": export_report.network_exported,
+            "timeout_seconds": timeout,
+            "export_format": export_report.format,
+        },
+        "endpoint_evidence": {
+            "endpoint_scope": scope,
+            "endpoint_configured": bool(endpoint),
+            "localhost_endpoint": scope == "local-capture-server",
+            "failure_mode": failure,
+        },
+        "claim_evidence": {
+            "operator_review_required": bool(verified_remote),
+            "operator_review_confirmed": bool(verified_remote and remote_ok),
+            "claim_boundary": "bounded-remote-interop",
+        },
+        "withheld_payloads": WITHHELD_PAYLOADS,
         "claim_boundary": "bounded-remote-interop",
         "note": (
             "Bounded OTLP probe only; does not prove OpenAI hosted trace, MCP, A2A, or broad collector interoperability."
         ),
     }
     return report
+
+
+def infer_failure_mode(*, send: bool, remote_status: dict[str, object] | None) -> str:
+    if not send:
+        return "not-sent"
+    if not isinstance(remote_status, dict):
+        return "remote-status-missing"
+    if remote_status.get("ok") is True:
+        return "none"
+    if remote_status.get("error"):
+        return "remote-error"
+    http_status = remote_status.get("http_status")
+    if isinstance(http_status, int):
+        return "http-error"
+    return "remote-status-not-ok"
 
 
 def first_original_trace_id(output: dict[str, object]) -> str:
@@ -144,6 +186,12 @@ def count_otlp_spans(output: dict[str, object]) -> int:
     return total
 
 
+def write_report(path_text: str, text: str) -> None:
+    path = Path(path_text).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
 def main() -> int:
     args = parse_args()
     if args.verified_remote and not args.send:
@@ -159,7 +207,7 @@ def main() -> int:
     )
     text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
-        Path(args.output).write_text(text, encoding="utf-8")
+        write_report(args.output, text)
     else:
         print(text, end="")
     return 0

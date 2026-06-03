@@ -26,3 +26,8 @@
 - `sessions/`：单次会话的本地恢复材料
 - `observations/`：运行过程中的本地观察材料、agent trace JSONL 与 reducer 输入原料
 - `tool-outputs/`：大工具输出、本地日志和完整 diff 的本地原文；进入 prompt 前应先摘要或定点截取
+- `execution-snapshots/`：Stop hook 写入的本地 execution state / resume readiness 快照
+- `task-outcome-evals/`：本地 deterministic task outcome runner 输出
+- `trace-interop/`：本地 trace interop probe / report 输出
+
+以上 runtime 输出目录默认不进入版本控制；需要共享的稳定结论应提升到 docs、standards、changelog、status、ADR 或 checker。

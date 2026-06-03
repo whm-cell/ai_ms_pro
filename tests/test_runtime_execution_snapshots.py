@@ -36,6 +36,12 @@ class RuntimeExecutionSnapshotTest(unittest.TestCase):
         self.assertEqual(snapshot["claim_boundary"], "local-only")
         self.assertEqual(snapshot["tool_contracts"], ["stop_runtime_observation", "stop_runtime_session"])
         self.assertEqual(snapshot["authority"]["level"], "main-agent")
+        self.assertEqual(snapshot["state_source"], "default-stop-hook")
+        self.assertTrue(snapshot["resume_ready"])
+        self.assertEqual(snapshot["resume_blockers"], [])
+        self.assertEqual(snapshot["run_identity"]["session_id"], "session-demo")
+        self.assertEqual(snapshot["state_transition"]["state"], "resumable")
+        self.assertTrue(snapshot["resume_context"]["resume_ready"])
 
     def test_snapshot_validator_accepts_written_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:
@@ -65,6 +71,29 @@ class RuntimeExecutionSnapshotTest(unittest.TestCase):
             )
 
         self.assertEqual(errors, [])
+
+    def test_snapshot_validator_rejects_raw_runtime_artifact_path(self) -> None:
+        snapshot = runtime_execution_snapshot.build_execution_snapshot(
+            payload={},
+            session_id="session-raw-path",
+            agent_label="main",
+            branch_or_thread="test-branch",
+            session_type="new",
+            requirement_ids=["REQ-001"],
+            workstream_ids=["WS-01"],
+            traceability_source="manual",
+            changed_paths=[],
+            prompt_preview="Check raw runtime path",
+            transcript_path=".codex/runtime/sessions/raw.md",
+        )
+
+        errors = check_runtime_execution_snapshots.validate_snapshot(
+            snapshot,
+            check_runtime_execution_snapshots.load_contract_names(),
+            Path("snapshot.json"),
+        )
+
+        self.assertTrue(any("must not contain raw local transcript or runtime paths" in item for item in errors))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Harness Capability Model
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 状态：active capability direction
 
 ## 定位
@@ -22,13 +22,16 @@
    - execution snapshot
    - bounded checkpoint / resume
    - local execution state model
+   - resume readiness / blocker summary
 2. `bounded observability / interop`
    - local trace + bounded remote interop report
    - OTLP pilot evidence
    - future MCP/A2A/OpenAI-friendly contract shape
+   - local-only / pilot-remote / verified-remote count and endpoint failure mode
 3. `task-quality eval`
    - workflow/guardrail/tooling eval 继续保留
    - 新增 task outcome eval，衡量任务完成质量、过度行动、resume 稳定性和 guardrail posture
+   - task outcome aggregate counts and blocked reason summary
 
 ## 不变边界
 

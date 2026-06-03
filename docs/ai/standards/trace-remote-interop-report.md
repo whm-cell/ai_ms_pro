@@ -1,6 +1,6 @@
 # Trace Remote Interop Report
 
-更新时间：2026-06-01
+更新时间：2026-06-03
 状态：bounded pilot evidence
 
 ## Purpose
@@ -28,17 +28,27 @@
   - 只证明本地 adapter/export shape
 - `pilot-remote`
   - 发起一次 bounded remote probe
-  - 记录 endpoint scope、HTTP status、trace mapping
+  - 记录 endpoint scope、HTTP status、trace mapping、failure mode 和 withheld payload class
   - 不自动声明广义 external interoperability
 - `verified-remote`
   - 仅在成功 probe 之后，且经额外 operator review 时使用
   - 仍只证明该 endpoint scope 的 bounded remote evidence
   - 不自动外推到 OpenAI hosted trace、MCP、A2A 或所有 collector
 
+## Structured Evidence
+
+Report 同时保留顶层兼容字段，并新增 4 个结构化 evidence 面：
+
+- `export_attempt`：记录是否显式 `--send`、是否发生 network export、timeout 和 export format。
+- `endpoint_evidence`：记录 endpoint scope、endpoint 是否配置、是否 localhost、failure mode。
+- `claim_evidence`：记录是否需要 / 已确认 operator review，以及 claim boundary。
+- `withheld_payloads`：记录被刻意 withheld 的 payload class，例如 raw trace payload、request body、response body、prompt、transcript 和 secret。
+
 ## Boundary
 
 - report 不记录 raw trace payload、request/response body、prompt、transcript、secret 或 raw runtime path。
 - local capture server 不能被标为 `verified-remote`。
+- `verified-remote` 必须同时具备 `network_exported=true`、`remote_status.ok=true`、非 local capture endpoint scope 和 `claim_evidence.operator_review_confirmed=true`。
 - 该 report 是 bounded interop evidence，不是 capability completion certificate。
 
 ## Validation

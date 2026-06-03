@@ -23,7 +23,7 @@
 - 新增 `Stop` runtime hook 脚本 [stop_runtime_session.py](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks/stop_runtime_session.py)，会 best-effort 读取 hook stdin JSON 并刷新当前 session 的本地快照文件
 - 更新 [hooks.json](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks.json)，使 `Stop` 先写 runtime observation、再写 runtime session、最后执行治理检查
 - 新增 `SessionStart` runtime hook 脚本 [session_start_runtime_context.py](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/hooks/session_start_runtime_context.py)，会在 `startup|resume` 时读取最近 session 文件并通过 `additionalContext` 注入精简恢复提示
-- 为 runtime session 增补最小模板 [._template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/_template.md) 与提升规则 [ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+- 为 runtime session 增补最小模板 [._template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/_template.md) 与提升规则 [ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-002-session-to-handoff-promotion.md)
 - 更新 runtime README 和工作上下文，明确 `Stop` 只写本地 observation/session 文件，`SessionStart` 只读取本地 session 摘要，三者都不会自动发布 `handoff`
 - 为治理脚本加入分级策略：普通实现漂移继续 warning，核心治理实现改动缺少 `working-context` 或 `ADR` 更新时直接失败
 - 手工用模拟 `Stop` payload 验证过 observation 追加脚本，随后已清理测试产物
@@ -42,7 +42,7 @@
 - [sessions/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/README.md)
 - [sessions/_template.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/sessions/_template.md)
 - [check_ai_governance.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/check_ai_governance.py)
-- [ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)
+- [ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-002-session-to-handoff-promotion.md)
 - [working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)
 
 ## 关键实现决策
@@ -92,7 +92,7 @@
 
 ## 后续参考动作
 
-- 先读 [working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[ADR-001-harness-layering.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)、[ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-002-session-to-handoff-promotion.md)，再决定 observation reducer 应先对接 `handoff` 还是长期经验提炼
+- 先读 [working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[ADR-001-harness-layering.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-001-harness-layering.md)、[ADR-002-session-to-handoff-promotion.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-002-session-to-handoff-promotion.md)，再决定 observation reducer 应先对接 `handoff` 还是长期经验提炼
 
 ## 建议同步更新
 

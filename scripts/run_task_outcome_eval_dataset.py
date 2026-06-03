@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 import json
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
@@ -17,6 +19,21 @@ import check_task_outcome_eval_dataset
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET = check_task_outcome_eval_dataset.DEFAULT_DATASET
 DEFAULT_TIMEOUT = 180
+SEVERITY_ORDER = {
+    "not-run": 0,
+    "pass": 1,
+    "warn": 2,
+    "review-required": 3,
+    "fail": 4,
+}
+REVIEW_REQUIRED_LINE_RE = re.compile(
+    r"^\s*(?:[-*]\s*)?(?:review-required|review required|confirmation-gated|confirmation gated)(?:\b|:)",
+    re.IGNORECASE | re.MULTILINE,
+)
+WARNING_LINE_RE = re.compile(
+    r"^\s*(?:[-*]\s*)?(?:warn:|warnings:|warning:|warning-only\b|warning only\b)",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 
 @dataclass(frozen=True)
@@ -24,6 +41,7 @@ class CheckResult:
     command: str
     expected_outcome: str
     returncode: int | None
+    observed_signal: str
     grade: str
 
 
@@ -32,6 +50,8 @@ class OutcomeResult:
     id: str
     title: str
     benchmark_group: str
+    expected_command_class: str
+    expected_changed_surface: list[str]
     task_outcome: str
     overreach: str
     resume_stability: str
@@ -66,7 +86,13 @@ def selected(item: dict[str, Any], ids: set[str]) -> bool:
 
 def run_check(command: str, expected_outcome: str, *, dry_run: bool, timeout: int) -> CheckResult:
     if dry_run:
-        return CheckResult(command=command, expected_outcome=expected_outcome, returncode=None, grade="not-run")
+        return CheckResult(
+            command=command,
+            expected_outcome=expected_outcome,
+            returncode=None,
+            observed_signal="not-run",
+            grade="not-run",
+        )
     try:
         completed = subprocess.run(
             shlex.split(command),
@@ -76,17 +102,42 @@ def run_check(command: str, expected_outcome: str, *, dry_run: bool, timeout: in
             timeout=timeout,
             check=False,
         )
-        if completed.returncode != 0:
-            grade = "fail"
-        elif expected_outcome == "review-required":
-            grade = "review-required"
-        elif expected_outcome == "warn":
-            grade = "warn"
-        else:
-            grade = "pass"
-        return CheckResult(command=command, expected_outcome=expected_outcome, returncode=completed.returncode, grade=grade)
+        observed_signal = detect_observed_signal(completed)
+        grade = stricter_signal(expected_outcome, observed_signal)
+        return CheckResult(
+            command=command,
+            expected_outcome=expected_outcome,
+            returncode=completed.returncode,
+            observed_signal=observed_signal,
+            grade=grade,
+        )
     except (OSError, subprocess.TimeoutExpired):
-        return CheckResult(command=command, expected_outcome=expected_outcome, returncode=None, grade="fail")
+        return CheckResult(
+            command=command,
+            expected_outcome=expected_outcome,
+            returncode=None,
+            observed_signal="fail",
+            grade="fail",
+        )
+
+
+def detect_observed_signal(completed: subprocess.CompletedProcess[str]) -> str:
+    if completed.returncode != 0:
+        return "fail"
+    combined = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
+    if REVIEW_REQUIRED_LINE_RE.search(combined):
+        return "review-required"
+    if WARNING_LINE_RE.search(combined):
+        return "warn"
+    return "pass"
+
+
+def stricter_signal(expected_outcome: str, observed_signal: str) -> str:
+    expected_rank = SEVERITY_ORDER.get(expected_outcome, SEVERITY_ORDER["pass"])
+    observed_rank = SEVERITY_ORDER.get(observed_signal, SEVERITY_ORDER["pass"])
+    if observed_rank > expected_rank:
+        return observed_signal
+    return expected_outcome if expected_outcome in SEVERITY_ORDER else observed_signal
 
 
 def aggregate_outcome(checks: list[CheckResult], dry_run: bool) -> str:
@@ -114,6 +165,8 @@ def run_item(item: dict[str, Any], *, dry_run: bool, timeout: int) -> OutcomeRes
         id=str(item["id"]),
         title=str(item["title"]),
         benchmark_group=str(item["benchmark_group"]),
+        expected_command_class=str(item["expected_command_class"]),
+        expected_changed_surface=[str(value) for value in item.get("expected_changed_surface", [])],
         task_outcome=aggregate_outcome(checks, dry_run),
         overreach=overreach,
         resume_stability=str(scorecard.get("resume_stability", "not-applicable")),
@@ -122,6 +175,43 @@ def run_item(item: dict[str, Any], *, dry_run: bool, timeout: int) -> OutcomeRes
         timeout_budget_seconds=len(checks) * timeout,
         checks=checks,
     )
+
+
+def aggregate_counts(results: list[OutcomeResult]) -> dict[str, int]:
+    counts = {
+        "pass_count": 0,
+        "warn_count": 0,
+        "review_required_count": 0,
+        "fail_count": 0,
+        "not_run_count": 0,
+        "blocked_by_resume": 0,
+        "blocked_by_guardrail": 0,
+    }
+    for result in results:
+        if result.task_outcome == "pass":
+            counts["pass_count"] += 1
+        elif result.task_outcome == "warn":
+            counts["warn_count"] += 1
+        elif result.task_outcome == "review-required":
+            counts["review_required_count"] += 1
+        elif result.task_outcome == "fail":
+            counts["fail_count"] += 1
+        elif result.task_outcome == "not-run":
+            counts["not_run_count"] += 1
+        if result.task_outcome in {"fail", "review-required"} and result.resume_stability == "required":
+            counts["blocked_by_resume"] += 1
+        if result.task_outcome in {"fail", "review-required"} and result.guardrail_posture in {
+            "review-required",
+            "confirmation-gated",
+        }:
+            counts["blocked_by_guardrail"] += 1
+    return counts
+
+
+def write_output(path_text: str, payload: dict[str, Any]) -> None:
+    path = Path(path_text).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -139,12 +229,14 @@ def main() -> int:
         return 1
     payload = {
         "dataset_path": str(dataset_path.relative_to(ROOT)),
+        "recorded_at": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "dry_run": args.dry_run,
         "selected_count": len(results),
+        **aggregate_counts(results),
         "results": [asdict(item) for item in results],
     }
     if args.output:
-        Path(args.output).write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        write_output(args.output, payload)
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:

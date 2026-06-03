@@ -22,7 +22,7 @@
 - 新增 reducer 脚本 [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)，会读取 observation JSONL 并输出 handoff-compatible markdown 草稿
 - reducer 默认优先处理 `needs_governance_promotion=true` 的 observation；如果没有 promotable 记录，则回退到最近 observations
 - reducer 支持 `--input`、`--output`、`--limit`、`--stage`、`--task`、`--title`、`--requirement-id`、`--workstream-id` 参数，便于按需生成草稿
-- 新增 [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)，正式采纳 “observations -> handoff draft -> 主 Agent 审核 -> status/ADR” 的默认顺序
+- 新增 [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-003-observation-reducer-order.md)，正式采纳 “observations -> handoff draft -> 主 Agent 审核 -> status/ADR” 的默认顺序
 - 新增 [ADR-004-requirement-workstream-metadata.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)，正式采纳 requirement/workstream metadata 的统一位点和绑定规则
 - 更新 [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)、[working-context.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/working-context.md)、[index.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md) 和 runtime observations README，同步 reducer 的职责边界与 metadata 规则
 - 已用临时 observation JSONL 样本手工验证 reducer 输出结构，确认生成结果可直接作为 handoff 草稿起点
@@ -30,7 +30,7 @@
 ## 修改文件
 
 - [reduce_runtime_observations.py](/Volumes/usd/codes/go_projects/ai_ms_pro/scripts/reduce_runtime_observations.py)
-- [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-003-observation-reducer-order.md)
+- [ADR-003-observation-reducer-order.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/archive/ADR-003-observation-reducer-order.md)
 - [ADR-004-requirement-workstream-metadata.md](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/adr/ADR-004-requirement-workstream-metadata.md)
 - [AGENTS.md](/Volumes/usd/codes/go_projects/ai_ms_pro/AGENTS.md)
 - [observations/README.md](/Volumes/usd/codes/go_projects/ai_ms_pro/.codex/runtime/observations/README.md)

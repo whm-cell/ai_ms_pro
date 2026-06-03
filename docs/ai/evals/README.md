@@ -1,6 +1,6 @@
 # Agent Harness Eval Protocol
 
-Updated: 2026-05-10
+Updated: 2026-06-03
 Status: standard lightweight dataset
 
 ## Purpose
@@ -67,6 +67,7 @@ The deterministic grader is intentionally simple:
 - `expected_outcome=pass` with exit code `0` grades `pass`.
 - `expected_outcome=warn` with exit code `0` grades `warn`.
 - `expected_outcome=review-required` with exit code `0` grades `review-required`.
+- task-outcome runner execute mode now also treats soft output signals such as `WARN:` / `Warnings:` / `review-required` as observed `warn` or `review-required` instead of counting them as a clean pass.
 - matching trace evidence grades `pass`; missing or invalid trace evidence grades `fail` in execute mode.
 - any non-zero exit code grades `fail`.
 - `--dry-run` grades `not-run` and is the safe CI path for runner wiring.
@@ -80,7 +81,9 @@ This runner is local-only. It does not call model APIs, hosted eval services, Op
 It records:
 
 - benchmark group
-- expected repo-local validation commands
+- expected changed surface
+- expected command class
+- expected repo-local validation commands with `expected_outcome` limited to `pass` / `warn` / `review-required`
 - bounded overreach expectation
 - resume-stability expectation
 - guardrail posture expectation
@@ -93,8 +96,15 @@ It records:
 - `overreach`
 - `resume_stability`
 - `guardrail_posture`
+- per-check `observed_signal` alongside `expected_outcome`
+- aggregate `pass_count`, `warn_count`, `review_required_count`, `fail_count`, `not_run_count`
+- aggregate `blocked_by_resume` and `blocked_by_guardrail`
+
+Execute-mode `warn` is an expected soft signal class for checks such as context budget or governance advisory output. It should be reviewed, but it is not the same as `fail` unless the dataset row expected a clean pass or the command exits non-zero.
 
 This is still local-only. It does not judge model quality from hidden grader prompts or external telemetry, but it gives the harness a stable way to compare “workflow passed” against “task outcome passed”.
+
+When `--output <path>` is used, the runner now creates missing parent directories automatically so the first local artifact write does not fail on an empty runtime folder.
 
 ## Grading Outcomes
 
@@ -124,7 +134,7 @@ The dataset should stay small, readable, and dependency-free. New evals should p
 
 `EVAL-028-tool-output-artifact-summary` covers artifact-preserving compression: raw tool output stays in `.codex/runtime/tool-outputs/`, while the transcript receives bounded summaries and line windows.
 
-`task-outcome-evals.jsonl` starts with five benchmark groups: `simple-fix`, `cross-file`, `docs-sync`, `risk-judgment`, and `tool-selection`.
+`task-outcome-evals.jsonl` starts with nine benchmark groups: `simple-fix`, `cross-file`, `docs-sync`, `risk-judgment`, `tool-selection`, `resume-durability`, `trace-interop-boundary`, `warning-review-signal`, and `overreach-prevention`.
 
 ## Validation
 

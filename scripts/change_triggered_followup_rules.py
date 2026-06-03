@@ -2,32 +2,7 @@ from __future__ import annotations
 
 from change_triggered_harness_sample_rules import HARNESS_SAMPLE_GAP_COMMANDS, HARNESS_SAMPLE_GAP_PATTERNS
 from change_triggered_profile_rules import PROFILE_AND_UPGRADE_RULES
-
-Rule = dict[str, object]
-WARNING_SAMPLE_CODE_ALIGNMENT_COMMANDS = (
-    ".codex/hooks/run_with_repo_python.sh scripts/check_warning_sample_code_alignment.py",
-    "python3 tests/test_warning_sample_code_alignment.py",
-)
-
-
-def rule(
-    name: str,
-    level: str,
-    ci_coverage: str,
-    patterns: tuple[str, ...],
-    commands: tuple[str, ...],
-    references: tuple[str, ...],
-    reason: str,
-) -> Rule:
-    return {
-        "name": name,
-        "level": level,
-        "ci_coverage": ci_coverage,
-        "patterns": patterns,
-        "commands": commands,
-        "references": references,
-        "reason": reason,
-    }
+from change_triggered_rule_builder import Rule, WARNING_SAMPLE_CODE_ALIGNMENT_COMMANDS, rule
 
 
 RULES: tuple[Rule, ...] = (

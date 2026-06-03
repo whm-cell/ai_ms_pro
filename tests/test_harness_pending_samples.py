@@ -45,7 +45,7 @@ class HarnessPendingSamplesTest(unittest.TestCase):
             {"GAP-GUARDRAIL-PREFLIGHT-WARNING": 1, "GAP-RUNTIME-LOOP-SCOPE-WARNING": 1},
             report.pending_placeholder_by_gap,
         )
-        self.assertEqual({"local-only": 1, "local-replay": 8, "real": 16, "synthetic": 5}, report.accepted_evidence_class_counts)
+        self.assertEqual({"local-only": 1, "local-replay": 8, "real": 18, "synthetic": 5}, report.accepted_evidence_class_counts)
         self.assertEqual(2, report.accepted_real_by_gap["GAP-GUARDRAIL-SOURCE-BOUNDARY"])
         self.assertEqual(2, report.accepted_real_by_gap["GAP-SEC-CONTROL-MATRIX-BURNIN"])
         self.assertEqual(2, report.accepted_real_by_gap["GAP-RUNTIME-STAGE-CHECKPOINT-RESUME"])
@@ -53,6 +53,7 @@ class HarnessPendingSamplesTest(unittest.TestCase):
         self.assertEqual(2, report.accepted_real_by_gap["GAP-WORKFLOW-SIMPLE-SKIP"])
         self.assertEqual(3, report.accepted_real_by_gap["GAP-WORKFLOW-TASK-PROFILE-AUDIT"])
         self.assertEqual(2, report.accepted_real_by_gap["GAP-AGENTIC-SANDBOX-HONESTY"])
+        self.assertEqual(1, report.accepted_real_by_gap["GAP-GUARDRAIL-CONFIRMATION"])
         self.assertNotIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.accepted_real_by_gap)
         checkpoint_metric = report.queued_readiness_metrics_by_gap["GAP-RUNTIME-STAGE-CHECKPOINT-RESUME"]
         self.assertEqual("accepted cross-task resume samples", checkpoint_metric.source_metric)
@@ -170,9 +171,9 @@ class HarnessPendingSamplesTest(unittest.TestCase):
             },
             report.next_capture_focus_available_capture_gate_counts,
         )
-        self.assertEqual({"needs-first-real-sample": 5}, report.next_capture_focus_shown_readiness_counts)
+        self.assertEqual({"needs-first-real-sample": 4, "needs-more-real-samples": 1}, report.next_capture_focus_shown_readiness_counts)
         self.assertEqual(
-            {"needs-first-real-sample": 13, "needs-more-real-samples": 1},
+            {"needs-first-real-sample": 12, "needs-more-real-samples": 2},
             report.next_capture_focus_available_readiness_counts,
         )
         self.assertEqual(
@@ -499,21 +500,24 @@ class HarnessPendingSamplesTest(unittest.TestCase):
         self.assertEqual((), report.next_capture_focus_ledger_action_filter)
         self.assertEqual((), report.next_capture_focus_capture_gate_filter)
         self.assertEqual(("needs-more-real-samples",), report.next_capture_focus_readiness_filter)
-        self.assertEqual(1, report.next_capture_focus_count)
-        self.assertEqual(1, report.next_capture_focus_available_count)
+        self.assertEqual(2, report.next_capture_focus_count)
+        self.assertEqual(2, report.next_capture_focus_available_count)
         self.assertEqual(0, report.next_capture_focus_limit)
         self.assertFalse(report.next_capture_focus_truncated)
         self.assertEqual((), report.next_capture_focus_hidden_gap_ids)
-        self.assertEqual(["GAP-TRACE-LOCAL-SUMMARY-BURNIN"], [item.gap_id for item in report.next_capture_focus])
-        self.assertEqual({"P1": 1}, report.next_capture_focus_shown_priority_counts)
-        self.assertEqual({"trace-interop": 1}, report.next_capture_focus_shown_area_counts)
-        self.assertEqual({"append-new-pending-slot": 1}, report.next_capture_focus_shown_ledger_action_counts)
         self.assertEqual(
-            {"requires-distinct-task-class-report": 1},
+            ["GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"],
+            [item.gap_id for item in report.next_capture_focus],
+        )
+        self.assertEqual({"P1": 2}, report.next_capture_focus_shown_priority_counts)
+        self.assertEqual({"ai-guardrail": 1, "trace-interop": 1}, report.next_capture_focus_shown_area_counts)
+        self.assertEqual({"append-new-pending-slot": 2}, report.next_capture_focus_shown_ledger_action_counts)
+        self.assertEqual(
+            {"requires-distinct-task-class-report": 1, "requires-user-confirmed-high-impact-action": 1},
             report.next_capture_focus_shown_capture_gate_counts,
         )
-        self.assertEqual({"needs-more-real-samples": 1}, report.next_capture_focus_shown_readiness_counts)
-        self.assertEqual({"needs-more-real-samples": 1}, report.next_capture_focus_available_readiness_counts)
+        self.assertEqual({"needs-more-real-samples": 2}, report.next_capture_focus_shown_readiness_counts)
+        self.assertEqual({"needs-more-real-samples": 2}, report.next_capture_focus_available_readiness_counts)
         self.assertEqual("needs-more-real-samples", report.next_capture_focus[0].readiness)
 
     def test_gap_id_filter_focuses_counts_and_review_cards(self) -> None:
@@ -756,9 +760,9 @@ class HarnessPendingSamplesTest(unittest.TestCase):
         )
         self.assertIn("Focus shown capture gates: {'replace-placeholder-after-real-event': 2", result.stdout)
         self.assertIn("Focus available capture gates: {'replace-placeholder-after-real-event': 2", result.stdout)
-        self.assertIn("Focus shown readiness: {'needs-first-real-sample': 5}", result.stdout)
+        self.assertIn("Focus shown readiness: {'needs-first-real-sample': 4, 'needs-more-real-samples': 1}", result.stdout)
         self.assertIn(
-            "Focus available readiness: {'needs-first-real-sample': 13, 'needs-more-real-samples': 1}",
+            "Focus available readiness: {'needs-first-real-sample': 12, 'needs-more-real-samples': 2}",
             result.stdout,
         )
         self.assertIn(f"Focus hidden gap ids: {', '.join(DEFAULT_HIDDEN_CAPTURE_FOCUS_GAP_IDS)}", result.stdout)
@@ -847,7 +851,7 @@ class HarnessPendingSamplesTest(unittest.TestCase):
         )
         self.assertIn("Focus shown capture gates: {'replace-placeholder-after-real-event': 2", result.stdout)
         self.assertIn(
-            "Focus shown readiness: {'needs-first-real-sample': 13, 'needs-more-real-samples': 1}",
+            "Focus shown readiness: {'needs-first-real-sample': 12, 'needs-more-real-samples': 2}",
             result.stdout,
         )
         self.assertIn("Focus hidden gap ids: <none>", result.stdout)
@@ -987,9 +991,10 @@ class HarnessPendingSamplesTest(unittest.TestCase):
         )
 
         self.assertIn("Focus readiness filter: needs-more-real-samples", result.stdout)
-        self.assertIn("Focus entries: 1/1", result.stdout)
-        self.assertIn("Focus shown readiness: {'needs-more-real-samples': 1}", result.stdout)
-        self.assertIn("Focus available readiness: {'needs-more-real-samples': 1}", result.stdout)
+        self.assertIn("Focus entries: 2/2", result.stdout)
+        self.assertIn("Focus shown readiness: {'needs-more-real-samples': 2}", result.stdout)
+        self.assertIn("Focus available readiness: {'needs-more-real-samples': 2}", result.stdout)
+        self.assertIn("## P1 GAP-GUARDRAIL-CONFIRMATION", result.stdout)
         self.assertIn("## P1 GAP-TRACE-LOCAL-SUMMARY-BURNIN", result.stdout)
         self.assertIn("Readiness: `needs-more-real-samples`", result.stdout)
         self.assertNotIn("## P3 GAP-TRACE-REMOTE-INTEROP", result.stdout)
@@ -1212,10 +1217,11 @@ class HarnessPendingSamplesTest(unittest.TestCase):
 
         self.assertIn('"next_capture_focus_readiness_filter": [', result.stdout)
         self.assertIn('"needs-more-real-samples"', result.stdout)
-        self.assertIn('"next_capture_focus_count": 1', result.stdout)
-        self.assertIn('"next_capture_focus_available_count": 1', result.stdout)
+        self.assertIn('"next_capture_focus_count": 2', result.stdout)
+        self.assertIn('"next_capture_focus_available_count": 2', result.stdout)
         self.assertIn('"next_capture_focus_shown_readiness_counts"', result.stdout)
         self.assertIn('"next_capture_focus_available_readiness_counts"', result.stdout)
+        self.assertIn('"GAP-GUARDRAIL-CONFIRMATION"', result.stdout)
         self.assertIn('"GAP-TRACE-LOCAL-SUMMARY-BURNIN"', result.stdout)
 
     def test_cli_text_shows_no_contract_blockers_after_remote_interop_approval(self) -> None:

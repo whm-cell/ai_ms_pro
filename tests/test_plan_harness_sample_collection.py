@@ -270,7 +270,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             readinesses={"needs-first-real-sample"},
         )
 
-        self.assertEqual(13, len(items))
+        self.assertEqual(12, len(items))
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in items))
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", {item.gap_id for item in items})
         self.assertNotIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", {item.gap_id for item in items})
@@ -288,8 +288,11 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             readinesses={"needs-more-real-samples"},
         )
 
-        self.assertEqual(["GAP-TRACE-LOCAL-SUMMARY-BURNIN"], [item.gap_id for item in items])
-        self.assertEqual("needs-more-real-samples", items[0].readiness)
+        self.assertEqual(
+            ["GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"],
+            [item.gap_id for item in items],
+        )
+        self.assertTrue(all(item.readiness == "needs-more-real-samples" for item in items))
 
     def test_readiness_cli_filter_reports_matching_capture_card(self) -> None:
         result = subprocess.run(
@@ -512,7 +515,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertIn("- queued gaps: 19", text)
         self.assertIn("- priority counts: P0=1, P1=8, P2=9, P3=1", text)
         self.assertIn(
-            "- readiness counts: needs-first-real-sample=13, needs-more-real-samples=1, ready-for-upgrade-discussion=5",
+            "- readiness counts: needs-first-real-sample=12, needs-more-real-samples=2, ready-for-upgrade-discussion=5",
             text,
         )
         self.assertIn("- pending slot status counts: none=17, placeholder=2", text)

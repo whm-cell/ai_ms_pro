@@ -16,6 +16,31 @@
     "original_trace_id": "trace-stop-observation-sample",
     "otlp_span_count": 1
   },
+  "export_attempt": {
+    "send": true,
+    "network_exported": true,
+    "timeout_seconds": 10,
+    "export_format": "otlp-http-json"
+  },
+  "endpoint_evidence": {
+    "endpoint_scope": "external-test-endpoint",
+    "endpoint_configured": true,
+    "localhost_endpoint": false,
+    "failure_mode": "none"
+  },
+  "claim_evidence": {
+    "operator_review_required": false,
+    "operator_review_confirmed": false,
+    "claim_boundary": "bounded-remote-interop"
+  },
+  "withheld_payloads": [
+    "raw_trace_payload",
+    "request_body",
+    "response_body",
+    "prompt",
+    "transcript",
+    "secret"
+  ],
   "claim_boundary": "bounded-remote-interop",
   "note": "Sample shape only. It demonstrates a bounded pilot-remote probe report and does not count as accepted real external interop evidence."
 }

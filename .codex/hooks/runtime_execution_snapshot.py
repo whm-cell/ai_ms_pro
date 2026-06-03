@@ -45,6 +45,11 @@ TOOL_CONTRACT_KEYS = (
     "tool_contracts",
     "toolContracts",
 )
+VALIDATION_REF_KEYS = (
+    "last_validation_refs",
+    "validation_refs",
+    "validationRefs",
+)
 
 
 def write_snapshot(snapshot: dict[str, Any], snapshot_dir: Path | None = None) -> Path:
@@ -70,7 +75,7 @@ def build_execution_snapshot(
     prompt_preview: str,
     transcript_path: str,
 ) -> dict[str, Any]:
-    state = infer_state(payload)
+    state, state_source = infer_state(payload)
     state_reason = (
         text_value(first_value(payload, REASON_KEYS))
         or default_state_reason(state, session_type)
@@ -78,7 +83,14 @@ def build_execution_snapshot(
     stage = read_current_stage()
     authority_level = infer_authority(payload, agent_label)
     tool_contracts = infer_tool_contracts(payload)
+    last_validation_refs = infer_last_validation_refs(payload)
+    resume_ready, resume_blockers = infer_resume_context(
+        state=state,
+        task_summary=infer_task_summary(payload, prompt_preview),
+        transcript_path=transcript_path,
+    )
     now = datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+    task_summary = infer_task_summary(payload, prompt_preview)
 
     snapshot: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -89,12 +101,13 @@ def build_execution_snapshot(
         "session_type": session_type,
         "state": state,
         "state_reason": state_reason,
+        "state_source": state_source,
         "agent": agent_label,
         "authority": {
             "level": authority_level,
             "canonical_promotion_required": True,
         },
-        "task_summary": infer_task_summary(payload, prompt_preview),
+        "task_summary": task_summary,
         "requirement_ids": requirement_ids or ["未绑定"],
         "workstream_ids": workstream_ids or ["未绑定"],
         "traceability_source": traceability_source or "unbound",
@@ -102,12 +115,66 @@ def build_execution_snapshot(
         "claim_boundary": "local-only",
         "changed_paths": changed_paths[:20],
         "changed_path_count": len(changed_paths),
+        **execution_state_fields(
+            session_id=session_id,
+            branch_or_thread=branch_or_thread,
+            session_type=session_type,
+            agent_label=agent_label,
+            state=state,
+            state_reason=state_reason,
+            state_source=state_source,
+            recorded_at=now,
+            resume_ready=resume_ready,
+            resume_blockers=resume_blockers,
+            last_validation_refs=last_validation_refs,
+            changed_path_count=len(changed_paths),
+        ),
         "artifacts": {
             "transcript_path": transcript_path,
             "working_context_path": relative_or_text(WORKING_CONTEXT_PATH),
         },
     }
     return snapshot
+
+
+def execution_state_fields(
+    *,
+    session_id: str,
+    branch_or_thread: str,
+    session_type: str,
+    agent_label: str,
+    state: str,
+    state_reason: str,
+    state_source: str,
+    recorded_at: str,
+    resume_ready: bool,
+    resume_blockers: list[str],
+    last_validation_refs: list[str],
+    changed_path_count: int,
+) -> dict[str, Any]:
+    return {
+        "resume_ready": resume_ready,
+        "resume_blockers": resume_blockers,
+        "last_validation_refs": last_validation_refs,
+        "run_identity": {
+            "session_id": session_id,
+            "branch_or_thread": branch_or_thread,
+            "session_type": session_type,
+            "agent": agent_label,
+        },
+        "state_transition": {
+            "state": state,
+            "state_reason": state_reason,
+            "state_source": state_source,
+            "recorded_at": recorded_at,
+        },
+        "resume_context": {
+            "resume_ready": resume_ready,
+            "resume_blockers": resume_blockers,
+            "last_validation_refs": last_validation_refs,
+            "changed_path_count": changed_path_count,
+        },
+    }
 
 
 def load_snapshot(path: Path) -> dict[str, Any]:
@@ -117,14 +184,14 @@ def load_snapshot(path: Path) -> dict[str, Any]:
     return value
 
 
-def infer_state(payload: dict[str, Any]) -> str:
+def infer_state(payload: dict[str, Any]) -> tuple[str, str]:
     explicit = text_value(first_value(payload, STATE_KEYS)).lower().replace("_", "-")
     if explicit in ALLOWED_STATES:
-        return explicit
+        return explicit, "payload"
     task_complete = payload.get("task_complete")
     if task_complete is True:
-        return "completed"
-    return "resumable"
+        return "completed", "payload-task-complete"
+    return "resumable", "default-stop-hook"
 
 
 def default_state_reason(state: str, session_type: str) -> str:
@@ -154,6 +221,26 @@ def infer_tool_contracts(payload: dict[str, Any]) -> list[str]:
         if filtered:
             return filtered
     return ["stop_runtime_observation", "stop_runtime_session"]
+
+
+def infer_last_validation_refs(payload: dict[str, Any]) -> list[str]:
+    value = first_value(payload, VALIDATION_REF_KEYS)
+    if not isinstance(value, list):
+        return []
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()][:20]
+
+
+def infer_resume_context(*, state: str, task_summary: str, transcript_path: str) -> tuple[bool, list[str]]:
+    blockers: list[str] = []
+    if state in {"completed", "cancelled"}:
+        blockers.append(f"terminal-state:{state}")
+    if state == "failed":
+        blockers.append("failed-state-requires-review")
+    if not task_summary:
+        blockers.append("missing-task-summary")
+    if not transcript_path:
+        blockers.append("missing-transcript-reference")
+    return not blockers, blockers
 
 
 def infer_task_summary(payload: dict[str, Any], prompt_preview: str) -> str:
