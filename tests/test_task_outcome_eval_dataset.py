@@ -170,6 +170,17 @@ class TaskOutcomeEvalDatasetTest(unittest.TestCase):
 
         self.assertTrue(any("expected_outcome must be one of" in error for error in errors))
 
+    def test_dataset_validator_allows_repo_local_python_interpreter(self) -> None:
+        errors: list[str] = []
+
+        check_task_outcome_eval_dataset.validate_command(
+            ".codex/.venv/bin/python tests/test_task_outcome_eval_dataset.py",
+            "demo command",
+            errors,
+        )
+
+        self.assertEqual([], errors)
+
     def test_runner_payload_aggregate_counts_blocks_resume_and_guardrail(self) -> None:
         results = [
             run_task_outcome_eval_dataset.OutcomeResult(

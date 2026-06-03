@@ -13,6 +13,8 @@
 - 修复 runtime verification artifact 被误纳入 tracked change surface 后容易混淆 canonical truth 与本地恢复材料的问题。
 - 修复 capability summary 对 high-impact confirmation 使用不存在的 risk family，导致真实 `human-confirmation` 样本无法计数的问题。
 - 将 ADR-002 和 ADR-003 归档到 `docs/ai/adr/archive/`，相关规则已由 AGENTS、runtime governance compression reference、reducer 和 checks 承接。
+- 修复 GitHub PR-range CI 暴露的 trailing whitespace 和 sample readiness 测试漂移：`GAP-GUARDRAIL-CONFIRMATION` 已从 `needs-first-real-sample` 转为 `needs-more-real-samples`。
+- 修复 task outcome eval dataset validator 在 CI checkout 中误把 repo-local `.codex/.venv/bin/python` 当作必须存在的 committed path。
 
 ## 维护降噪
 
@@ -48,4 +50,6 @@ python3 tests/test_harness_pending_samples.py
 .codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py
 .codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py
 .codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all
+python3 -m unittest discover -s tests
+git diff --check origin/main...HEAD
 ```

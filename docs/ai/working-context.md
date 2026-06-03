@@ -39,6 +39,7 @@
 - Agentic security / trace / sandbox / sample-gap 控制面只证明本地 bounded contract；不证明 hosted trace、native sandbox、MCP/A2A 或外部 collector。
 - `GAP-TRACE-OTLP-PILOT-BURNIN` 只有 1 个 accepted local-interop sample；`verified_remote=0`。
 - `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` 尚无 accepted cross-task resume sample；不能用 harness-hardening 任务补数。
+- `GAP-GUARDRAIL-CONFIRMATION` 已有 1 个 accepted real sample，但仍是 `needs-more-real-samples`，不能当成高影响动作覆盖完成。
 - 高影响动作、runtime drift、guardrail samples、security triage 和 runtime token pressure 仍是 warning / review-required。
 
 ## 下一次会话先读
@@ -55,6 +56,7 @@
 - Runtime files、full diff、transcript、source evidence 和 subagent output 都是 bounded/on-demand 输入；稳定结论必须提升到 docs / checks / ADR。
 - Sample-gap 机制只记录真实 evidence 与 upgrade decisions；synthetic evidence 不得补 accepted real sample。
 - Capability summary 是 artifact-backed local summary，只支持后续决策，不自动升级 blocking、remote 或 hosted capability claim。
+- Task outcome eval command validation treats repo-local `.codex/.venv/bin/python` as an optional local interpreter entrypoint; CI must still validate referenced repo scripts/tests.
 - 2026-06-01 至 2026-06-03 已完成 capability bootstrap、tightening、state/evidence/aggregate 增强；边界仍是 local-first。
 
 ## 更新规则

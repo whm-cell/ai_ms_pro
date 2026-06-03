@@ -197,7 +197,10 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
             report.accepted_real_readiness_metric_deltas,
         )
         self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.readiness_gap_ids["needs-first-real-sample"])
-        self.assertEqual(["GAP-TRACE-LOCAL-SUMMARY-BURNIN"], report.readiness_gap_ids["needs-more-real-samples"])
+        self.assertEqual(
+            ["GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"],
+            report.readiness_gap_ids["needs-more-real-samples"],
+        )
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.readiness_gap_ids["ready-for-upgrade-discussion"])
         self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", report.readiness_gap_ids["ready-for-upgrade-discussion"])
         self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.capture_gate_gap_ids["replace-placeholder-after-real-event"])
@@ -239,7 +242,7 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
         self.assertEqual([], report.errors)
         self.assertEqual(("needs-first-real-sample",), report.readiness_filter)
         self.assertEqual(report.item_count, report.needs_first_real_sample)
-        self.assertEqual(13, report.item_count)
+        self.assertEqual(12, report.item_count)
         self.assertEqual(0, report.ready_for_upgrade_discussion)
         self.assertEqual(0, report.needs_more_real_samples)
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in report.items))

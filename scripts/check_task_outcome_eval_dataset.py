@@ -131,9 +131,15 @@ def validate_command(command: str, prefix: str, errors: list[str]) -> None:
     except ValueError as exc:
         errors.append(f"{prefix}: command is not shell-parseable: {exc}")
         return
-    for part in parts:
+    for index, part in enumerate(parts):
+        if index == 0 and is_python_command(part):
+            continue
         if part.startswith(("scripts/", "tests/", ".codex/")) and not (ROOT / part).exists():
             errors.append(f"{prefix}: command references missing path {part}")
+
+
+def is_python_command(value: str) -> bool:
+    return value == "python3" or value.endswith("/python") or value.endswith("/python3")
 
 
 def main() -> int:

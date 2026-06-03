@@ -212,9 +212,12 @@ class HarnessSampleTemplateTest(unittest.TestCase):
         )
 
         self.assertEqual([], report.errors)
-        self.assertEqual(1, report.template_count)
-        self.assertEqual("GAP-TRACE-LOCAL-SUMMARY-BURNIN", report.validations[0].gap_id)
-        self.assertEqual("placeholder", report.validations[0].template_review_state)
+        self.assertEqual(2, report.template_count)
+        self.assertEqual(
+            {"GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"},
+            {validation.gap_id for validation in report.validations},
+        )
+        self.assertTrue(all(validation.template_review_state == "placeholder" for validation in report.validations))
 
     def test_actionable_without_pending_templates_validate_without_blocked_or_local_gaps(self) -> None:
         report = check_harness_sample_templates.build_report(

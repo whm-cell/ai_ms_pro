@@ -40,7 +40,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         self.assertEqual({"P0": 1, "P1": 6, "P2": 6, "P3": 1}, report.priority_counts)
         self.assertEqual({"none": 12, "placeholder": 2}, report.pending_slot_status_counts)
         self.assertEqual({"append-new-pending-slot": 12, "fill-existing-placeholder": 2}, report.ledger_action_counts)
-        self.assertEqual({"needs-first-real-sample": 13, "needs-more-real-samples": 1}, report.readiness_counts)
+        self.assertEqual({"needs-first-real-sample": 12, "needs-more-real-samples": 2}, report.readiness_counts)
         self.assertEqual(
             {
                 "replace-placeholder-after-real-event": 2,
@@ -211,10 +211,10 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         ids = {entry.gap_id for target in report.targets for entry in target.entries}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(1, report.item_count)
-        self.assertEqual({"GAP-TRACE-LOCAL-SUMMARY-BURNIN"}, ids)
-        self.assertEqual({"needs-more-real-samples": 1}, report.readiness_counts)
-        self.assertEqual({"append-new-pending-slot": 1}, report.ledger_action_counts)
+        self.assertEqual(2, report.item_count)
+        self.assertEqual({"GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"}, ids)
+        self.assertEqual({"needs-more-real-samples": 2}, report.readiness_counts)
+        self.assertEqual({"append-new-pending-slot": 2}, report.ledger_action_counts)
 
     def test_ledger_action_filter_limits_bundle_to_placeholder_fills(self) -> None:
         report = build_harness_sample_intake_bundle.build_report(
@@ -630,8 +630,9 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         )
 
         self.assertIn("# Harness Sample Intake Summary", result.stdout)
-        self.assertIn("- draft templates: 1", result.stdout)
-        self.assertIn("readiness counts: {'needs-more-real-samples': 1}", result.stdout)
+        self.assertIn("- draft templates: 2", result.stdout)
+        self.assertIn("readiness counts: {'needs-more-real-samples': 2}", result.stdout)
+        self.assertIn("GAP-GUARDRAIL-CONFIRMATION", result.stdout)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", result.stdout)
         self.assertIn(
             "ledger accepted real=3; accepted real local trace summary task classes=1/3",
