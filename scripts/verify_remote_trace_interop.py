@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import UTC, datetime
+from ipaddress import ip_address
 import json
 from pathlib import Path
 import sys
@@ -15,7 +16,7 @@ import export_agent_trace
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = export_agent_trace.DEFAULT_INPUT
 SCHEMA_VERSION = "trace-remote-interop-report/v1"
-LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+LOCALHOST_NAMES = {"localhost"}
 WITHHELD_PAYLOADS = [
     "raw_trace_payload",
     "request_body",
@@ -47,20 +48,41 @@ def parse_args() -> argparse.Namespace:
 
 
 def infer_endpoint_scope(endpoint: str | None, explicit: str | None) -> str:
+    if is_loopback_endpoint(endpoint):
+        return "local-capture-server"
     if explicit:
         return explicit
     if not endpoint:
         return "local-capture-server"
-    parsed = urlparse(endpoint)
-    if parsed.hostname in LOCAL_HOSTS:
-        return "local-capture-server"
     return "external-test-endpoint"
 
 
-def capability_level(*, send: bool, remote_ok: bool, verified_remote: bool) -> str:
+def is_loopback_endpoint(endpoint: str | None) -> bool:
+    if not endpoint:
+        return False
+    host = endpoint_hostname(endpoint)
+    if not host:
+        return False
+    if host in LOCALHOST_NAMES:
+        return True
+    try:
+        return ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def endpoint_hostname(endpoint: str) -> str:
+    parsed = urlparse(endpoint)
+    host = parsed.hostname
+    if host is None and "://" not in endpoint:
+        host = urlparse(f"//{endpoint}").hostname
+    return host.rstrip(".").lower() if host else ""
+
+
+def capability_level(*, send: bool, remote_ok: bool, verified_remote: bool, endpoint_scope: str) -> str:
     if not send:
         return "local-only"
-    if verified_remote and remote_ok:
+    if verified_remote and remote_ok and endpoint_scope != "local-capture-server":
         return "verified-remote"
     return "pilot-remote"
 
@@ -84,13 +106,20 @@ def build_report(
     remote_ok = bool(export_report.remote_status and export_report.remote_status.get("ok"))
     scope = infer_endpoint_scope(endpoint, endpoint_scope)
     failure = infer_failure_mode(send=send, remote_status=export_report.remote_status)
+    localhost_endpoint = is_loopback_endpoint(endpoint) or scope == "local-capture-server"
+    level = capability_level(
+        send=send,
+        remote_ok=remote_ok,
+        verified_remote=verified_remote,
+        endpoint_scope=scope,
+    )
     report = {
         "schema_version": SCHEMA_VERSION,
         "recorded_at": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "input_path": export_report.input_path,
         "export_format": export_report.format,
         "endpoint_scope": scope,
-        "capability_level": capability_level(send=send, remote_ok=remote_ok, verified_remote=verified_remote),
+        "capability_level": level,
         "network_exported": export_report.network_exported,
         "endpoint": endpoint,
         "remote_status": export_report.remote_status or {"ok": False, "http_status": None},
@@ -108,12 +137,12 @@ def build_report(
         "endpoint_evidence": {
             "endpoint_scope": scope,
             "endpoint_configured": bool(endpoint),
-            "localhost_endpoint": scope == "local-capture-server",
+            "localhost_endpoint": localhost_endpoint,
             "failure_mode": failure,
         },
         "claim_evidence": {
             "operator_review_required": bool(verified_remote),
-            "operator_review_confirmed": bool(verified_remote and remote_ok),
+            "operator_review_confirmed": bool(verified_remote and remote_ok and level == "verified-remote"),
             "claim_boundary": "bounded-remote-interop",
         },
         "withheld_payloads": WITHHELD_PAYLOADS,

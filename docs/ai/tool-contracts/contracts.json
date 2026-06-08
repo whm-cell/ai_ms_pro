@@ -405,7 +405,7 @@
       "trust_level": "pilot-remote-evidence",
       "sandbox_requirement": "explicit operator send decision for network path",
       "dangerous_flags": ["--send", "--endpoint", "--verified-remote"],
-      "notes": "The default command is local-only and no-network. A verified-remote claim requires a successful bounded probe plus explicit operator review evidence; the script does not auto-upgrade pilot-remote to broad interop completion and withholds raw request/response payloads."
+      "notes": "The default command is local-only and no-network. A verified-remote claim requires a successful bounded probe plus explicit operator review evidence; the script does not auto-upgrade pilot-remote to broad interop completion, loopback / localhost endpoints cannot be promoted to verified-remote, and raw request/response payloads are withheld."
     },
     {
       "name": "check_remote_trace_interop_report",
@@ -428,7 +428,8 @@
       "auth_scope": "no auth by default; report validation only",
       "local_vs_remote": "bounded-remote-interop",
       "trust_level": "interop-report-validator",
-      "sandbox_requirement": "none"
+      "sandbox_requirement": "none",
+      "notes": "The validator rejects verified-remote reports backed only by localhost, 127.0.0.1, ::1, or other loopback endpoint evidence."
     },
     {
       "name": "summarize_runtime_traces",
@@ -1331,6 +1332,106 @@
         "python3 tests/test_agent_run_provenance.py"
       ],
       "notes": "This checker is local-first. It validates repo evidence, REQ/WS bindings or explicit unbound state, authority/canonical-write claims, validation commands, and claim boundaries. It forbids raw .codex/runtime references and does not treat GitHub Copilot cloud agent tasks, hosted traces, MCP/A2A interop, OpenAI sandbox, or GitHub plan upgrades as current provenance sources."
+    },
+    {
+      "name": "check_ci_agent_contract",
+      "purpose": "Validate advisory ci-agent-contract/v1 records for PR-only, read-only CI agent boundaries without creating a real agent workflow.",
+      "path": "scripts/check_ci_agent_contract.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_ci_agent_contract.py",
+      "inputs": [
+        "docs/ai/standards/ci-agent-contract.sample.jsonl",
+        "docs/ai/tool-contracts/contracts.json",
+        "repository evidence refs"
+      ],
+      "outputs": [
+        "stdout CI agent contract audit",
+        "optional JSON report",
+        "referenced tool contract list",
+        "process exit code"
+      ],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_ci_agent_contract.py",
+        "python3 tests/test_ci_agent_contract.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "advisory-contract-validator",
+      "sandbox_requirement": "none",
+      "notes": "This checker is advisory. It requires pull_request-only triggers, forbids pull_request_target, secrets, OIDC, repository writes, PR comments, labels, merge, release, deploy, and external-send capabilities, and requires claim boundaries that avoid hosted/cloud-agent execution or remote enforcement claims. It does not create or prove any CI agent workflow."
+    },
+    {
+      "name": "check_external_harness_decisions",
+      "purpose": "Validate source-backed bounded external harness decision records for remote trace, external eval/sandbox, MCP/A2A, and CI agent workflow choices.",
+      "path": "scripts/check_external_harness_decisions.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py",
+      "inputs": [
+        "docs/ai/standards/external-harness-decisions.jsonl",
+        "docs/ai/tool-contracts/contracts.json",
+        "repository evidence refs"
+      ],
+      "outputs": [
+        "stdout external harness decision audit",
+        "optional JSON report",
+        "active decision area list",
+        "referenced tool contract list",
+        "source evidence count",
+        "local upgrade scope list",
+        "process exit code"
+      ],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "ci",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py",
+        "python3 tests/test_external_harness_decisions.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "bounded-decision-validator",
+      "sandbox_requirement": "none",
+      "notes": "This checker audits active decisions to keep remote trace, external eval/sandbox, MCP/A2A, and CI agent workflow work source-backed and bounded. It requires HTTPS first-party source evidence with positive local signals, local upgrade scopes, and no-claim flags for hosted trace/eval, verified remote without operator review, native sandbox, MCP/A2A runtime, real CI agent workflow, and external effects without explicit confirmation. It does not send network probes, install eval tools, create MCP/A2A runtime code, or create GitHub agent workflows."
+    },
+    {
+      "name": "run_sandboxed_command",
+      "purpose": "Run an argv-only command through an opt-in local execution policy wrapper with preflight-risk refusal and bounded runtime artifacts.",
+      "path": "scripts/run_sandboxed_command.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/run_sandboxed_command.py -- python3 --version",
+      "inputs": [
+        "argv command after --",
+        ".codex/hooks/preflight_risk_catalog.py",
+        "current process environment allowlist"
+      ],
+      "outputs": [
+        "stdout markdown run report",
+        ".codex/runtime/tool-outputs/*.log",
+        ".codex/runtime/tool-outputs/*.stdout.log",
+        ".codex/runtime/tool-outputs/*.stderr.log",
+        ".codex/runtime/tool-outputs/*.meta.json",
+        "process exit code"
+      ],
+      "side_effects": ["read_repo", "write_runtime"],
+      "permissions": ["read-repo", "write-runtime", "execute-local-command"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "assistive",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/run_sandboxed_command.py -- python3 --version",
+        "python3 -m unittest tests.test_execution_sandbox_wrapper",
+        "python3 tests/test_pre_tool_use_preflight.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "policy-wrapper",
+      "sandbox_requirement": "argv-only local wrapper; not a native OS sandbox",
+      "dangerous_flags": ["--human-confirmation-ref", "command after --"],
+      "notes": "The wrapper enforces argv-only shell=false execution from repo root, a reduced environment allowlist, timeout, bounded raw artifacts, metadata with native_sandbox=false, and refusal for destructive, external-send, externally visible, or sensitive-output findings unless a human confirmation reference is supplied. It is not a native sandbox, not an execution engine, and not proof that all shell scripts or subprocesses are isolated."
     },
     {
       "name": "check_tool_contracts",

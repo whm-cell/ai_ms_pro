@@ -1,6 +1,6 @@
 # Harness Capability Model
 
-更新时间：2026-06-03
+更新时间：2026-06-08
 状态：active capability direction
 
 ## 定位
@@ -39,6 +39,32 @@
 - `docs/ai/*`、`docs/requirements/*`、checks、tool contracts 仍是共享真相与约束入口。
 - 任何 remote / hosted / MCP / A2A / OpenAI / external OTLP claim 都必须以当前 turn 验证或已接受证据为准。
 - 新能力优先以 bounded local-first 方式落地，不先做多租户、分布式或 hosted orchestration。
+
+## 支撑性护栏
+
+2026-06-06 的五个反哺点只把支撑面补齐到 bounded evidence：
+
+- cross-task resume：已有 checkpoint / queue 入口，但 accepted cross-task sample 仍为 0。
+- remote trace interop：loopback / localhost evidence 不能升级为 `verified-remote`。
+- execution policy：`run_sandboxed_command.py` 是 local wrapper，metadata 明示 `native_sandbox=false`。
+- multi-agent：planner / executor / reviewer 只作为 trace / provenance / eval 样例，不是 runtime scheduler。
+- CI agent：`ci-agent-contract/v1` 是 PR-only / read-only advisory contract，不创建真实 GitHub agent workflow。
+
+2026-06-07 已把四个外部 harness 方向转成 source-backed active bounded decisions；
+2026-06-08 增加 evidence-backed default permission：
+
+- remote trace pilot：当前不发送外部 payload；等待显式 endpoint、`--send` 确认和 operator review。
+- external eval / sandbox：先做 comparison-only，不新增依赖、不声明 native sandbox。
+- MCP / A2A：只保留 tool-contract / provenance 元数据方向，不进入 runtime prototype。
+- CI agent workflow：继续 advisory contract，不创建真实 GitHub agent workflow。
+- 每条 decision 都必须记录一手 `source_evidence`、positive signal 和 local upgrade scope；source 只提升决策质量、比较口径、metadata discipline 或边界可见性，不提升 hosted / remote / native runtime claim。
+- 每条 active decision 也必须记录 `default_permission`：证据充分且对当前 harness 正向时，允许 bounded local/no-effect 小步默认推进；external send、verified remote、hosted eval、native sandbox、MCP/A2A runtime、真实 CI agent workflow 和外部副作用仍按 activation gates 阻断。
+
+对应审计命令：
+
+```bash
+.codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py
+```
 
 ## 运营视图
 

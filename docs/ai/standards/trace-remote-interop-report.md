@@ -1,6 +1,6 @@
 # Trace Remote Interop Report
 
-更新时间：2026-06-03
+更新时间：2026-06-06
 状态：bounded pilot evidence
 
 ## Purpose
@@ -47,7 +47,7 @@ Report 同时保留顶层兼容字段，并新增 4 个结构化 evidence 面：
 ## Boundary
 
 - report 不记录 raw trace payload、request/response body、prompt、transcript、secret 或 raw runtime path。
-- local capture server 不能被标为 `verified-remote`。
+- local capture server、localhost、127.0.0.1、::1 或其它 loopback endpoint 不能被标为 `verified-remote`。
 - `verified-remote` 必须同时具备 `network_exported=true`、`remote_status.ok=true`、非 local capture endpoint scope 和 `claim_evidence.operator_review_confirmed=true`。
 - 该 report 是 bounded interop evidence，不是 capability completion certificate。
 

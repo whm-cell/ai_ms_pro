@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-06-03
+更新时间：2026-06-08
 阶段：stage-00
 状态：进行中
 
@@ -18,6 +18,10 @@
 ## 当前完成度
 
 - 2026-06-03 已把 execution snapshot、remote interop report、task outcome eval 和 capability summary 推进到结构化 state / evidence / aggregate 指标。
+- 2026-06-06 已把五个 harness 反哺点收敛为 bounded 小切片：remote interop loopback hardening、CI agent contract、local execution policy wrapper、planner / executor / reviewer schema sample、cross-task resume 真实样本继续排队。
+- 2026-06-07 已把四类外部 harness 方向固化为 source-backed `external-harness-decision/v1` active decisions，并由 checker 审计 source evidence、local upgrade scope 与 no-claim boundary。
+- 2026-06-08 已把人工“正向则默认许可”判断收敛为 `default_permission` 字段：只许可 first-party evidence-backed、bounded local/no-effect 小步；外部副作用和能力宣称仍由 activation gates 阻断。
+- 2026-06-08 已新增 opt-in Prototype Design Brief 与 prototype artifact review 机制：默认关闭，只在配置开启时进入 `check_ai_governance.py` child checks。
 - `new_pro_standard` 只同步 starter-safe 机制；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
 
 ## 本阶段关键成果
@@ -26,12 +30,17 @@
 - GitHub 最小权限、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 与 `merge_group` 本地证据已具备；private Free 下 branch protection / rulesets 仍不得声明强制。
 - Agentic standards、tool contracts、sample gaps、runtime compression、context budget 与 code-shape 已进入 deterministic checks / references；细则不放回默认上下文。
 - Capability bootstrap / tightening / state-evidence 聚合均保持 local-first：runtime artifact 是本地恢复材料，verified remote、hosted trace、MCP/A2A、native sandbox 和外部 collector 均未声明完成。
+- 新增 CI agent contract 与 local execution policy wrapper 只提供 advisory contract / assistive wrapper，不创建真实 CI agent workflow、不证明 native sandbox。
+- External harness decision ledger 只把人工判断变为 source-backed 可复核记录；default permission 只覆盖 bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`，但外部运行面仍不声明完成。
+- Prototype Design Brief / artifact review 只验证设计投影面、原型审查包和 Source Truth 漂移；当前不声明本 repo 已有生产原型能力，也不复制外部项目业务需求。
 
 ## 风险与阻塞
 
 - GitHub remote required checks / review / 禁直推在 private Free 下仍是 `UNKNOWN`。
 - `GAP-TRACE-OTLP-PILOT-BURNIN` 只有 1 个 accepted local-interop sample；`GAP-TRACE-REMOTE-INTEROP` 没有 verified remote evidence。
 - `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` 尚无 accepted cross-task resume sample；不能用 harness-hardening 任务样本补数。
+- planner / executor / reviewer 当前只是 trace / provenance / eval 样例形状，不能当作 multi-agent scheduler、A2A、hosted trace 或 red-team evidence。
+- external harness decisions 当前是 source-backed no-effect governance evidence；`default_permission` 不得当作 remote trace、hosted eval、native sandbox、MCP/A2A 或 CI agent runtime 完成。
 - 高影响动作、runtime drift、guardrail samples、security triage、runtime token pressure 仍处于 warning / review-required，不自动升级 blocking。
 - Context budget 和 ADR 数量需继续压缩；code-shape 只剩 legacy 大文件 warning。
 
@@ -46,6 +55,8 @@
 - 提交前收敛 canonical change surface：docs、standards、scripts、tests、tool contracts 可进入共享 truth，`.codex/runtime/*` 不作为 canonical artifact。
 - 继续观察 capability summary 的 `resume_ready`、blocked resume、interop level count、task outcome breakdown 和 blocked reason；指标只支持决策，不自动升级 claim。
 - 对 cross-task resume、remote interop 和 high-impact guardrail 只采集真实 bounded sample；synthetic 或 local-only 证据不得冒充 accepted remote / cross-task proof。
+- 下一轮若推进五个反哺点，优先补真实 cross-task resume sample 和经 ADR-017 允许的 remote endpoint pilot；CI agent、local execution wrapper、多 agent 样例继续保持 advisory，直到有真实样本、误报和修复路径。
+- 若后续推进外部 harness 决策，可默认推进 `default_permission.permitted_scope` 中的 first-party evidence-backed、bounded local/no-effect 小步；超出范围只能按 `external-harness-decisions.jsonl` 的 activation gates 执行：remote trace 需 endpoint/`--send`/operator review，native sandbox 或 MCP/A2A runtime 需单独 proposal/ADR，CI agent workflow 需 owner、permissions、remote guardrail 和 rollback evidence。
 - 压缩完成型 handoff / status 细节，合并或 supersede 旧 ADR，避免默认面超过 context gate。
 - legacy code-shape 大文件按独立维护小切片拆分，避免和 capability schema 改动混合。
 
@@ -60,7 +71,8 @@
 
 - 本轮优化完成后，context budget 应低于 warning threshold，ADR count 应低于预算，code-shape legacy warning 应消失。
 - High-impact confirmation 只能计为 local repo governance cleanup sample；cross-task resume、verified remote 和 external collector 仍不得声明完成。
-- Task outcome eval 的 warn/review 语义仍是本地 deterministic signal，不是模型质量评分。
+- Task outcome eval 的 warn/review 语义仍是本地 deterministic signal，不是模型质量评分；CI agent contract、local execution wrapper 和 multi-agent sample 也只是 bounded harness evidence，不是平台完成证明。
+- External harness decision audit 通过只能证明四类 source-backed operator decision 与 default-permitted local/no-effect scope 当前一致；不能证明任何外部运行面或托管能力。
 
 ## 关联文档
 

@@ -226,6 +226,53 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("governance-surface", names)
         self.assertIn("agent-run-provenance", names)
 
+    def test_ci_agent_contract_change_triggers_contract_check(self) -> None:
+        names = self.followup_names("docs/ai/standards/ci-agent-contract.sample.jsonl")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("ci-agent-contract", names)
+
+    def test_external_harness_decisions_change_triggers_decision_check(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            ("docs/ai/standards/external-harness-decisions.jsonl",)
+        )
+        names = {item.name for item in followups}
+        decision = next(item for item in followups if item.name == "external-harness-decisions")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("external-harness-decisions", names)
+        self.assertIn("scripts/check_external_harness_decisions.py", "\n".join(decision.commands))
+
+    def test_local_execution_policy_wrapper_change_triggers_wrapper_checks(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("scripts/run_sandboxed_command.py",))
+        names = {item.name for item in followups}
+        wrapper = next(item for item in followups if item.name == "local-execution-policy-wrapper")
+
+        self.assertIn("local-execution-policy-wrapper", names)
+        self.assertIn("tool-contract-registry", names)
+        self.assertIn("harness-code-shape", names)
+        self.assertIn("tests.test_execution_sandbox_wrapper", "\n".join(wrapper.commands))
+
+    def test_prototype_design_brief_change_triggers_prototype_checks(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            ("docs/ai/templates/prototype-design-brief.md",)
+        )
+        names = {item.name for item in followups}
+        prototype = next(item for item in followups if item.name == "prototype-design-brief")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("prototype-design-brief", names)
+        self.assertIn("scripts/check_prototype_design_brief.py", "\n".join(prototype.commands))
+
+    def test_prototype_checker_change_triggers_code_shape_and_tests(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("scripts/check_prototype_design_brief.py",))
+        names = {item.name for item in followups}
+        prototype = next(item for item in followups if item.name == "prototype-design-brief")
+
+        self.assertIn("prototype-design-brief", names)
+        self.assertIn("harness-code-shape", names)
+        self.assertIn("tests/test_prototype_design_brief.py", "\n".join(prototype.commands))
+
     def test_next_best_work_review_change_triggers_review_checks(self) -> None:
         followups = check_change_triggered_followups.build_followups(("scripts/ai_governance_next_best_work.py",))
         names = {item.name for item in followups}

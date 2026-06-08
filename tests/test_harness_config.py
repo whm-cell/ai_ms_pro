@@ -33,6 +33,12 @@ class HarnessConfigTest(unittest.TestCase):
         self.assertEqual(config.context_budget.default_surface_high_warning_percent, 90)
         self.assertEqual(config.context_budget.stage_status_line_budget, 120)
         self.assertEqual(config.context_budget.skill_description_word_budget, 30)
+        self.assertFalse(config.prototype_design_brief.enabled)
+        self.assertFalse(config.prototype_design_brief.artifact_review_enabled)
+        self.assertEqual(
+            config.prototype_design_brief.brief_path,
+            "docs/ai/prototypes/prototype-design-brief.md",
+        )
 
     def test_context_surface_overrides_defaults(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -88,6 +94,92 @@ mcp_server_budget = 4
                     config_label="checks.required_ai_docs",
                 )
 
+    def test_loads_prototype_design_brief_feature_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(
+                root / ".codex/harness.toml",
+                """[prototype_design_brief]
+enabled = true
+artifact_review_enabled = true
+brief_path = "docs/ai/prototypes/prototype-design-brief.md"
+artifact_dir = "docs/ai/prototypes/custom"
+prototype_page_path = "app/prototype/custom/page.tsx"
+prototype_route = "/prototype/custom"
+fixture_paths = ["lib/prototype/customFixture.ts"]
+required_states = ["empty", "permission_denied"]
+""",
+            )
+
+            config = harness_config.load_harness_config(root).prototype_design_brief
+
+        self.assertTrue(config.enabled)
+        self.assertTrue(config.artifact_review_enabled)
+        self.assertEqual(config.artifact_dir, "docs/ai/prototypes/custom")
+        self.assertEqual(config.fixture_paths, ("lib/prototype/customFixture.ts",))
+        self.assertEqual(config.required_states, ("empty", "permission_denied"))
+
+    def test_artifact_review_requires_base_feature_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(
+                root / ".codex/harness.toml",
+                """[prototype_design_brief]
+enabled = false
+artifact_review_enabled = true
+artifact_dir = "docs/ai/prototypes/custom"
+prototype_page_path = "app/prototype/custom/page.tsx"
+prototype_route = "/prototype/custom"
+required_states = ["empty"]
+""",
+            )
+
+            with self.assertRaisesRegex(
+                harness_config.HarnessConfigError,
+                "artifact_review_enabled requires",
+            ):
+                harness_config.load_harness_config(root)
+
+    def test_governance_checks_follow_prototype_feature_flags(self) -> None:
+        disabled = harness_config.PrototypeDesignBriefConfig(
+            enabled=False,
+            artifact_review_enabled=False,
+            brief_path="docs/ai/prototypes/prototype-design-brief.md",
+            artifact_dir="",
+            prototype_page_path="",
+            prototype_route="",
+            fixture_paths=(),
+            required_states=(),
+        )
+        brief_only = harness_config.PrototypeDesignBriefConfig(
+            enabled=True,
+            artifact_review_enabled=False,
+            brief_path="docs/ai/prototypes/prototype-design-brief.md",
+            artifact_dir="",
+            prototype_page_path="",
+            prototype_route="",
+            fixture_paths=(),
+            required_states=(),
+        )
+        artifact_enabled = harness_config.PrototypeDesignBriefConfig(
+            enabled=True,
+            artifact_review_enabled=True,
+            brief_path="docs/ai/prototypes/prototype-design-brief.md",
+            artifact_dir="docs/ai/prototypes/custom",
+            prototype_page_path="app/prototype/custom/page.tsx",
+            prototype_route="/prototype/custom",
+            fixture_paths=("lib/prototype/customFixture.ts",),
+            required_states=("empty",),
+        )
+
+        disabled_labels = [label for label, _path in check_ai_governance.governance_check_specs(disabled)]
+        brief_labels = [label for label, _path in check_ai_governance.governance_check_specs(brief_only)]
+        artifact_labels = [label for label, _path in check_ai_governance.governance_check_specs(artifact_enabled)]
+
+        self.assertNotIn("prototype-brief", disabled_labels)
+        self.assertIn("prototype-brief", brief_labels)
+        self.assertIn("prototype-artifact", artifact_labels)
+
     def test_minimal_parser_handles_checks_and_context_surface(self) -> None:
         raw_text = """[checks]
 required_ai_docs = [
@@ -110,6 +202,11 @@ skill_description_word_budget = 25
 skill_body_line_budget = 240
 adr_count_budget = 8
 mcp_server_budget = 3
+
+[prototype_design_brief]
+enabled = true
+artifact_review_enabled = false
+brief_path = "docs/ai/prototypes/custom.md"
 """
         with mock.patch.object(harness_config, "tomllib", None):
             parsed = harness_config.load_toml_config(raw_text)
@@ -123,6 +220,11 @@ mcp_server_budget = 3
         self.assertEqual(parsed["context_budget"]["default_surface_high_warning_percent"], 88)
         self.assertEqual(parsed["context_budget"]["stage_status_line_budget"], 70)
         self.assertEqual(parsed["context_budget"]["mcp_server_budget"], 3)
+        self.assertTrue(parsed["prototype_design_brief"]["enabled"])
+        self.assertEqual(
+            parsed["prototype_design_brief"]["brief_path"],
+            "docs/ai/prototypes/custom.md",
+        )
 
     def test_budget_warning_can_fire_at_or_over_budget(self) -> None:
         config = harness_config.ContextSurfaceConfig(

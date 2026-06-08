@@ -8,6 +8,9 @@ Use this reference when changing repo-local agentic standards: trace schema, tra
 - Trace export: `scripts/export_agent_trace.py`; default local/no-network export, explicit `--send --endpoint` only for OTLP HTTP JSON pilot evidence.
 - Eval: `docs/ai/evals/*`, `scripts/check_agent_eval_dataset.py`, `scripts/run_agent_eval_dataset.py`, and trace evidence helpers.
 - Agent-run provenance: `docs/ai/standards/agent-run-provenance.md`, `docs/ai/standards/agent-run-provenance-sample.jsonl`, and `scripts/check_agent_run_provenance.py`.
+- CI agent contract: `docs/ai/standards/ci-agent-contract.md`, sample JSONL, and `scripts/check_ci_agent_contract.py`; advisory only, no real CI agent workflow.
+- Local execution policy wrapper: `docs/ai/standards/local-execution-policy-wrapper.md` and `scripts/run_sandboxed_command.py`; assistive wrapper only, `native_sandbox=false`.
+- External harness decisions: `docs/ai/standards/external-harness-decisions.md`, decision JSONL, and `scripts/check_external_harness_decisions.py`; records source-backed remote trace, external eval/sandbox, MCP/A2A, and CI agent workflow choices plus evidence-backed default permission for bounded local/no-effect improvements without creating external effects.
 - Tool contracts: `docs/ai/tool-contracts/contracts.json`, `scripts/check_tool_contracts.py`.
 - Security controls: `docs/ai/security/agentic-control-matrix.md` plus security triage docs.
 - Sample gaps: `scripts/collect_harness_sample_gaps.py`, generic bounded intake `scripts/check_harness_sample_gap_evidence.py`, real-sample queue `scripts/plan_harness_sample_collection.py`, generated-template drift check `scripts/check_harness_sample_templates.py`, grouped intake bundle `scripts/build_harness_sample_intake_bundle.py`, pending sample slot audit `scripts/check_harness_pending_samples.py`, future-work contract precondition check `scripts/check_harness_future_work_contracts.py`, and `--使用细节/真实场景覆盖缺口待确认.md`.
@@ -30,6 +33,9 @@ Use `references/verification-commands.md` for the full command matrix. Minimum c
 - `.codex/hooks/run_with_repo_python.sh scripts/check_agent_eval_dataset.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --dry-run`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_ci_agent_contract.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py`
+- `.codex/hooks/run_with_repo_python.sh scripts/run_sandboxed_command.py -- python3 --version`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_tool_contracts.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/check_harness_sample_gap_evidence.py`
 - `.codex/hooks/run_with_repo_python.sh scripts/collect_harness_sample_gaps.py`

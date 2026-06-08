@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-05-31
+更新时间：2026-06-08
 状态：已确认
 
 ## 作用
@@ -35,6 +35,9 @@
 | `check_task_outcome_eval_dataset.py` | `advisory` | governance job validates dataset shape | task outcome eval 只提供本地 benchmark 结构和 cost proxy，不等于 hosted grading 或模型最终质量结论 |
 | `run_task_outcome_eval_dataset.py` | `advisory` | governance job runs `--dry-run`; executed outcome evals remain local | 输出 `task_outcome`、`overreach`、`resume_stability`、`guardrail_posture` 与成本 proxy；真实长期趋势仍需更多运行样本 |
 | `check_agent_run_provenance.py` | `advisory` | manual / follow-up summary | 校验 local-first `agent-run-provenance/v1` 记录的 REQ/WS 绑定或显式 unbound、authority、canonical write、changed files、tool contracts、validation evidence 和 claim boundaries；不读取 raw runtime、不声明 GitHub plan 升级、Copilot cloud agent task、hosted trace、MCP/A2A、OpenAI sandbox 或外部 OTLP 互通 |
+| `check_ci_agent_contract.py` | `advisory` | manual / follow-up summary | 校验 `ci-agent-contract/v1` 的 PR-only trigger、read-only/default-minimal permissions、禁用 pull_request_target / secrets / OIDC / repo write / PR comment / label / merge / release / deploy / external-send，并要求 hosted/cloud-agent 与 remote-enforcement no-claim；不创建真实 CI agent workflow |
+| `check_external_harness_decisions.py` | `advisory` | manual / follow-up summary | 校验 `external-harness-decision/v1` 中 remote trace pilot、external eval/sandbox、MCP/A2A 与 CI agent workflow 四类 active decision 是否齐全，并强制 no hosted trace/eval、no verified remote without operator review、no native sandbox、no MCP/A2A runtime、no real CI agent workflow、no external effect without explicit confirmation；不发送网络 probe、不安装 eval 工具、不创建 MCP/A2A runtime、不创建 GitHub agent workflow |
+| `run_sandboxed_command.py` | `advisory` | manual assistive wrapper | argv-only / `shell=false` / repo-root / reduced-env / timeout / runtime tool-output artifacts / preflight refusal；metadata 明示 `native_sandbox=false`，不能当作 OS sandbox、云端 execution engine 或完整 subprocess isolation |
 | `check_tool_contracts.py` | `blocking-candidate` | governance job | MCP-like tools 或高影响工具 contract 增多后，根据误报率和 automation mode 使用情况升级 |
 | `check_threejs_snake_contract.py` | `blocking` | governance job | 已强制；它是 WS-01 static contract gate，不替代 browser smoke |
 | `collect_harness_sample_gaps.py` | `advisory` | governance job writes sample-gap markdown + JSON and appends the gap table to the step summary | 列出 security / guardrail / workflow 真实样本缺口，并从现有样本 checker 与通用 gap evidence ledger 汇总当前 evidence 计数；不自动生成证据，不升级 blocking |
@@ -60,6 +63,8 @@
 | `check_warning_sample_code_alignment.py` | `advisory` | governance job validates hook/checker warning-code alignment | 校验 PreToolUse preflight 和 Stop loop/scope hook 实际 emitted finding codes、导出的 code 清单、样本 checker `FINDING_CODES` 对齐，并确认 Stop recommendation mapping 覆盖所有 finding 且 action code 被样本 checker 接受；只防 code/schema 漂移，不生成 evidence、不接受 pending 样本、不升级 blocking |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary；包含 high-impact-agent-actions review-required advisory | 不直接升级；只驱动其他 checks 与人工确认 |
 | `check_context_budget.py` | `blocking` | governance job / pre-commit / `check_ai_governance.py`; Stop hook inherits through governance check | 默认面、skill catalog、raw source、static task packet 达到 90% 压缩触发线或硬预算超限时阻断；`--warning-only` 仅保留人工审计输出 |
+| `check_prototype_design_brief.py` | `blocking` when enabled | `check_ai_governance.py` only when `[prototype_design_brief].enabled = true`; manual otherwise | Prototype Design Brief 是受控设计投影面；开启后缺必填章节、关键语义门槛、Source Truth 未绑定或 REQ/WS/ADR/link 漂移时阻断 |
+| `check_prototype_artifact_review.py` | `blocking` when enabled | `check_ai_governance.py` only when `[prototype_design_brief].artifact_review_enabled = true`; manual otherwise | Prototype artifact package 和配置的静态原型缺审查包、route、关键状态、truth boundary、surface identity、non-production boundary 或工具无关性时阻断 |
 | `check_runtime_token_budget.py` | `blocking-candidate` | governance job validates no-transcript wiring; manual transcript audit uses `--transcript <rollout-jsonl>` and optional `--strict`; Stop token-pressure hook reuses the thresholds for warning-only current-transcript summaries | 两次以上真实长会话样本证明阈值、误报率和修复路径可控后，才考虑是否把 runtime transcript audit 升级为阻断；不得把本机历史 transcript 作为默认阻断输入 |
 | `pre_tool_use_preflight.py` | `advisory` | PreToolUse hook warning-only; unit tests cover large-output, destructive, external-send, benign-command paths, finding-code output, and bounded sample-capture guidance; sample checker validates burn-in artifact | 只提醒动作前风险，不输出 `continue: false`，不等同用户授权；warning 会显示 finding codes 和 placeholder replacement gate，方便真实 warning 后填 bounded sample；若未来考虑阻断，必须先记录真实样本、误报率和任务中断成本 |
 | `check_pre_tool_use_preflight_samples.py` | `advisory` | governance job validates PreToolUse preflight sample artifact; accepted real warning samples remain burn-in | 校验 `pre-tool-use-preflight-sample/v1` JSONL 的 finding / operator decision、outcome、false_positive、action_taken、存在的 repo-relative `evidence_refs`（允许 selector）和 raw tool 边界；synthetic 样本不计入真实 burn-in，当前 accepted real warning sample 为 0 |
@@ -82,6 +87,9 @@
 
 ## 最新口径补充
 
+- 2026-06-08：新增 opt-in Prototype Design Brief 与 prototype artifact review 机制。默认 `[prototype_design_brief]` 关闭；开启后由 `check_ai_governance.py` 追加 brief / artifact child checks，只验证设计投影面与原型审查包，不复制其他项目业务 truth，也不声明当前 repo 已有生产原型能力。
+- 2026-06-07：新增 `external-harness-decision/v1` 决策账本和 `check_external_harness_decisions.py`，把 remote trace pilot、external eval/sandbox、MCP/A2A、CI agent workflow 四个先前需要人工判断的方向转为 bounded active decisions。当前决策是：remote trace 等待显式 endpoint/`--send`/operator review，external eval/sandbox 先 comparison-only 且不加依赖，MCP/A2A 只做 contract registry，CI agent 保持 advisory、不创建真实 workflow。
+- 2026-06-06：五个 harness 反哺点进入 bounded 小切片：remote interop checker 现在拒绝 localhost / loopback verified-remote，CI agent contract 与 local execution policy wrapper 登记为 advisory，planner / executor / reviewer 只作为 schema sample，cross-task resume 仍需真实非 harness 任务样本。该批更新不升级 blocking、不声明 hosted/cloud agent、native sandbox、A2A 或 verified remote completion。
 - 2026-05-25：`check_harness_pending_samples.py` 现在在 text / JSON 输出 `ready_upgrade_decision_next_evidence_by_gap`，把 ready gap 的 keep-advisory 后续证据需求放到 pending audit 旁路可见；该输出只读当前 collection queue / upgrade-decision snapshot，不写 ledger、不生成样本、不接受 pending row。
 - 2026-05-25：`check_harness_burn_in_readiness.py` 现在从 `docs/ai/standards/harness-upgrade-decisions.jsonl` 读取 ready gap 的 `next_evidence_needed`，并在 text / JSON 输出 `ready_next_evidence_needed_by_gap` 与 per-item `next_evidence_needed`；该输出只暴露 keep-advisory 后续证据需求，不写 ledger、不生成样本、不升级 blocking。
 - 2026-05-25：`check_harness_upgrade_decisions.py` 现在要求 ready-gap upgrade decision 的 `evidence_refs` 是存在的 repo-relative 路径，允许 markdown anchor、pytest node id 和 JSONL 行号 selector，并继续拒绝 `.codex/runtime` 原始材料；该校验只防决策证据引用漂移，不新增样本、不改等级。

@@ -22,6 +22,16 @@ max_open_codex_prs = 3
 max_open_dependabot_prs = 4
 max_failed_open_prs = 0
 
+[prototype_design_brief]
+enabled = false
+artifact_review_enabled = false
+brief_path = "docs/ai/prototypes/prototype-design-brief.md"
+artifact_dir = ""
+prototype_page_path = ""
+prototype_route = ""
+fixture_paths = []
+required_states = []
+
 [context_budget]
 default_surface_token_budget = 8500
 default_surface_warning_percent = 80

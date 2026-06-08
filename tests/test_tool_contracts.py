@@ -87,6 +87,62 @@ class ToolContractValidationTest(unittest.TestCase):
         self.assertEqual(contract["local_vs_remote"], "bounded-remote-interop")
         self.assertIn("--verified-remote", contract["dangerous_flags"])
         self.assertIn("does not auto-upgrade pilot-remote", contract["notes"])
+        self.assertIn("loopback", contract["notes"])
+
+    def test_ci_agent_contract_is_advisory_pr_only(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_ci_agent_contract")
+
+        self.assertEqual(contract["side_effects"], ["read_repo"])
+        self.assertEqual(contract["automation_mode"], "ci")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertEqual(contract["local_vs_remote"], "local-only")
+        self.assertIn("docs/ai/standards/ci-agent-contract.sample.jsonl", contract["inputs"])
+        self.assertIn("referenced tool contract list", "\n".join(contract["outputs"]))
+        self.assertIn("tests/test_ci_agent_contract.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("pull_request-only", contract["notes"])
+        self.assertIn("pull_request_target", contract["notes"])
+        self.assertIn("does not create or prove any CI agent workflow", contract["notes"])
+
+    def test_external_harness_decisions_contract_is_no_effect_audit(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_external_harness_decisions")
+
+        self.assertEqual(contract["side_effects"], ["read_repo"])
+        self.assertEqual(contract["automation_mode"], "ci")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertEqual(contract["local_vs_remote"], "local-only")
+        self.assertIn("docs/ai/standards/external-harness-decisions.jsonl", contract["inputs"])
+        self.assertIn("active decision area list", "\n".join(contract["outputs"]))
+        self.assertIn("tests/test_external_harness_decisions.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("hosted trace/eval", contract["notes"])
+        self.assertIn("verified remote without operator review", contract["notes"])
+        self.assertIn("native sandbox", contract["notes"])
+        self.assertIn("MCP/A2A runtime", contract["notes"])
+        self.assertIn("real CI agent workflow", contract["notes"])
+        self.assertIn("does not send network probes", contract["notes"])
+
+    def test_local_execution_policy_wrapper_contract_is_not_native_sandbox(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "run_sandboxed_command")
+
+        self.assertEqual(contract["side_effects"], ["read_repo", "write_runtime"])
+        self.assertEqual(contract["automation_mode"], "assistive")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertIn("scripts/run_sandboxed_command.py -- python3 --version", contract["command"])
+        self.assertIn("write-runtime", contract["permissions"])
+        self.assertIn("execute-local-command", contract["permissions"])
+        self.assertIn(".codex/runtime/tool-outputs/*.meta.json", contract["outputs"])
+        self.assertIn("tests.test_execution_sandbox_wrapper", "\n".join(contract["verification_commands"]))
+        self.assertIn("not a native OS sandbox", contract["sandbox_requirement"])
+        self.assertIn("native_sandbox=false", contract["notes"])
+        self.assertIn("not proof", contract["notes"])
 
     def test_runtime_trace_summary_contract_is_local_read_only(self) -> None:
         data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)

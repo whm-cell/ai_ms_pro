@@ -88,21 +88,27 @@ from check_context_budget import (
     build_report as build_context_budget_report,
 )
 from context_budget_warnings import blocking_findings as context_budget_blocking_findings
-from harness_config import HarnessConfigError, load_harness_config
+from harness_config import HarnessConfigError, PrototypeDesignBriefConfig, load_harness_config
 
 
 CHECKS = [
     ("structure", ROOT / "scripts" / "check_ai_docs.py"),
     ("quality", ROOT / "scripts" / "check_ai_doc_quality.py"),
 ]
+PROTOTYPE_BRIEF_CHECK = ("prototype-brief", ROOT / "scripts" / "check_prototype_design_brief.py")
+PROTOTYPE_ARTIFACT_CHECK = (
+    "prototype-artifact",
+    ROOT / "scripts" / "check_prototype_artifact_review.py",
+)
 ACTIVE_HANDOFF_STATUS_WARNING_THRESHOLD = 3
 
 
-def load_context_surface_config() -> tuple[object | None, list[str]]:
+def load_harness_runtime_config() -> tuple[object | None, PrototypeDesignBriefConfig | None, list[str]]:
     try:
-        return load_harness_config(ROOT).context_surface, []
+        config = load_harness_config(ROOT)
+        return config.context_surface, config.prototype_design_brief, []
     except HarnessConfigError as exc:
-        return None, [str(exc)]
+        return None, None, [str(exc)]
 
 
 def validate_active_document_state(
@@ -139,9 +145,24 @@ def validate_active_document_state(
         )
 
 
-def run_child_checks() -> list[tuple[str, str, str]]:
+def governance_check_specs(
+    prototype_config: PrototypeDesignBriefConfig | None,
+) -> list[tuple[str, Path]]:
+    checks = list(CHECKS)
+    if prototype_config is None:
+        return checks
+    if prototype_config.enabled:
+        checks.append(PROTOTYPE_BRIEF_CHECK)
+    if prototype_config.artifact_review_enabled:
+        checks.append(PROTOTYPE_ARTIFACT_CHECK)
+    return checks
+
+
+def run_child_checks(
+    prototype_config: PrototypeDesignBriefConfig | None,
+) -> list[tuple[str, str, str]]:
     failures: list[tuple[str, str, str]] = []
-    for label, script in CHECKS:
+    for label, script in governance_check_specs(prototype_config):
         result = subprocess.run(
             [sys.executable, str(script)],
             cwd=str(ROOT),
@@ -192,7 +213,7 @@ def print_result(
 def main() -> int:
     errors = []
     warnings = []
-    context_surface, config_errors = load_context_surface_config()
+    context_surface, prototype_config, config_errors = load_harness_runtime_config()
     errors.extend(config_errors)
 
     changed_paths = load_changed_paths()
@@ -232,7 +253,7 @@ def main() -> int:
 
     return print_result(
         errors=errors,
-        failures=run_child_checks(),
+        failures=run_child_checks(prototype_config),
         warnings=warnings,
     )
 

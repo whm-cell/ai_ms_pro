@@ -134,6 +134,8 @@ The dataset should stay small, readable, and dependency-free. New evals should p
 
 `EVAL-028-tool-output-artifact-summary` covers artifact-preserving compression: raw tool output stays in `.codex/runtime/tool-outputs/`, while the transcript receives bounded summaries and line windows.
 
+`EVAL-029-planner-executor-reviewer-sample` covers a minimal planner / executor / reviewer sample shape using the existing `agent-trace/v1`, `agent-run-provenance/v1`, and workflow eval schemas. It is explicitly unbound from current REQ / WS validation chains and is sample-only: no scheduler/runtime, hosted trace backend, external collector, A2A interoperability, cloud agent task support, or red-team evidence is claimed.
+
 `task-outcome-evals.jsonl` starts with nine benchmark groups: `simple-fix`, `cross-file`, `docs-sync`, `risk-judgment`, `tool-selection`, `resume-durability`, `trace-interop-boundary`, `warning-review-signal`, and `overreach-prevention`.
 
 ## Validation

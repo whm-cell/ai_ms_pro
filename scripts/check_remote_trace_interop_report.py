@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+from ipaddress import ip_address
 import json
 from pathlib import Path
 import sys
 from typing import Any
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +19,7 @@ ALLOWED_LEVELS = {"local-only", "pilot-remote", "verified-remote"}
 ALLOWED_FAILURE_MODES = {"not-sent", "none", "remote-status-missing", "remote-error", "http-error", "remote-status-not-ok"}
 REQUIRED_WITHHELD_PAYLOADS = {"raw_trace_payload", "request_body", "response_body", "prompt", "transcript", "secret"}
 FORBIDDEN_RAW_PAYLOAD_KEYS = {"request_body", "response_body", "raw_payload", "raw_trace_payload", "prompt", "transcript", "secret"}
+LOCALHOST_NAMES = {"localhost"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,6 +41,8 @@ def validate_report(report: dict[str, Any], path: Path) -> list[str]:
         errors.append(f"{path}: capability_level must be one of {sorted(ALLOWED_LEVELS)}")
     validate_structured_evidence(report, path, errors)
     validate_no_raw_payload_keys(report, path, errors)
+    endpoint_is_loopback = is_loopback_endpoint(report.get("endpoint"))
+    validate_loopback_boundary(report, path, errors, endpoint_is_loopback=endpoint_is_loopback)
     if not isinstance(report.get("network_exported"), bool):
         errors.append(f"{path}: network_exported must be a boolean")
     remote_status = report.get("remote_status")
@@ -68,10 +73,60 @@ def validate_report(report: dict[str, Any], path: Path) -> list[str]:
             errors.append(f"{path}: verified-remote requires remote_status.ok=true")
         if report.get("endpoint_scope") == "local-capture-server":
             errors.append(f"{path}: verified-remote cannot use local-capture-server scope")
+        if endpoint_is_loopback or localhost_endpoint_flag(report):
+            errors.append(f"{path}: verified-remote cannot use localhost/loopback endpoint")
         claim_evidence = report.get("claim_evidence")
         if not isinstance(claim_evidence, dict) or claim_evidence.get("operator_review_confirmed") is not True:
             errors.append(f"{path}: verified-remote requires claim_evidence.operator_review_confirmed=true")
     return errors
+
+
+def validate_loopback_boundary(
+    report: dict[str, Any],
+    path: Path,
+    errors: list[str],
+    *,
+    endpoint_is_loopback: bool,
+) -> None:
+    endpoint_evidence = report.get("endpoint_evidence")
+    if endpoint_is_loopback and report.get("endpoint_scope") != "local-capture-server":
+        errors.append(f"{path}: localhost/loopback endpoint must use endpoint_scope=local-capture-server")
+    if endpoint_is_loopback and isinstance(endpoint_evidence, dict):
+        if endpoint_evidence.get("endpoint_scope") != "local-capture-server":
+            errors.append(
+                f"{path}: localhost/loopback endpoint must use endpoint_evidence.endpoint_scope=local-capture-server"
+            )
+        if endpoint_evidence.get("localhost_endpoint") is not True:
+            errors.append(f"{path}: localhost/loopback endpoint requires endpoint_evidence.localhost_endpoint=true")
+    if localhost_endpoint_flag(report) and report.get("endpoint_scope") != "local-capture-server":
+        errors.append(f"{path}: localhost_endpoint=true requires endpoint_scope=local-capture-server")
+
+
+def localhost_endpoint_flag(report: dict[str, Any]) -> bool:
+    endpoint_evidence = report.get("endpoint_evidence")
+    return isinstance(endpoint_evidence, dict) and endpoint_evidence.get("localhost_endpoint") is True
+
+
+def is_loopback_endpoint(endpoint: Any) -> bool:
+    if not isinstance(endpoint, str) or not endpoint.strip():
+        return False
+    host = endpoint_hostname(endpoint)
+    if not host:
+        return False
+    if host in LOCALHOST_NAMES:
+        return True
+    try:
+        return ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def endpoint_hostname(endpoint: str) -> str:
+    parsed = urlparse(endpoint)
+    host = parsed.hostname
+    if host is None and "://" not in endpoint:
+        host = urlparse(f"//{endpoint}").hostname
+    return host.rstrip(".").lower() if host else ""
 
 
 def validate_structured_evidence(report: dict[str, Any], path: Path, errors: list[str]) -> None:
