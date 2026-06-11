@@ -10,6 +10,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from runtime_sanitizer import compact_text, compact_transcript_path
+from runtime_trace_producer import try_emit_stop_trace
+from runtime_traceability import resolve_runtime_traceability
+
 
 ROOT = Path(__file__).resolve().parents[2]
 OBSERVATION_DIR = ROOT / ".codex" / "runtime" / "observations"
@@ -19,10 +23,7 @@ DOC_ROOTS = (
 )
 MAX_FIELD_LENGTH = 300
 MAX_CHANGED_PATHS = 20
-SESSION_ID_KEYS = (
-    "session_id",
-    "sessionId",
-)
+SESSION_ID_KEYS = ("session_id", "sessionId")
 TEXT_KEYS = (
     "user_prompt",
     "prompt",
@@ -31,10 +32,7 @@ TEXT_KEYS = (
     "content",
     "input",
 )
-TRANSCRIPT_KEYS = (
-    "transcript_path",
-    "transcriptPath",
-)
+TRANSCRIPT_KEYS = ("transcript_path", "transcriptPath")
 REQUIREMENT_ID_KEYS = (
     "requirement_ids",
     "requirementIds",
@@ -101,12 +99,17 @@ def append_observation(payload: dict[str, Any]) -> None:
     session_id = first_value(payload, SESSION_ID_KEYS) or first_env_value(ENV_SESSION_ID_KEYS) or "unknown-session"
     changed_paths = git_status_paths()
     promote = should_promote(changed_paths)
-    requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
-    workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
-    if not requirement_ids:
-        requirement_ids = collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
-    if not workstream_ids:
-        workstream_ids = collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
+    payload_requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
+    payload_workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
+    env_requirement_ids = [] if payload_requirement_ids else collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
+    env_workstream_ids = [] if payload_workstream_ids else collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
+    requirement_ids, workstream_ids, traceability_source = resolve_runtime_traceability(
+        payload_requirement_ids,
+        payload_workstream_ids,
+        env_requirement_ids,
+        env_workstream_ids,
+        changed_paths,
+    )
 
     observation = {
         "timestamp": now.isoformat(),
@@ -116,15 +119,16 @@ def append_observation(payload: dict[str, Any]) -> None:
         "agent": infer_agent_label(payload),
         "session_kind": "resume" if infer_resumed(payload) else "active",
         "branch_or_thread": infer_branch_or_thread(payload, session_id),
-        "cwd": compact_text(string_value(payload.get("cwd"))) or str(ROOT),
-        "transcript_path": compact_text(first_value(payload, TRANSCRIPT_KEYS)),
-        "prompt_preview": compact_text(first_value(payload, TEXT_KEYS)),
+        "cwd": compact_text(string_value(payload.get("cwd")), MAX_FIELD_LENGTH) or str(ROOT),
+        "transcript_path": compact_transcript_path(first_value(payload, TRANSCRIPT_KEYS), MAX_FIELD_LENGTH),
+        "prompt_preview": compact_text(first_value(payload, TEXT_KEYS), MAX_FIELD_LENGTH),
         "changed_paths": changed_paths[:MAX_CHANGED_PATHS],
         "changed_path_count": len(changed_paths),
         "docs_changed": any(is_under_doc_root(path_text) for path_text in changed_paths),
         "runtime_only_changes": has_runtime_only_changes(changed_paths),
         "requirement_ids": requirement_ids,
         "workstream_ids": workstream_ids,
+        "traceability_source": traceability_source,
         "needs_governance_promotion": promote,
         "promotion_reason": infer_promotion_reason(promote, changed_paths),
     }
@@ -138,6 +142,7 @@ def append_observation(payload: dict[str, Any]) -> None:
     observation_file = OBSERVATION_DIR / f"{now.strftime('%Y-%m-%d')}.jsonl"
     with observation_file.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(clean_observation, ensure_ascii=False) + "\n")
+    try_emit_stop_trace(clean_observation, OBSERVATION_DIR)
 
 
 def infer_agent_label(payload: dict[str, Any]) -> str:
@@ -223,8 +228,6 @@ def has_runtime_only_changes(changed_paths: list[str]) -> bool:
         return False
     for path_text in changed_paths:
         if path_text.startswith(".codex/runtime/"):
-            continue
-        if path_text.startswith("mysjzhishidian/"):
             continue
         return False
     return True
@@ -331,13 +334,6 @@ def is_meaningful(value: Any) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
     return True
-
-
-def compact_text(value: Any) -> str:
-    if not isinstance(value, str):
-        return ""
-    compact = " ".join(value.split())
-    return compact[:MAX_FIELD_LENGTH].strip()
 
 
 def string_value(value: Any) -> str:

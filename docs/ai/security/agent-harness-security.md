@@ -16,12 +16,15 @@
 - 2026-05-08 已清理本机历史 runtime：删除 49 个旧 `.codex/runtime/sessions/*` 与 `.codex/runtime/observations/*` 文件，只保留 README 和 session 模板。
 - `.codex/runtime/*` 仍是本地恢复材料，不进入 `docs/ai/index.md` 默认入口，也不替代 canonical governance truth。
 - `docs/requirements/source/_template.md` 已要求声明 source trust、instruction handling 和 sanitization status；`scripts/check_requirements_shape.py` 对 source docs 缺失或语义不清的外部内容边界元数据输出 review-required warning，默认不阻断。
+- `docs/ai/security/agentic-red-team-samples.jsonl` 已记录 local-replay red-team 样本；这些样本证明本地 guardrail 可复跑，不证明真实外部攻击或远端互通。
 
 ## High-Impact Action Guardrails
 
 P2 高影响动作矩阵已落地到 [Agent Action Guardrails](./agent-action-guardrails.md)。
 
 该矩阵覆盖远端分支删除、PR close / merge、workflow permission 变更、secret / env 变更、部署 / release、外部消息发送、destructive file operation 和 destructive database operation。默认规则是：Agent 可审计、可提示、可 dry-run、可准备草稿，但不得由 hook 或后台自动执行 destructive、externally visible 或 permission-changing 动作。
+
+[Agentic Control Matrix](./agentic-control-matrix.md) 将 source boundary、runtime redaction、高影响动作、tool contracts、supply-chain evidence、trace/eval integrity 和 remote gate 边界映射到 OWASP / NIST 风格控制面。该矩阵是 review-required 证据面，不把单次 advisory evidence 自动升级为 blocking。
 
 ## Runtime Redaction Scope
 
@@ -48,7 +51,7 @@ P2 高影响动作矩阵已落地到 [Agent Action Guardrails](./agent-action-gu
 2. P2 High-Impact Action Matrix 已落地，后续只补真实样本和 review-required 提示，不直接升级 blocking。
 3. 两类 guardrails 都至少积累两个真实样本后，再判断哪些 warning 值得保持 review-required 或升级 blocking。
 
-真实样本统一记录到 [Agent Guardrail Samples](./agent-guardrail-samples.md)。该记录面只保留摘要、触发规则、结果和证据链接，不替代 user confirmation，不存 secret，也不贴完整 PRD、runtime JSONL 或 transcript。
+高影响动作与 source-boundary 真实样本记录到 [Agent Guardrail Samples](./agent-guardrail-samples.md)。G6/G7 adversarial replay / incident 样本记录到 [Agentic Red-Team Samples](./agentic-red-team-samples.md)。这些记录面只保留摘要、触发规则、结果和证据链接，不替代 user confirmation，不存 secret，也不贴完整 PRD、runtime JSONL 或 transcript。
 
 ### P1 External Content Boundary
 
@@ -65,6 +68,7 @@ P2 高影响动作矩阵已落地到 [Agent Action Guardrails](./agent-action-gu
 ### Sample Recording
 
 - [Agent Guardrail Samples](./agent-guardrail-samples.md) 记录 P1 / P2 guardrails 的真实样本、误报 / 漏报、reviewer 负担和 blocking 升级信号。
+- [Agentic Red-Team Samples](./agentic-red-team-samples.md) 记录 8 类 red-team risk family 的 local-replay / real-incident 样本。
 - 样本记录只支持后续 review；不能替代高影响动作的明确人工确认，也不能替代 secret scanning、source sanitization 或远端审计证据。
 
 ## External References

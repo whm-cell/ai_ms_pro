@@ -1,0 +1,58 @@
+我查了当前 repo 状态，也重新对照了外部主流资料。结论很明确：现在这个 harness 已经不是“文档型约束”了，已经到达 **repo-local production-adjacent agentic harness** 水平，也就是本地工程治理、恢复、验证、trace/eval/tool contract 都已经成体系；但还没到 **enterprise / cross-agent interoperability platform** 水平。
+
+**一句话评级**
+
+当前大概是 **3.5 / 5**：
+
+- `5` 是企业级 agent platform：真实 OpenAI/OTLP trace 后端、MCP/A2A 协议互通、正式 trace grading、红队安全样本、跨团队 PR 样本、远端强制门禁都跑满。
+- 当前是 `3.5`：本地治理链路、CI、trace schema、eval runner、tool contract、安全护栏、样本缺口收集都已落地，但远端互通和真实长期样本还没补齐。
+
+**和世界主流方向对照**
+
+Anthropic 最近的 long-running agent harness 重点是：不要让 agent 一口吃完整项目，而是用 initializer / coding agent、feature list、progress file、git history、单 feature 增量推进、端到端测试来避免上下文腐化和过早宣布完成。他们还强调 compaction 不够，必须靠结构化状态和干净交接来支撑长任务。你的 harness 在这块已经很接近：有 `docs/ai/*`、handoff/status/changelog/ADR、REQ/WS、runtime reducer、context budget、archive candidate、CI smoke、git/PR guardrails。参考：[Anthropic effective harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)。
+
+Anthropic 2026 的新 harness design 又往前推进到 planner / generator / evaluator 三角色，强调 evaluator 独立、可评分 criteria、Playwright MCP 真实交互验证、sprint contract。你的 harness 目前有 eval runner、deterministic grader、subagent 使用规范、browser smoke，但还没有固定化的 planner-generator-evaluator 闭环。参考：[Anthropic harness design](https://www.anthropic.com/engineering/harness-design-long-running-apps)。
+
+OpenAI 这边主流是 traces + graders + datasets + eval runs。Agents SDK tracing 会记录 model calls、tool calls、handoffs、guardrails、自定义事件，并可导出到后端；agent eval 文档强调用 trace grading 定位 workflow-level 问题。你的 harness 已经有 `agent-trace/v1`、Stop trace producer、local export adapter、eval dataset、runner/grader，但还没有 OpenAI trace backend、hosted eval runs、trace grading dashboard。参考：[OpenAI tracing](https://openai.github.io/openai-agents-python/tracing/)、[OpenAI agent evals](https://developers.openai.com/api/docs/guides/agent-evals)、[trace grading](https://developers.openai.com/api/docs/guides/trace-grading)。
+
+MCP 主流关注工具暴露、schema、权限、人类确认、确定性工具列表。你的 `tool-contracts/contracts.json` 已经有 MCP-like 的工具权限、side effects、automation mode、destructive/external visibility，但还不是 MCP server/client。参考：[MCP tools spec](https://modelcontextprotocol.io/specification/draft/server/tools)。
+
+OpenTelemetry / W3C 方向关注标准 trace/span、agent/tool spans、traceparent/tracestate 传播。你现在只是本地 `local-otel-json` adapter，还没到 OTLP exporter 或 W3C trace context 兼容。参考：[OpenTelemetry GenAI agent spans](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-agent-spans/)、[W3C Trace Context](https://www.w3.org/TR/trace-context/)。
+
+安全方面，OWASP LLM / Agentic 风险集中在 prompt injection、insecure output handling、supply chain、sensitive disclosure、insecure plugin/tool design、excessive agency 等。你的 harness 已经有 source boundary、高影响动作确认、runtime sanitizer、security evidence triage、tool contract，但还没有完整 OWASP Agentic Top 10 control matrix 或 red-team eval set。参考：[OWASP LLM Top 10](https://owasp.org/www-project-top-ten-for-large-language-model-applications/)、[OWASP Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)。
+
+A2A 方向关注 Agent Card、Task、Message、Artifact、Streaming、auth、JSON-RPC/gRPC/HTTP bindings。你的 handoff/status/changelog 是内部协作物，不是 A2A protocol。参考：[A2A specification](https://a2a-protocol.org/latest/specification/)。
+
+**当前最强的地方**
+
+1. 长任务可恢复：`index -> working-context -> status -> handoff` 已经形成短上下文入口。
+2. 可验证：governance、code-shape、Ruff、unit tests、browser smoke、GitHub guardrails、branch hygiene 都有检查面。
+3. 可追踪：REQ/WS、traceability matrix、runtime observation、Stop trace producer、`agent-trace/v1` 已经串起来。
+4. 有 eval 入口：不是只写“应该 eval”，而是有 dataset、runner、deterministic grader。
+5. 有工具契约：tool side effects / permission / automation mode 已经结构化。
+6. 有安全护栏：source boundary、高影响动作、runtime sanitizer、security evidence 都不是口头规则。
+7. 有自我约束：明确把 OpenAI/OTLP/MCP/A2A 标成 future work，没有虚假宣称。
+
+**还没到世界一线的地方**
+
+1. 没有真实 trace backend：没有 OpenAI Traces、OTLP collector、dashboard。
+2. 没有 hosted trace grading：本地 grader 只能跑 repo checks，不能做 trace-level behavioral grading。
+3. 没有 MCP/A2A 互通：只有 contract 和 crosswalk，没有 protocol server/client。
+4. 真实样本不足：security evidence、guardrail、workflow skills 还需要真实 PR / scheduled / cross-workstream 样本。
+5. 多 agent 质量闭环还没固定化：没有常驻 planner-generator-evaluator pipeline。
+6. 安全还不是 formal control matrix：还缺 OWASP/NIST 映射、risk owner、red-team eval。
+7. 远端 GitHub enforcement 受 private Free plan 限制：branch protection / rulesets 仍是 `UNKNOWN / plan-limited`。
+
+**我的判断**
+
+对个人或小团队长期 Codex/agentic 开发来说，这个 harness 已经明显高于普通项目治理水平，甚至比很多“只靠 prompt + README + CI”的 agent workflow 稳得多。
+
+但如果拿它和 Anthropic/OpenAI 最新 agentic engineering 方向比，它现在属于：
+
+> 本地工程控制平面成熟，外部互通和真实生产样本还未成熟。
+
+下一步真正能把它从 `3.5` 推到 `4` 的，不是再写更多文档，而是补三类真实证据：
+
+1. 真实 PR / scheduled / cross-workstream 样本。
+2. trace grading 或至少 trace-linked eval run。
+3. MCP/A2A/OTLP/OpenAI exporter 选一个做真实互通，不再只做 crosswalk。

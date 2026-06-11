@@ -9,12 +9,21 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from context_budget_warnings import build_warnings, usage_percent
-from harness_config import ContextBudgetConfig, HarnessConfigError, load_harness_config
+from context_budget_warnings import (
+    BudgetUsage,
+    blocking_findings,
+    budget_usages,
+    build_warnings,
+    usage_percent,
+)
+from harness_config import (
+    ContextBudgetConfig as ContextBudgetConfig,
+    HarnessConfigError,
+    load_harness_config,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
-AI_DOC_ROOT = ROOT / "docs" / "ai"
 DEFAULT_SURFACE = (
     "AGENTS.md",
     "docs/ai/index.md",
@@ -42,6 +51,7 @@ class ContextBudgetReport:
     default_surface_budget: int
     default_surface_warning_percent: int
     default_surface_high_warning_percent: int
+    always_on_doc_line_budget: int
     default_surface: list[SurfaceItem]
     active_handoff_count: int
     active_handoff_budget: int
@@ -51,6 +61,7 @@ class ContextBudgetReport:
     skill_count: int
     mcp_server_count: int
     mcp_server_budget: int
+    budget_usages: list[BudgetUsage]
     warnings: list[str]
     duplicate_instructions: list[str]
     skills: list[SkillItem]
@@ -61,6 +72,16 @@ def parse_args() -> argparse.Namespace:
         description="Audit default context surface size and on-demand harness budget.",
     )
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Compatibility flag; blocking mode is the default.",
+    )
+    parser.add_argument(
+        "--warning-only",
+        action="store_true",
+        help="Keep exit code 0 for manual audits even when blocking findings exist.",
+    )
     return parser.parse_args()
 
 
@@ -224,6 +245,7 @@ def build_report(root: Path = ROOT) -> ContextBudgetReport:
     active_handoff_count = len(iter_docs(root / "docs" / "ai" / "handoffs" / "active"))
     adr_count = len(iter_docs(root / "docs" / "ai" / "adr"))
     mcp_count = mcp_server_count(root)
+    multi_budget_usages = budget_usages(root)
     warnings = build_warnings(
         report_items=default_items,
         skills=skills,
@@ -233,12 +255,14 @@ def build_report(root: Path = ROOT) -> ContextBudgetReport:
         active_handoff_budget=context_surface.active_handoff_budget,
         adr_count=adr_count,
         mcp_count=mcp_count,
+        budget_usages=multi_budget_usages,
     )
     return ContextBudgetReport(
         default_surface_tokens=sum(item.estimated_tokens for item in default_items),
         default_surface_budget=context_budget.default_surface_token_budget,
         default_surface_warning_percent=context_budget.default_surface_warning_percent,
         default_surface_high_warning_percent=context_budget.default_surface_high_warning_percent,
+        always_on_doc_line_budget=context_budget.always_on_doc_line_budget,
         default_surface=default_items,
         active_handoff_count=active_handoff_count,
         active_handoff_budget=context_surface.active_handoff_budget,
@@ -248,13 +272,18 @@ def build_report(root: Path = ROOT) -> ContextBudgetReport:
         skill_count=len(skills),
         mcp_server_count=mcp_count,
         mcp_server_budget=context_budget.mcp_server_budget,
+        budget_usages=multi_budget_usages,
         warnings=warnings,
         duplicate_instructions=duplicates,
         skills=skills,
     )
 
 
-def render_report(report: ContextBudgetReport) -> str:
+def render_report(
+    report: ContextBudgetReport,
+    *,
+    findings: list[str] | None = None,
+) -> str:
     lines = [
         "Context budget audit:",
         "- default surface: "
@@ -264,14 +293,19 @@ def render_report(report: ContextBudgetReport) -> str:
         "- default warning thresholds: "
         f"{report.default_surface_warning_percent}% / "
         f"{report.default_surface_high_warning_percent}%",
+        f"- always-on document line budget: {report.always_on_doc_line_budget}",
         f"- active handoffs: {report.active_handoff_count} / budget {report.active_handoff_budget}",
         f"- ADR count: {report.adr_count} / budget {report.adr_budget}",
         f"- stage status line budget: {report.stage_status_line_budget}",
         f"- skills: {report.skill_count}",
         f"- MCP servers: {report.mcp_server_count} / budget {report.mcp_server_budget}",
-        "",
-        "Default surface:",
     ]
+    for usage in report.budget_usages:
+        lines.append(
+            f"- {usage.name}: {usage.used_tokens} estimated tokens / budget {usage.budget} "
+            f"({usage_percent(usage.used_tokens, usage.budget):.1f}%)"
+        )
+    lines.extend(["", "Default surface:"])
     for item in report.default_surface:
         lines.append(f"- {item.path}: {item.lines} lines, ~{item.estimated_tokens} tokens")
 
@@ -284,6 +318,13 @@ def render_report(report: ContextBudgetReport) -> str:
     if report.duplicate_instructions:
         lines.extend(["", "Duplicate instruction samples:"])
         lines.extend(f"- {item}" for item in report.duplicate_instructions)
+
+    if findings is not None:
+        if findings:
+            lines.extend(["", "Blocking findings:"])
+            lines.extend(f"- {finding}" for finding in findings)
+        else:
+            lines.extend(["", "Blocking findings: none"])
     return "\n".join(lines)
 
 
@@ -295,11 +336,14 @@ def main() -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
+    findings = blocking_findings(report)
     if args.json:
-        print(json.dumps(asdict(report), ensure_ascii=False, indent=2))
+        payload = asdict(report)
+        payload["blocking_findings"] = findings
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        print(render_report(report))
-    return 0
+        print(render_report(report, findings=findings))
+    return 0 if args.warning_only or not findings else 1
 
 
 if __name__ == "__main__":

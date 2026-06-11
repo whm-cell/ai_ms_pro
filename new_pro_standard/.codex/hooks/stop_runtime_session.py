@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from runtime_sanitizer import compact_text, compact_transcript_path
+from runtime_traceability import resolve_runtime_traceability
 from session_snapshot_render import render_session_snapshot
 
 
@@ -102,15 +104,20 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
     session_file = find_or_create_session_file(session_id, agent_label, branch_or_thread)
 
     session_type = infer_session_type(payload, session_file)
-    prompt_preview = compact_text(first_value(payload, TEXT_KEYS))
-    transcript_path = compact_text(first_value(payload, TRANSCRIPT_KEYS))
-    requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
-    workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
-    if not requirement_ids:
-        requirement_ids = collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
-    if not workstream_ids:
-        workstream_ids = collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
+    prompt_preview = compact_text(first_value(payload, TEXT_KEYS), MAX_FIELD_LENGTH)
+    transcript_path = compact_transcript_path(first_value(payload, TRANSCRIPT_KEYS), MAX_FIELD_LENGTH)
     changed_paths = git_status_paths()
+    payload_requirement_ids = collect_identifier_values(payload, REQUIREMENT_ID_KEYS)
+    payload_workstream_ids = collect_identifier_values(payload, WORKSTREAM_ID_KEYS)
+    env_requirement_ids = [] if payload_requirement_ids else collect_env_identifiers(ENV_REQUIREMENT_ID_KEYS)
+    env_workstream_ids = [] if payload_workstream_ids else collect_env_identifiers(ENV_WORKSTREAM_ID_KEYS)
+    requirement_ids, workstream_ids, traceability_source = resolve_runtime_traceability(
+        payload_requirement_ids,
+        payload_workstream_ids,
+        env_requirement_ids,
+        env_workstream_ids,
+        changed_paths,
+    )
     now = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
     promote = should_promote(changed_paths)
@@ -124,13 +131,13 @@ def write_session_snapshot(payload: dict[str, Any]) -> None:
             "session_id": session_id,
             "requirement_ids": requirement_ids,
             "workstream_ids": workstream_ids,
-            "traceability_source": "",
+            "traceability_source": traceability_source,
             "prompt_preview": prompt_preview,
             "transcript_path": transcript_path,
             "changed_paths": changed_paths,
             "promote": promote,
             "promote_reason": promote_reason,
-            "working_context_path": compact_text(str(WORKING_CONTEXT_PATH)),
+            "working_context_path": compact_text(str(WORKING_CONTEXT_PATH), MAX_FIELD_LENGTH),
         }
     )
 
@@ -225,8 +232,6 @@ def should_promote(changed_paths: list[str]) -> bool:
         return False
     for path_text in changed_paths:
         if path_text.startswith(".codex/runtime/"):
-            continue
-        if path_text.startswith("mysjzhishidian/"):
             continue
         return True
     return False
@@ -325,13 +330,6 @@ def is_meaningful(value: Any) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
     return True
-
-
-def compact_text(value: Any) -> str:
-    if not isinstance(value, str):
-        return ""
-    compact = " ".join(value.split())
-    return compact[:MAX_FIELD_LENGTH].strip()
 
 
 def slugify(value: str) -> str:

@@ -5,18 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Three.js Snake</title>
     <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <main class="app-shell">
-      <canvas id="game"></canvas>
+      <canvas id="game" aria-label="Three.js Snake game board"></canvas>
 
-      <section class="hud">
+      <section class="hud" aria-label="Game status">
         <div class="brand">Three.js Snake</div>
         <div class="stats">
           <div>Score <strong id="score">0</strong></div>
           <div>Best <strong id="best">0</strong></div>
+          <div>Status <strong id="status">Ready</strong></div>
         </div>
-        <p class="hint">Use arrow keys or WASD. Press Enter to restart.</p>
+        <button id="reset-best" class="hud-button" type="button">Reset Best</button>
+        <p class="hint">Use arrow keys or WASD. Press P or Space to pause.</p>
       </section>
 
       <section class="overlay" id="overlay" aria-live="polite">

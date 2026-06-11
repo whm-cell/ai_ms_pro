@@ -42,7 +42,22 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Launch the browser in headed mode for manual observation.",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--url",
+        default="",
+        help="Use an already-served app URL instead of starting a local static server.",
+    )
+    parser.add_argument(
+        "--no-server",
+        action="store_true",
+        help="Require --url and do not bind a local static server.",
+    )
+    args = parser.parse_args()
+    if args.no_server and not args.url:
+        parser.error("--no-server requires --url.")
+    if args.url and not args.url.startswith(("http://", "https://")):
+        parser.error("--url must be an http:// or https:// URL.")
+    return args
 
 
 def find_free_port(host: str) -> int:
@@ -76,6 +91,18 @@ def wait_for_server(host: str, port: int, timeout: float = 5.0) -> None:
         except Exception:
             time.sleep(0.1)
     raise RuntimeError(f"Static server did not become ready in time: {url}")
+
+
+def wait_for_url(url: str, timeout: float = 5.0) -> None:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=0.5) as response:
+                if 200 <= response.status < 400:
+                    return
+        except Exception:
+            time.sleep(0.1)
+    raise RuntimeError(f"External app URL did not become ready in time: {url}")
 
 
 def run_command(cmd: list[str], *, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
@@ -119,15 +146,16 @@ def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
     raise RuntimeError(f"Playwright CLI command failed: {' '.join(cmd)}\n{details}{help_note}")
 
 
-def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
-    open_args = [url]
-    if headed:
-        open_args.append("--headed")
-
-    run_pw("open", *open_args, env=env)
-
+def run_browser_code(source: str, env: dict[str, str]) -> None:
     run_pw(
         "run-code",
+        source.strip(),
+        env=env,
+    )
+
+
+def verify_initial_state(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 await page.waitForLoadState("domcontentloaded");
 await page.waitForFunction(() => Boolean(window.__THREEJS_SNAKE_TEST__));
@@ -135,46 +163,97 @@ const snapshot = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.restart
 if (!snapshot.running || snapshot.gameOver || !snapshot.overlayHidden || snapshot.score !== 0) {
   throw new Error(`Unexpected initial snapshot: ${JSON.stringify(snapshot)}`);
 }
-        """.strip(),
+if (snapshot.paused || snapshot.status !== "Running") {
+  throw new Error(`Expected running status in initial snapshot, got ${JSON.stringify(snapshot)}`);
+}
+if (!snapshot.requirementIds.includes("REQ-001") || !snapshot.workstreamIds.includes("WS-01")) {
+  throw new Error(`Expected WS-01 metadata in snapshot, got ${JSON.stringify(snapshot)}`);
+}
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_pause_resume(env: dict[str, str]) -> None:
+    run_browser_code(
+        """
+const paused = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.pause());
+if (!paused.paused || paused.running || paused.overlayHidden || paused.title !== "Paused" || paused.restartLabel !== "Resume") {
+  throw new Error(`Expected pause state, got ${JSON.stringify(paused)}`);
+}
+const resumed = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.resume());
+if (resumed.paused || !resumed.running || !resumed.overlayHidden || resumed.status !== "Running") {
+  throw new Error(`Expected resume state, got ${JSON.stringify(resumed)}`);
+}
+        """,
+        env=env,
+    )
+
+
+def verify_food_pickup(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 const afterEat = await page.evaluate(() => {
   window.__THREEJS_SNAKE_TEST__.placeFoodAhead();
   return window.__THREEJS_SNAKE_TEST__.step(1);
 });
-if (afterEat.score !== 1 || !afterEat.running || afterEat.gameOver) {
+if (afterEat.score !== 1 || afterEat.best !== 1 || !afterEat.running || afterEat.gameOver) {
   throw new Error(`Expected a successful food pickup, got ${JSON.stringify(afterEat)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_reset_best(env: dict[str, str]) -> None:
+    run_browser_code(
+        """
+const afterResetBest = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.resetBestScore());
+if (afterResetBest.best !== 0 || afterResetBest.resetBestLabel !== "Reset Best") {
+  throw new Error(`Expected best score reset, got ${JSON.stringify(afterResetBest)}`);
+}
+        """,
+        env=env,
+    )
+
+
+def verify_crash(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 const afterCrash = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.step(9));
 if (!afterCrash.gameOver || afterCrash.running || afterCrash.title !== "Game Over") {
   throw new Error(`Expected a wall collision game over, got ${JSON.stringify(afterCrash)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
 
-    run_pw(
-        "run-code",
+
+def verify_restart(env: dict[str, str]) -> None:
+    run_browser_code(
         """
 await page.locator("#restart").click();
 const afterRestart = await page.evaluate(() => window.__THREEJS_SNAKE_TEST__.getSnapshot());
 if (!afterRestart.running || afterRestart.gameOver || afterRestart.score !== 0 || !afterRestart.overlayHidden) {
   throw new Error(`Expected restart to reset the game, got ${JSON.stringify(afterRestart)}`);
 }
-        """.strip(),
+        """,
         env=env,
     )
+
+
+def smoke_steps(url: str, headed: bool, env: dict[str, str]) -> None:
+    open_args = [url]
+    if headed:
+        open_args.append("--headed")
+
+    run_pw("open", *open_args, env=env)
+    verify_initial_state(env)
+    verify_pause_resume(env)
+    verify_food_pickup(env)
+    verify_reset_best(env)
+    verify_crash(env)
+    verify_restart(env)
 
 
 def main() -> int:
@@ -182,29 +261,43 @@ def main() -> int:
     ensure_npx()
 
     host = args.host
-    port = args.port or find_free_port(host)
-    server, thread, bound_port = start_static_server(host, port)
+    server = None
+    thread = None
+    if args.url:
+        bound_port = args.port
+        url = args.url
+    else:
+        port = args.port or find_free_port(host)
+        server, thread, bound_port = start_static_server(host, port)
+        url = f"http://{host}:{bound_port}{APP_URL_PATH}"
     session_name = f"snake-{os.getpid()}-{int(time.time())}"
     env = os.environ.copy()
     env["PLAYWRIGHT_CLI_SESSION"] = session_name
-    url = f"http://{host}:{bound_port}{APP_URL_PATH}"
 
-    print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
+    if server is None:
+        print(f"[smoke] using external app URL {url}")
+    else:
+        print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
     print(f"[smoke] opening {url}")
 
     try:
-        wait_for_server(host, bound_port)
+        if server is None:
+            wait_for_url(url)
+        else:
+            wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS threejs-snake: load -> eat -> game over -> restart")
+        print("[smoke] PASS threejs-snake: load -> pause -> resume -> reset best -> game over -> restart")
         return 0
     finally:
         try:
             run_pw("close", env=env)
         except Exception:
             pass
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=1.0)
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=1.0)
         shutil.rmtree(REPO_ROOT / ".playwright-cli", ignore_errors=True)
 
 

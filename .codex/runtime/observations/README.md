@@ -9,6 +9,7 @@
 当前最小实现：
 
 - `Stop` hook 会 best-effort 追加 observation 到 `YYYY-MM-DD.jsonl`
+- `Stop` hook 会 best-effort 追加 portable trace 到 `agent-traces/YYYY-MM-DD.agent-trace.jsonl`
 - 每条记录都是 append-only 原料，不直接替代 `handoff`、`status`、`adr`
 - observation 会记录时间戳、session id、agent、当前分支/线程、工作区变更、是否建议提升到共享治理层
 
@@ -18,6 +19,12 @@
 - `changed_paths` / `changed_path_count`：当前工作区触碰范围
 - `needs_governance_promotion` / `promotion_reason`：供后续 reducer 或主 Agent 判断是否要升格为 `handoff`
 - `requirement_ids` / `workstream_ids`：如 payload 或环境显式提供，则一并写入 observation 原料，供 reducer 聚合
+
+Trace producer：
+
+- trace 文件使用 `docs/ai/standards/agent-trace.schema.json` 的 `agent-trace/v1` 形状
+- trace record 从已清洗 observation 字段派生，不写入完整 prompt、完整 transcript、secret 或未审查外部内容
+- trace 文件仍是本地 runtime 原料；稳定结论需要由主 Agent 审核后再提升到共享治理文档
 
 Reducer 用法：
 

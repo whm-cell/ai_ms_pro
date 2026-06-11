@@ -35,6 +35,14 @@ DEFAULT_SKILL_DESCRIPTION_WORD_BUDGET = 30
 DEFAULT_SKILL_BODY_LINE_BUDGET = 400
 DEFAULT_ADR_COUNT_BUDGET = 15
 DEFAULT_MCP_SERVER_BUDGET = 10
+DEFAULT_PROTOTYPE_DESIGN_BRIEF_ENABLED = False
+DEFAULT_PROTOTYPE_ARTIFACT_REVIEW_ENABLED = False
+DEFAULT_PROTOTYPE_BRIEF_PATH = "docs/ai/prototypes/prototype-design-brief.md"
+DEFAULT_PROTOTYPE_ARTIFACT_DIR = ""
+DEFAULT_PROTOTYPE_PAGE_PATH = ""
+DEFAULT_PROTOTYPE_ROUTE = ""
+DEFAULT_PROTOTYPE_FIXTURE_PATHS: tuple[str, ...] = ()
+DEFAULT_PROTOTYPE_REQUIRED_STATES: tuple[str, ...] = ()
 
 
 class HarnessConfigError(ValueError):
@@ -68,10 +76,23 @@ class ContextBudgetConfig:
 
 
 @dataclass(frozen=True)
+class PrototypeDesignBriefConfig:
+    enabled: bool
+    artifact_review_enabled: bool
+    brief_path: str
+    artifact_dir: str
+    prototype_page_path: str
+    prototype_route: str
+    fixture_paths: tuple[str, ...]
+    required_states: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class HarnessConfig:
     checks: ChecksConfig
     context_surface: ContextSurfaceConfig
     context_budget: ContextBudgetConfig
+    prototype_design_brief: PrototypeDesignBriefConfig
 
 
 def load_harness_config(root: Path = ROOT) -> HarnessConfig:
@@ -88,10 +109,12 @@ def load_harness_config(root: Path = ROOT) -> HarnessConfig:
     checks = _load_checks(data.get("checks", {}))
     context_surface = _load_context_surface(data.get("context_surface", {}))
     context_budget = _load_context_budget(data.get("context_budget", {}))
+    prototype_design_brief = _load_prototype_design_brief(data.get("prototype_design_brief", {}))
     return HarnessConfig(
         checks=checks,
         context_surface=context_surface,
         context_budget=context_budget,
+        prototype_design_brief=prototype_design_brief,
     )
 
 
@@ -112,6 +135,9 @@ def load_minimal_toml_config(raw_text: str) -> dict[str, Any]:
         ),
         "context_budget": _parse_context_budget_section(
             _extract_section(raw_text, "context_budget")
+        ),
+        "prototype_design_brief": _parse_prototype_design_brief_section(
+            _extract_section(raw_text, "prototype_design_brief")
         ),
     }
 
@@ -231,6 +257,99 @@ def _load_context_budget(raw_value: object) -> ContextBudgetConfig:
     )
 
 
+def _load_prototype_design_brief(raw_value: object) -> PrototypeDesignBriefConfig:
+    if raw_value is None:
+        raw_value = {}
+    if not isinstance(raw_value, dict):
+        raise HarnessConfigError("[prototype_design_brief] must be a table")
+
+    enabled = _bool_value(
+        raw_value.get("enabled"),
+        default=DEFAULT_PROTOTYPE_DESIGN_BRIEF_ENABLED,
+        label="prototype_design_brief.enabled",
+    )
+    artifact_review_enabled = _bool_value(
+        raw_value.get("artifact_review_enabled"),
+        default=DEFAULT_PROTOTYPE_ARTIFACT_REVIEW_ENABLED,
+        label="prototype_design_brief.artifact_review_enabled",
+    )
+    if artifact_review_enabled and not enabled:
+        raise HarnessConfigError(
+            "prototype_design_brief.artifact_review_enabled requires "
+            "prototype_design_brief.enabled = true"
+        )
+
+    config = PrototypeDesignBriefConfig(
+        enabled=enabled,
+        artifact_review_enabled=artifact_review_enabled,
+        brief_path=_string_value(
+            raw_value.get("brief_path"),
+            default=DEFAULT_PROTOTYPE_BRIEF_PATH,
+            label="prototype_design_brief.brief_path",
+            allow_empty=False,
+        ),
+        artifact_dir=_string_value(
+            raw_value.get("artifact_dir"),
+            default=DEFAULT_PROTOTYPE_ARTIFACT_DIR,
+            label="prototype_design_brief.artifact_dir",
+        ),
+        prototype_page_path=_string_value(
+            raw_value.get("prototype_page_path"),
+            default=DEFAULT_PROTOTYPE_PAGE_PATH,
+            label="prototype_design_brief.prototype_page_path",
+        ),
+        prototype_route=_string_value(
+            raw_value.get("prototype_route"),
+            default=DEFAULT_PROTOTYPE_ROUTE,
+            label="prototype_design_brief.prototype_route",
+        ),
+        fixture_paths=_string_tuple(
+            raw_value.get("fixture_paths"),
+            default=DEFAULT_PROTOTYPE_FIXTURE_PATHS,
+            label="prototype_design_brief.fixture_paths",
+        ),
+        required_states=_string_tuple(
+            raw_value.get("required_states"),
+            default=DEFAULT_PROTOTYPE_REQUIRED_STATES,
+            label="prototype_design_brief.required_states",
+        ),
+    )
+
+    if config.artifact_review_enabled:
+        missing_labels = []
+        if not config.artifact_dir:
+            missing_labels.append("artifact_dir")
+        if not config.prototype_page_path:
+            missing_labels.append("prototype_page_path")
+        if not config.prototype_route:
+            missing_labels.append("prototype_route")
+        if not config.required_states:
+            missing_labels.append("required_states")
+        if missing_labels:
+            rendered = ", ".join(f"prototype_design_brief.{label}" for label in missing_labels)
+            raise HarnessConfigError(
+                "prototype artifact review is enabled but required config is missing: "
+                f"{rendered}"
+            )
+    return config
+
+
+def _string_value(
+    value: object,
+    *,
+    default: str,
+    label: str,
+    allow_empty: bool = True,
+) -> str:
+    if value is None:
+        return default
+    if not isinstance(value, str):
+        raise HarnessConfigError(f"{label} must be a string")
+    if not allow_empty and not value.strip():
+        raise HarnessConfigError(f"{label} must not be empty")
+    return value
+
+
 def _string_tuple(value: object, *, default: tuple[str, ...], label: str) -> tuple[str, ...]:
     if value is None:
         return default
@@ -296,6 +415,20 @@ def _parse_context_budget_section(section_text: str) -> dict[str, object]:
     return values
 
 
+def _parse_prototype_design_brief_section(section_text: str) -> dict[str, object]:
+    values: dict[str, object] = {}
+    for key in ("enabled", "artifact_review_enabled"):
+        if (value := _parse_bool(section_text, key)) is not None:
+            values[key] = value
+    for key in ("brief_path", "artifact_dir", "prototype_page_path", "prototype_route"):
+        if (value := _parse_string(section_text, key)) is not None:
+            values[key] = value
+    for key in ("fixture_paths", "required_states"):
+        if value := _parse_string_array(section_text, key):
+            values[key] = value
+    return values
+
+
 def _parse_string_array(section_text: str, key: str) -> list[str] | None:
     match = re.search(rf"(?ms)^\s*{re.escape(key)}\s*=\s*(\[[^\]]*\])", section_text)
     if not match:
@@ -306,6 +439,19 @@ def _parse_string_array(section_text: str, key: str) -> list[str] | None:
         raise ValueError(f"could not parse {key}") from exc
     if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
         raise ValueError(f"{key} must be a list of strings")
+    return parsed
+
+
+def _parse_string(section_text: str, key: str) -> str | None:
+    match = re.search(rf"(?m)^\s*{re.escape(key)}\s*=\s*(.+?)\s*$", section_text)
+    if not match:
+        return None
+    try:
+        parsed = ast.literal_eval(match.group(1))
+    except (SyntaxError, ValueError) as exc:
+        raise ValueError(f"could not parse {key}") from exc
+    if not isinstance(parsed, str):
+        raise ValueError(f"{key} must be a string")
     return parsed
 
 

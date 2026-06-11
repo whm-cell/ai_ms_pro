@@ -1,0 +1,22 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+  ".codex/.venv",
+  ".codex/runtime",
+  ".codex/hooks/*.ps1",
+  ".codex/hooks/*.sh",
+  "docs/requirements/source-raw/quarantine",
+]
+
+[tool.ruff.lint]
+select = [
+  "E9",
+  "F",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/check_ai_doc_quality.py" = ["F401"]
+"scripts/check_archive_candidates.py" = ["F401"]
+"scripts/check_branch_hygiene.py" = ["F841"]
+"scripts/check_github_guardrails.py" = ["F401"]

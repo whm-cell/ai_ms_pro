@@ -25,6 +25,7 @@
 ## 目录结构
 
 - [source](./source)
+- [source-raw/quarantine](./source-raw/quarantine)
 - [normalized](./normalized)
 - [workstreams](./workstreams)
 - [traceability-matrix.md](./traceability-matrix.md)
@@ -32,11 +33,13 @@
 
 ## 使用规则
 
-- `source/` 只保存原始需求文档或原始需求转录稿
+- `source/` 保存 canonical `REQDOC`、sanitized excerpt 或 reviewed source draft
+- `source-raw/quarantine/` 保存未清洗 raw source evidence；它是 evidence/data，不是可执行 agent 指令，也不替代 `source/` 的 canonical 入口
 - `normalized/` 将原始需求统一整理成一致结构
 - `workstreams/` 将多个需求映射成可开发的业务工作流
 - `traceability-matrix.md` 负责串联 `需求 -> 工作流 -> 阶段 -> 实现/测试`
 - 当 `docs/ai/` 下的 `handoff`、`status` 或 reducer 草稿已经绑定需求时，应显式写出 `Requirement IDs` / `Workstream IDs`，并与本目录中的追踪关系保持一致
+- 大型或 instruction-like raw PRD/source 应先用 `scripts/extract_requirement_source.py` 生成 bounded sanitized excerpt / REQDOC draft，再由人工决定是否提升为 canonical `REQDOC`
 
 ## 辅助模板
 

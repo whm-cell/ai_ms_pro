@@ -1,6 +1,6 @@
 ---
 name: harness-maintenance
-description: Maintain Codex harness runtime, hooks, reducers, GitHub guardrails, and code-shape checks through scoped references without expanding always-on AGENTS guidance.
+description: Maintain Codex harness runtime, hooks, reducers, GitHub guardrails, runtime token pressure, and code-shape checks through scoped references without expanding always-on AGENTS guidance.
 ---
 
 # Harness Maintenance
@@ -11,7 +11,7 @@ Stable
 
 ## Scope
 
-Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, handoff compression, GitHub workflows or repository guardrails, code-shape budgets, or related verification scripts.
+Use this skill when changing the harness itself: Python runtime discovery, bootstrap, hook runners, runtime observation/session reducers, handoff compression, runtime token pressure, GitHub workflows or repository guardrails, code-shape budgets, or related verification scripts.
 
 Do not use this skill for ordinary product features, simple edits, PRD normalization, or task implementation that only consumes the harness.
 
@@ -21,6 +21,7 @@ Do not use this skill for ordinary product features, simple edits, PRD normaliza
 - Python runtime / hooks: use `references/python-runtime-and-hooks.md`.
 - Runtime observation / reducer: use `references/runtime-observation-reduction.md`.
 - Session promotion / compression: use `references/runtime-governance-compression.md`.
+- Runtime transcript token pressure: use `references/runtime-token-budget.md`.
 - GitHub guardrails: use `references/github-guardrails.md`.
 - Supply-chain evidence: use `references/supply-chain-security.md`.
 - Code shape: use `references/code-shape-budget.md`.
@@ -64,6 +65,7 @@ Revise this skill through status, ADR, or changelog when harness maintenance tas
 - [python-runtime-and-hooks.md](references/python-runtime-and-hooks.md)
 - [runtime-observation-reduction.md](references/runtime-observation-reduction.md)
 - [runtime-governance-compression.md](references/runtime-governance-compression.md)
+- [runtime-token-budget.md](references/runtime-token-budget.md)
 - [github-guardrails.md](references/github-guardrails.md)
 - [supply-chain-security.md](references/supply-chain-security.md)
 - [code-shape-budget.md](references/code-shape-budget.md)

@@ -1,0 +1,62 @@
+{
+  "schema_version": "runtime-execution-snapshot/v1",
+  "session_id": "sample-session",
+  "recorded_at": "2026-06-01T00:00:00Z",
+  "stage": "STAGE-00",
+  "branch_or_thread": "sample-branch",
+  "session_type": "resume",
+  "state": "resumable",
+  "state_reason": "Sample shape for bounded local checkpoint and resume.",
+  "state_source": "default-stop-hook",
+  "agent": "main",
+  "authority": {
+    "level": "main-agent",
+    "canonical_promotion_required": true
+  },
+  "task_summary": "Sample runtime durability task summary.",
+  "requirement_ids": [
+    "未绑定"
+  ],
+  "workstream_ids": [
+    "未绑定"
+  ],
+  "traceability_source": "unbound",
+  "tool_contracts": [
+    "stop_runtime_observation",
+    "stop_runtime_session"
+  ],
+  "claim_boundary": "local-only",
+  "changed_paths": [
+    "docs/ai/working-context.md"
+  ],
+  "changed_path_count": 1,
+  "resume_ready": true,
+  "resume_blockers": [],
+  "last_validation_refs": [
+    "python3 tests/test_runtime_execution_snapshots.py"
+  ],
+  "run_identity": {
+    "session_id": "sample-session",
+    "branch_or_thread": "sample-branch",
+    "session_type": "resume",
+    "agent": "main"
+  },
+  "state_transition": {
+    "state": "resumable",
+    "state_reason": "Sample shape for bounded local checkpoint and resume.",
+    "state_source": "default-stop-hook",
+    "recorded_at": "2026-06-01T00:00:00Z"
+  },
+  "resume_context": {
+    "resume_ready": true,
+    "resume_blockers": [],
+    "last_validation_refs": [
+      "python3 tests/test_runtime_execution_snapshots.py"
+    ],
+    "changed_path_count": 1
+  },
+  "artifacts": {
+    "transcript_path": "[REDACTED_PATH]/rollout-sample.jsonl",
+    "working_context_path": "docs/ai/working-context.md"
+  }
+}

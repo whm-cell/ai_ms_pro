@@ -14,6 +14,18 @@ def render_hooks_config(*, root: Path, system: str | None = None) -> str:
 
     config = {
         "hooks": {
+            "PreToolUse": [
+                {
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": f"{runner_command} pre_tool_use_preflight.py",
+                            "statusMessage": "Checking tool preflight risks",
+                            "timeout": 30,
+                        }
+                    ],
+                }
+            ],
             "SessionStart": [
                 {
                     "matcher": "startup|resume",
@@ -40,6 +52,18 @@ def render_hooks_config(*, root: Path, system: str | None = None) -> str:
                             "type": "command",
                             "command": f"{runner_command} stop_runtime_session.py",
                             "statusMessage": "Persisting runtime session snapshot",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{runner_command} stop_runtime_token_pressure.py",
+                            "statusMessage": "Checking runtime token pressure",
+                            "timeout": 30,
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{runner_command} stop_loop_scope_monitor.py",
+                            "statusMessage": "Checking loop and scope drift",
                             "timeout": 30,
                         },
                         {

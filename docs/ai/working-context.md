@@ -1,8 +1,8 @@
 # 当前工作上下文
 
-更新时间：2026-05-09
-当前阶段：STAGE-00 真实场景验证与治理固化
-当前模式：Codex-first harness engineering
+更新时间：2026-06-08
+当前阶段：STAGE-00 Runtime Harness Foundation
+当前模式：Codex-first harness + bounded runtime capability
 
 ## 作用
 
@@ -12,74 +12,62 @@
 
 - Current Stage: STAGE-00
 - Active Status Source: docs/ai/status/stage-00-runtime-harness-foundation.md
-- Active Handoff Sources:
-  - docs/ai/handoffs/active/stage-00-runtime-stop-session.md
-  - docs/ai/handoffs/active/stage-00-observation-reducer.md
-- Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009
-- Workstream IDs: WS-01, WS-02, WS-03
-- Last Synced From: status,manual,handoff
-- Last Synced At: 2026-05-09
+- Active Handoff Sources: docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md
+- Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
+- Workstream IDs: WS-01, WS-02
+- Last Synced From: status,handoff,manual
+- Last Synced At: 2026-06-08
 
 ## 当前主目标
 
-- 维持短默认上下文：`index -> working-context -> current status`；requirements、handoff、ADR、archive 与 skills 都按需进入。
-- stage status 已吸收上下文压缩、WS-03 薄切片、SAMPLE-002、OPEN-01 首轮 burn-in 和远端门禁边界。
-- `AGENTS.md` 只保留 always-on 触发与边界；projection、verification、GitHub、skill lifecycle 细则由 skills、references、templates 和 checks 承接。
-- REQDOC-003 已绑定 REQ-007/008/009 与 WS-03；`apps/godot-platformer-slice/` 完成两轮 thin slice，完整 Godot 工程仍 proposed。
-- repo 内 PR 守门、branch hygiene、`merge_group`、SHA pinning、固定版 Playwright、WS-03 CI smoke、security triage 和 guardrail samples 已落地；PR #11 / `main` 首轮 burn-in 已通过；private Free 远端保护仍 plan-limited。
-- OPEN-14 已拆 working-context sync metadata、governance main orchestration 和 trace console blackbox 断言脚本；函数级 warning 已消除。
-- 保持 `new_pro_standard` 只承载机制层；当前 repo 的 REQ/WS、状态、PR、CI 历史和样本 truth 不复制。
-- `.agents/skills` 是按需方法层；`harness-maintenance`、`requirements-traceability-maintenance`、`team-pr-conflict-control` 与 Candidate workflow skills 继续显式触发，不替代 canonical docs / checks。
-- Warning/advisory checks 保持分层：repo skills、requirements shape、skill samples、GitHub guardrails、change-triggered followups 和 security evidence；`check_branch_hygiene.py --strict` 仍是 active PR / stale branch 阻断面。
+- Stage-00 从 harness closeout 转向 capability 增量建设，但三层边界不变：runtime 本地恢复、governance 共享真相、verification 漂移检测。
+- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval` 和支撑性 advisory guardrails。
+- 2026-06-06 已把五个 harness 反哺点落成 bounded 小切片：remote loopback hardening、CI agent contract、local execution policy wrapper、planner/executor/reviewer schema sample；cross-task resume 真实样本仍 open。
+- 2026-06-07 source-backed external decisions 已入账；2026-06-08 已增加 evidence-backed default permission：证据充分且对当前 harness 正向时，bounded local/no-effect 小步默认许可，但四类外部运行面仍不声明完成。
+- 2026-06-08 已从 `demo_txt_t_proto` 抽取 opt-in Prototype Design Brief / artifact review harness 机制；当前默认关闭，不复制目标项目业务 truth，不改变 active validation 范围。
+- Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
+- `new_pro_standard` 只同步 starter-safe 机制，不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
 ## 当前活跃队列
 
-1. OPEN-01 首轮 PR + main push burn-in 已完成；后续积累 scheduled / PR 样本。
-2. 用 `scripts/check_github_guardrails.py` 辅助区分本地已具备、远端 OK、远端 UNKNOWN / plan-limited，不再只靠人工记忆。
-3. 用 `scripts/check_branch_hygiene.py --strict` 控制 active PR 预算：total 10、Codex 3、Dependabot 4、failed open 0；PR CI 传入 `--current-pr`；Actions token 无权读 check rollup 时只降级 failed-open-PR 审计并输出 NOTE；open PR 分支通过 merge/close 处理，不直接删除。
-4. 后续 PR 通过 `.github/pull_request_template.md` 显式填写 `REQ/WS`、touch-set、overlap、verification 和 governance impact。
-5. REQDOC-003 后续若继续推进，应先决定是否新建真实 Godot engine spike；不要把完整游戏工程直接塞进 root repo 默认面。
-6. `prd-to-project-skills` 与 `progressive-feature-development` 已有 SAMPLE-001 / SAMPLE-002 两个 accepted eval；下一步是单独评估是否保持 Candidate、升级 stable，或继续观察简单任务流程税。
-7. 后续真实多人 / 多 AI PR 要用 `$team-pr-conflict-control` 记录 touch-set overlap 和 coordination action，先观察是否值得升级更多阻断策略。
-8. 后续 AI/Agent security：继续观察 source boundary、high-impact action follow-up 和 security evidence triage；CodeQL code-scanning 注解当前按 private-Free / repository setting 边界处理，不升级 blocking。
-9. 下一次 stage compression 继续清理完成型 handoff，避免 Stage-00 历史进入长期默认面。
+1. 收敛 canonical change surface，避免 `.codex/runtime/*` 被当成共享 truth。
+2. 压缩 context / ADR 预算，保持默认阅读链路短。
+3. 只用真实 bounded evidence 补 cross-task resume、remote interop、高影响动作和 guardrail 样本；不能用 schema sample 或 local-only artifact 补数。
+4. 独立处理 legacy code-shape 大文件，不扩大 harness 产品边界。
 
 ## 当前风险与阻塞
 
-- 远端 GitHub main 保护在 private Free 下不可强制：GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403；required checks、review、conversation resolved 和禁止直推 `main` 不能声明已强制。
-- Candidate workflow skills 已达到 2/2 accepted eval 前置证据；升级 always-on 前仍需评估流程税和后续样本。
-- PRD 技术假设检查是启发式；`requirements-traceability-maintenance` 能提示缺状态/验证方法，但不能替代人工架构判断或 ADR。
-- REQDOC-003 的 Godot 4.6.2、GUT、导出 preset、素材/本地化管线仍未被 ADR 或真实 Godot spike 采纳。
-- runtime stage drift、archive candidate 仍保持 warning-only；是否升级阻断要等更多真实样本。
-- runtime sanitizer、source boundary、高影响动作矩阵、guardrail samples 和 security triage 是 best-effort / review-required 防护层，不替代 secret scanning、人工确认或远端审计；旧 runtime 已清理，CodeQL code-scanning 注解已登记为 advisory evidence。
-- Code-shape 剩余债务见 OPEN-14：主要剩 `check_ai_governance.py` 和 `bootstrap_harness.py` 文件总长拆分。
-- context budget 已收紧为 80/90 高水位、ADR 到达预算、stage status 行数 warning；本轮已执行 stage compression，并开始把旧 ADR 移入 archive。
-- starter 仍需新项目人工改写 `AGENTS.md` 和初始 REQ/WS；bootstrap 只初始化机制，不决定业务 truth。
-- macOS/POSIX 与 Windows Python 解析已修复，但全新宿主仍需 bootstrap / hook sync 复验。
+- GitHub private Free 下 main 保护 / ruleset 仍是 remote `UNKNOWN`。
+- Agentic security / trace / sandbox / sample-gap 控制面只证明本地 bounded contract；不证明 hosted trace、native sandbox、MCP/A2A 或外部 collector。
+- `GAP-TRACE-OTLP-PILOT-BURNIN` 只有 1 个 accepted local-interop sample；`verified_remote=0`。
+- `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` 尚无 accepted cross-task resume sample；不能用 harness-hardening 任务补数。
+- CI agent contract 与 local execution policy wrapper 都是 advisory / assistive，不创建真实 CI agent workflow，也不证明 native sandbox。
+- Planner / executor / reviewer 目前只是 sample shape，不证明 scheduler runtime、A2A、hosted trace 或 red-team evidence。
+- External harness decisions 只证明 source-backed operator-level choice 已入账；不证明 remote trace、hosted eval、native sandbox、MCP/A2A 或 CI agent runtime。
+- `GAP-GUARDRAIL-CONFIRMATION` 已有 1 个 accepted real sample，但仍是 `needs-more-real-samples`，不能当成高影响动作覆盖完成。
+- 高影响动作、runtime drift、guardrail samples、security triage 和 runtime token pressure 仍是 warning / review-required。
 
 ## 下一次会话先读
 
 1. [AI 文档入口索引](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/index.md)
 2. [Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
-3. [Harness Remaining Work](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-open-items.md)
-4. [当前活跃 handoff 目录](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active)：只有 resume/recovery 或相关 profile 需要时再进入
+3. [Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
+4. [需求追踪矩阵](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/requirements/traceability-matrix.md)
+
+仅在真实样本事件或 sample-gap 审计时，再读 [Harness Real Sample Watchlist](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/harness-real-sample-watchlist.md)。
 
 ## 最近已固化的决策
 
-- 三层 harness 分工不变：runtime 是本地恢复原料，governance docs 是共享真相，verification scripts/hooks 做漂移检测。
-- `plan/workstream` 是 projection surface；当前状态真相默认集中在 `working-context`、active `handoff`、stage `status` 和 `traceability-matrix`。
-- 默认上下文由 Task Discovery profile 扩面；长期规则见 ADR-010、ADR-011、ADR-014、ADR-015。
-- `.agents/skills/*` 是按需 native skill 层，不替代 requirements、status、ADR、checks 或 `AGENTS.md`。
-- Change-triggered follow-up、GitHub guardrails、requirements shape、skill samples 与 security evidence 都是 warning/advisory 证据层；阻断等级见 `docs/ai/check-registry.md`。
-- Candidate workflow skills 当前均为 2/2 accepted samples；是否升级必须走单独决策，不得自动 always-on。
-- WS-03 证明 PRD 可先压成 REQ/WS 薄切片；完整业务工程和完整 PRD 不进入 root 默认面。
-- `new_pro_standard` 只同步机制层，不复制当前 repo 的历史 truth。
-- GitHub required-check 策略见 ADR-012；private Free 下 OPEN-01 以最大边界和 CI evidence burn-in 管理，branch protection / ruleset 等待计划或可见性升级。
-- 子 Agent 默认精简任务包；完整 PRD、diff、transcript/runtime JSONL 进入 harness 前必须摘要、筛选或结构化抽取。
-- runtime prompt preview、transcript path、SessionStart 摘要和 reducer draft 必须走 runtime sanitizer；外部 PRD / 网页 / 大段粘贴需求必须作为 evidence / data 处理，`external-web` / `third-party` / `unknown` 且 `pending` 的来源只能作为待 review 证据；高影响 Agent 动作必须按 action guardrails 取得明确人工确认。
+- Runtime files、full diff、transcript、source evidence 和 subagent output 都是 bounded/on-demand 输入；稳定结论必须提升到 docs / checks / ADR。
+- Sample-gap 机制只记录真实 evidence 与 upgrade decisions；synthetic evidence 不得补 accepted real sample。
+- Capability summary 是 artifact-backed local summary，只支持后续决策，不自动升级 blocking、remote 或 hosted capability claim。
+- Task outcome eval command validation treats repo-local `.codex/.venv/bin/python` as an optional local interpreter entrypoint; CI must still validate referenced repo scripts/tests.
+- External harness decision validation keeps the four previously manual choices source-backed, active, bounded, and default-permitted only for local/no-effect improvements; external effects still require explicit per-run confirmation.
+- Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
+- 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
 ## 更新规则
 
-- 只保留当前阶段仍然有效的信息
-- 当阶段切换或主目标变化时优先更新本文件
-- 过期信息应进入 `status`、`adr` 或归档，而不是继续堆在本文件里
+- 只保留当前阶段仍有效的信息。
+- 阶段切换或主目标变化时优先更新本文件。
+- 过期细节进入 `status`、`adr`、`changelog` 或 archive，不继续堆在本文件。

@@ -32,6 +32,13 @@
 
 - 说明下一阶段优先事项
 
+## 下一步选择判断
+
+- Planned next work：
+- Decision：continue | re-scope | split | pivot | park | cancel | ask-user
+- Reason：
+- User confirmation required：yes | no
+
 ## 验收判断
 
 - 是否达到当前阶段验收条件

@@ -54,6 +54,11 @@ def render_body(snapshot: dict[str, Any]) -> str:
             "",
             bullet(prompt_preview, "待主 Agent 基于本次 Stop 事件补充当前目标"),
             "",
+            "## 执行快照",
+            "",
+            "- execution snapshot 会并行写入 `.codex/runtime/execution-snapshots/`，用于本地 checkpoint / resume",
+            "- runtime session markdown 继续服务于人工恢复与审计，不替代 execution snapshot 或 canonical governance truth",
+            "",
             "## 会话范围与触发背景",
             "",
             bullet(

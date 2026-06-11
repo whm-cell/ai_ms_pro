@@ -33,7 +33,13 @@ await page.waitForLoadState("domcontentloaded");
 await page.locator("#game").waitFor();
 await page.locator("#score").waitFor();
 await page.locator("#best").waitFor();
+await page.locator("#status").waitFor();
+await page.locator("#reset-best").waitFor();
 await page.locator(".hint").waitFor();
+
+await page.evaluate(() => localStorage.setItem("threejs-snake-best-score", "7"));
+await page.reload({ waitUntil: "domcontentloaded" });
+await page.locator("#reset-best").waitFor();
 
 const canvasBox = await page.locator("#game").boundingBox();
 if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
@@ -41,9 +47,35 @@ if (!canvasBox || canvasBox.width < 100 || canvasBox.height < 100) {
 }
 
 await page.waitForFunction(() => document.querySelector("#overlay")?.classList.contains("hidden"));
+const seededBest = (await page.locator("#best").textContent() || "").trim();
+if (seededBest !== "7") {
+  throw new Error(`Expected seeded best score 7, got ${JSON.stringify(seededBest)}`);
+}
+await page.locator("#reset-best").click();
+await page.waitForFunction(() => (document.querySelector("#best")?.textContent || "").trim() === "0");
+
 const initialScore = (await page.locator("#score").textContent() || "").trim();
 if (initialScore !== "0") {
   throw new Error(`Expected initial score 0, got ${JSON.stringify(initialScore)}`);
+}
+const initialStatus = (await page.locator("#status").textContent() || "").trim();
+if (initialStatus !== "Running") {
+  throw new Error(`Expected initial status Running, got ${JSON.stringify(initialStatus)}`);
+}
+
+await page.keyboard.press("p");
+await page.waitForFunction(() => (document.querySelector("#title")?.textContent || "").trim() === "Paused");
+const pausedStatus = (await page.locator("#status").textContent() || "").trim();
+const resumeLabel = (await page.locator("#restart").textContent() || "").trim();
+if (pausedStatus !== "Paused" || resumeLabel !== "Resume") {
+  throw new Error(`Expected pause UI, got ${JSON.stringify({ pausedStatus, resumeLabel })}`);
+}
+
+await page.keyboard.press(" ");
+await page.waitForFunction(() => document.querySelector("#overlay")?.classList.contains("hidden"));
+const resumedStatus = (await page.locator("#status").textContent() || "").trim();
+if (resumedStatus !== "Running") {
+  throw new Error(`Expected resumed status Running, got ${JSON.stringify(resumedStatus)}`);
 }
 
 await page.keyboard.press("ArrowDown");
@@ -75,29 +107,45 @@ def main() -> int:
     ensure_npx()
 
     host = args.host
-    port = args.port or find_free_port(host)
-    server, thread, bound_port = start_static_server(host, port)
+    server = None
+    thread = None
+    if args.url:
+        bound_port = args.port
+        url = args.url
+    else:
+        port = args.port or find_free_port(host)
+        server, thread, bound_port = start_static_server(host, port)
+        url = f"http://{host}:{bound_port}{APP_URL_PATH}"
     session_name = f"snake-blackbox-{os.getpid()}-{int(time.time())}"
     env = os.environ.copy()
     env["PLAYWRIGHT_CLI_SESSION"] = session_name
-    url = f"http://{host}:{bound_port}{APP_URL_PATH}"
 
-    print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
+    if server is None:
+        print(f"[smoke] using external app URL {url}")
+    else:
+        print(f"[smoke] serving {REPO_ROOT} on {host}:{bound_port}")
     print(f"[smoke] opening {url}")
 
     try:
-        wait_for_server(host, bound_port)
+        if server is None:
+            from threejs_snake_smoke import wait_for_url
+
+            wait_for_url(url)
+        else:
+            wait_for_server(host, bound_port)
         smoke_steps(url, args.headed, env)
-        print("[smoke] PASS threejs-snake blackbox: load -> keyboard turn -> game over -> enter restart")
+        print("[smoke] PASS threejs-snake blackbox: load -> reset best -> keyboard turn -> game over -> enter restart")
         return 0
     finally:
         try:
             run_pw("close", env=env)
         except Exception:
             pass
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=1.0)
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=1.0)
         shutil.rmtree(REPO_ROOT / ".playwright-cli", ignore_errors=True)
 
 

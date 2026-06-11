@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from runtime_sanitizer import compact_text, compact_transcript_path
+from runtime_trace_producer import try_emit_stop_trace
 from runtime_traceability import resolve_runtime_traceability
 
 
@@ -141,6 +142,7 @@ def append_observation(payload: dict[str, Any]) -> None:
     observation_file = OBSERVATION_DIR / f"{now.strftime('%Y-%m-%d')}.jsonl"
     with observation_file.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(clean_observation, ensure_ascii=False) + "\n")
+    try_emit_stop_trace(clean_observation, OBSERVATION_DIR)
 
 
 def infer_agent_label(payload: dict[str, Any]) -> str:

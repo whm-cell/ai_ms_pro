@@ -10,19 +10,9 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from change_triggered_followup_rules import RULES
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-@dataclass(frozen=True)
-class FollowupRule:
-    name: str
-    level: str
-    ci_coverage: str
-    patterns: tuple[str, ...]
-    commands: tuple[str, ...]
-    references: tuple[str, ...]
-    reason: str
 
 
 @dataclass(frozen=True)
@@ -34,161 +24,6 @@ class Followup:
     commands: tuple[str, ...]
     references: tuple[str, ...]
     reason: str
-
-
-RULES: tuple[FollowupRule, ...] = (
-    FollowupRule(
-        name="governance-surface",
-        level="blocking-candidate",
-        ci_coverage="covered by governance job; changed-file mapping remains advisory",
-        patterns=(
-            "AGENTS.md",
-            "docs/ai/**",
-            "docs/requirements/**",
-            ".codex/harness.toml",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py",),
-        references=(".agents/skills/repo-governed-coding/references/governance-checklist.md",),
-        reason="Shared governance truth changed.",
-    ),
-    FollowupRule(
-        name="default-context-budget",
-        level="advisory",
-        ci_coverage="manual check only",
-        patterns=(
-            "AGENTS.md",
-            "docs/ai/index.md",
-            "docs/ai/working-context.md",
-            "docs/ai/status/**",
-            "docs/ai/adr/**",
-            ".agents/skills/**",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py",),
-        references=(".agents/skills/harness-maintenance/references/verification-commands.md",),
-        reason="Default context or skill surface changed.",
-    ),
-    FollowupRule(
-        name="repo-local-skills",
-        level="review-required",
-        ci_coverage="manual check unless a project promotes repo skill checks into CI",
-        patterns=(".agents/skills/**",),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_repo_skills.py",),
-        references=("python3 /Users/coolm/.codex/skills/.system/skill-creator/scripts/quick_validate.py <changed-skill-dir>",),
-        reason="Repo-local skill structure or discoverability may have changed.",
-    ),
-    FollowupRule(
-        name="requirements-traceability",
-        level="blocking-candidate",
-        ci_coverage="partly covered by governance; shape check remains explicit",
-        patterns=("docs/requirements/**",),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_requirements_shape.py",),
-        references=(".agents/skills/requirements-traceability-maintenance/",),
-        reason="Requirement, workstream, matrix, or technical-assumption shape may have changed.",
-    ),
-    FollowupRule(
-        name="candidate-skill-eval",
-        level="advisory",
-        ci_coverage="manual sample-quality check",
-        patterns=(
-            "docs/ai/skill-usage-samples.md",
-            "docs/ai/skill-evals/**",
-            ".agents/skills/progressive-feature-development/**",
-            ".agents/skills/prd-to-project-skills/**",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_skill_usage_samples.py",),
-        references=("docs/ai/skill-evals/README.md",),
-        reason="Candidate skill evidence or eval protocol changed.",
-    ),
-    FollowupRule(
-        name="github-guardrails",
-        level="blocking-candidate",
-        ci_coverage="local workflow structure is checked; remote enforcement may be UNKNOWN",
-        patterns=(
-            ".github/**",
-            "scripts/check_github_guardrails.py",
-            "scripts/check_pr_touch_conflicts.py",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py",),
-        references=(
-            ".agents/skills/harness-maintenance/references/github-guardrails.md",
-            ".agents/skills/team-pr-conflict-control/",
-        ),
-        reason="GitHub workflow, ownership, remote guardrail, or PR overlap surface changed.",
-    ),
-    FollowupRule(
-        name="supply-chain-evidence",
-        level="advisory",
-        ci_coverage="security evidence workflow produces artifacts but is not a required check",
-        patterns=(
-            ".github/workflows/security-evidence.yml",
-            "docs/ai/check-registry.md",
-            "docs/ai/security/**",
-            ".agents/skills/harness-maintenance/references/supply-chain-security.md",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py",),
-        references=(
-            ".agents/skills/harness-maintenance/references/supply-chain-security.md",
-            "docs/ai/security/supply-chain-provenance-plan.md",
-        ),
-        reason="Scorecard, CodeQL, SBOM, or provenance evidence changed.",
-    ),
-    FollowupRule(
-        name="high-impact-agent-actions",
-        level="review-required",
-        ci_coverage="advisory follow-up only; high-impact actions still require explicit user confirmation",
-        patterns=(
-            "docs/ai/security/agent-action-guardrails.md", ".github/workflows/**", ".github/CODEOWNERS",
-            ".github/dependabot.yml", "scripts/check_branch_hygiene.py", "scripts/check_github_guardrails.py",
-            "scripts/check_pr_touch_conflicts.py", "scripts/check_change_triggered_followups.py",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_change_triggered_followups.py", ".codex/hooks/run_with_repo_python.sh scripts/check_github_guardrails.py"),
-        references=("docs/ai/security/agent-action-guardrails.md", "docs/ai/security/remote-merge-gates.md"),
-        reason="A high-impact agent action surface changed; review confirmation and automation boundaries.",
-    ),
-    FollowupRule(
-        name="harness-code-shape",
-        level="blocking-candidate",
-        ci_coverage="covered by code shape job for committed code",
-        patterns=(
-            "scripts/*.py",
-            ".codex/hooks/*.py",
-            ".codex/hooks/**/*.py",
-            "tests/*.py",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged",),
-        references=(".agents/skills/harness-maintenance/references/code-shape-budget.md",),
-        reason="Harness Python or test code changed.",
-    ),
-    FollowupRule(
-        name="handoff-compression",
-        level="advisory",
-        ci_coverage="manual compression review only",
-        patterns=(
-            "docs/ai/handoffs/active/**",
-            "docs/ai/status/**",
-            "docs/ai/working-context.md",
-        ),
-        commands=(".codex/hooks/run_with_repo_python.sh scripts/check_archive_candidates.py",),
-        references=(".agents/skills/harness-maintenance/references/runtime-governance-compression.md",),
-        reason="Active recovery surface changed; archive candidates may need review.",
-    ),
-    FollowupRule(
-        name="starter-sync",
-        level="review-required",
-        ci_coverage="validate from starter root before publishing starter changes",
-        patterns=("new_pro_standard/**",),
-        commands=(
-            "cd new_pro_standard && python3 -m unittest discover -s tests",
-            "cd new_pro_standard && python3 scripts/check_ai_governance.py",
-            "cd new_pro_standard && python3 scripts/check_context_budget.py",
-            "cd new_pro_standard && python3 scripts/check_repo_skills.py",
-        ),
-        references=("new_pro_standard/docs/ai/harness-portability-guide.md",),
-        reason="Starter mechanism layer changed; validate the starter from its own root.",
-    ),
-)
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Suggest follow-up checks from changed files without expanding AGENTS.md.")
     parser.add_argument("--root", default=str(ROOT), help="Repository root to inspect.")
@@ -256,17 +91,18 @@ def matches(pattern: str, path: str) -> bool:
 def build_followups(files: tuple[str, ...]) -> tuple[Followup, ...]:
     followups: list[Followup] = []
     for rule in RULES:
-        matched = tuple(path for path in files if any(matches(pattern, path) for pattern in rule.patterns))
+        patterns = tuple(str(pattern) for pattern in rule["patterns"])
+        matched = tuple(path for path in files if any(matches(pattern, path) for pattern in patterns))
         if matched:
             followups.append(
                 Followup(
-                    name=rule.name,
-                    level=rule.level,
-                    ci_coverage=rule.ci_coverage,
+                    name=str(rule["name"]),
+                    level=str(rule["level"]),
+                    ci_coverage=str(rule["ci_coverage"]),
                     matched_files=matched,
-                    commands=rule.commands,
-                    references=rule.references,
-                    reason=rule.reason,
+                    commands=tuple(str(command) for command in rule["commands"]),
+                    references=tuple(str(reference) for reference in rule["references"]),
+                    reason=str(rule["reason"]),
                 )
             )
     return tuple(followups)

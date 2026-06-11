@@ -1,78 +1,84 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-05-09
+更新时间：2026-06-08
 阶段：stage-00
 状态：进行中
 
 ## 需求与工作流标识
 
-- Requirement IDs：REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009
-- Workstream IDs：WS-01, WS-02, WS-03
-- 当前阶段已通过 WS-01、WS-02、WS-03 完成三个真实场景的 requirements traceability 与实现验证。
+- Requirement IDs：REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
+- Workstream IDs：WS-01, WS-02
+- Active validation：WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
 
 ## 当前阶段目标
 
-- 建立可恢复、可压缩、可验证的 runtime / governance / verification harness。
-- 用真实业务薄切片验证 PRD 能通过 REQ/WS 进入 harness，而不是把完整 PRD 长期放进默认上下文。
-- 把 GitHub private Free 最大边界、AI/Agent security guardrails、context budget、skill eval 和 code-shape 债务做成可复查证据。
+- Runtime / Governance / Verification 三层 harness 已可用；当前阶段从 closeout 转为 bounded capability 增量建设。
+- 新增能力限定为 `runtime durability`、`bounded observability / interop`、`task-quality eval`，不转向通用云端 agent platform。
 
 ## 当前完成度
 
-- Runtime / Governance / Verification 主链路已可用：Stop hooks、runtime reducer/sanitizer、source boundary、action matrix、traceability、repo-local Python、hook sync、governance、code shape、context budget、requirements shape、GitHub guardrails 和 skill eval checks 已落地。
-- WS-01、WS-02、WS-03 均有 repo-native 实现和 CI browser smoke；WS-03 继续以浏览器薄切片验证 REQDOC-003，未引入完整 Godot 工程。
-- `new_pro_standard` 已同步机制层；当前 repo 的 REQ/WS、PR、CI、status、样本和历史 truth 不复制到 starter。
-- `.agents/skills` 已作为按需方法层接入；Candidate workflow skills 保持显式触发，不替代 requirements、status、ADR、checks 或 `AGENTS.md`。
-- GitHub 侧已有最小权限 workflow、full-SHA action pinning、fixed-version Playwright packages、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 和 `merge_group`；private Free 下 branch protection / rulesets 仍是 future gates。
-- PR #11 已完成首轮远端 burn-in 并合入 `main`；merge commit `c1f170f` 的 `main` push workflows 均为 success。
+- 2026-06-03 已把 execution snapshot、remote interop report、task outcome eval 和 capability summary 推进到结构化 state / evidence / aggregate 指标。
+- 2026-06-06 已把五个 harness 反哺点收敛为 bounded 小切片：remote interop loopback hardening、CI agent contract、local execution policy wrapper、planner / executor / reviewer schema sample、cross-task resume 真实样本继续排队。
+- 2026-06-07 已把四类外部 harness 方向固化为 source-backed `external-harness-decision/v1` active decisions，并由 checker 审计 source evidence、local upgrade scope 与 no-claim boundary。
+- 2026-06-08 已把人工“正向则默认许可”判断收敛为 `default_permission` 字段：只许可 first-party evidence-backed、bounded local/no-effect 小步；外部副作用和能力宣称仍由 activation gates 阻断。
+- 2026-06-08 已新增 opt-in Prototype Design Brief 与 prototype artifact review 机制：默认关闭，只在配置开启时进入 `check_ai_governance.py` child checks。
+- `new_pro_standard` 只同步 starter-safe 机制；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
 
 ## 本阶段关键成果
 
-- 三个 workstream 已跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`，且 WS-01/02/03 browser smoke 已纳入 CI `smoke` job。
-- 首轮 PR + main push CI burn-in 已跑通：PR #11 和合并后的 `main` push 覆盖 governance、Windows hook runtime、WS-01/02/03 smoke、dependency review、Scorecard、CodeQL artifact 和 SBOM artifact。
-- 默认上下文面已通过 stage compression 降到预算 warning 以下；ADR 计数也低于预算。
-- Candidate workflow skills 已有两个 accepted real-task eval samples，但仍不自动升级 always-on。
-- `new_pro_standard` 保持机制层同步，不复制当前项目 truth。
-- AI/Agent security P0/P1/P2 已覆盖 runtime redaction、source boundary、高影响动作矩阵、首批 samples 和 security triage。
+- `requirements -> implementation -> smoke -> runtime promotion -> status` 已跑通；CI blocking smoke 仍只覆盖 WS-01 / WS-02。
+- GitHub 最小权限、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 与 `merge_group` 本地证据已具备；private Free 下 branch protection / rulesets 仍不得声明强制。
+- Agentic standards、tool contracts、sample gaps、runtime compression、context budget 与 code-shape 已进入 deterministic checks / references；细则不放回默认上下文。
+- Capability bootstrap / tightening / state-evidence 聚合均保持 local-first：runtime artifact 是本地恢复材料，verified remote、hosted trace、MCP/A2A、native sandbox 和外部 collector 均未声明完成。
+- 新增 CI agent contract 与 local execution policy wrapper 只提供 advisory contract / assistive wrapper，不创建真实 CI agent workflow、不证明 native sandbox。
+- External harness decision ledger 只把人工判断变为 source-backed 可复核记录；default permission 只覆盖 bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`，但外部运行面仍不声明完成。
+- Prototype Design Brief / artifact review 只验证设计投影面、原型审查包和 Source Truth 漂移；当前不声明本 repo 已有生产原型能力，也不复制外部项目业务需求。
 
 ## 风险与阻塞
 
-- OPEN-01 已调整为 private GitHub Free 最大边界：GitHub API 对 branch protection / rulesets 返回 plan limit HTTP 403；远端 required checks、review、conversation resolved 和禁止直推 `main` 不能声明已强制，但也不再作为本地代码缺口追打。
-- PR #1 的已合并 Codex 分支已删除；失败的 Dependabot GitHub Actions PR #2-#6 已关闭并删除分支；当前剩余远端非 main 分支都对应 open 且 green 的 PR。active PR 预算为 total 10、Codex 3、Dependabot 4、failed open 0。
-- dependency review、Scorecard、CodeQL、SBOM 和 secret scanning advisory 当前仍以 advisory / artifact evidence 为主；private Free 下不作为 required gate；CodeQL code-scanning 注解已登记为 advisory platform evidence。
-- runtime stage drift、archive candidate、context budget、source boundary 和 change-triggered followups 继续 warning / review-required；高影响动作矩阵不允许 hooks 自动执行 destructive、externally visible 或 permission-changing 动作。
-- Code-shape 债务已收窄：runtime traceability、reducer、bootstrap `render_plan`、governance traceability、working-context sync metadata、governance main orchestration、trace console blackbox smoke 和 Stop observation warnings 已消除；剩余见 OPEN-14。
-- REQDOC-003 的 Godot 4.6.2、GUT、导出 preset、素材、本地化和发布管线仍是 proposed / 待确认；root repo 只保留 harness 研究所需的薄业务样本。
+- GitHub remote required checks / review / 禁直推在 private Free 下仍是 `UNKNOWN`。
+- `GAP-TRACE-OTLP-PILOT-BURNIN` 只有 1 个 accepted local-interop sample；`GAP-TRACE-REMOTE-INTEROP` 没有 verified remote evidence。
+- `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` 尚无 accepted cross-task resume sample；不能用 harness-hardening 任务样本补数。
+- planner / executor / reviewer 当前只是 trace / provenance / eval 样例形状，不能当作 multi-agent scheduler、A2A、hosted trace 或 red-team evidence。
+- external harness decisions 当前是 source-backed no-effect governance evidence；`default_permission` 不得当作 remote trace、hosted eval、native sandbox、MCP/A2A 或 CI agent runtime 完成。
+- 高影响动作、runtime drift、guardrail samples、security triage、runtime token pressure 仍处于 warning / review-required，不自动升级 blocking。
+- Context budget 和 ADR 数量需继续压缩；code-shape 只剩 legacy 大文件 warning。
 
 ## 本轮收敛
 
-- 上下文：默认面执行 stage compression，细节下沉到按需文档；旧 ADR 开始移入 ADR archive，避免 ADR 计数长期卡预算。
-- 业务样本：WS-03 新增连击计分与评级反馈，并由 `scripts/godot_platformer_slice_smoke.py` 覆盖；该 smoke 现已接入 CI。
-- Skill eval：本轮登记 SAMPLE-002，`prd-to-project-skills` 与 `progressive-feature-development` 达到 2/2 accepted eval samples；是否升级仍需单独决策，不自动 always-on。
-- Code-shape：已拆出多组 renderer/catalog/traceability/working-context metadata/orchestration 小模块，并提取 trace console blackbox 断言脚本；剩余大文件按 OPEN-14 分批拆。
-- Security：新增 runtime sanitizer、source boundary metadata、action matrix、guardrail samples、security triage 和 Private Free attestation 边界；runtime 写入/读取路径会做 best-effort redaction，高影响动作只允许提示、dry-run、draft 或 evidence collection。
+- `.codex/runtime/*` tracked verification artifacts 已从 canonical change surface 移除，生成目录改为 ignore。
+- Default context surface 降到预算线以下；ADR-002/003 已归档，当前 ADR 数低于预算。
+- 记录 1 条 bounded high-impact confirmation real sample；cross-task resume 仍因缺真实非 harness 任务样本保持 open。
 
 ## 下一阶段重点
 
-- OPEN-01 首轮远端 burn-in 已完成；下一步积累 scheduled / 后续 PR 样本；branch protection / rulesets / required reviews 仅作为 future gates。
-- 观察 AI/Agent guardrails 与 security evidence 真实样本：source boundary warning 误报率、高影响动作 review-required 提示、security triage SLO 是否足够清晰，以及是否需要后续升级或保持 advisory。
-- 继续观察 WS-01 / WS-02 / WS-03 browser smoke 在后续 CI 中的 burn-in 结果，失败时区分 Playwright 版本、浏览器安装和应用切片回归。
-- 评估 Candidate workflow skills 达到 2/2 后是否保持显式调用、升级稳定 skill，或继续观察更多样本。
-- 继续压缩 Stage-00 历史：完成型 handoff 归档、status 保持摘要、ADR 旧决策归档或 supersede。
-- 继续按 OPEN-14 分批拆剩余 code-shape 债务。
+- 提交前收敛 canonical change surface：docs、standards、scripts、tests、tool contracts 可进入共享 truth，`.codex/runtime/*` 不作为 canonical artifact。
+- 继续观察 capability summary 的 `resume_ready`、blocked resume、interop level count、task outcome breakdown 和 blocked reason；指标只支持决策，不自动升级 claim。
+- 对 cross-task resume、remote interop 和 high-impact guardrail 只采集真实 bounded sample；synthetic 或 local-only 证据不得冒充 accepted remote / cross-task proof。
+- 下一轮若推进五个反哺点，优先补真实 cross-task resume sample 和经 ADR-017 允许的 remote endpoint pilot；CI agent、local execution wrapper、多 agent 样例继续保持 advisory，直到有真实样本、误报和修复路径。
+- 若后续推进外部 harness 决策，可默认推进 `default_permission.permitted_scope` 中的 first-party evidence-backed、bounded local/no-effect 小步；超出范围只能按 `external-harness-decisions.jsonl` 的 activation gates 执行：remote trace 需 endpoint/`--send`/operator review，native sandbox 或 MCP/A2A runtime 需单独 proposal/ADR，CI agent workflow 需 owner、permissions、remote guardrail 和 rollback evidence。
+- 压缩完成型 handoff / status 细节，合并或 supersede 旧 ADR，避免默认面超过 context gate。
+- legacy code-shape 大文件按独立维护小切片拆分，避免和 capability schema 改动混合。
+
+## Next Best Work Review
+
+- Planned next work：继续 Stage-00 harness 维护小切片。
+- Decision：continue
+- Reason：当前优化是稳定、降噪和证据补强，不改变 stage goal、REQ/WS 范围或 blocking policy。
+- User confirmation required：no
 
 ## 验收判断
 
-- Stage-00 已证明 harness 能跑通 `requirements -> implementation -> smoke -> runtime promotion -> status`。
-- 当前尚未完全进入下一阶段，因为 Godot engine spike、长期 skill/PR 样本、后续 CI 样本和 AI/Agent guardrails 真实样本仍需确认；远端强制门禁在 private Free 下已归类为 plan-limited ceiling。
-- 剩余风险主要是远端 enforcement 不可用时的人审纪律、长期上下文增长和维护性债务，不是本地 harness 能否使用。
+- 本轮优化完成后，context budget 应低于 warning threshold，ADR count 应低于预算，code-shape legacy warning 应消失。
+- High-impact confirmation 只能计为 local repo governance cleanup sample；cross-task resume、verified remote 和 external collector 仍不得声明完成。
+- Task outcome eval 的 warn/review 语义仍是本地 deterministic signal，不是模型质量评分；CI agent contract、local execution wrapper 和 multi-agent sample 也只是 bounded harness evidence，不是平台完成证明。
+- External harness decision audit 通过只能证明四类 source-backed operator decision 与 default-permitted local/no-effect scope 当前一致；不能证明任何外部运行面或托管能力。
 
 ## 关联文档
 
-- [项目计划](../plan.md)
 - [Harness Remaining Work](../harness-open-items.md)
 - [AI 文档入口索引](../index.md)
 - [当前工作上下文](../working-context.md)
-- [Agent Harness Security](../security/agent-harness-security.md)
-- [Candidate Skill Usage Samples](../skill-usage-samples.md)
-- [ADR-014 Context Budget Audit](../adr/ADR-014-context-budget-audit.md)
-- [ADR-015 Progressive Feature And PRD Skills](../adr/ADR-015-progressive-feature-and-prd-skills.md)
+- [Harness Capability Model](../harness-capability-model.md)
+- [Agentic Control Matrix](../security/agentic-control-matrix.md)
+- [Tool Contracts](../tool-contracts/README.md)

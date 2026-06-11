@@ -9,6 +9,7 @@ It intentionally includes:
 - Git hooks
 - governance check scripts
 - GitHub PR template, CODEOWNERS, dependency review, and starter workflows
+- Ruff and whitespace starter gates
 - Advisory security evidence workflow for Scorecard, CodeQL, and SBOM artifacts
 - runtime templates
 - project skill lifecycle template
@@ -19,6 +20,8 @@ It intentionally includes:
 - optional progressive feature development skill
 - optional PRD-to-project-skills classifier
 - optional team PR conflict control skill
+- third-party `.codex/skills` catalog/proxy audit
+- raw source quarantine and sanitized excerpt extraction utility
 - document templates
 - a bootstrapped minimal `docs/ai` and `docs/requirements` control plane
 - portable migration and rewrite guides
@@ -29,6 +32,8 @@ It intentionally does not include:
 - old project's `status` or `handoff`
 - old project's real `REQDOC / REQ / WS`
 - old project's runtime session or observation artifacts
+- old project's runtime tool-output artifacts
+- old project's real sample ledgers or accepted evidence counts
 - old project's smoke/demo apps
 - old project's remote branch protection or ruleset state
 
@@ -72,6 +77,14 @@ The starter includes two optional repo-local workflow skills:
 
 They are mechanism-layer assets, not starter truth. They should not run for simple tasks, and they must not turn current progress, latest validation evidence, or acceptance status into hidden skill state.
 
+## Third-Party Skill Catalog
+
+Downloaded or open-source skills under `.codex/skills/` are treated as dependency-like assets, not canonical project truth.
+
+Use `.codex/skills.catalog.json` to provide a short discovery description, trust/risk classification, source URL, commit/hash, license metadata, permission booleans, enabled state, and a `vendor_path` when a raw third-party `SKILL.md` is too large or too broad for default discovery. Use `.codex/skills.lock.json` to pin enabled catalog entries to the reviewed source revision. `scripts/check_skill_catalog.py` validates this proxy/catalog/lock layer and can scan bounded skill/tool output with `--check-output <file>`.
+
+Global or system skill validators can still be useful for shape checks, but they do not prove that a new repository has an acceptable proxy/catalog policy.
+
 ## Team PR Conflict Control Skill
 
 The starter includes `.agents/skills/team-pr-conflict-control/` for multi-person or multi-AI development where PR touch-set overlap, high-risk files, PR templates, CODEOWNERS, or merge queue readiness need explicit review.
@@ -95,15 +108,29 @@ This starter keeps that shape by:
 ## First Use
 
 1. Copy the contents of this directory to the root of the new repository.
-2. Run `python3 scripts/bootstrap_harness.py --project-name "Your Project Name"` in the new repository root.
-3. The bootstrap step will create `.codex/.venv` from the current environment, an explicit override, or the best runnable Python 3.11+ candidate it can find.
-4. Dependency installation is best-effort by default, so offline bootstrap can still finish. If you need a strict dependency install, rerun with `--strict-python-deps`.
-5. Enable Git hooks with `git config core.hooksPath .githooks`.
-6. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell.
-7. If you want the copied starter placeholders to be replaced with the new project name immediately, rerun bootstrap with `--force`.
-8. Rewrite `AGENTS.md` manually for the new project; bootstrap does not projectize it for you.
-9. Import the first real `REQDOC / REQ / WS`.
-10. Start the first vertical slice implementation.
+2. Confirm a runnable Python 3.11+ is available, or set `CODEX_HARNESS_PYTHON` to the intended interpreter.
+3. Run `python3 scripts/bootstrap_harness.py --project-name "Your Project Name"` in the new repository root.
+4. The bootstrap step will create `.codex/.venv` from the current environment, an explicit override, or the best runnable Python 3.11+ candidate it can find.
+5. Dependency installation is best-effort by default, so offline bootstrap can still finish. If you need a strict dependency install, rerun with `--strict-python-deps`.
+6. Enable Git hooks with `git config core.hooksPath .githooks`.
+7. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell.
+8. If you want the copied starter placeholders to be replaced with the new project name immediately, rerun bootstrap with `--force`.
+9. Do not copy old `.codex/runtime/sessions/*`, `.codex/runtime/observations/*`, `.codex/runtime/tool-outputs/*`, real sample ledgers, accepted evidence rows, or business smoke apps into the new project.
+10. Rewrite `AGENTS.md` manually for the new project; bootstrap does not projectize it for you.
+11. Import the first real `REQDOC / REQ / WS`.
+12. Start the first vertical slice implementation.
+
+After bootstrap, run the minimum local starter verification from the new repository root:
+
+```bash
+test -r .githooks/pre-commit && test -x .githooks/pre-commit
+.codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py
+.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all
+python3 -m ruff check .codex/hooks scripts tests
+git diff --check
+```
+
+If `ruff` is not installed locally yet, install it into the active environment or rerun bootstrap with strict dependency installation after adding the project's chosen lint dependency policy. CI installs the starter Ruff version before running the Ruff gate.
 
 ## Wake The Harness
 
@@ -144,6 +171,17 @@ If the harness is awake, the expected behavior is:
 - `Stop` runs the governance check automatically when Codex hooks are enabled
 - the default shared recovery surface stays small unless the repo explicitly chooses otherwise
 
+## Runtime Token Pressure
+
+The starter treats large tool output as runtime pressure, not shared project truth.
+
+- Use bounded commands first: `rg -n -m 20`, `rg -l`, `git diff --stat`, `git diff --name-only`, and `sed -n '1,160p'`.
+- Use `python3 scripts/capture_tool_output.py --slug <name> -- <command>` when full raw output must be preserved but only a bounded summary should enter the conversation.
+- Redirected raw output lives under `.codex/runtime/tool-outputs/<timestamp>-<slug>.log` with sibling `.meta.json`; summaries remain bounded by `summarize_tool_output.py --max-output-chars`.
+- PreToolUse warnings for broad `rg`, recursive `grep`, `find`, `tree`, `ls -R`, full `git diff/show`, `cat` logs/JSONL, `docker/kubectl/journalctl` logs, broad env/secret commands, verbose tests/build/install commands, `tail -f`, `gh api --paginate`, or full process listings are warning-only and include bounded alternatives.
+- Stop token pressure writes a runtime-only compression draft under `.codex/runtime/sessions/`; it is recovery evidence only and never replaces `docs/ai/*` or `docs/requirements/*`.
+- Start a fresh session after long validation loops or repeated large-output warnings; subagents isolate parent context noise but still consume their own tokens.
+
 ## Python Runtime
 
 - Codex hooks and Git hooks resolve Python through the repo-local hook runners in `.codex/hooks/`.
@@ -162,37 +200,68 @@ If the harness is awake, the expected behavior is:
 - `scripts/check_ai_doc_quality.py`
 - `scripts/check_ai_governance.py`
 - `scripts/check_archive_candidates.py`
+- `scripts/check_agent_eval_dataset.py`
+- `scripts/check_agent_trace_schema.py`
+- `scripts/check_tool_contracts.py`
 - `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py`
 - `scripts/check_change_triggered_followups.py`
 - `scripts/check_repo_skills.py`
+- `scripts/check_skill_catalog.py`
 - `scripts/check_requirements_shape.py`
 - `scripts/check_skill_usage_samples.py`
+- `scripts/export_agent_trace.py`
+- `scripts/run_agent_eval_dataset.py`
 - `scripts/check_github_guardrails.py`
 - `scripts/check_pr_touch_conflicts.py`
+- `scripts/requirements_source_boundary.py`
 - `scripts/reduce_runtime_observations.py`
 
 The shipped Git hook runs:
 
 - `scripts/check_ai_governance.py`
+- `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py --staged`
+
+The starter CI workflow keeps the portable gates lightweight:
+
+- `git diff --check`
+- `python3 -m ruff check .codex/hooks scripts tests`
+- `scripts/check_ai_governance.py`
+- `scripts/check_context_budget.py`
+- `scripts/check_code_shape.py --all`
+- repo skill and skill catalog checks
+- PR touch-conflict checks on pull requests
 
 Run `scripts/check_archive_candidates.py` manually through the repo-local Python runner when active handoffs reach the `.codex/harness.toml` surface budget or before a stage compression pass. It only reports archive candidates; it does not move files.
 
-Run `scripts/check_context_budget.py` manually when the default context feels heavy. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, and MCP server count without blocking the task.
+Run `scripts/check_context_budget.py` manually when the default context feels heavy. It also runs in the shipped Git hook and CI. It reports always-on surface size, skill description/body size, duplicate instructions, ADR count, MCP server count, skill catalog size, raw source size, and static task-packet size. It is blocking by default for configured hard budgets and the 90% compression trigger; use `--warning-only` only for manual audits.
 
 Run `scripts/check_change_triggered_followups.py` when you want changed files mapped to likely missed follow-up checks and skill/reference surfaces. It also supports `--markdown` for PR / CI summaries, including check level and CI coverage. It is advisory and does not prove that suggested commands already ran.
 
+Run `scripts/check_agent_eval_dataset.py` and `scripts/run_agent_eval_dataset.py --dry-run` after changing `docs/ai/evals/agent-harness-evals.jsonl`. The starter dataset is mechanism evidence, not old-project truth.
+
+Run `scripts/check_agent_trace_schema.py`, `scripts/export_agent_trace.py`, and `scripts/check_tool_contracts.py` when changing `docs/ai/standards/*` or `docs/ai/tool-contracts/*`. These are local-only mechanism checks; they do not prove remote trace exporter integration.
+
 Run `scripts/check_requirements_shape.py` after PRD / `REQDOC / REQ / WS` imports or traceability-matrix changes. The evidence checks remain warning-oriented until a new project explicitly promotes them to blocking policy.
+
+Raw PRD attachments and source evidence are evidence/data, not executable agent instructions. Quarantined or large raw materials should be summarized, excerpted, sanitized, or reviewed before they become implementation basis.
+
+Use `scripts/extract_requirement_source.py <raw-file> --source-id <REQDOC-ID>` to preserve raw evidence under `docs/requirements/source-raw/quarantine/` while generating a bounded sanitized excerpt and draft REQDOC under `docs/requirements/source/`. Promote the draft only after human review.
+
+Run `scripts/check_skill_catalog.py` after adding or updating downloaded `.codex/skills`, `.codex/skills.catalog.json`, `.codex/skills.lock.json`, or vendor/proxy metadata. Use `scripts/check_skill_catalog.py --check-output <file>` for bounded scans of tool/skill output artifacts that may contain instruction-like text.
 
 Run `scripts/check_github_guardrails.py` after configuring the GitHub repository. The starter can ship workflows, CODEOWNERS, PR template, and PR touch-conflict checks, but remote branch protection / rulesets are external GitHub settings and may require a paid plan or a public repository.
 
 Use `docs/ai/check-registry.md` to decide whether a check is advisory, review-required, blocking-candidate, or blocking. Use `docs/ai/security/supply-chain-provenance-plan.md` before promoting Scorecard, CodeQL, SBOM, or SLSA provenance from evidence to enforcement.
 
+Use `docs/ai/harness-real-sample-watchlist.md` for real-event-only validation gaps. The starter ships the observation logic, not old-project sample counts or accepted conclusions.
+
 ## Included Guides
 
 - `docs/ai/harness-portability-guide.md`
 - `docs/ai/check-registry.md`
+- `docs/ai/harness-real-sample-watchlist.md`
 - `docs/ai/security/supply-chain-provenance-plan.md`
 - `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/ai/new-project-agents-rewrite-guide.md`

@@ -35,6 +35,28 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install Python harness dependencies
+        run: python3 -m pip install -r .codex/requirements.txt
+
+      - name: Check whitespace errors
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$BASE_REF" ]; then
+            git diff --check "origin/${BASE_REF}...HEAD"
+          elif [ "$EVENT_NAME" = "push" ] && [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            git diff --check "${BEFORE_SHA}...HEAD"
+          elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            git diff --check "HEAD^...HEAD"
+          else
+            git diff --check
+          fi
+
+      - name: Run Ruff checks
+        run: python3 -m ruff check .codex/hooks scripts tests
+
       - name: Check hook config sync
         run: python3 scripts/sync_hooks_config.py --check
 
@@ -85,8 +107,846 @@ jobs:
       - name: Run AI governance checks
         run: python3 scripts/check_ai_governance.py
 
+      - name: Run context budget gate
+        run: python3 scripts/check_context_budget.py
+
+      - name: Run check burn-in ledger audit
+        run: |
+          python3 scripts/check_burn_in_ledger.py > /tmp/check-burn-in-ledger.md
+          python3 scripts/check_burn_in_ledger.py --json > /tmp/check-burn-in-ledger.json
+          {
+            echo ""
+            echo "### Check burn-in ledger"
+            echo ""
+            cat /tmp/check-burn-in-ledger.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run check burn-in upgrade decision audit
+        run: |
+          python3 scripts/check_burn_in_upgrade_decisions.py > /tmp/check-burn-in-upgrade-decisions.md
+          python3 scripts/check_burn_in_upgrade_decisions.py --json > /tmp/check-burn-in-upgrade-decisions.json
+          {
+            echo ""
+            echo "### Check burn-in upgrade decisions"
+            echo ""
+            cat /tmp/check-burn-in-upgrade-decisions.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run runtime token budget wiring check
+        run: python3 scripts/check_runtime_token_budget.py
+
+      - name: Run stage checkpoint artifact checks
+        run: python3 scripts/check_stage_checkpoints.py
+
+      - name: Run runtime execution snapshot checks
+        run: python3 scripts/check_runtime_execution_snapshots.py
+
+      - name: Run PreToolUse preflight sample checks
+        run: python3 scripts/check_pre_tool_use_preflight_samples.py
+
+      - name: Run loop scope monitor sample checks
+        run: python3 scripts/check_loop_scope_monitor_samples.py
+
+      - name: Run warning sample code alignment check
+        run: python3 scripts/check_warning_sample_code_alignment.py
+
+      - name: Run agent trace schema checks
+        run: python3 scripts/check_agent_trace_schema.py
+
+      - name: Run agent eval dataset checks
+        run: python3 scripts/check_agent_eval_dataset.py
+
+      - name: Run agent eval runner dry-run
+        run: python3 scripts/run_agent_eval_dataset.py --dry-run
+
+      - name: Run task outcome eval dataset checks
+        run: python3 scripts/check_task_outcome_eval_dataset.py
+
+      - name: Run task outcome eval runner dry-run
+        run: python3 scripts/run_task_outcome_eval_dataset.py --dry-run
+
+      - name: Run agent trace local export check
+        run: python3 scripts/export_agent_trace.py --input docs/ai/standards/agent-trace-sample.jsonl > /tmp/agent-trace-export.json
+
+      - name: Run remote trace interop report check
+        run: python3 scripts/check_remote_trace_interop_report.py
+
+      - name: Run local trace summary smoke
+        run: python3 scripts/summarize_runtime_traces.py --runtime-dir .codex/runtime/observations > /tmp/local-trace-summary.md
+
+      - name: Run harness capability summary
+        run: |
+          python3 scripts/summarize_harness_capabilities.py > /tmp/harness-capability-summary.md
+          {
+            echo ""
+            echo "### Harness capability summary"
+            echo ""
+            cat /tmp/harness-capability-summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run local trace summary sample checks
+        run: python3 scripts/check_local_trace_summary_samples.py
+
+      - name: Run agentic red-team sample checks
+        run: python3 scripts/check_agentic_red_team_samples.py
+
+      - name: Run harness sample gap evidence checks
+        run: python3 scripts/check_harness_sample_gap_evidence.py
+
+      - name: Run harness collection config checks
+        run: python3 scripts/check_harness_collection_config.py
+
+      - name: Run harness sample follow-up coverage audit
+        run: |
+          python3 scripts/check_harness_sample_followup_coverage.py > /tmp/harness-sample-followup-coverage.md
+          python3 scripts/check_harness_sample_followup_coverage.py --json > /tmp/harness-sample-followup-coverage.json
+          {
+            echo ""
+            echo "### Harness sample follow-up coverage"
+            echo ""
+            cat /tmp/harness-sample-followup-coverage.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness sample gap collector
+        run: |
+          python3 scripts/collect_harness_sample_gaps.py > /tmp/harness-sample-gaps.md
+          python3 scripts/collect_harness_sample_gaps.py --json > /tmp/harness-sample-gaps.json
+          {
+            echo ""
+            echo "### Harness sample gaps"
+            echo ""
+            cat /tmp/harness-sample-gaps.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness sample collection planner
+        run: |
+          python3 scripts/plan_harness_sample_collection.py > /tmp/harness-sample-collection.md
+          python3 scripts/plan_harness_sample_collection.py --json > /tmp/harness-sample-collection.json
+          python3 scripts/plan_harness_sample_collection.py --area agentic-red-team --capture-card > /tmp/harness-sample-collection-area-agentic-red-team.md
+          python3 scripts/plan_harness_sample_collection.py --area ai-guardrail --capture-card > /tmp/harness-sample-collection-area-ai-guardrail.md
+          python3 scripts/plan_harness_sample_collection.py --area runtime-durability --capture-card > /tmp/harness-sample-collection-area-runtime-durability.md
+          python3 scripts/plan_harness_sample_collection.py --area security-evidence --capture-card > /tmp/harness-sample-collection-area-security-evidence.md
+          python3 scripts/plan_harness_sample_collection.py --area trace-interop --capture-card > /tmp/harness-sample-collection-area-trace-interop.md
+          python3 scripts/plan_harness_sample_collection.py --area workflow-skills --capture-card > /tmp/harness-sample-collection-area-workflow-skills.md
+          python3 scripts/plan_harness_sample_collection.py --priority P0 --capture-card > /tmp/harness-sample-collection-priority-p0.md
+          python3 scripts/plan_harness_sample_collection.py --priority P1 --capture-card > /tmp/harness-sample-collection-priority-p1.md
+          python3 scripts/plan_harness_sample_collection.py --priority P2 --capture-card > /tmp/harness-sample-collection-priority-p2.md
+          python3 scripts/plan_harness_sample_collection.py --priority P3 --capture-card > /tmp/harness-sample-collection-priority-p3.md
+          python3 scripts/plan_harness_sample_collection.py --ledger-action append-new-pending-slot --capture-card > /tmp/harness-sample-collection-append-new-pending-slot.md
+          python3 scripts/plan_harness_sample_collection.py --ledger-action fill-existing-placeholder --capture-card > /tmp/harness-sample-collection-fill-existing-placeholder.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-approved-remote-interop --capture-card > /tmp/harness-sample-collection-remote-interop.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-approved-bounded-incident --capture-card > /tmp/harness-sample-collection-approved-bounded-incident.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate replace-placeholder-after-real-event --capture-card > /tmp/harness-sample-collection-placeholder-replacement.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-security-workflow-event --capture-card > /tmp/harness-sample-collection-security-event.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-bounded-real-incident --capture-card > /tmp/harness-sample-collection-bounded-real-incident.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-workflow-task-event --capture-card > /tmp/harness-sample-collection-workflow-task-event.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-cross-task-resume --capture-card > /tmp/harness-sample-collection-cross-task-resume.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-distinct-task-class-report --capture-card > /tmp/harness-sample-collection-distinct-task-class-report.md
+          python3 scripts/plan_harness_sample_collection.py --capture-gate requires-user-confirmed-high-impact-action --capture-card > /tmp/harness-sample-collection-user-confirmed-high-impact-action.md
+          python3 scripts/plan_harness_sample_collection.py --ledger-action review-upgrade-decision --capture-card > /tmp/harness-sample-collection-upgrade-decision-review.md
+          python3 scripts/plan_harness_sample_collection.py --readiness needs-first-real-sample --capture-card > /tmp/harness-sample-collection-needs-first-real-sample.md
+          python3 scripts/plan_harness_sample_collection.py --readiness needs-more-real-samples --capture-card > /tmp/harness-sample-collection-needs-more-real-samples.md
+          python3 scripts/plan_harness_sample_collection.py --readiness ready-for-upgrade-discussion --capture-card > /tmp/harness-sample-collection-ready-for-upgrade-discussion.md
+          python3 scripts/plan_harness_sample_collection.py --include-accepted --readiness local-sample-only --capture-card > /tmp/harness-sample-collection-local-sample-only.md
+          {
+            echo ""
+            echo "### Harness sample collection queue"
+            echo ""
+            cat /tmp/harness-sample-collection.md
+            echo ""
+            echo "### Harness sample collection queue (area agentic-red-team)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-agentic-red-team.md
+            echo ""
+            echo "### Harness sample collection queue (area ai-guardrail)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-ai-guardrail.md
+            echo ""
+            echo "### Harness sample collection queue (area runtime-durability)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-runtime-durability.md
+            echo ""
+            echo "### Harness sample collection queue (area security-evidence)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-security-evidence.md
+            echo ""
+            echo "### Harness sample collection queue (area trace-interop)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-trace-interop.md
+            echo ""
+            echo "### Harness sample collection queue (area workflow-skills)"
+            echo ""
+            cat /tmp/harness-sample-collection-area-workflow-skills.md
+            echo ""
+            echo "### Harness sample collection queue (priority P0)"
+            echo ""
+            cat /tmp/harness-sample-collection-priority-p0.md
+            echo ""
+            echo "### Harness sample collection queue (priority P1)"
+            echo ""
+            cat /tmp/harness-sample-collection-priority-p1.md
+            echo ""
+            echo "### Harness sample collection queue (priority P2)"
+            echo ""
+            cat /tmp/harness-sample-collection-priority-p2.md
+            echo ""
+            echo "### Harness sample collection queue (priority P3)"
+            echo ""
+            cat /tmp/harness-sample-collection-priority-p3.md
+            echo ""
+            echo "### Harness sample collection queue (append new pending slot)"
+            echo ""
+            cat /tmp/harness-sample-collection-append-new-pending-slot.md
+            echo ""
+            echo "### Harness sample collection queue (fill existing placeholder)"
+            echo ""
+            cat /tmp/harness-sample-collection-fill-existing-placeholder.md
+            echo ""
+            echo "### Harness sample collection queue (remote interop)"
+            echo ""
+            cat /tmp/harness-sample-collection-remote-interop.md
+            echo ""
+            echo "### Harness sample collection queue (approved bounded incident)"
+            echo ""
+            cat /tmp/harness-sample-collection-approved-bounded-incident.md
+            echo ""
+            echo "### Harness sample collection queue (placeholder replacement)"
+            echo ""
+            cat /tmp/harness-sample-collection-placeholder-replacement.md
+            echo ""
+            echo "### Harness sample collection queue (security workflow event)"
+            echo ""
+            cat /tmp/harness-sample-collection-security-event.md
+            echo ""
+            echo "### Harness sample collection queue (bounded real incident)"
+            echo ""
+            cat /tmp/harness-sample-collection-bounded-real-incident.md
+            echo ""
+            echo "### Harness sample collection queue (workflow task event)"
+            echo ""
+            cat /tmp/harness-sample-collection-workflow-task-event.md
+            echo ""
+            echo "### Harness sample collection queue (cross-task resume)"
+            echo ""
+            cat /tmp/harness-sample-collection-cross-task-resume.md
+            echo ""
+            echo "### Harness sample collection queue (distinct task class report)"
+            echo ""
+            cat /tmp/harness-sample-collection-distinct-task-class-report.md
+            echo ""
+            echo "### Harness sample collection queue (user confirmed high impact action)"
+            echo ""
+            cat /tmp/harness-sample-collection-user-confirmed-high-impact-action.md
+            echo ""
+            echo "### Harness sample collection queue (upgrade decision review)"
+            echo ""
+            cat /tmp/harness-sample-collection-upgrade-decision-review.md
+            echo ""
+            echo "### Harness sample collection queue (needs first real sample)"
+            echo ""
+            cat /tmp/harness-sample-collection-needs-first-real-sample.md
+            echo ""
+            echo "### Harness sample collection queue (needs more real samples)"
+            echo ""
+            cat /tmp/harness-sample-collection-needs-more-real-samples.md
+            echo ""
+            echo "### Harness sample collection queue (ready for upgrade discussion)"
+            echo ""
+            cat /tmp/harness-sample-collection-ready-for-upgrade-discussion.md
+            echo ""
+            echo "### Harness sample collection queue (local sample only)"
+            echo ""
+            cat /tmp/harness-sample-collection-local-sample-only.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness burn-in readiness audit
+        run: |
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted > /tmp/harness-burn-in-readiness.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --json > /tmp/harness-burn-in-readiness.json
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area agentic-red-team > /tmp/harness-burn-in-readiness-area-agentic-red-team.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area ai-guardrail > /tmp/harness-burn-in-readiness-area-ai-guardrail.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area runtime-durability > /tmp/harness-burn-in-readiness-area-runtime-durability.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area security-evidence > /tmp/harness-burn-in-readiness-area-security-evidence.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area trace-interop > /tmp/harness-burn-in-readiness-area-trace-interop.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --area workflow-skills > /tmp/harness-burn-in-readiness-area-workflow-skills.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --priority P0 > /tmp/harness-burn-in-readiness-priority-p0.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --priority P1 > /tmp/harness-burn-in-readiness-priority-p1.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --priority P2 > /tmp/harness-burn-in-readiness-priority-p2.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --priority P3 > /tmp/harness-burn-in-readiness-priority-p3.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-approved-remote-interop > /tmp/harness-burn-in-readiness-remote-interop.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-approved-bounded-incident > /tmp/harness-burn-in-readiness-approved-bounded-incident.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate replace-placeholder-after-real-event > /tmp/harness-burn-in-readiness-placeholder-replacement.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-security-workflow-event > /tmp/harness-burn-in-readiness-security-event.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-bounded-real-incident > /tmp/harness-burn-in-readiness-bounded-real-incident.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-workflow-task-event > /tmp/harness-burn-in-readiness-workflow-task-event.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-cross-task-resume > /tmp/harness-burn-in-readiness-cross-task-resume.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-distinct-task-class-report > /tmp/harness-burn-in-readiness-distinct-task-class-report.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate requires-user-confirmed-high-impact-action > /tmp/harness-burn-in-readiness-user-confirmed-high-impact-action.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --capture-gate upgrade-decision-review > /tmp/harness-burn-in-readiness-upgrade-decision-review.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --readiness needs-first-real-sample > /tmp/harness-burn-in-readiness-needs-first-real-sample.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --readiness needs-more-real-samples > /tmp/harness-burn-in-readiness-needs-more-real-samples.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --readiness ready-for-upgrade-discussion > /tmp/harness-burn-in-readiness-ready-for-upgrade-discussion.md
+          python3 scripts/check_harness_burn_in_readiness.py --include-future --include-accepted --readiness local-sample-only > /tmp/harness-burn-in-readiness-local-sample-only.md
+          {
+            echo ""
+            echo "### Harness burn-in readiness"
+            echo ""
+            cat /tmp/harness-burn-in-readiness.md
+            echo ""
+            echo "### Harness burn-in readiness (area agentic-red-team)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-agentic-red-team.md
+            echo ""
+            echo "### Harness burn-in readiness (area ai-guardrail)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-ai-guardrail.md
+            echo ""
+            echo "### Harness burn-in readiness (area runtime-durability)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-runtime-durability.md
+            echo ""
+            echo "### Harness burn-in readiness (area security-evidence)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-security-evidence.md
+            echo ""
+            echo "### Harness burn-in readiness (area trace-interop)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-trace-interop.md
+            echo ""
+            echo "### Harness burn-in readiness (area workflow-skills)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-area-workflow-skills.md
+            echo ""
+            echo "### Harness burn-in readiness (priority P0)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-priority-p0.md
+            echo ""
+            echo "### Harness burn-in readiness (priority P1)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-priority-p1.md
+            echo ""
+            echo "### Harness burn-in readiness (priority P2)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-priority-p2.md
+            echo ""
+            echo "### Harness burn-in readiness (priority P3)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-priority-p3.md
+            echo ""
+            echo "### Harness burn-in readiness (remote interop)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-remote-interop.md
+            echo ""
+            echo "### Harness burn-in readiness (approved bounded incident)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-approved-bounded-incident.md
+            echo ""
+            echo "### Harness burn-in readiness (placeholder replacement)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-placeholder-replacement.md
+            echo ""
+            echo "### Harness burn-in readiness (security workflow event)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-security-event.md
+            echo ""
+            echo "### Harness burn-in readiness (bounded real incident)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-bounded-real-incident.md
+            echo ""
+            echo "### Harness burn-in readiness (workflow task event)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-workflow-task-event.md
+            echo ""
+            echo "### Harness burn-in readiness (cross-task resume)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-cross-task-resume.md
+            echo ""
+            echo "### Harness burn-in readiness (distinct task class report)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-distinct-task-class-report.md
+            echo ""
+            echo "### Harness burn-in readiness (user confirmed high impact action)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-user-confirmed-high-impact-action.md
+            echo ""
+            echo "### Harness burn-in readiness (upgrade decision review)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-upgrade-decision-review.md
+            echo ""
+            echo "### Harness burn-in readiness (needs first real sample)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-needs-first-real-sample.md
+            echo ""
+            echo "### Harness burn-in readiness (needs more real samples)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-needs-more-real-samples.md
+            echo ""
+            echo "### Harness burn-in readiness (ready for upgrade discussion)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-ready-for-upgrade-discussion.md
+            echo ""
+            echo "### Harness burn-in readiness (local sample only)"
+            echo ""
+            cat /tmp/harness-burn-in-readiness-local-sample-only.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness upgrade decision audit
+        run: |
+          python3 scripts/check_harness_upgrade_decisions.py > /tmp/harness-upgrade-decisions.md
+          python3 scripts/check_harness_upgrade_decisions.py --json > /tmp/harness-upgrade-decisions.json
+          {
+            echo ""
+            echo "### Harness upgrade decisions"
+            echo ""
+            cat /tmp/harness-upgrade-decisions.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness sample template drift checks
+        run: |
+          python3 scripts/check_harness_sample_templates.py > /tmp/harness-sample-templates.md
+          python3 scripts/check_harness_sample_templates.py --area agentic-red-team > /tmp/harness-sample-templates-area-agentic-red-team.md
+          python3 scripts/check_harness_sample_templates.py --area ai-guardrail > /tmp/harness-sample-templates-area-ai-guardrail.md
+          python3 scripts/check_harness_sample_templates.py --area runtime-durability > /tmp/harness-sample-templates-area-runtime-durability.md
+          python3 scripts/check_harness_sample_templates.py --area security-evidence > /tmp/harness-sample-templates-area-security-evidence.md
+          python3 scripts/check_harness_sample_templates.py --area trace-interop > /tmp/harness-sample-templates-area-trace-interop.md
+          python3 scripts/check_harness_sample_templates.py --area workflow-skills > /tmp/harness-sample-templates-area-workflow-skills.md
+          python3 scripts/check_harness_sample_templates.py --priority P0 > /tmp/harness-sample-templates-priority-p0.md
+          python3 scripts/check_harness_sample_templates.py --priority P1 > /tmp/harness-sample-templates-priority-p1.md
+          python3 scripts/check_harness_sample_templates.py --priority P2 > /tmp/harness-sample-templates-priority-p2.md
+          python3 scripts/check_harness_sample_templates.py --priority P3 > /tmp/harness-sample-templates-priority-p3.md
+          python3 scripts/check_harness_sample_templates.py --ledger-action append-new-pending-slot > /tmp/harness-sample-templates-append-new-pending-slot.md
+          python3 scripts/check_harness_sample_templates.py --ledger-action fill-existing-placeholder > /tmp/harness-sample-templates-fill-existing-placeholder.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-approved-remote-interop > /tmp/harness-sample-templates-remote-interop.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-approved-bounded-incident > /tmp/harness-sample-templates-approved-bounded-incident.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate replace-placeholder-after-real-event > /tmp/harness-sample-templates-placeholder-replacement.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-security-workflow-event > /tmp/harness-sample-templates-security-event.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-bounded-real-incident > /tmp/harness-sample-templates-bounded-real-incident.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-workflow-task-event > /tmp/harness-sample-templates-workflow-task-event.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-cross-task-resume > /tmp/harness-sample-templates-cross-task-resume.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-distinct-task-class-report > /tmp/harness-sample-templates-distinct-task-class-report.md
+          python3 scripts/check_harness_sample_templates.py --capture-gate requires-user-confirmed-high-impact-action > /tmp/harness-sample-templates-user-confirmed-high-impact-action.md
+          python3 scripts/check_harness_sample_templates.py --ledger-action review-upgrade-decision > /tmp/harness-sample-templates-upgrade-decision-review.md
+          python3 scripts/check_harness_sample_templates.py --readiness needs-first-real-sample > /tmp/harness-sample-templates-needs-first-real-sample.md
+          python3 scripts/check_harness_sample_templates.py --readiness needs-more-real-samples > /tmp/harness-sample-templates-needs-more-real-samples.md
+          python3 scripts/check_harness_sample_templates.py --readiness ready-for-upgrade-discussion > /tmp/harness-sample-templates-ready-for-upgrade-discussion.md
+          python3 scripts/check_harness_sample_templates.py --readiness local-sample-only > /tmp/harness-sample-templates-local-sample-only.md
+          {
+            echo ""
+            echo "### Harness sample template drift"
+            echo ""
+            cat /tmp/harness-sample-templates.md
+            echo ""
+            echo "### Harness sample template drift (area agentic-red-team)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-agentic-red-team.md
+            echo ""
+            echo "### Harness sample template drift (area ai-guardrail)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-ai-guardrail.md
+            echo ""
+            echo "### Harness sample template drift (area runtime-durability)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-runtime-durability.md
+            echo ""
+            echo "### Harness sample template drift (area security-evidence)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-security-evidence.md
+            echo ""
+            echo "### Harness sample template drift (area trace-interop)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-trace-interop.md
+            echo ""
+            echo "### Harness sample template drift (area workflow-skills)"
+            echo ""
+            cat /tmp/harness-sample-templates-area-workflow-skills.md
+            echo ""
+            echo "### Harness sample template drift (priority P0)"
+            echo ""
+            cat /tmp/harness-sample-templates-priority-p0.md
+            echo ""
+            echo "### Harness sample template drift (priority P1)"
+            echo ""
+            cat /tmp/harness-sample-templates-priority-p1.md
+            echo ""
+            echo "### Harness sample template drift (priority P2)"
+            echo ""
+            cat /tmp/harness-sample-templates-priority-p2.md
+            echo ""
+            echo "### Harness sample template drift (priority P3)"
+            echo ""
+            cat /tmp/harness-sample-templates-priority-p3.md
+            echo ""
+            echo "### Harness sample template drift (append new pending slot)"
+            echo ""
+            cat /tmp/harness-sample-templates-append-new-pending-slot.md
+            echo ""
+            echo "### Harness sample template drift (fill existing placeholder)"
+            echo ""
+            cat /tmp/harness-sample-templates-fill-existing-placeholder.md
+            echo ""
+            echo "### Harness sample template drift (remote interop)"
+            echo ""
+            cat /tmp/harness-sample-templates-remote-interop.md
+            echo ""
+            echo "### Harness sample template drift (approved bounded incident)"
+            echo ""
+            cat /tmp/harness-sample-templates-approved-bounded-incident.md
+            echo ""
+            echo "### Harness sample template drift (placeholder replacement)"
+            echo ""
+            cat /tmp/harness-sample-templates-placeholder-replacement.md
+            echo ""
+            echo "### Harness sample template drift (security workflow event)"
+            echo ""
+            cat /tmp/harness-sample-templates-security-event.md
+            echo ""
+            echo "### Harness sample template drift (bounded real incident)"
+            echo ""
+            cat /tmp/harness-sample-templates-bounded-real-incident.md
+            echo ""
+            echo "### Harness sample template drift (workflow task event)"
+            echo ""
+            cat /tmp/harness-sample-templates-workflow-task-event.md
+            echo ""
+            echo "### Harness sample template drift (cross-task resume)"
+            echo ""
+            cat /tmp/harness-sample-templates-cross-task-resume.md
+            echo ""
+            echo "### Harness sample template drift (distinct task class report)"
+            echo ""
+            cat /tmp/harness-sample-templates-distinct-task-class-report.md
+            echo ""
+            echo "### Harness sample template drift (user confirmed high impact action)"
+            echo ""
+            cat /tmp/harness-sample-templates-user-confirmed-high-impact-action.md
+            echo ""
+            echo "### Harness sample template drift (upgrade decision review)"
+            echo ""
+            cat /tmp/harness-sample-templates-upgrade-decision-review.md
+            echo ""
+            echo "### Harness sample template drift (needs first real sample)"
+            echo ""
+            cat /tmp/harness-sample-templates-needs-first-real-sample.md
+            echo ""
+            echo "### Harness sample template drift (needs more real samples)"
+            echo ""
+            cat /tmp/harness-sample-templates-needs-more-real-samples.md
+            echo ""
+            echo "### Harness sample template drift (ready for upgrade discussion)"
+            echo ""
+            cat /tmp/harness-sample-templates-ready-for-upgrade-discussion.md
+            echo ""
+            echo "### Harness sample template drift (local sample only)"
+            echo ""
+            cat /tmp/harness-sample-templates-local-sample-only.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness sample intake bundle
+        run: |
+          python3 scripts/build_harness_sample_intake_bundle.py > /tmp/harness-sample-intake-bundle.md
+          python3 scripts/build_harness_sample_intake_bundle.py --json > /tmp/harness-sample-intake-bundle.json
+          python3 scripts/build_harness_sample_intake_bundle.py --summary > /tmp/harness-sample-intake-summary.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area agentic-red-team --summary > /tmp/harness-sample-intake-area-agentic-red-team.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area ai-guardrail --summary > /tmp/harness-sample-intake-area-ai-guardrail.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area runtime-durability --summary > /tmp/harness-sample-intake-area-runtime-durability.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area security-evidence --summary > /tmp/harness-sample-intake-area-security-evidence.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area trace-interop --summary > /tmp/harness-sample-intake-area-trace-interop.md
+          python3 scripts/build_harness_sample_intake_bundle.py --area workflow-skills --summary > /tmp/harness-sample-intake-area-workflow-skills.md
+          python3 scripts/build_harness_sample_intake_bundle.py --priority P0 --summary > /tmp/harness-sample-intake-priority-p0.md
+          python3 scripts/build_harness_sample_intake_bundle.py --priority P1 --summary > /tmp/harness-sample-intake-priority-p1.md
+          python3 scripts/build_harness_sample_intake_bundle.py --priority P2 --summary > /tmp/harness-sample-intake-priority-p2.md
+          python3 scripts/build_harness_sample_intake_bundle.py --priority P3 --summary > /tmp/harness-sample-intake-priority-p3.md
+          python3 scripts/build_harness_sample_intake_bundle.py --ledger-action append-new-pending-slot --summary > /tmp/harness-sample-intake-append-new-pending-slot.md
+          python3 scripts/build_harness_sample_intake_bundle.py --ledger-action fill-existing-placeholder --summary > /tmp/harness-sample-intake-fill-existing-placeholder.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-approved-remote-interop --summary > /tmp/harness-sample-intake-remote-interop.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-approved-bounded-incident --summary > /tmp/harness-sample-intake-approved-bounded-incident.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate replace-placeholder-after-real-event --summary > /tmp/harness-sample-intake-placeholder-replacement.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-security-workflow-event --summary > /tmp/harness-sample-intake-security-event.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-bounded-real-incident --summary > /tmp/harness-sample-intake-bounded-real-incident.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-workflow-task-event --summary > /tmp/harness-sample-intake-workflow-task-event.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-cross-task-resume --summary > /tmp/harness-sample-intake-cross-task-resume.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-distinct-task-class-report --summary > /tmp/harness-sample-intake-distinct-task-class-report.md
+          python3 scripts/build_harness_sample_intake_bundle.py --capture-gate requires-user-confirmed-high-impact-action --summary > /tmp/harness-sample-intake-user-confirmed-high-impact-action.md
+          python3 scripts/build_harness_sample_intake_bundle.py --ledger-action review-upgrade-decision --summary > /tmp/harness-sample-intake-upgrade-decision-review.md
+          python3 scripts/build_harness_sample_intake_bundle.py --readiness needs-first-real-sample --summary > /tmp/harness-sample-intake-needs-first-real-sample.md
+          python3 scripts/build_harness_sample_intake_bundle.py --readiness needs-more-real-samples --summary > /tmp/harness-sample-intake-needs-more-real-samples.md
+          python3 scripts/build_harness_sample_intake_bundle.py --readiness ready-for-upgrade-discussion --summary > /tmp/harness-sample-intake-ready-for-upgrade-discussion.md
+          {
+            echo ""
+            echo "### Harness sample intake bundle"
+            echo ""
+            cat /tmp/harness-sample-intake-summary.md
+            echo ""
+            echo "### Harness sample intake bundle (area agentic-red-team)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-agentic-red-team.md
+            echo ""
+            echo "### Harness sample intake bundle (area ai-guardrail)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-ai-guardrail.md
+            echo ""
+            echo "### Harness sample intake bundle (area runtime-durability)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-runtime-durability.md
+            echo ""
+            echo "### Harness sample intake bundle (area security-evidence)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-security-evidence.md
+            echo ""
+            echo "### Harness sample intake bundle (area trace-interop)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-trace-interop.md
+            echo ""
+            echo "### Harness sample intake bundle (area workflow-skills)"
+            echo ""
+            cat /tmp/harness-sample-intake-area-workflow-skills.md
+            echo ""
+            echo "### Harness sample intake bundle (priority P0)"
+            echo ""
+            cat /tmp/harness-sample-intake-priority-p0.md
+            echo ""
+            echo "### Harness sample intake bundle (priority P1)"
+            echo ""
+            cat /tmp/harness-sample-intake-priority-p1.md
+            echo ""
+            echo "### Harness sample intake bundle (priority P2)"
+            echo ""
+            cat /tmp/harness-sample-intake-priority-p2.md
+            echo ""
+            echo "### Harness sample intake bundle (priority P3)"
+            echo ""
+            cat /tmp/harness-sample-intake-priority-p3.md
+            echo ""
+            echo "### Harness sample intake bundle (append new pending slot)"
+            echo ""
+            cat /tmp/harness-sample-intake-append-new-pending-slot.md
+            echo ""
+            echo "### Harness sample intake bundle (fill existing placeholder)"
+            echo ""
+            cat /tmp/harness-sample-intake-fill-existing-placeholder.md
+            echo ""
+            echo "### Harness sample intake bundle (remote interop)"
+            echo ""
+            cat /tmp/harness-sample-intake-remote-interop.md
+            echo ""
+            echo "### Harness sample intake bundle (approved bounded incident)"
+            echo ""
+            cat /tmp/harness-sample-intake-approved-bounded-incident.md
+            echo ""
+            echo "### Harness sample intake bundle (placeholder replacement)"
+            echo ""
+            cat /tmp/harness-sample-intake-placeholder-replacement.md
+            echo ""
+            echo "### Harness sample intake bundle (security workflow event)"
+            echo ""
+            cat /tmp/harness-sample-intake-security-event.md
+            echo ""
+            echo "### Harness sample intake bundle (bounded real incident)"
+            echo ""
+            cat /tmp/harness-sample-intake-bounded-real-incident.md
+            echo ""
+            echo "### Harness sample intake bundle (workflow task event)"
+            echo ""
+            cat /tmp/harness-sample-intake-workflow-task-event.md
+            echo ""
+            echo "### Harness sample intake bundle (cross-task resume)"
+            echo ""
+            cat /tmp/harness-sample-intake-cross-task-resume.md
+            echo ""
+            echo "### Harness sample intake bundle (distinct task class report)"
+            echo ""
+            cat /tmp/harness-sample-intake-distinct-task-class-report.md
+            echo ""
+            echo "### Harness sample intake bundle (user confirmed high impact action)"
+            echo ""
+            cat /tmp/harness-sample-intake-user-confirmed-high-impact-action.md
+            echo ""
+            echo "### Harness sample intake bundle (upgrade decision review)"
+            echo ""
+            cat /tmp/harness-sample-intake-upgrade-decision-review.md
+            echo ""
+            echo "### Harness sample intake bundle (needs first real sample)"
+            echo ""
+            cat /tmp/harness-sample-intake-needs-first-real-sample.md
+            echo ""
+            echo "### Harness sample intake bundle (needs more real samples)"
+            echo ""
+            cat /tmp/harness-sample-intake-needs-more-real-samples.md
+            echo ""
+            echo "### Harness sample intake bundle (ready for upgrade discussion)"
+            echo ""
+            cat /tmp/harness-sample-intake-ready-for-upgrade-discussion.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness pending sample slot audit
+        run: |
+          python3 scripts/check_harness_pending_samples.py --include-future --include-accepted > /tmp/harness-pending-samples.md
+          python3 scripts/check_harness_pending_samples.py --include-future --include-accepted --json > /tmp/harness-pending-samples.json
+          python3 scripts/check_harness_pending_samples.py --capture-focus > /tmp/harness-pending-capture-focus.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-all.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area agentic-red-team --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-agentic-red-team.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area ai-guardrail --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-ai-guardrail.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area runtime-durability --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-runtime-durability.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area security-evidence --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-security-evidence.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area trace-interop --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-trace-interop.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-area workflow-skills --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-area-workflow-skills.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-priority P0 --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-priority-p0.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-priority P1 --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-priority-p1.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-priority P2 --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-priority-p2.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-priority P3 --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-priority-p3.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-ledger-action append-new-pending-slot --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-append-new-pending-slot.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-ledger-action fill-existing-placeholder --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-fill-existing-placeholder.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-approved-remote-interop --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-remote-interop.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-approved-bounded-incident --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-approved-bounded-incident.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate replace-placeholder-after-real-event --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-placeholder-replacement.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-security-workflow-event --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-security-event.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-bounded-real-incident --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-bounded-real-incident.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-workflow-task-event --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-workflow-task-event.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-cross-task-resume --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-cross-task-resume.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-distinct-task-class-report --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-distinct-task-class-report.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-gate requires-user-confirmed-high-impact-action --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-user-confirmed-high-impact-action.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-readiness needs-first-real-sample --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-needs-first-real-sample.md
+          python3 scripts/check_harness_pending_samples.py --capture-focus --capture-focus-readiness needs-more-real-samples --capture-focus-limit 0 > /tmp/harness-pending-capture-focus-needs-more-real-samples.md
+          python3 scripts/check_harness_pending_samples.py --review-state placeholder --review-cards > /tmp/harness-pending-review-cards.md
+          {
+            echo ""
+            echo "### Harness pending sample lanes"
+            echo ""
+            cat /tmp/harness-pending-samples.md
+            echo ""
+            echo "### Harness pending next capture focus"
+            echo ""
+            cat /tmp/harness-pending-capture-focus.md
+            echo ""
+            echo "### Harness pending next capture focus (all matching lanes)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-all.md
+            echo ""
+            echo "### Harness pending next capture focus (area agentic-red-team)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-agentic-red-team.md
+            echo ""
+            echo "### Harness pending next capture focus (area ai-guardrail)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-ai-guardrail.md
+            echo ""
+            echo "### Harness pending next capture focus (area runtime-durability)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-runtime-durability.md
+            echo ""
+            echo "### Harness pending next capture focus (area security-evidence)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-security-evidence.md
+            echo ""
+            echo "### Harness pending next capture focus (area trace-interop)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-trace-interop.md
+            echo ""
+            echo "### Harness pending next capture focus (area workflow-skills)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-area-workflow-skills.md
+            echo ""
+            echo "### Harness pending next capture focus (priority P0)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-priority-p0.md
+            echo ""
+            echo "### Harness pending next capture focus (priority P1)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-priority-p1.md
+            echo ""
+            echo "### Harness pending next capture focus (priority P2)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-priority-p2.md
+            echo ""
+            echo "### Harness pending next capture focus (priority P3)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-priority-p3.md
+            echo ""
+            echo "### Harness pending next capture focus (append new pending slot)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-append-new-pending-slot.md
+            echo ""
+            echo "### Harness pending next capture focus (fill existing placeholder)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-fill-existing-placeholder.md
+            echo ""
+            echo "### Harness pending next capture focus (remote interop)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-remote-interop.md
+            echo ""
+            echo "### Harness pending next capture focus (approved bounded incident)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-approved-bounded-incident.md
+            echo ""
+            echo "### Harness pending next capture focus (placeholder replacement)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-placeholder-replacement.md
+            echo ""
+            echo "### Harness pending next capture focus (security workflow event)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-security-event.md
+            echo ""
+            echo "### Harness pending next capture focus (bounded real incident)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-bounded-real-incident.md
+            echo ""
+            echo "### Harness pending next capture focus (workflow task event)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-workflow-task-event.md
+            echo ""
+            echo "### Harness pending next capture focus (cross-task resume)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-cross-task-resume.md
+            echo ""
+            echo "### Harness pending next capture focus (distinct task class report)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-distinct-task-class-report.md
+            echo ""
+            echo "### Harness pending next capture focus (user confirmed high impact action)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-user-confirmed-high-impact-action.md
+            echo ""
+            echo "### Harness pending next capture focus (needs first real sample)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-needs-first-real-sample.md
+            echo ""
+            echo "### Harness pending next capture focus (needs more real samples)"
+            echo ""
+            cat /tmp/harness-pending-capture-focus-needs-more-real-samples.md
+            echo ""
+            echo "### Harness pending placeholder review cards"
+            echo ""
+            cat /tmp/harness-pending-review-cards.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run harness future-work contract checks
+        run: |
+          python3 scripts/check_harness_future_work_contracts.py > /tmp/harness-future-work-contracts.md
+          python3 scripts/check_harness_future_work_contracts.py --json > /tmp/harness-future-work-contracts.json
+          {
+            echo ""
+            echo "### Harness future-work contract preconditions"
+            echo ""
+            cat /tmp/harness-future-work-contracts.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run workspace sandbox manifest checks
+        run: python3 scripts/check_workspace_sandbox.py
+
+      - name: Run task profile audit sample check
+        run: python3 scripts/check_task_profile_audit.py
+
+      - name: Run tool contract checks
+        run: python3 scripts/check_tool_contracts.py
+
+      - name: Run Three.js Snake contract checks
+        run: python3 scripts/check_threejs_snake_contract.py
+
       - name: Run code shape checks
         run: python3 scripts/check_code_shape.py --all
+
+      - name: Run skill catalog checks
+        run: python3 scripts/check_skill_catalog.py
 
   windows-hook-runtime:
     runs-on: windows-latest
@@ -144,6 +1004,3 @@ jobs:
 
       - name: Run Harness Trace Console blackbox smoke
         run: python3 scripts/harness_trace_console_blackbox_smoke.py
-
-      - name: Run Godot Platformer Slice smoke
-        run: python3 scripts/godot_platformer_slice_smoke.py

@@ -1,7 +1,7 @@
 # Remote Merge Gates Evidence
 
 更新时间：2026-05-09
-状态：private GitHub Free plan-limited；首轮 PR + main push CI burn-in 已通过
+状态：private GitHub Free plan-limited；首轮 PR + main push CI burn-in 已通过；当前无升级 GitHub plan 计划
 
 ## Purpose
 
@@ -13,7 +13,7 @@
 
 - `Upgrade to GitHub Pro or make this repository public to enable this feature. (HTTP 403)`
 
-因此当前缺口不再按“继续本地实现即可关闭”处理，而是记录为 plan-limited ceiling。除非升级 GitHub 计划或把仓库改为 public，否则不能把 branch protection、rulesets、required checks、review gates 或 merge queue 声明为远端强制。
+因此当前缺口不再按“继续本地实现即可关闭”处理，而是记录为 plan-limited ceiling。当前没有升级 GitHub plan 或把仓库改为 public 的计划，所以本仓库只把 GitHub 作为 CI / PR / security artifact evidence 面；不能把 branch protection、rulesets、required checks、review gates 或 merge queue 声明为远端强制。
 
 ## Current Evidence
 
@@ -63,7 +63,7 @@ Latest proven successful PR evidence:
 
 | Workflow | Run | Event | Head | Proven jobs / steps | Conclusion |
 | --- | --- | --- | --- | --- | --- |
-| Governance And Smoke | [25598728368](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728368) | `pull_request` | `codex/harness-ci-burn-in` at `9b23fd522586bd77126d58ab12c2c3494112cf51` | `governance`, `windows-hook-runtime`, `smoke`; hook sync, advisory summary, branch hygiene summary, PR touch conflict check, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 / WS-03 browser smoke | success |
+| Governance And Smoke | [25598728368](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728368) | `pull_request` | `codex/harness-ci-burn-in` at `9b23fd522586bd77126d58ab12c2c3494112cf51` | `governance`, `windows-hook-runtime`, `smoke`; hook sync, advisory summary, branch hygiene summary, PR touch conflict check, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 browser smoke | success |
 | Dependency Review | [25598728367](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728367) | `pull_request` | same head | `dependency-review` job and Dependency Review step | success |
 | Security Evidence | [25598728374](https://github.com/whm-cell/ai_ms_pro/actions/runs/25598728374) | `pull_request` | same head | Scorecard, CodeQL artifact, SBOM artifact | success |
 
@@ -71,7 +71,7 @@ Latest proven successful `main` push evidence:
 
 | Workflow | Run | Event | Head | Proven jobs / steps | Conclusion |
 | --- | --- | --- | --- | --- | --- |
-| Governance And Smoke | [25599034611](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034611) | `push` | `main` at `c1f170faa701885882a0ed7a2105c1054fe956ea` | `governance`, `windows-hook-runtime`, `smoke`; main advisory summary, main branch hygiene summary, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 / WS-03 browser smoke | success |
+| Governance And Smoke | [25599034611](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034611) | `push` | `main` at `c1f170faa701885882a0ed7a2105c1054fe956ea` | `governance`, `windows-hook-runtime`, `smoke`; main advisory summary, main branch hygiene summary, unit tests, AI governance, code-shape, Windows Python / hook runner tests, WS-01 / WS-02 browser smoke | success |
 | Security Evidence | [25599034597](https://github.com/whm-cell/ai_ms_pro/actions/runs/25599034597) | `push` | same head | Scorecard, CodeQL analysis, `codeql-results` artifact, SBOM generation, `sbom-cyclonedx` artifact | success |
 
 Observed non-gate evidence:
@@ -97,6 +97,8 @@ Under private GitHub Free, the repository should maximize the surfaces that rema
 - Treat branch protection / rulesets / required reviews / required checks / merge queue as future upgrade targets that activate only after upgrading GitHub plan or making the repository public.
 
 ## Future Upgrade Gates
+
+当前没有升级 GitHub plan 的计划。本节只保留为未来条件变化时的参考；不要把它当成当前路线图或实现目标。
 
 If the repository plan or visibility later supports remote enforcement, branch protection or rulesets should require:
 

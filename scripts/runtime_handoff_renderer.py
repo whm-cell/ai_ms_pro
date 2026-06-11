@@ -218,6 +218,8 @@ def render_followup_lines(context: HandoffRenderContext) -> list[str]:
         "- 如果同类 observation 在多个 session 中重复出现，可增加 status 或 ADR 候选压缩",
         "- 若真实项目需求已经导入，运行 reducer 时显式补齐 `--requirement-id` / `--workstream-id`，减少后续追踪断点",
         "",
+        "## Next Best Work Review",
+        "- Planned next work / Decision / Reason / User confirmation required：由主 Agent 发布前填写；Decision：continue | re-scope | split | pivot | park | cancel | ask-user",
         "## 下一位 Agent 的第一步动作",
         "",
         f"- 先复核 `{display_path(context.observation_file)}` 的最近 observation，与当前 active handoff 和 `working-context.md` 对照，判断是否需要落地新的 canonical handoff",

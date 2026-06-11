@@ -1,6 +1,6 @@
 # 项目计划
 
-更新时间：2026-05-07
+更新时间：2026-05-25
 文档定位：阶段规划与范围控制视图
 
 ## 使用边界
@@ -12,28 +12,29 @@
 ## 项目目标
 
 - 用真实业务场景验证当前 Codex-first harness 的可行性
-- 落地多个可运行的 repo-native 垂直切片
+- 落地可运行的 repo-native 垂直切片
 - 跑通 `requirements -> implementation -> runtime memory -> handoff/status` 的最小闭环
 
 ## 范围定义
 
 ### 当前范围
 
-- 导入多个真实需求场景，并验证 harness 在第二个和第三个 workstream 上可复用
-- 实现至少三个桌面浏览器可运行的 repo-native 静态应用切片
+- 保留 WS-01 Three.js Snake 作为 capability validation sample
+- 保留 WS-02 Harness Trace Console 作为 governance UI sample
 - 继续强化 runtime harness、governance harness 和 requirements traceability 的协同
+- 将已停止的 long-running burn-in session 做 closeout / split / review
 
 ### 暂不纳入范围
 
-- 多人模式、联网、排行榜
+- 继续扩大新的业务功能线
 - 部署上线、域名和正式运营能力
-- 音效、复杂特效、移动端深度适配
+- 把本地 runtime 原料当作 canonical project memory
 
 ## 业务线索与模块划分
 
 ### 核心业务线索
 
-- 多个真实需求场景导入与 traceability
+- 真实需求场景导入与 traceability
 - 垂直切片应用实现与 smoke 验证
 - runtime observation / reducer / handoff / status 压缩验证
 
@@ -46,31 +47,26 @@
 
 ## 阶段规划
 
-### 第 0 阶段：规划与骨架
+### 第 0 阶段：Runtime Harness Foundation
 
-- 目标：完成 harness 骨架、引入首个真实需求场景并落下最小可运行垂直切片
-- 验收：形成 requirements 体系、首批 ADR、首个阶段 status 和可运行场景
+- 目标：完成 harness 骨架、引入真实需求场景并落下最小可运行垂直切片
+- 验收：形成 requirements 体系、阶段 status、可运行场景、smoke、governance checker 和 closeout handoff
 
-### 第 1 阶段：核心基础设施
-
-- 目标：基于真实样本收紧 traceability、一致性校验和 reducer 压缩策略
-- 验收：metadata 与 traceability matrix 的同步规则稳定，治理脚本可继续增强
-
-### 第 2 阶段：核心业务流程
+### 第 1 阶段：更多真实 workstream 复用
 
 - 目标：在更多真实功能切片上复用已验证的 harness 流程
-- 验收：不止一个 workstream 能稳定走通 requirements -> implementation -> status/adr
+- 验收：不止一个 workstream 能稳定走通 requirements -> implementation -> status/adr，并能在默认上下文预算内恢复
 
-### 第 3 阶段：测试、优化与上线准备
+### 第 2 阶段：测试、优化与合并准备
 
-- 目标：接入 CI、补齐更强校验和必要的发布准备
+- 目标：接入 CI、补齐更强校验和必要的合并准备
 - 验收：文档漂移与 traceability 漏更能在合并前被拦下
 
 ## 技术与架构决策
 
 - runtime / governance / verification 三层 harness 已采纳
 - requirements traceability 采用 `REQDOC -> REQ -> WS -> STAGE` 结构
-- 首个真实前端场景采用轻量方式接入，用于验证 harness，而不是先追求完整工程化
+- 真实前端场景采用轻量方式接入，用于验证 harness，而不是先追求完整工程化
 
 ## 风险与约束
 

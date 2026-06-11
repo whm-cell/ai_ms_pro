@@ -8,8 +8,7 @@
 
 典型例子：
 
-- Godot 2D 游戏已有 `collision` / 碰撞实现模式 skill，但当前 PRD 需要新的碰撞体验。
-- skill 建议使用通用 `Area2D` hitbox / hurtbox 模式，但当前关卡需要像素级碰撞、斜坡、单向平台或特殊攻击判定。
+- 既有 UI / 交互实现模式 skill 建议使用通用控件组合，但当前 REQ 需要不同的筛选、键盘或状态反馈行为。
 - skill 中的默认技术路线和当前验收标准冲突。
 
 ## 优先级
@@ -69,19 +68,19 @@
 
 没有真实样本时，不应把新规则升级为 always-on。
 
-## Godot 碰撞示例
+## 交互行为示例
 
-如果 PRD 写明“玩家攻击判定需要独立于受击判定，并且敌人弱点区域可单独受击”，而旧 skill 只建议单一 `CollisionShape2D`：
+如果 REQ 写明“筛选控件必须支持键盘输入、空结果提示和详情检查”，而旧 skill 只建议静态列表展示：
 
-- `REQ/WS` 记录验收真相：攻击判定、受击判定、弱点区域的行为和验收方式。
-- ADR 或 status 判断是否采纳长期模型：hitbox / hurtbox / weakpoint 分离。
-- skill 只沉淀可复用实现方法：节点组织、signal 约定、测试 checklist。
+- `REQ/WS` 记录验收真相：筛选输入、空结果、详情检查的行为和验收方式。
+- ADR 或 status 判断是否采纳长期模型：filter state、detail panel 和 smoke API 分离。
+- skill 只沉淀可复用实现方法：状态组织、事件约定、测试 checklist。
 - 技术方案写清楚旧 skill 的偏离原因和新的验证方法。
 
 ## 不应做的事
 
-- 不要把“第一关的碰撞参数”写进 skill。
-- 不要把“当前做到哪个碰撞任务”写进 skill。
+- 不要把“一次页面筛选参数”写进 skill。
+- 不要把“当前做到哪个交互任务”写进 skill。
 - 不要因为 skill 已存在就忽略 PRD 的新验收标准。
 - 不要在没有 eval 的情况下把新碰撞模式升级为默认 always-on 流程。
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -32,6 +31,10 @@ class Config:
     python_function: Limit
     python_class: Limit
     shell_file: Limit
+    typescript_file: Limit
+    stylesheet_file: Limit
+    sql_file: Limit
+    rust_file: Limit
 
 @dataclass(frozen=True)
 class Candidate:
@@ -70,6 +73,10 @@ def load_config() -> Config:
         python_function=Limit(**thresholds["python_function"]),
         python_class=Limit(**thresholds["python_class"]),
         shell_file=Limit(**thresholds["shell_file"]),
+        typescript_file=Limit(**thresholds.get("typescript_file", thresholds["python_file"])),
+        stylesheet_file=Limit(**thresholds.get("stylesheet_file", thresholds["shell_file"])),
+        sql_file=Limit(**thresholds.get("sql_file", thresholds["shell_file"])),
+        rust_file=Limit(**thresholds.get("rust_file", thresholds.get("typescript_file", thresholds["python_file"]))),
     )
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -105,6 +112,14 @@ def detect_kind(path: str) -> str | None:
     pure = PurePosixPath(path)
     if pure.suffix == ".py":
         return "python"
+    if pure.suffix in {".ts", ".tsx"}:
+        return "typescript"
+    if pure.suffix in {".css", ".scss"}:
+        return "stylesheet"
+    if pure.suffix == ".sql":
+        return "sql"
+    if pure.suffix == ".rs":
+        return "rust"
     if pure.suffix == ".sh" or path == ".githooks/pre-commit":
         return "shell"
     return None
@@ -155,7 +170,10 @@ def load_all_candidates(config: Config) -> list[Candidate]:
         kind = detect_kind(path)
         if kind is None:
             continue
-        text = decode_text((ROOT / path).read_bytes(), path)
+        candidate_path = ROOT / path
+        if not candidate_path.exists():
+            continue
+        text = decode_text(candidate_path.read_bytes(), path)
         candidates.append(Candidate(path=path, kind=kind, is_new=False, text=text))
     return candidates
 
@@ -214,51 +232,73 @@ def add_definition_findings(
         )
 
 
-def check_candidate(
+def check_python_candidate(
     candidate: Candidate,
     config: Config,
     errors: list[str],
     warnings: list[str],
 ) -> None:
     line_count = len(candidate.text.splitlines())
-    if candidate.kind == "python":
-        add_length_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="Python file",
-            limit=config.python_file,
-            actual=line_count,
-            is_new=candidate.is_new,
-        )
-        functions, classes = collect_python_shapes(candidate.text)
-        add_definition_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="function/method",
-            limit=config.python_function,
-            items=functions,
-            is_new=candidate.is_new,
-        )
-        add_definition_findings(
-            errors,
-            warnings,
-            path=candidate.path,
-            label="class",
-            limit=config.python_class,
-            items=classes,
-            is_new=candidate.is_new,
-        )
-        return
-
     add_length_findings(
         errors,
         warnings,
         path=candidate.path,
-        label="shell file",
-        limit=config.shell_file,
+        label="Python file",
+        limit=config.python_file,
         actual=line_count,
+        is_new=candidate.is_new,
+    )
+    functions, classes = collect_python_shapes(candidate.text)
+    add_definition_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label="function/method",
+        limit=config.python_function,
+        items=functions,
+        is_new=candidate.is_new,
+    )
+    add_definition_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label="class",
+        limit=config.python_class,
+        items=classes,
+        is_new=candidate.is_new,
+    )
+
+
+def simple_kind_budget(candidate: Candidate, config: Config) -> tuple[str, Limit]:
+    if candidate.kind == "typescript":
+        return ("TypeScript file", config.typescript_file)
+    if candidate.kind == "stylesheet":
+        return ("stylesheet file", config.stylesheet_file)
+    if candidate.kind == "sql":
+        return ("SQL file", config.sql_file)
+    if candidate.kind == "rust":
+        return ("Rust file", config.rust_file)
+    return ("shell file", config.shell_file)
+
+
+def check_candidate(
+    candidate: Candidate,
+    config: Config,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    if candidate.kind == "python":
+        check_python_candidate(candidate, config, errors, warnings)
+        return
+
+    label, limit = simple_kind_budget(candidate, config)
+    add_length_findings(
+        errors,
+        warnings,
+        path=candidate.path,
+        label=label,
+        limit=limit,
+        actual=len(candidate.text.splitlines()),
         is_new=candidate.is_new,
     )
 
