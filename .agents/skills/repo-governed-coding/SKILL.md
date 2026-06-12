@@ -1,6 +1,6 @@
 ---
 name: repo-governed-coding
-description: Optional coding guardrails for governed repo work. Use for non-trivial implementation, review, or refactor tasks needing assumptions, minimal diffs, doc sync, REQ/WS traceability, and verification.
+description: Optional governed coding guardrails. Use for non-trivial implementation, review, refactor, verification, doc sync, traceability, magic values/魔法值, complexity/复杂度, duplication/重复, naming/命名, or abstraction/抽象 boundaries.
 ---
 
 # Repo Governed Coding
@@ -32,6 +32,7 @@ Inspired by the MIT-licensed `forrestchang/andrej-karpathy-skills` project and a
 
 4. Close the loop with governance.
 - Use `references/governance-checklist.md` for document impact, traceability, truth-surface, and verification closeout details.
+- Use `references/evidence-based-coding-checklist.md` when reviewing or implementing code-quality changes involving magic values, complexity, duplication, naming, or public abstraction boundaries.
 - Use `$requirements-traceability-maintenance` when changing PRD, `REQDOC`, `REQ`, `WS`, traceability matrix, or technical assumptions.
 - Use `$harness-maintenance` verification references when selecting repo checks.
 
@@ -71,3 +72,4 @@ Detailed repo-specific rules live in `references/governance-checklist.md` so thi
 ## Reference
 
 - Read [governance-checklist.md](references/governance-checklist.md) when you need the repo-specific update and closeout checklist.
+- Read [evidence-based-coding-checklist.md](references/evidence-based-coding-checklist.md) when code quality standards, refactors, or review findings are part of the task.

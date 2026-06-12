@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-06-08
+更新时间：2026-06-12
 状态：已确认
 
 ## 作用
@@ -19,8 +19,9 @@
 | Check | Level | CI coverage | 升级条件 |
 | --- | --- | --- | --- |
 | `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
-| `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / CSS / SQL / Rust | 新增大文件误报可控后保持或收紧 |
-| Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; scope is `E9` plus Pyflakes `F` | 先观察 P0 误报和修复成本；后续再决定是否扩大到 style / import sorting / complexity 或纳入 hooks |
+| `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / JS / CSS / SCSS / SQL / Rust / shell / PowerShell | 新增大文件误报可控后保持或收紧；Next-style source trees 已进入 file-level budget；tests 与 fixture/cases/mock data 使用 path-specific 单文件预算 |
+| Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; scope is `E9` plus Pyflakes `F` | 保持当前 blocking scope；`PLR2004`、`C901`、`PLR0912`、`PLR0915` 只能先作为 no-write / review-required 样本收集，误报率、修复路径和 CI 成本可控后再讨论升级 |
+| Evidence-based coding standards | `review-required` | manual / `$repo-governed-coding` checklist | 覆盖魔法值、复杂度、长函数/大类职责、重复代码风险、命名和公共抽象触发条件；后续若引入 Ruff 或 JS/TS lint，必须先进入 blocking-candidate burn-in |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
 | `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit; Actions token 无法读取 check rollup 时 failed-open-PR 审计降级为 NOTE | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
@@ -87,6 +88,7 @@
 
 ## 最新口径补充
 
+- 2026-06-12：新增 evidence-based coding standards 和 `$repo-governed-coding` checklist。该标准是 review-required，不改变 Ruff blocking scope，不启用 JS/TS lint；候选自动化规则包括 Ruff `PLR2004`、`C901`、`PLR0912`、`PLR0915` 和未来 JS/TS `no-magic-numbers`，都必须先收集真实样本、误报率、修复路径、CI 成本和 reviewer 负担。
 - 2026-06-08：新增 opt-in Prototype Design Brief 与 prototype artifact review 机制。默认 `[prototype_design_brief]` 关闭；开启后由 `check_ai_governance.py` 追加 brief / artifact child checks，只验证设计投影面与原型审查包，不复制其他项目业务 truth，也不声明当前 repo 已有生产原型能力。
 - 2026-06-07：新增 `external-harness-decision/v1` 决策账本和 `check_external_harness_decisions.py`，把 remote trace pilot、external eval/sandbox、MCP/A2A、CI agent workflow 四个先前需要人工判断的方向转为 bounded active decisions。当前决策是：remote trace 等待显式 endpoint/`--send`/operator review，external eval/sandbox 先 comparison-only 且不加依赖，MCP/A2A 只做 contract registry，CI agent 保持 advisory、不创建真实 workflow。
 - 2026-06-06：五个 harness 反哺点进入 bounded 小切片：remote interop checker 现在拒绝 localhost / loopback verified-remote，CI agent contract 与 local execution policy wrapper 登记为 advisory，planner / executor / reviewer 只作为 schema sample，cross-task resume 仍需真实非 harness 任务样本。该批更新不升级 blocking、不声明 hosted/cloud agent、native sandbox、A2A 或 verified remote completion。

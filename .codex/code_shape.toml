@@ -2,20 +2,98 @@ version = 1
 
 [scope]
 include = [
+  "app/*.ts",
+  "app/**/*.ts",
+  "app/*.tsx",
+  "app/**/*.tsx",
+  "app/*.js",
+  "app/**/*.js",
+  "app/*.jsx",
+  "app/**/*.jsx",
+  "app/*.mjs",
+  "app/**/*.mjs",
+  "app/*.css",
+  "app/**/*.css",
+  "app/*.scss",
+  "app/**/*.scss",
   "apps/**/*.py",
   "apps/**/*.ts",
   "apps/**/*.tsx",
+  "apps/**/*.js",
+  "apps/**/*.jsx",
+  "apps/**/*.mjs",
   "apps/**/*.css",
+  "apps/**/*.scss",
+  "components/*.ts",
+  "components/**/*.ts",
+  "components/*.tsx",
+  "components/**/*.tsx",
+  "components/*.js",
+  "components/**/*.js",
+  "components/*.jsx",
+  "components/**/*.jsx",
+  "components/*.mjs",
+  "components/**/*.mjs",
+  "components/*.css",
+  "components/**/*.css",
+  "components/*.scss",
+  "components/**/*.scss",
   "crates/**/*.rs",
+  "lib/*.ts",
+  "lib/**/*.ts",
+  "lib/*.tsx",
+  "lib/**/*.tsx",
+  "lib/*.js",
+  "lib/**/*.js",
+  "lib/*.jsx",
+  "lib/**/*.jsx",
+  "lib/*.mjs",
+  "lib/**/*.mjs",
   "src/**/*.rs",
   "scripts/*.py",
   "scripts/**/*.py",
+  "scripts/*.ts",
+  "scripts/**/*.ts",
+  "scripts/*.js",
+  "scripts/**/*.js",
+  "scripts/*.mjs",
+  "scripts/**/*.mjs",
+  "scripts/*.cjs",
+  "scripts/**/*.cjs",
   "services/**/*.py",
+  "services/*.ts",
+  "services/**/*.ts",
+  "services/*.tsx",
+  "services/**/*.tsx",
+  "services/*.js",
+  "services/**/*.js",
+  "services/*.jsx",
+  "services/**/*.jsx",
+  "services/*.mjs",
+  "services/**/*.mjs",
+  "services/*.sql",
+  "services/**/*.sql",
+  "tests/*.py",
+  "tests/**/*.py",
+  "tests/*.ts",
+  "tests/**/*.ts",
+  "tests/*.tsx",
+  "tests/**/*.tsx",
+  "tests/*.js",
+  "tests/**/*.js",
+  "tests/*.jsx",
+  "tests/**/*.jsx",
+  "tests/*.mjs",
+  "tests/**/*.mjs",
   "db/**/*.sql",
   ".codex/hooks/*.py",
   ".codex/hooks/**/*.py",
   ".codex/hooks/*.sh",
   ".codex/hooks/**/*.sh",
+  ".codex/hooks/*.ps1",
+  ".codex/hooks/**/*.ps1",
+  ".codex/skills/*/scripts/*.py",
+  ".codex/skills/**/scripts/**/*.py",
   ".agents/skills/*/scripts/*.py",
   ".agents/skills/**/scripts/**/*.py",
   ".githooks/pre-commit",
@@ -25,6 +103,8 @@ exclude = [
   ".codex/runtime/**",
   "new_pro_standard/**",
   "output/**",
+  "**/.next/**",
+  "**/coverage/**",
   "**/__pycache__/**",
   "**/dist/**",
   "**/node_modules/**",
@@ -38,6 +118,11 @@ python_function = 60
 python_class = 180
 shell_file = 80
 rust_file = 350
+typescript_file = 350
+javascript_file = 350
+stylesheet_file = 500
+sql_file = 180
+powershell_file = 80
 
 [thresholds.python_file]
 warn = 350
@@ -63,6 +148,10 @@ error = 800
 warn = 450
 error = 800
 
+[thresholds.javascript_file]
+warn = 450
+error = 800
+
 [thresholds.stylesheet_file]
 warn = 700
 error = 1200
@@ -70,3 +159,83 @@ error = 1200
 [thresholds.sql_file]
 warn = 250
 error = 500
+
+[thresholds.powershell_file]
+warn = 120
+error = 200
+
+[[file_overrides]]
+name = "test file"
+patterns = [
+  "tests/*.py",
+  "tests/**/*.py",
+  "tests/*.ts",
+  "tests/**/*.ts",
+  "tests/*.tsx",
+  "tests/**/*.tsx",
+  "tests/*.js",
+  "tests/**/*.js",
+  "tests/*.jsx",
+  "tests/**/*.jsx",
+  "tests/*.mjs",
+  "tests/**/*.mjs",
+]
+kinds = ["python", "typescript", "javascript"]
+warn = 800
+error = 1500
+
+[[file_overrides]]
+name = "fixture/cases data file"
+patterns = [
+  "*Cases.py",
+  "**/*Cases.py",
+  "*Cases.ts",
+  "**/*Cases.ts",
+  "*Cases.tsx",
+  "**/*Cases.tsx",
+  "*Cases.js",
+  "**/*Cases.js",
+  "*Cases.jsx",
+  "**/*Cases.jsx",
+  "*Cases.mjs",
+  "**/*Cases.mjs",
+  "fixtures.py",
+  "**/fixtures.py",
+  "fixtures.ts",
+  "**/fixtures.ts",
+  "fixtures.tsx",
+  "**/fixtures.tsx",
+  "fixtures.js",
+  "**/fixtures.js",
+  "fixtures.jsx",
+  "**/fixtures.jsx",
+  "fixtures.mjs",
+  "**/fixtures.mjs",
+  "*Fixture.py",
+  "**/*Fixture.py",
+  "*Fixture.ts",
+  "**/*Fixture.ts",
+  "*Fixture.tsx",
+  "**/*Fixture.tsx",
+  "*Fixture.js",
+  "**/*Fixture.js",
+  "*Fixture.jsx",
+  "**/*Fixture.jsx",
+  "*Fixture.mjs",
+  "**/*Fixture.mjs",
+  "mockData.py",
+  "**/mockData.py",
+  "mockData.ts",
+  "**/mockData.ts",
+  "mockData.tsx",
+  "**/mockData.tsx",
+  "mockData.js",
+  "**/mockData.js",
+  "mockData.jsx",
+  "**/mockData.jsx",
+  "mockData.mjs",
+  "**/mockData.mjs",
+]
+kinds = ["python", "typescript", "javascript"]
+warn = 900
+error = 1800

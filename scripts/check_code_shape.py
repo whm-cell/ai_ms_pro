@@ -24,6 +24,13 @@ class Limit:
     error: int
 
 @dataclass(frozen=True)
+class FileOverride:
+    name: str
+    patterns: tuple[str, ...]
+    kinds: tuple[str, ...]
+    limit: Limit
+
+@dataclass(frozen=True)
 class Config:
     include: tuple[str, ...]
     exclude: tuple[str, ...]
@@ -32,9 +39,12 @@ class Config:
     python_class: Limit
     shell_file: Limit
     typescript_file: Limit
+    javascript_file: Limit
     stylesheet_file: Limit
     sql_file: Limit
     rust_file: Limit
+    powershell_file: Limit
+    file_overrides: tuple[FileOverride, ...]
 
 @dataclass(frozen=True)
 class Candidate:
@@ -66,6 +76,15 @@ def load_config() -> Config:
     data = tomllib.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     scope = data["scope"]
     thresholds = data["thresholds"]
+    file_overrides = tuple(
+        FileOverride(
+            name=item["name"],
+            patterns=tuple(item["patterns"]),
+            kinds=tuple(item.get("kinds", ())),
+            limit=Limit(warn=item["warn"], error=item["error"]),
+        )
+        for item in data.get("file_overrides", ())
+    )
     return Config(
         include=tuple(scope["include"]),
         exclude=tuple(scope["exclude"]),
@@ -74,9 +93,12 @@ def load_config() -> Config:
         python_class=Limit(**thresholds["python_class"]),
         shell_file=Limit(**thresholds["shell_file"]),
         typescript_file=Limit(**thresholds.get("typescript_file", thresholds["python_file"])),
+        javascript_file=Limit(**thresholds.get("javascript_file", thresholds.get("typescript_file", thresholds["python_file"]))),
         stylesheet_file=Limit(**thresholds.get("stylesheet_file", thresholds["shell_file"])),
         sql_file=Limit(**thresholds.get("sql_file", thresholds["shell_file"])),
         rust_file=Limit(**thresholds.get("rust_file", thresholds.get("typescript_file", thresholds["python_file"]))),
+        powershell_file=Limit(**thresholds.get("powershell_file", thresholds["shell_file"])),
+        file_overrides=file_overrides,
     )
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
@@ -86,7 +108,6 @@ def run_git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
         capture_output=True,
         check=False,
     )
-
 
 def repo_has_commits() -> bool:
     result = run_git(["rev-parse", "--verify", "HEAD"])
@@ -99,7 +120,6 @@ def decode_text(blob: bytes, path: str) -> str:
     except UnicodeDecodeError as exc:
         raise ValueError(f"{path} is not valid UTF-8 text: {exc}") from exc
 
-
 def path_matches(path: str, config: Config) -> bool:
     if not any(fnmatch.fnmatchcase(path, pattern) for pattern in config.include):
         return False
@@ -107,13 +127,14 @@ def path_matches(path: str, config: Config) -> bool:
         return False
     return True
 
-
 def detect_kind(path: str) -> str | None:
     pure = PurePosixPath(path)
     if pure.suffix == ".py":
         return "python"
     if pure.suffix in {".ts", ".tsx"}:
         return "typescript"
+    if pure.suffix in {".js", ".jsx", ".mjs", ".cjs"}:
+        return "javascript"
     if pure.suffix in {".css", ".scss"}:
         return "stylesheet"
     if pure.suffix == ".sql":
@@ -122,6 +143,8 @@ def detect_kind(path: str) -> str | None:
         return "rust"
     if pure.suffix == ".sh" or path == ".githooks/pre-commit":
         return "shell"
+    if pure.suffix == ".ps1":
+        return "powershell"
     return None
 
 
@@ -155,7 +178,6 @@ def load_staged_candidates(config: Config) -> list[Candidate]:
             )
         )
     return candidates
-
 
 def load_all_candidates(config: Config) -> list[Candidate]:
     result = run_git(["ls-files", "--cached", "--others", "--exclude-standard"])
@@ -201,7 +223,6 @@ def add_length_findings(
             "Keep the file small enough to stay easy to split and review."
         )
 
-
 def add_definition_findings(
     errors: list[str],
     warnings: list[str],
@@ -231,7 +252,6 @@ def add_definition_findings(
             f"{summarize(over_warn, limit.warn)}"
         )
 
-
 def check_python_candidate(
     candidate: Candidate,
     config: Config,
@@ -239,12 +259,13 @@ def check_python_candidate(
     warnings: list[str],
 ) -> None:
     line_count = len(candidate.text.splitlines())
+    label, limit = file_budget(candidate, config)
     add_length_findings(
         errors,
         warnings,
         path=candidate.path,
-        label="Python file",
-        limit=config.python_file,
+        label=label,
+        limit=limit,
         actual=line_count,
         is_new=candidate.is_new,
     )
@@ -268,18 +289,31 @@ def check_python_candidate(
         is_new=candidate.is_new,
     )
 
-
 def simple_kind_budget(candidate: Candidate, config: Config) -> tuple[str, Limit]:
+    if candidate.kind == "python":
+        return ("Python file", config.python_file)
     if candidate.kind == "typescript":
         return ("TypeScript file", config.typescript_file)
+    if candidate.kind == "javascript":
+        return ("JavaScript file", config.javascript_file)
     if candidate.kind == "stylesheet":
         return ("stylesheet file", config.stylesheet_file)
     if candidate.kind == "sql":
         return ("SQL file", config.sql_file)
     if candidate.kind == "rust":
         return ("Rust file", config.rust_file)
+    if candidate.kind == "powershell":
+        return ("PowerShell file", config.powershell_file)
     return ("shell file", config.shell_file)
 
+def file_budget(candidate: Candidate, config: Config) -> tuple[str, Limit]:
+    label, limit = simple_kind_budget(candidate, config)
+    for override in config.file_overrides:
+        if candidate.kind not in override.kinds:
+            continue
+        if any(fnmatch.fnmatchcase(candidate.path, pattern) for pattern in override.patterns):
+            return (f"{label} ({override.name})", override.limit)
+    return (label, limit)
 
 def check_candidate(
     candidate: Candidate,
@@ -291,7 +325,7 @@ def check_candidate(
         check_python_candidate(candidate, config, errors, warnings)
         return
 
-    label, limit = simple_kind_budget(candidate, config)
+    label, limit = file_budget(candidate, config)
     add_length_findings(
         errors,
         warnings,
@@ -301,7 +335,6 @@ def check_candidate(
         actual=len(candidate.text.splitlines()),
         is_new=candidate.is_new,
     )
-
 
 def main() -> int:
     args = parse_args()
@@ -337,7 +370,6 @@ def main() -> int:
     for message in warnings:
         print(f"WARN: {message}")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

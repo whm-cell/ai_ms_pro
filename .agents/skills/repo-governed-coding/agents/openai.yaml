@@ -1,7 +1,7 @@
 interface:
   display_name: "Repo-Governed Coding"
-  short_description: "Governed coding for this repo"
-  default_prompt: "Use $repo-governed-coding at the repo-local path to implement or review a governed change."
+  short_description: "Governed coding and evidence-based review for this repo"
+  default_prompt: "Use $repo-governed-coding at the repo-local path to implement or review a governed code-quality change."
 
 policy:
   allow_implicit_invocation: false

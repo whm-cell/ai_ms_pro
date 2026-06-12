@@ -22,6 +22,8 @@
 - 2026-06-07 已把四类外部 harness 方向固化为 source-backed `external-harness-decision/v1` active decisions，并由 checker 审计 source evidence、local upgrade scope 与 no-claim boundary。
 - 2026-06-08 已把人工“正向则默认许可”判断收敛为 `default_permission` 字段：只许可 first-party evidence-backed、bounded local/no-effect 小步；外部副作用和能力宣称仍由 activation gates 阻断。
 - 2026-06-08 已新增 opt-in Prototype Design Brief 与 prototype artifact review 机制：默认关闭，只在配置开启时进入 `check_ai_governance.py` child checks。
+- 2026-06-12 已新增 evidence-based coding standards 与 `$repo-governed-coding` checklist，用于魔法值、复杂度、重复、命名和公共抽象边界的 review-required 判断；本轮不启用新 lint blocking。
+- 2026-06-12 已按 `demo_txt_t_proto` 长文件样本扩展 code-shape scope，并为 tests 与 fixture/cases/mock data 增加 path-specific 单文件预算。
 - `new_pro_standard` 只同步 starter-safe 机制；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
 
 ## 本阶段关键成果
@@ -33,6 +35,7 @@
 - 新增 CI agent contract 与 local execution policy wrapper 只提供 advisory contract / assistive wrapper，不创建真实 CI agent workflow、不证明 native sandbox。
 - External harness decision ledger 只把人工判断变为 source-backed 可复核记录；default permission 只覆盖 bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`，但外部运行面仍不声明完成。
 - Prototype Design Brief / artifact review 只验证设计投影面、原型审查包和 Source Truth 漂移；当前不声明本 repo 已有生产原型能力，也不复制外部项目业务需求。
+- Evidence-based coding standards 只补 review-required 研发标准和按需 skill 引导；Ruff `PLR2004`、`C901`、`PLR0912`、`PLR0915` 与未来 JS/TS `no-magic-numbers` 仍只是 blocking-candidate 方向。
 
 ## 风险与阻塞
 
@@ -42,7 +45,8 @@
 - planner / executor / reviewer 当前只是 trace / provenance / eval 样例形状，不能当作 multi-agent scheduler、A2A、hosted trace 或 red-team evidence。
 - external harness decisions 当前是 source-backed no-effect governance evidence；`default_permission` 不得当作 remote trace、hosted eval、native sandbox、MCP/A2A 或 CI agent runtime 完成。
 - 高影响动作、runtime drift、guardrail samples、security triage、runtime token pressure 仍处于 warning / review-required，不自动升级 blocking。
-- Context budget 和 ADR 数量需继续压缩；code-shape 只剩 legacy 大文件 warning。
+- 魔法值、复杂度、重复和公共抽象边界目前依赖 review-required checklist；尚无真实误报样本、修复路径和 CI 成本证据支持升级为 blocking。
+- Context budget 和 ADR 数量需继续压缩；code-shape 扩面后会暴露更多 legacy warning，但新增超大文件阻断边界不变。
 
 ## 本轮收敛
 
@@ -58,6 +62,7 @@
 - 对 cross-task resume、remote interop 和 high-impact guardrail 只采集真实 bounded sample；synthetic 或 local-only 证据不得冒充 accepted remote / cross-task proof。
 - 下一轮若推进五个反哺点，优先补真实 cross-task resume sample 和经 ADR-017 允许的 remote endpoint pilot；CI agent、local execution wrapper、多 agent 样例继续保持 advisory，直到有真实样本、误报和修复路径。
 - 若后续推进外部 harness 决策，可默认推进 `default_permission.permitted_scope` 中的 first-party evidence-backed、bounded local/no-effect 小步；超出范围只能按 `external-harness-decisions.jsonl` 的 activation gates 执行：remote trace 需 endpoint/`--send`/operator review，native sandbox 或 MCP/A2A runtime 需单独 proposal/ADR，CI agent workflow 需 owner、permissions、remote guardrail 和 rollback evidence。
+- 若后续推进 code-quality 自动化，先用候选 Ruff / ESLint 规则做 no-write 样本审计，再按 check registry 的真实样本、误报率、修复路径、CI 成本和 reviewer 负担要求决定是否升级。
 - 压缩完成型 handoff / status 细节，合并或 supersede 旧 ADR，避免默认面超过 context gate。
 - legacy code-shape 大文件按独立维护小切片拆分，避免和 capability schema 改动混合。
 

@@ -21,7 +21,7 @@
 ## 当前主目标
 
 - Stage-00 从 harness closeout 转向 capability 增量建设，但三层边界不变：runtime 本地恢复、governance 共享真相、verification 漂移检测。
-- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval` 和支撑性 advisory guardrails。
+- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、evidence-based code-quality review standard 和支撑性 advisory guardrails。
 - 2026-06-06 已把五个 harness 反哺点落成 bounded 小切片：remote loopback hardening、CI agent contract、local execution policy wrapper、planner/executor/reviewer schema sample；cross-task resume 真实样本仍 open。
 - 2026-06-07 source-backed external decisions 已入账；2026-06-08 已增加 evidence-backed default permission：证据充分且对当前 harness 正向时，bounded local/no-effect 小步默认许可，但四类外部运行面仍不声明完成。
 - 2026-06-08 已从 `demo_txt_t_proto` 抽取 opt-in Prototype Design Brief / artifact review harness 机制；当前默认关闭，不复制目标项目业务 truth，不改变 active validation 范围。
@@ -64,6 +64,8 @@
 - Task outcome eval command validation treats repo-local `.codex/.venv/bin/python` as an optional local interpreter entrypoint; CI must still validate referenced repo scripts/tests.
 - External harness decision validation keeps the four previously manual choices source-backed, active, bounded, and default-permitted only for local/no-effect improvements; external effects still require explicit per-run confirmation.
 - Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
+- Evidence-based coding standards are review-required only; candidate Ruff / JS lint rules need real samples before any blocking upgrade.
+- Code-shape now covers Next-style `app/`, `components/`, `lib/`, JS/MJS/JSX, SCSS, service SQL, tests, and PowerShell at file-level; Python keeps AST budgets.
 - `.codex/hooks.json` uses the portable `.codex/hooks/run_hook.cmd` launcher; Windows routes to PowerShell and macOS / Linux routes to POSIX shell without host-specific resync.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
