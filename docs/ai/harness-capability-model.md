@@ -59,6 +59,7 @@
 - CI agent workflow：继续 advisory contract，不创建真实 GitHub agent workflow。
 - 每条 decision 都必须记录一手 `source_evidence`、positive signal 和 local upgrade scope；source 只提升决策质量、比较口径、metadata discipline 或边界可见性，不提升 hosted / remote / native runtime claim。
 - 每条 active decision 也必须记录 `default_permission`：证据充分且对当前 harness 正向时，允许 bounded local/no-effect 小步默认推进；external send、verified remote、hosted eval、native sandbox、MCP/A2A runtime、真实 CI agent workflow 和外部副作用仍按 activation gates 阻断。
+- Agent Productization Readiness 只作为 review-required 缺口雷达：固定产品 agent 的 12 个能力域，并把当前 harness control-plane 的 partial / deferred 短板显式输出；它不改变三条主线、不声明产品 agent 平台完成。
 
 对应审计命令：
 
