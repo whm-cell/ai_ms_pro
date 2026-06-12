@@ -95,6 +95,30 @@ class RuntimeExecutionSnapshotTest(unittest.TestCase):
 
         self.assertTrue(any("must not contain raw local transcript or runtime paths" in item for item in errors))
 
+    def test_snapshot_validator_accepts_windows_working_context_ref(self) -> None:
+        snapshot = runtime_execution_snapshot.build_execution_snapshot(
+            payload={},
+            session_id="session-windows-path",
+            agent_label="main",
+            branch_or_thread="test-branch",
+            session_type="new",
+            requirement_ids=["REQ-001"],
+            workstream_ids=["WS-01"],
+            traceability_source="manual",
+            changed_paths=["docs/ai/working-context.md"],
+            prompt_preview="Validate Windows working context ref",
+            transcript_path="[REDACTED_PATH]/rollout.jsonl",
+        )
+        snapshot["artifacts"]["working_context_path"] = "docs\\ai\\working-context.md"
+
+        errors = check_runtime_execution_snapshots.validate_snapshot(
+            snapshot,
+            check_runtime_execution_snapshots.load_contract_names(),
+            Path("snapshot.json"),
+        )
+
+        self.assertEqual(errors, [])
+
 
 if __name__ == "__main__":
     unittest.main()

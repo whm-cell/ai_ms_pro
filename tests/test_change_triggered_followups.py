@@ -243,6 +243,24 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("external-harness-decisions", names)
         self.assertIn("scripts/check_external_harness_decisions.py", "\n".join(decision.commands))
 
+    def test_agent_productization_readiness_change_triggers_readiness_check(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            ("docs/ai/standards/agent-productization-readiness-assessment.jsonl",)
+        )
+        names = {item.name for item in followups}
+        readiness = next(item for item in followups if item.name == "agent-productization-readiness")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("agent-productization-readiness", names)
+        self.assertIn("scripts/check_agent_productization_readiness.py", "\n".join(readiness.commands))
+        self.assertEqual(readiness.level, "review-required")
+
+    def test_agent_productization_readiness_helper_triggers_readiness_check(self) -> None:
+        names = self.followup_names("scripts/agent_productization_readiness.py")
+
+        self.assertIn("agent-productization-readiness", names)
+        self.assertIn("harness-code-shape", names)
+
     def test_local_execution_policy_wrapper_change_triggers_wrapper_checks(self) -> None:
         followups = check_change_triggered_followups.build_followups(("scripts/run_sandboxed_command.py",))
         names = {item.name for item in followups}

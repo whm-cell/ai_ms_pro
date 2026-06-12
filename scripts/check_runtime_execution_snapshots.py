@@ -106,7 +106,7 @@ def validate_snapshot(snapshot: dict[str, Any], contract_names: set[str], path: 
         errors.append(f"{path}: artifacts must be an object")
     else:
         working_context = artifacts.get("working_context_path")
-        if not isinstance(working_context, str) or not working_context.endswith("docs/ai/working-context.md"):
+        if not isinstance(working_context, str) or not is_working_context_ref(working_context):
             errors.append(f"{path}: artifacts.working_context_path must point to docs/ai/working-context.md")
         for key, value in artifacts.items():
             if isinstance(value, str) and contains_raw_runtime_path(value):
@@ -178,6 +178,10 @@ def contains_raw_runtime_path(value: str) -> bool:
     if value.startswith("[REDACTED_PATH]"):
         return False
     return any(marker in value for marker in RAW_PATH_MARKERS)
+
+
+def is_working_context_ref(value: str) -> bool:
+    return value.replace("\\", "/").endswith("docs/ai/working-context.md")
 
 
 def load_snapshot(path: Path) -> dict[str, Any]:

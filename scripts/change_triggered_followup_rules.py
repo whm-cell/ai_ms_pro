@@ -210,6 +210,23 @@ RULES: tuple[Rule, ...] = (
         "External harness decision records or validator changed.",
     ),
     rule(
+        "agent-productization-readiness",
+        "review-required",
+        "manual / governance follow-up can audit product-agent readiness gaps",
+        (
+            "docs/ai/standards/agent-productization-readiness*",
+            "scripts/agent_productization_readiness.py",
+            "scripts/check_agent_productization_readiness.py",
+            "tests/test_agent_productization_readiness.py",
+        ),
+        (
+            ".codex/hooks/run_with_repo_python.sh scripts/check_agent_productization_readiness.py",
+            "python3 tests/test_agent_productization_readiness.py",
+        ),
+        ("docs/ai/standards/agent-productization-readiness.md",),
+        "Agent productization readiness model, assessment, or validator changed.",
+    ),
+    rule(
         "local-execution-policy-wrapper",
         "advisory",
         "manual assistive wrapper smoke only; not a native sandbox proof",
