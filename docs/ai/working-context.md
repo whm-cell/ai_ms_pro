@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-06-08
+更新时间：2026-06-12
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前模式：Codex-first harness + bounded runtime capability
 
@@ -16,7 +16,7 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
-- Last Synced At: 2026-06-08
+- Last Synced At: 2026-06-12
 
 ## 当前主目标
 
@@ -64,6 +64,7 @@
 - Task outcome eval command validation treats repo-local `.codex/.venv/bin/python` as an optional local interpreter entrypoint; CI must still validate referenced repo scripts/tests.
 - External harness decision validation keeps the four previously manual choices source-backed, active, bounded, and default-permitted only for local/no-effect improvements; external effects still require explicit per-run confirmation.
 - Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
+- `.codex/hooks.json` uses the portable `.codex/hooks/run_hook.cmd` launcher; Windows routes to PowerShell and macOS / Linux routes to POSIX shell without host-specific resync.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
 ## 更新规则

@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-06-08
+更新时间：2026-06-12
 阶段：stage-00
 状态：进行中
 
@@ -49,6 +49,7 @@
 - `.codex/runtime/*` tracked verification artifacts 已从 canonical change surface 移除，生成目录改为 ignore。
 - Default context surface 降到预算线以下；ADR-002/003 已归档，当前 ADR 数低于预算。
 - 记录 1 条 bounded high-impact confirmation real sample；cross-task resume 仍因缺真实非 harness 任务样本保持 open。
+- `.codex/hooks.json` 已改为 portable hook launcher，Windows 进入 PowerShell runner，macOS / Linux 进入 POSIX runner，避免 `.py` 文件关联弹窗并消除跨宿主同步漂移。
 
 ## 下一阶段重点
 

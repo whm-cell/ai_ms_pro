@@ -1,6 +1,6 @@
 # AI 文档入口索引
 
-更新时间：2026-06-08
+更新时间：2026-06-12
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前判断：harness 可用；阶段从 closeout 转向 bounded capability 增量建设；context budget 是 strict gate；active validation 仍只认 WS-01 / WS-02；execution snapshot、remote interop、task eval、CI agent contract、local wrapper、source-backed external decisions、evidence-backed default permission 和 opt-in Prototype Design Brief 均按结构化 evidence / claim-boundary 处理。
 
@@ -42,7 +42,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Evidence-backed External Decision Permission](./changelog/2026-06-08-evidence-backed-external-decision-permission.md)
+- 最新 changelog：[Portable Hook Launcher Config](./changelog/2026-06-12-portable-hook-launcher-config.md)
 
 ## 维护规则
 

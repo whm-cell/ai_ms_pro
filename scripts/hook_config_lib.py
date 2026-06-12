@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import json
-import platform
 from pathlib import Path
 
 
 def render_hooks_config(*, root: Path, system: str | None = None) -> str:
-    resolved_root = root.resolve()
-    current_system = (system or platform.system()).strip() or platform.system()
-    runner_command = resolve_runner_command(root=resolved_root, system=current_system)
+    runner_command = resolve_runner_command(root=root.resolve(), system=system)
 
     config = {
         "hooks": {
@@ -80,8 +77,6 @@ def render_hooks_config(*, root: Path, system: str | None = None) -> str:
     return json.dumps(config, ensure_ascii=False, indent=2) + "\n"
 
 
-def resolve_runner_command(*, root: Path, system: str) -> str:
-    normalized_system = system.lower()
-    if normalized_system == "windows":
-        return "powershell -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/run_hook.ps1"
-    return ".codex/hooks/run_hook.py"
+def resolve_runner_command(*, root: Path, system: str | None = None) -> str:
+    _ = (root, system)
+    return ".codex/hooks/run_hook.cmd"
