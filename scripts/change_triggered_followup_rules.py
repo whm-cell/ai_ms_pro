@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from change_triggered_enterprise_boundary_rules import ENTERPRISE_CODE_BOUNDARY_RULES
 from change_triggered_harness_sample_rules import HARNESS_SAMPLE_GAP_COMMANDS, HARNESS_SAMPLE_GAP_PATTERNS
 from change_triggered_profile_rules import PROFILE_AND_UPGRADE_RULES
 from change_triggered_rule_builder import Rule, WARNING_SAMPLE_CODE_ALIGNMENT_COMMANDS, rule
@@ -59,6 +60,41 @@ RULES: tuple[Rule, ...] = (
         (".agents/skills/harness-maintenance/references/runtime-token-budget.md",),
         "Runtime transcript or token-budget policy changed.",
     ),
+    rule(
+        "config-contract-boundary",
+        "review-required",
+        "manual / SessionStart env drift warning; config contract check remains review-required",
+        (
+            ".codex/harness.toml",
+            ".codex/hooks.json",
+            ".codex/hooks/session_start_env_template_sync.py",
+            ".env.example",
+            "*.env.example",
+            "**/*.env.example",
+            ".github/workflows/**",
+            "scripts/check_config_contract.py",
+            "scripts/check_env_template_sync.py",
+            "scripts/harness_config.py",
+            "scripts/hook_config_lib.py",
+            "scripts/sync_hooks_config.py",
+            "tests/test_config_contract.py",
+            "tests/test_env_template_sync.py",
+            "tests/test_harness_config.py",
+            "tests/test_hooks_config_sync.py",
+            "docs/ai/standards/config-contract-boundary.md",
+            "lib/**/providerConfig.*",
+            "services/**/deployment.env.example",
+        ),
+        (
+            ".codex/hooks/run_with_repo_python.sh scripts/check_config_contract.py",
+            ".codex/hooks/run_with_repo_python.sh scripts/check_env_template_sync.py --warning-only",
+            "python3 tests/test_config_contract.py",
+            "python3 tests/test_env_template_sync.py",
+        ),
+        ("docs/ai/standards/config-contract-boundary.md",),
+        "Config contract registry, env template, hook, workflow, or deployment env surface changed.",
+    ),
+    *ENTERPRISE_CODE_BOUNDARY_RULES,
     rule(
         "stage-checkpoints",
         "advisory",

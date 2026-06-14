@@ -32,6 +32,23 @@ prototype_route = ""
 fixture_paths = []
 required_states = []
 
+[config_contracts]
+enabled = true
+env_template_paths = []
+local_env_paths = [
+  ".env",
+  ".env.local",
+]
+registry_paths = []
+scan_roots = [
+  "scripts",
+  ".codex/hooks",
+]
+allowed_literal_paths = []
+secret_key_patterns = []
+config_key_patterns = []
+literal_patterns = []
+
 [context_budget]
 default_surface_token_budget = 8500
 default_surface_warning_percent = 80

@@ -203,6 +203,7 @@ Use these on-demand triggers:
 - `.agents/skills/harness-maintenance/`: harness internals
 - `.agents/skills/team-pr-conflict-control/`: multi-person or multi-AI PR collision control
 - `.agents/skills/repo-governed-coding/`: only when explicitly invoked or when governed coding guardrails are requested
+- `.agents/skills/enterprise-code-boundary-maintenance/`: logging/redaction, error contract, runtime side effect, config contract, or enterprise coding boundary guardrails
 
 Skip workflow skills for simple tasks. Skill outputs must write durable results back to requirements, handoff, status, ADR, changelog, checks, PR metadata, or candidate skills; they must not create hidden canonical truth.
 

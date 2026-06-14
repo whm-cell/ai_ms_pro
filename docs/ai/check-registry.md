@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-06-12
+更新时间：2026-06-14
 状态：已确认
 
 ## 作用
@@ -22,6 +22,7 @@
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / JS / CSS / SCSS / SQL / Rust / shell / PowerShell | 新增大文件误报可控后保持或收紧；Next-style source trees 已进入 file-level budget；tests 与 fixture/cases/mock data 使用 path-specific 单文件预算 |
 | Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; scope is `E9` plus Pyflakes `F` | 保持当前 blocking scope；`PLR2004`、`C901`、`PLR0912`、`PLR0915` 只能先作为 no-write / review-required 样本收集，误报率、修复路径和 CI 成本可控后再讨论升级 |
 | Evidence-based coding standards | `review-required` | manual / `$repo-governed-coding` checklist | 覆盖魔法值、复杂度、长函数/大类职责、重复代码风险、命名和公共抽象触发条件；后续若引入 Ruff 或 JS/TS lint，必须先进入 blocking-candidate burn-in |
+| Enterprise Code Boundary standards | `review-required` | manual / `$enterprise-code-boundary-maintenance` checklist | 覆盖 logging/redaction、error contract、runtime side effect 和 config contract routing；v1 只做规范索引和 changed-file follow-up，不新增 checker、不声明 SIEM/DLP、生产 observability、全局错误码平台、service mesh 或远端 side-effect 审计 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
 | `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit; Actions token 无法读取 check rollup 时 failed-open-PR 审计降级为 NOTE | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
@@ -39,6 +40,8 @@
 | `check_ci_agent_contract.py` | `advisory` | manual / follow-up summary | 校验 `ci-agent-contract/v1` 的 PR-only trigger、read-only/default-minimal permissions、禁用 pull_request_target / secrets / OIDC / repo write / PR comment / label / merge / release / deploy / external-send，并要求 hosted/cloud-agent 与 remote-enforcement no-claim；不创建真实 CI agent workflow |
 | `check_external_harness_decisions.py` | `advisory` | manual / follow-up summary | 校验 `external-harness-decision/v1` 中 remote trace pilot、external eval/sandbox、MCP/A2A 与 CI agent workflow 四类 active decision 是否齐全，并强制 no hosted trace/eval、no verified remote without operator review、no native sandbox、no MCP/A2A runtime、no real CI agent workflow、no external effect without explicit confirmation；不发送网络 probe、不安装 eval 工具、不创建 MCP/A2A runtime、不创建 GitHub agent workflow |
 | `check_agent_productization_readiness.py` | `review-required` | manual / follow-up summary | 校验 `agent-productization-readiness/v1` 模型和 `agent-productization-assessment/v1` 当前评估，固定 runtime orchestration、tool/MCP、memory、HITL、durability、trace、eval、sandbox、multi-agent、structured output、cost/latency、ops 12 个能力域；`partial` / `missing` / `deferred` 只输出 `REVIEW:`，不升级 blocking、不声明产品 agent 平台完成 |
+| `check_config_contract.py` | `review-required` | manual / follow-up summary | 校验 `[config_contracts]` 声明的 registry、allowed paths、env template、secret key pattern、config key pattern 和 literal pattern；当前只做 repo-local 配置契约边界，不提供配置中心、secret manager、远端部署验证或 provider-specific 硬编码 |
+| `check_env_template_sync.py` | `review-required` | manual; SessionStart hook warning-only | 只比较 env template 与本机 env 的 key 集合，不读取、不打印、不覆盖值；无 env template 配置时为 no-op；本机 `.env` 缺 key 只作为运行前提醒 |
 | `run_sandboxed_command.py` | `advisory` | manual assistive wrapper | argv-only / `shell=false` / repo-root / reduced-env / timeout / runtime tool-output artifacts / preflight refusal；metadata 明示 `native_sandbox=false`，不能当作 OS sandbox、云端 execution engine 或完整 subprocess isolation |
 | `check_tool_contracts.py` | `blocking-candidate` | governance job | MCP-like tools 或高影响工具 contract 增多后，根据误报率和 automation mode 使用情况升级 |
 | `check_threejs_snake_contract.py` | `blocking` | governance job | 已强制；它是 WS-01 static contract gate，不替代 browser smoke |
@@ -89,6 +92,8 @@
 
 ## 最新口径补充
 
+- 2026-06-14：新增 Enterprise Code Boundary Candidate skill 与三份 review-required 标准，首批覆盖 logging/redaction、error contract 和 runtime side effect；它只做规范索引和复核路由，不新增 checker、不升级 blocking、不声明生产观测或远端副作用治理完成。
+- 2026-06-14：新增 Config Contract Boundary 标准、`check_config_contract.py`、`check_env_template_sync.py` 和 SessionStart env template drift warning。该机制只约束 repo 内配置 registry / template / scanned code 的边界，不读取或输出 env 值，不接生产配置中心、secret manager 或远端部署验证；provider-specific 规则必须进入 `[config_contracts]`，不得硬编码在通用 checker 中。
 - 2026-06-12：新增 Agent Productization Readiness 标准和 `check_agent_productization_readiness.py`。该检查把成熟产品 agent 的 12 个能力域固化为 review-required readiness model，并记录当前 `ai-ms-pro-harness-control-plane` 的 partial/deferred 短板；它只做缺口雷达，不新增外部依赖、不接 hosted trace/eval、不创建 MCP/A2A runtime 或 CI agent workflow，也不改变 Stage-00 local-first 边界。
 - 2026-06-12：新增 evidence-based coding standards 和 `$repo-governed-coding` checklist。该标准是 review-required，不改变 Ruff blocking scope，不启用 JS/TS lint；候选自动化规则包括 Ruff `PLR2004`、`C901`、`PLR0912`、`PLR0915` 和未来 JS/TS `no-magic-numbers`，都必须先收集真实样本、误报率、修复路径、CI 成本和 reviewer 负担。
 - 2026-06-08：新增 opt-in Prototype Design Brief 与 prototype artifact review 机制。默认 `[prototype_design_brief]` 关闭；开启后由 `check_ai_governance.py` 追加 brief / artifact child checks，只验证设计投影面与原型审查包，不复制其他项目业务 truth，也不声明当前 repo 已有生产原型能力。

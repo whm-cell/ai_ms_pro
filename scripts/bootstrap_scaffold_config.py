@@ -23,6 +23,23 @@ def render_harness_config() -> str:
         archive_candidate_min_score = 3
         warn_at_budget = true
 
+        [config_contracts]
+        enabled = true
+        env_template_paths = []
+        local_env_paths = [
+          ".env",
+          ".env.local",
+        ]
+        registry_paths = []
+        scan_roots = [
+          "scripts",
+          ".codex/hooks",
+        ]
+        allowed_literal_paths = []
+        secret_key_patterns = []
+        config_key_patterns = []
+        literal_patterns = []
+
         [context_budget]
         default_surface_token_budget = 6500
         always_on_doc_line_budget = 300

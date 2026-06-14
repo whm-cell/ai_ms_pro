@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-06-12
+更新时间：2026-06-14
 阶段：stage-00
 状态：进行中
 
@@ -17,38 +17,28 @@
 
 ## 当前完成度
 
-- 2026-06-03 已把 execution snapshot、remote interop report、task outcome eval 和 capability summary 推进到结构化 state / evidence / aggregate 指标。
-- 2026-06-06 已把五个 harness 反哺点收敛为 bounded 小切片：remote interop loopback hardening、CI agent contract、local execution policy wrapper、planner / executor / reviewer schema sample、cross-task resume 真实样本继续排队。
-- 2026-06-07 已把四类外部 harness 方向固化为 source-backed `external-harness-decision/v1` active decisions，并由 checker 审计 source evidence、local upgrade scope 与 no-claim boundary。
-- 2026-06-08 已把人工“正向则默认许可”判断收敛为 `default_permission` 字段：只许可 first-party evidence-backed、bounded local/no-effect 小步；外部副作用和能力宣称仍由 activation gates 阻断。
-- 2026-06-08 已新增 opt-in Prototype Design Brief 与 prototype artifact review 机制：默认关闭，只在配置开启时进入 `check_ai_governance.py` child checks。
+- 2026-06-03 至 06-08 已完成 capability state/evidence 聚合、bounded vnext 切片、external decisions、`default_permission` 和 opt-in Prototype Design Brief；外部副作用与能力宣称仍由 activation gates 阻断。
 - 2026-06-12 已新增 evidence-based coding standards 与 `$repo-governed-coding` checklist，用于魔法值、复杂度、重复、命名和公共抽象边界的 review-required 判断；本轮不启用新 lint blocking。
 - 2026-06-12 已新增 Agent Productization Readiness：固定 12 个产品 agent 能力域，并用 `check_agent_productization_readiness.py` 输出 review-required 缺口；不升级 blocking。
 - 2026-06-12 已按 `demo_txt_t_proto` 长文件样本扩展 code-shape scope，并为 tests 与 fixture/cases/mock data 增加 path-specific 单文件预算。
+- 2026-06-14 已按 `demo_txt_t_proto` 配置边界样本新增 Config Contract Boundary：`[config_contracts]`、`check_config_contract.py`、`check_env_template_sync.py` 和 SessionStart env key drift warning；当前只约束 repo-local 配置契约，不读取 env 值、不接 secret manager 或远端配置中心。
+- 2026-06-14 已新增 `$enterprise-code-boundary-maintenance` Candidate skill 与三份 review-required 标准；首批只覆盖 logging/redaction、error contract 和 runtime side effect，不新增 checker、不升级 blocking。
 - `new_pro_standard` 只同步 starter-safe 机制；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
 
 ## 本阶段关键成果
 
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已跑通；CI blocking smoke 仍只覆盖 WS-01 / WS-02。
-- GitHub 最小权限、CODEOWNERS、PR template、Dependabot、dependency review、security evidence、PR conflict / branch hygiene 与 `merge_group` 本地证据已具备；private Free 下 branch protection / rulesets 仍不得声明强制。
-- Agentic standards、tool contracts、sample gaps、runtime compression、context budget 与 code-shape 已进入 deterministic checks / references；细则不放回默认上下文。
-- Capability bootstrap / tightening / state-evidence 聚合均保持 local-first：runtime artifact 是本地恢复材料，verified remote、hosted trace、MCP/A2A、native sandbox 和外部 collector 均未声明完成。
-- 新增 CI agent contract 与 local execution policy wrapper 只提供 advisory contract / assistive wrapper，不创建真实 CI agent workflow、不证明 native sandbox。
-- External harness decision ledger 只把人工判断变为 source-backed 可复核记录；default permission 只覆盖 bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`，但外部运行面仍不声明完成。
-- Prototype Design Brief / artifact review 只验证设计投影面、原型审查包和 Source Truth 漂移；当前不声明本 repo 已有生产原型能力，也不复制外部项目业务需求。
-- Evidence-based coding standards 只补 review-required 研发标准和按需 skill 引导；Ruff `PLR2004`、`C901`、`PLR0912`、`PLR0915` 与未来 JS/TS `no-magic-numbers` 仍只是 blocking-candidate 方向。
-- Agent Productization Readiness 只把成熟 agent 能力要求转成 review-required model / assessment；当前多项产品化能力仍为 partial 或 deferred。
+- GitHub、agentic standards、tool contracts、sample gaps、runtime compression、context budget、code-shape、prototype brief、coding standards、enterprise boundaries 和 productization readiness 均已进入 bounded checks / references；细则不放回默认上下文。
+- Capability bootstrap / tightening / state-evidence 聚合保持 local-first：runtime artifact 是本地恢复材料；verified remote、hosted trace、MCP/A2A、native sandbox、外部 collector、真实 CI agent workflow 和生产原型能力均未声明完成。
+- External decisions / default permission / execution wrapper 只覆盖 source-backed、bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`。
+- Config Contract Boundary 只把 env template、typed registry、scan roots、allowed literal paths 和 pattern 变成可审计契约；provider-specific 规则必须在 `.codex/harness.toml` 配置，不写死在通用 checker。
 
 ## 风险与阻塞
 
 - GitHub remote required checks / review / 禁直推在 private Free 下仍是 `UNKNOWN`。
-- `GAP-TRACE-OTLP-PILOT-BURNIN` 只有 1 个 accepted local-interop sample；`GAP-TRACE-REMOTE-INTEROP` 没有 verified remote evidence。
-- `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` 尚无 accepted cross-task resume sample；不能用 harness-hardening 任务样本补数。
-- planner / executor / reviewer 当前只是 trace / provenance / eval 样例形状，不能当作 multi-agent scheduler、A2A、hosted trace 或 red-team evidence。
-- external harness decisions 当前是 source-backed no-effect governance evidence；`default_permission` 不得当作 remote trace、hosted eval、native sandbox、MCP/A2A 或 CI agent runtime 完成。
-- 高影响动作、runtime drift、guardrail samples、security triage、runtime token pressure 仍处于 warning / review-required，不自动升级 blocking。
-- 魔法值、复杂度、重复和公共抽象边界目前依赖 review-required checklist；尚无真实误报样本、修复路径和 CI 成本证据支持升级为 blocking。
+- Remote interop、cross-task resume、multi-agent、external decisions、高影响动作、runtime drift、guardrail/security/runtime token pressure、coding standards、enterprise code boundary 和 product readiness 都仍缺真实样本、误报率、修复路径或 owner evidence；不得升级为完成或 blocking。
 - 产品级 agent readiness 当前只是缺口雷达；未来新增产品 agent 必须新增 target assessment。
+- Config Contract Boundary 不能被写成生产配置管理完成；它不验证外部部署 secret、不保存本机 `.env`、不证明远端环境已同步。
 - Context budget 和 ADR 数量需继续压缩；code-shape 扩面后会暴露更多 legacy warning，但新增超大文件阻断边界不变。
 
 ## 本轮收敛
@@ -63,10 +53,8 @@
 - 提交前收敛 canonical change surface：docs、standards、scripts、tests、tool contracts 可进入共享 truth，`.codex/runtime/*` 不作为 canonical artifact。
 - 继续观察 capability summary 的 `resume_ready`、blocked resume、interop level count、task outcome breakdown 和 blocked reason；指标只支持决策，不自动升级 claim。
 - 对 cross-task resume、remote interop 和 high-impact guardrail 只采集真实 bounded sample；synthetic 或 local-only 证据不得冒充 accepted remote / cross-task proof。
-- 下一轮若推进五个反哺点，优先补真实 cross-task resume sample 和经 ADR-017 允许的 remote endpoint pilot；CI agent、local execution wrapper、多 agent 样例继续保持 advisory，直到有真实样本、误报和修复路径。
-- 若后续推进外部 harness 决策，可默认推进 `default_permission.permitted_scope` 中的 first-party evidence-backed、bounded local/no-effect 小步；超出范围只能按 `external-harness-decisions.jsonl` 的 activation gates 执行：remote trace 需 endpoint/`--send`/operator review，native sandbox 或 MCP/A2A runtime 需单独 proposal/ADR，CI agent workflow 需 owner、permissions、remote guardrail 和 rollback evidence。
-- 若后续推进 code-quality 自动化，先用候选 Ruff / ESLint 规则做 no-write 样本审计，再按 check registry 的真实样本、误报率、修复路径、CI 成本和 reviewer 负担要求决定是否升级。
-- 若后续构建产品 agent，先运行 `check_agent_productization_readiness.py` 并新增 target assessment；升级需真实样本、owner 和修复路径。
+- 下一轮优先补真实 cross-task resume sample、ADR-017 允许的 remote endpoint pilot，以及 code-quality / product-agent / high-impact guardrail 的真实样本；所有升级仍按 check registry 的样本、误报率、修复路径、CI 成本和 owner 要求执行。
+- 若后续项目需要 provider / model / endpoint 边界，先把 pattern 和 registry path 写入 `[config_contracts]`，再运行 `check_config_contract.py`；不要把 provider-specific literal 写进通用 checker。
 - 压缩完成型 handoff / status 细节，合并或 supersede 旧 ADR，避免默认面超过 context gate。
 - legacy code-shape 大文件按独立维护小切片拆分，避免和 capability schema 改动混合。
 

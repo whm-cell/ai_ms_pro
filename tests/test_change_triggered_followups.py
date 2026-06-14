@@ -38,6 +38,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("high-impact-agent-actions", names)
         self.assertIn("harness-sample-gap-evidence", names)
         self.assertIn("python-linter", names)
+        self.assertIn("config-contract-boundary", names)
 
     def test_python_linter_config_change_triggers_linter_check(self) -> None:
         names = self.followup_names("pyproject.toml")
@@ -90,6 +91,66 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertIn("governance-surface", names)
         self.assertIn("runtime-token-budget", names)
+        self.assertIn("config-contract-boundary", names)
+
+    def test_env_template_change_triggers_config_contract(self) -> None:
+        followups = check_change_triggered_followups.build_followups((".env.example",))
+        names = {item.name for item in followups}
+        config_contract = next(item for item in followups if item.name == "config-contract-boundary")
+
+        self.assertIn("config-contract-boundary", names)
+        self.assertIn("scripts/check_config_contract.py", "\n".join(config_contract.commands))
+        self.assertIn("scripts/check_env_template_sync.py --warning-only", "\n".join(config_contract.commands))
+
+    def test_provider_registry_change_triggers_config_contract(self) -> None:
+        names = self.followup_names("lib/xhs/ai/providerConfig.ts")
+
+        self.assertIn("config-contract-boundary", names)
+
+    def test_deployment_env_template_change_triggers_config_contract(self) -> None:
+        names = self.followup_names("services/internal_auth/deployment.env.example")
+
+        self.assertIn("config-contract-boundary", names)
+
+    def test_enterprise_boundary_skill_change_triggers_review(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            (".agents/skills/enterprise-code-boundary-maintenance/SKILL.md",)
+        )
+        names = {item.name for item in followups}
+        enterprise = next(item for item in followups if item.name == "enterprise-code-boundaries")
+
+        self.assertIn("enterprise-code-boundaries", names)
+        self.assertIn("repo-local-skills", names)
+        self.assertIn("scripts/check_repo_skills.py", "\n".join(enterprise.commands))
+
+    def test_enterprise_boundary_standards_trigger_review(self) -> None:
+        for path in (
+            "docs/ai/standards/logging-redaction-boundary.md",
+            "docs/ai/standards/error-contract-boundary.md",
+            "docs/ai/standards/runtime-side-effect-boundary.md",
+        ):
+            names = self.followup_names(path)
+
+            self.assertIn("governance-surface", names)
+            self.assertIn("enterprise-code-boundaries", names)
+
+    def test_logger_error_provider_client_and_api_route_trigger_enterprise_boundary(self) -> None:
+        for path in (
+            "lib/xhs/logging/logger.ts",
+            "lib/xhs/errors/modelError.ts",
+            "lib/xhs/ai/provider.ts",
+            "lib/xhs/clients/bailianClient.ts",
+            "app/api/generate/route.ts",
+        ):
+            names = self.followup_names(path)
+
+            self.assertIn("enterprise-code-boundaries", names)
+
+    def test_enterprise_boundary_rule_helper_triggers_enterprise_boundary(self) -> None:
+        names = self.followup_names("scripts/change_triggered_enterprise_boundary_rules.py")
+
+        self.assertIn("enterprise-code-boundaries", names)
+        self.assertIn("harness-code-shape", names)
 
     def test_runtime_token_script_change_triggers_runtime_budget(self) -> None:
         names = self.followup_names("scripts/check_runtime_token_budget.py")

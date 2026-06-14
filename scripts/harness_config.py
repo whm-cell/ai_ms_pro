@@ -8,6 +8,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from harness_config_contracts import (
+    ConfigContractsConfig,
+    extract_array_literal,
+    load_config_contracts,
+    parse_config_contracts_section,
+)
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -93,6 +100,7 @@ class HarnessConfig:
     context_surface: ContextSurfaceConfig
     context_budget: ContextBudgetConfig
     prototype_design_brief: PrototypeDesignBriefConfig
+    config_contracts: ConfigContractsConfig
 
 
 def load_harness_config(root: Path = ROOT) -> HarnessConfig:
@@ -110,11 +118,16 @@ def load_harness_config(root: Path = ROOT) -> HarnessConfig:
     context_surface = _load_context_surface(data.get("context_surface", {}))
     context_budget = _load_context_budget(data.get("context_budget", {}))
     prototype_design_brief = _load_prototype_design_brief(data.get("prototype_design_brief", {}))
+    try:
+        config_contracts = load_config_contracts(data.get("config_contracts", {}))
+    except ValueError as exc:
+        raise HarnessConfigError(str(exc)) from exc
     return HarnessConfig(
         checks=checks,
         context_surface=context_surface,
         context_budget=context_budget,
         prototype_design_brief=prototype_design_brief,
+        config_contracts=config_contracts,
     )
 
 
@@ -138,6 +151,9 @@ def load_minimal_toml_config(raw_text: str) -> dict[str, Any]:
         ),
         "prototype_design_brief": _parse_prototype_design_brief_section(
             _extract_section(raw_text, "prototype_design_brief")
+        ),
+        "config_contracts": parse_config_contracts_section(
+            _extract_section(raw_text, "config_contracts")
         ),
     }
 
@@ -430,11 +446,12 @@ def _parse_prototype_design_brief_section(section_text: str) -> dict[str, object
 
 
 def _parse_string_array(section_text: str, key: str) -> list[str] | None:
-    match = re.search(rf"(?ms)^\s*{re.escape(key)}\s*=\s*(\[[^\]]*\])", section_text)
+    match = re.search(rf"(?m)^\s*{re.escape(key)}\s*=\s*", section_text)
     if not match:
         return None
+    array_text = extract_array_literal(section_text, start=match.end(), key=key)
     try:
-        parsed = ast.literal_eval(match.group(1))
+        parsed = ast.literal_eval(array_text)
     except (SyntaxError, ValueError) as exc:
         raise ValueError(f"could not parse {key}") from exc
     if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):

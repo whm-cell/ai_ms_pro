@@ -32,7 +32,13 @@ def render_hooks_config(*, root: Path, system: str | None = None) -> str:
                             "command": f"{runner_command} session_start_runtime_context.py",
                             "statusMessage": "Loading runtime session context",
                             "timeout": 30,
-                        }
+                        },
+                        {
+                            "type": "command",
+                            "command": f"{runner_command} session_start_env_template_sync.py",
+                            "statusMessage": "Checking local env template drift",
+                            "timeout": 30,
+                        },
                     ],
                 }
             ],

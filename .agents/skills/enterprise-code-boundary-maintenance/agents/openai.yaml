@@ -1,0 +1,7 @@
+interface:
+  display_name: "Enterprise Code Boundary"
+  short_description: "Review enterprise coding boundaries"
+  default_prompt: "Use $enterprise-code-boundary-maintenance to review logging, error, or side-effect boundary changes."
+
+policy:
+  allow_implicit_invocation: false

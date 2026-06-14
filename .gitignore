@@ -12,5 +12,8 @@
 .codex/runtime/trace-interop/*
 docs/requirements/source-raw/quarantine/*
 !docs/requirements/source-raw/quarantine/.gitkeep
+.env
+.env.*
+!.env.example
 **/*/__pycache__/
 output/

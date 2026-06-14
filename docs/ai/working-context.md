@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-06-12
+更新时间：2026-06-14
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前模式：Codex-first harness + bounded runtime capability
 
@@ -16,16 +16,16 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
-- Last Synced At: 2026-06-12
+- Last Synced At: 2026-06-14
 
 ## 当前主目标
 
 - Stage-00 从 harness closeout 转向 capability 增量建设，但三层边界不变：runtime 本地恢复、governance 共享真相、verification 漂移检测。
-- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、evidence-based code-quality review standard 和支撑性 advisory guardrails。
+- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、evidence-based code-quality review standard、config contract boundary、enterprise code boundary Candidate skill 和支撑性 advisory guardrails。
 - 2026-06-12 已新增 Agent Productization Readiness：12 域 review-required 缺口雷达，只报告 partial/deferred，不升级 blocking。
-- 2026-06-06 已把五个 harness 反哺点落成 bounded 小切片：remote loopback hardening、CI agent contract、local execution policy wrapper、planner/executor/reviewer schema sample；cross-task resume 真实样本仍 open。
-- 2026-06-07 source-backed external decisions 已入账；2026-06-08 已增加 evidence-backed default permission：证据充分且对当前 harness 正向时，bounded local/no-effect 小步默认许可，但四类外部运行面仍不声明完成。
-- 2026-06-08 已从 `demo_txt_t_proto` 抽取 opt-in Prototype Design Brief / artifact review harness 机制；当前默认关闭，不复制目标项目业务 truth，不改变 active validation 范围。
+- 2026-06-14 已新增 Config Contract Boundary：`[config_contracts]`、`check_config_contract.py`、`check_env_template_sync.py` 和 SessionStart env key drift warning；只做 repo-local 配置契约边界，不读取/输出 env 值，不接 secret manager、远端配置中心或部署 secret 验证。
+- 2026-06-14 已新增 `$enterprise-code-boundary-maintenance` Candidate skill 和三份 review-required 标准：logging/redaction、error contract、runtime side effect；只做规范索引与复核路由，不新增 checker、不升级 blocking。
+- 2026-06-06 至 06-08 已完成 bounded vnext 小切片、source-backed external decisions、default permission 和 opt-in Prototype Design Brief；均不声明外部运行面、生产原型或远端能力完成。
 - Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
 - `new_pro_standard` 只同步 starter-safe 机制，不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
@@ -67,6 +67,8 @@
 - Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
 - Evidence-based coding standards are review-required only; candidate Ruff / JS lint rules need real samples before any blocking upgrade.
 - Agent Productization Readiness is review-required only; current assessment keeps product runtime, native sandbox, multi-agent runtime, cost/latency, and ops as partial/deferred.
+- Config Contract Boundary is review-required only; provider-specific env keys, model IDs, endpoints, and secret-like patterns must be declared in `.codex/harness.toml`, not hardcoded into generic checkers.
+- Enterprise Code Boundary skill is Candidate only; logging/redaction, error contract, and runtime side effect boundaries are review-required standards until real samples justify checkers or blocking-candidate promotion.
 - Code-shape now covers Next-style `app/`, `components/`, `lib/`, JS/MJS/JSX, SCSS, service SQL, tests, and PowerShell at file-level; Python keeps AST budgets.
 - `.codex/hooks.json` uses the portable `.codex/hooks/run_hook.cmd` launcher; Windows routes to PowerShell and macOS / Linux routes to POSIX shell without host-specific resync.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。

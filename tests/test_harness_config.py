@@ -39,6 +39,8 @@ class HarnessConfigTest(unittest.TestCase):
             config.prototype_design_brief.brief_path,
             "docs/ai/prototypes/prototype-design-brief.md",
         )
+        self.assertFalse(config.config_contracts.enabled)
+        self.assertEqual(config.config_contracts.local_env_paths, (".env", ".env.local"))
 
     def test_context_surface_overrides_defaults(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -82,6 +84,32 @@ mcp_server_budget = 4
         self.assertEqual(config.context_budget.skill_body_line_budget, 250)
         self.assertEqual(config.context_budget.adr_count_budget, 9)
         self.assertEqual(config.context_budget.mcp_server_budget, 4)
+
+    def test_loads_config_contracts_feature_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(
+                root / ".codex/harness.toml",
+                """[config_contracts]
+enabled = true
+env_template_paths = [".env.example"]
+local_env_paths = [".env", ".env.local"]
+registry_paths = ["lib/providerConfig.ts"]
+scan_roots = ["app", "lib"]
+allowed_literal_paths = ["lib/providerConfig.ts"]
+secret_key_patterns = ["(?i)secret|token"]
+config_key_patterns = ["DASHSCOPE_[A-Z_]+"]
+literal_patterns = ["qwen[0-9A-Za-z_.-]+"]
+""",
+            )
+
+            config = harness_config.load_harness_config(root).config_contracts
+
+        self.assertTrue(config.enabled)
+        self.assertEqual(config.env_template_paths, (".env.example",))
+        self.assertEqual(config.registry_paths, ("lib/providerConfig.ts",))
+        self.assertEqual(config.scan_roots, ("app", "lib"))
+        self.assertEqual(config.literal_patterns, ("qwen[0-9A-Za-z_.-]+",))
 
     def test_rejects_repo_escaping_required_doc_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -207,6 +235,17 @@ mcp_server_budget = 3
 enabled = true
 artifact_review_enabled = false
 brief_path = "docs/ai/prototypes/custom.md"
+
+[config_contracts]
+enabled = true
+env_template_paths = [".env.example"]
+local_env_paths = [".env"]
+registry_paths = ["lib/providerConfig.ts"]
+scan_roots = ["lib"]
+allowed_literal_paths = ["lib/providerConfig.ts"]
+secret_key_patterns = ["SECRET"]
+config_key_patterns = ["API_KEY"]
+literal_patterns = ["qwen[0-9A-Za-z_.-]+"]
 """
         with mock.patch.object(harness_config, "tomllib", None):
             parsed = harness_config.load_toml_config(raw_text)
@@ -225,6 +264,9 @@ brief_path = "docs/ai/prototypes/custom.md"
             parsed["prototype_design_brief"]["brief_path"],
             "docs/ai/prototypes/custom.md",
         )
+        self.assertTrue(parsed["config_contracts"]["enabled"])
+        self.assertEqual(parsed["config_contracts"]["env_template_paths"], [".env.example"])
+        self.assertEqual(parsed["config_contracts"]["literal_patterns"], ["qwen[0-9A-Za-z_.-]+"])
 
     def test_budget_warning_can_fire_at_or_over_budget(self) -> None:
         config = harness_config.ContextSurfaceConfig(

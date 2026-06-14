@@ -1,6 +1,6 @@
 # Harness Capability Model
 
-更新时间：2026-06-08
+更新时间：2026-06-14
 状态：active capability direction
 
 ## 定位
@@ -60,11 +60,15 @@
 - 每条 decision 都必须记录一手 `source_evidence`、positive signal 和 local upgrade scope；source 只提升决策质量、比较口径、metadata discipline 或边界可见性，不提升 hosted / remote / native runtime claim。
 - 每条 active decision 也必须记录 `default_permission`：证据充分且对当前 harness 正向时，允许 bounded local/no-effect 小步默认推进；external send、verified remote、hosted eval、native sandbox、MCP/A2A runtime、真实 CI agent workflow 和外部副作用仍按 activation gates 阻断。
 - Agent Productization Readiness 只作为 review-required 缺口雷达：固定产品 agent 的 12 个能力域，并把当前 harness control-plane 的 partial / deferred 短板显式输出；它不改变三条主线、不声明产品 agent 平台完成。
+- Config Contract Boundary 作为 review-required 配置契约机制：`[config_contracts]` 声明 env template、本机 env、typed registry、扫描根、允许 literal path 和 pattern；`check_config_contract.py` 检查配置 key / secret-like key / 模型或 endpoint literal 不散落到未允许路径；`check_env_template_sync.py` 与 SessionStart hook 只比较 env key 集合，不读取、不输出、不覆盖 env 值。
+- 该机制不提供生产配置中心、secret manager、Kubernetes / CI secret 或远端部署验证；provider-specific 规则必须由项目配置输入，不写死在通用 checker。
 
 对应审计命令：
 
 ```bash
 .codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py
+.codex/hooks/run_with_repo_python.sh scripts/check_config_contract.py
+.codex/hooks/run_with_repo_python.sh scripts/check_env_template_sync.py --warning-only
 ```
 
 ## 运营视图
@@ -75,6 +79,7 @@
 - verified interop coverage
 - task eval pass rate
 - high-impact guardrail confirmation coverage
+- config contract / env template drift
 
 对应汇总命令：
 

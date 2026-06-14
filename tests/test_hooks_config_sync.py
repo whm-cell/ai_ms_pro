@@ -22,9 +22,19 @@ class HooksConfigRenderTest(unittest.TestCase):
                 pre_tool_commands = [
                     hook["command"] for hook in config["hooks"]["PreToolUse"][0]["hooks"]
                 ]
+                session_start_commands = [
+                    hook["command"] for hook in config["hooks"]["SessionStart"][0]["hooks"]
+                ]
                 self.assertEqual(
                     pre_tool_commands,
                     [".codex/hooks/run_hook.cmd pre_tool_use_preflight.py"],
+                )
+                self.assertEqual(
+                    session_start_commands,
+                    [
+                        ".codex/hooks/run_hook.cmd session_start_runtime_context.py",
+                        ".codex/hooks/run_hook.cmd session_start_env_template_sync.py",
+                    ],
                 )
                 commands = [hook["command"] for hook in config["hooks"]["Stop"][0]["hooks"]]
                 self.assertEqual(
@@ -38,7 +48,10 @@ class HooksConfigRenderTest(unittest.TestCase):
                     ],
                 )
                 self.assertTrue(
-                    all("powershell" not in command.lower() for command in [*pre_tool_commands, *commands])
+                    all(
+                        "powershell" not in command.lower()
+                        for command in [*pre_tool_commands, *session_start_commands, *commands]
+                    )
                 )
 
     def test_render_output_is_system_independent(self) -> None:
