@@ -24,7 +24,7 @@
 - 2026-06-14 已按 `demo_txt_t_proto` 配置边界样本新增 Config Contract Boundary：`[config_contracts]`、`check_config_contract.py`、`check_env_template_sync.py` 和 SessionStart env key drift warning；当前只约束 repo-local 配置契约，不读取 env 值、不接 secret manager 或远端配置中心。
 - 2026-06-14 已新增 `$enterprise-code-boundary-maintenance` Candidate skill 与三份 review-required 标准；首批只覆盖 logging/redaction、error contract 和 runtime side effect，不新增 checker、不升级 blocking。
 - 2026-06-15 已修复 WS-01 / WS-02 Playwright smoke 在 Windows 下直接调用 `npx` 找不到 `.cmd` 启动器的问题；macOS / Linux 继续使用 plain `npx`，并保持 `shell=False`。
-- `new_pro_standard` 只同步 starter-safe 机制；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
+- 2026-06-15 已将公共 harness 机制增量同步到 `new_pro_standard`，并过滤为 starter-safe 边界；本 repo 的 REQ/WS、accepted samples、runtime artifacts 和 demo apps 不复制。
 
 ## 本阶段关键成果
 
@@ -34,6 +34,7 @@
 - External decisions / default permission / execution wrapper 只覆盖 source-backed、bounded local/no-effect 改进；wrapper report 显式显示 `native sandbox: false`。
 - Config Contract Boundary 只把 env template、typed registry、scan roots、allowed literal paths 和 pattern 变成可审计契约；provider-specific 规则必须在 `.codex/harness.toml` 配置，不写死在通用 checker。
 - WS-01 / WS-02 Playwright smoke 的 `npx` 解析已集中到共享 helper；直接 smoke 与 blackbox smoke 均可在 Windows 通过，且不改变验证范围或外部能力声明。
+- `new_pro_standard` 已同步 hook/runtime、sample-gap、burn-in、productization readiness、config/enterprise boundary、eval、tool-contract、checkpoint 和 code-shape 公共逻辑；模板内相关 ledger 均为 empty / deferred / pending starter state。
 
 ## 风险与阻塞
 

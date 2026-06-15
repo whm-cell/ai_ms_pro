@@ -4,32 +4,34 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict, dataclass
-from pathlib import Path
 import json
+from pathlib import Path
 import re
 import sys
 from typing import Any
 
-import collect_harness_sample_gaps
-from harness_sample_collection_config import SAMPLE_LEDGER
+import evidence_ref_utils
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SAMPLES = ROOT / SAMPLE_LEDGER
+DEFAULT_SAMPLES = ROOT / "docs" / "ai" / "standards" / "harness-sample-gap-evidence.jsonl"
 ID_RE = re.compile(r"^GAP-SAMPLE-\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SOURCE_TYPES = {
-    "real-user-action",
     "real-workflow-run",
-    "real-security-event",
+    "real-pr-or-release",
+    "real-user-action",
+    "real-source-boundary",
     "real-workflow-task",
     "real-incident",
     "real-interop-run",
-    "local-only-mechanism",
+    "local-interop-run",
+    "local-replay",
     "manual-review",
     "synthetic-regression",
 }
-REAL_SOURCE_TYPES = {source_type for source_type in SOURCE_TYPES if source_type.startswith("real-")}
+REAL_SOURCE_TYPES = {value for value in SOURCE_TYPES if value.startswith("real-")}
+LOCAL_SOURCE_TYPES = {"local-interop-run", "local-replay"}
 OUTCOMES = {"accepted", "pending", "rejected"}
 ENDPOINT_SCOPES = {"none", "local-capture-server", "external-test-endpoint", "hosted-service"}
 REMOTE_STATUSES = {"none", "http-2xx", "http-error", "not-sent"}
@@ -37,11 +39,14 @@ FORBIDDEN_KEYS = {
     "cwd",
     "prompt",
     "prompt_preview",
+    "promptPreview",
     "raw_output",
+    "rawOutput",
     "request_body",
     "response_body",
     "transcript",
     "transcript_path",
+    "transcriptPath",
 }
 MAX_TEXT = 700
 MAX_LIST_ITEMS = 12
@@ -51,16 +56,20 @@ MAX_LIST_ITEMS = 12
 class GapEvidenceReport:
     sample_path: str
     record_count: int
-    accepted_real_sample_count: int
+    records_by_gap: dict[str, int]
     accepted_by_gap: dict[str, int]
     accepted_real_by_gap: dict[str, int]
+    accepted_local_by_gap: dict[str, int]
+    accepted_real_sample_count: int
+    accepted_local_sample_count: int
+    false_positive_count: int
     errors: list[str]
     warnings: list[str]
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate starter harness sample-gap evidence JSONL.")
-    parser.add_argument("--samples", default=str(DEFAULT_SAMPLES), help="Sample-gap evidence JSONL path.")
+    parser = argparse.ArgumentParser(description="Validate generic harness sample-gap evidence.")
+    parser.add_argument("--samples", default=str(DEFAULT_SAMPLES), help="Harness sample-gap evidence JSONL path.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser.parse_args()
 
@@ -87,27 +96,42 @@ def build_report(path: Path = DEFAULT_SAMPLES) -> GapEvidenceReport:
     warnings: list[str] = []
     records = load_records(path, errors)
     seen: set[str] = set()
+    records_by_gap: dict[str, int] = {}
     accepted_by_gap: dict[str, int] = {}
     accepted_real_by_gap: dict[str, int] = {}
+    accepted_local_by_gap: dict[str, int] = {}
     accepted_real = 0
+    accepted_local = 0
+    false_positive_count = 0
     for line_no, record in records:
         validate_record(line_no, record, seen, errors, warnings)
-        if text(record.get("outcome")) != "accepted":
-            continue
         gap_id = text(record.get("gap_id"))
         source_type = text(record.get("source_type"))
+        outcome = text(record.get("outcome"))
+        records_by_gap[gap_id] = records_by_gap.get(gap_id, 0) + 1
+        if record.get("false_positive") is True:
+            false_positive_count += 1
+        if outcome != "accepted":
+            continue
         accepted_by_gap[gap_id] = accepted_by_gap.get(gap_id, 0) + 1
         if source_type in REAL_SOURCE_TYPES:
             accepted_real += 1
             accepted_real_by_gap[gap_id] = accepted_real_by_gap.get(gap_id, 0) + 1
+        if source_type in LOCAL_SOURCE_TYPES:
+            accepted_local += 1
+            accepted_local_by_gap[gap_id] = accepted_local_by_gap.get(gap_id, 0) + 1
     return GapEvidenceReport(
-        sample_path=relative(path),
-        record_count=len(records),
-        accepted_real_sample_count=accepted_real,
-        accepted_by_gap=accepted_by_gap,
-        accepted_real_by_gap=accepted_real_by_gap,
-        errors=errors,
-        warnings=warnings,
+        relative(path),
+        len(records),
+        records_by_gap,
+        accepted_by_gap,
+        accepted_real_by_gap,
+        accepted_local_by_gap,
+        accepted_real,
+        accepted_local,
+        false_positive_count,
+        errors,
+        warnings,
     )
 
 
@@ -118,6 +142,7 @@ def load_records(path: Path, errors: list[str]) -> list[tuple[int, dict[str, Any
     records: list[tuple[int, dict[str, Any]]] = []
     for line_no, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not raw_line.strip():
+            errors.append(f"line {line_no}: blank line is not allowed")
             continue
         try:
             payload = json.loads(raw_line)
@@ -131,13 +156,7 @@ def load_records(path: Path, errors: list[str]) -> list[tuple[int, dict[str, Any
     return records
 
 
-def validate_record(
-    line_no: int,
-    record: dict[str, Any],
-    seen: set[str],
-    errors: list[str],
-    warnings: list[str],
-) -> None:
+def validate_record(line_no: int, record: dict[str, Any], seen: set[str], errors: list[str], warnings: list[str]) -> None:
     prefix = f"line {line_no}"
     scan_for_forbidden(prefix, record, errors)
     sample_id = required_text(record, "id", prefix, errors)
@@ -160,7 +179,14 @@ def validate_record(
     validate_known_gap_id(record, prefix, errors)
     for field in ("action_taken", "evidence_refs", "checker_refs"):
         validate_text_list(record, field, prefix, errors)
-    validate_existing_refs(text_list(record.get("evidence_refs")), prefix, errors)
+    evidence_ref_utils.validate_existing_repo_relative_refs(
+        text_list(record.get("evidence_refs")),
+        ROOT,
+        "evidence_refs",
+        prefix,
+        errors,
+        allow_selectors=True,
+    )
     validate_outcome_rules(record, prefix, errors, warnings)
 
 
@@ -196,64 +222,82 @@ def validate_bool(record: dict[str, Any], field: str, prefix: str, errors: list[
 
 def validate_known_gap_id(record: dict[str, Any], prefix: str, errors: list[str]) -> None:
     gap_id = text(record.get("gap_id"))
+    try:
+        import collect_harness_sample_gaps
+    except Exception as exc:
+        errors.append(f"{prefix}: could not load sample gap registry: {exc.__class__.__name__}")
+        return
     known_ids = {gap.id for gap in collect_harness_sample_gaps.GAPS}
     if gap_id and gap_id not in known_ids:
         errors.append(f"{prefix}: unknown gap_id: {gap_id}")
 
 
-def validate_text_list(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> None:
+def validate_text_list(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> list[str]:
     values = text_list(record.get(field))
     if not values:
         errors.append(f"{prefix}: {field} must be a non-empty list")
-        return
+        return []
     if len(values) > MAX_LIST_ITEMS:
         errors.append(f"{prefix}: {field} has too many items")
     for value in values:
         if len(value) > MAX_TEXT:
             errors.append(f"{prefix}: {field} item exceeds {MAX_TEXT} characters")
-
-
-def validate_existing_refs(values: list[str], prefix: str, errors: list[str]) -> None:
-    for value in values:
-        path_text = value.split("::", 1)[0].split("#", 1)[0]
-        if re.search(r":\d+(?::\d+)?$", path_text):
-            path_text = path_text.rsplit(":", 1)[0]
-        path = Path(path_text)
-        if path.is_absolute():
-            errors.append(f"{prefix}: evidence_refs items must be repo-relative paths: {value}")
-            continue
-        resolved = (ROOT / path).resolve()
-        if ROOT.resolve() not in (resolved, *resolved.parents):
-            errors.append(f"{prefix}: evidence_refs item escapes repository scope: {value}")
-            continue
-        if not resolved.exists():
-            errors.append(f"{prefix}: evidence_refs item does not exist: {value}")
+    return values
 
 
 def validate_outcome_rules(record: dict[str, Any], prefix: str, errors: list[str], warnings: list[str]) -> None:
     accepted = text(record.get("outcome")) == "accepted"
     source_type = text(record.get("source_type"))
-    if source_type == "synthetic-regression":
-        warnings.append(f"{prefix}: synthetic samples are regression fixtures only")
-        if accepted:
-            errors.append(f"{prefix}: synthetic samples must not be accepted as real evidence")
-    if accepted and source_type not in REAL_SOURCE_TYPES:
-        errors.append(f"{prefix}: accepted starter samples must use a real-* source_type")
+    gap_id = text(record.get("gap_id"))
+    if source_type == "synthetic-regression" and accepted:
+        warnings.append(f"{prefix}: synthetic samples do not count as real or local gap evidence")
+    if accepted and text_list(record.get("action_taken")) == ["none"]:
+        errors.append(f"{prefix}: accepted samples need action_taken")
+    if accepted and text_list(record.get("evidence_refs")) == ["none"]:
+        errors.append(f"{prefix}: accepted samples need evidence_refs")
     if accepted and record.get("no_external_claim") is not True:
         errors.append(f"{prefix}: accepted samples must set no_external_claim=true")
-    if text(record.get("gap_id")) == "GAP-STARTER-REMOTE-INTEROP":
-        validate_remote_interop(record, prefix, errors)
+    if source_type in LOCAL_SOURCE_TYPES and record.get("local_only") is not True:
+        errors.append(f"{prefix}: local samples must set local_only=true")
+    if gap_id == "GAP-TRACE-OTLP-PILOT-BURNIN":
+        validate_otlp_local_pilot(record, accepted, prefix, errors)
+    if gap_id == "GAP-TRACE-REMOTE-INTEROP":
+        validate_remote_interop(record, accepted, prefix, errors)
 
 
-def validate_remote_interop(record: dict[str, Any], prefix: str, errors: list[str]) -> None:
+def validate_otlp_local_pilot(record: dict[str, Any], accepted: bool, prefix: str, errors: list[str]) -> None:
+    if text(record.get("source_type")) != "local-interop-run":
+        errors.append(f"{prefix}: GAP-TRACE-OTLP-PILOT-BURNIN needs source_type=local-interop-run")
+    if not accepted:
+        return
+    if record.get("network_exported") is not True:
+        errors.append(f"{prefix}: accepted OTLP pilot samples must set network_exported=true")
+    if text(record.get("endpoint_scope")) != "local-capture-server":
+        errors.append(f"{prefix}: accepted OTLP pilot samples must use endpoint_scope=local-capture-server")
+    if text(record.get("remote_status")) != "http-2xx":
+        errors.append(f"{prefix}: accepted OTLP pilot samples must record remote_status=http-2xx")
+
+
+def validate_remote_interop(record: dict[str, Any], accepted: bool, prefix: str, errors: list[str]) -> None:
     if text(record.get("source_type")) != "real-interop-run":
-        errors.append(f"{prefix}: remote interop samples need source_type=real-interop-run")
+        errors.append(f"{prefix}: GAP-TRACE-REMOTE-INTEROP needs source_type=real-interop-run")
     if record.get("local_only") is not False:
         errors.append(f"{prefix}: remote interop samples must set local_only=false")
-    if text(record.get("endpoint_scope")) not in {"external-test-endpoint", "hosted-service"}:
-        errors.append(f"{prefix}: remote interop samples need an external-test-endpoint or hosted-service scope")
-    if record.get("network_exported") is True and text(record.get("remote_status")) not in {"http-2xx", "http-error"}:
-        errors.append(f"{prefix}: exported remote interop samples must record http-2xx or http-error")
+    if record.get("no_external_claim") is not True:
+        errors.append(f"{prefix}: remote interop samples must set no_external_claim=true")
+    endpoint_scope = text(record.get("endpoint_scope"))
+    if endpoint_scope not in {"external-test-endpoint", "hosted-service"}:
+        errors.append(
+            f"{prefix}: remote interop samples must use endpoint_scope=external-test-endpoint or hosted-service"
+        )
+    if not accepted:
+        return
+    remote_status = text(record.get("remote_status"))
+    if record.get("network_exported") is True:
+        if remote_status not in {"http-2xx", "http-error"}:
+            errors.append(f"{prefix}: exported remote interop samples must record http-2xx or http-error")
+    elif remote_status != "not-sent":
+        errors.append(f"{prefix}: non-exported remote interop samples must record remote_status=not-sent")
 
 
 def scan_for_forbidden(prefix: str, value: Any, errors: list[str]) -> None:
@@ -275,7 +319,10 @@ def emit_text(report: GapEvidenceReport) -> None:
     print(f"- samples: {report.sample_path}")
     print(f"- records: {report.record_count}")
     print(f"- accepted real samples: {report.accepted_real_sample_count}")
+    print(f"- accepted local samples: {report.accepted_local_sample_count}")
+    print(f"- records by gap: {report.records_by_gap}")
     print(f"- accepted by gap: {report.accepted_by_gap}")
+    print(f"- false positives: {report.false_positive_count}")
     for warning in report.warnings:
         print(f"WARN: {warning}")
     if report.errors:

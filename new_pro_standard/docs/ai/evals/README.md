@@ -1,21 +1,30 @@
 # Agent Harness Eval Protocol
 
-Updated: 2026-05-10
+Updated: 2026-06-03
 Status: standard lightweight dataset
 
 ## Purpose
 
-This directory defines a repo-local standard eval dataset for agent workflow behavior.
+This directory now carries two repo-local eval layers:
 
-It is not a hosted eval service and does not judge model quality by itself. The dataset gives future agents, reviewers, and harness maintainers a small set of realistic tasks with expected artifacts, expected checks, grading signals, and risk tags. A checker validates the dataset shape, and a local runner can execute declared repo-local checks with a deterministic pass / warn / review-required / fail grader.
+- `agent-harness-evals.jsonl`: workflow / guardrail / tooling behavior
+- `task-outcome-evals.jsonl`: task completion quality and bounded cost proxies
+
+Neither layer is a hosted eval service. Together they let the harness distinguish:
+
+- whether an agent followed the harness correctly
+- whether the harness helped the agent finish a real task without overreach
 
 ## Files
 
-- `agent-harness-evals.jsonl`: JSONL dataset. Each line is one eval item.
-- `scripts/check_agent_eval_dataset.py`: stdlib-only dataset validator.
-- `scripts/run_agent_eval_dataset.py`: local eval runner and deterministic grader.
-- `tests/test_agent_eval_dataset.py`: unit tests for the validator.
-- `tests/test_agent_eval_runner.py`: unit tests for the runner and grader.
+- `agent-harness-evals.jsonl`: workflow behavior dataset
+- `task-outcome-evals.jsonl`: task outcome dataset
+- `scripts/check_agent_eval_dataset.py`: workflow dataset validator
+- `scripts/run_agent_eval_dataset.py`: workflow dataset runner
+- `scripts/check_task_outcome_eval_dataset.py`: task outcome dataset validator
+- `scripts/run_task_outcome_eval_dataset.py`: task outcome dataset runner
+- `tests/test_agent_eval_dataset.py`, `tests/test_agent_eval_runner.py`
+- `tests/test_task_outcome_eval_dataset.py`
 
 ## Dataset Item Fields
 
@@ -58,11 +67,44 @@ The deterministic grader is intentionally simple:
 - `expected_outcome=pass` with exit code `0` grades `pass`.
 - `expected_outcome=warn` with exit code `0` grades `warn`.
 - `expected_outcome=review-required` with exit code `0` grades `review-required`.
+- task-outcome runner execute mode now also treats soft output signals such as `WARN:` / `Warnings:` / `review-required` as observed `warn` or `review-required` instead of counting them as a clean pass.
 - matching trace evidence grades `pass`; missing or invalid trace evidence grades `fail` in execute mode.
 - any non-zero exit code grades `fail`.
 - `--dry-run` grades `not-run` and is the safe CI path for runner wiring.
 
 This runner is local-only. It does not call model APIs, hosted eval services, OpenTelemetry, OpenAI trace backends, MCP servers, or A2A systems.
+
+## Task Outcome Eval Layer
+
+`task-outcome-evals.jsonl` adds a second deterministic layer for benchmark-like task slices.
+
+It records:
+
+- benchmark group
+- expected changed surface
+- expected command class
+- expected repo-local validation commands with `expected_outcome` limited to `pass` / `warn` / `review-required`
+- bounded overreach expectation
+- resume-stability expectation
+- guardrail posture expectation
+
+`scripts/run_task_outcome_eval_dataset.py` reports:
+
+- `task_outcome`
+- `command_count`
+- `timeout_budget_seconds`
+- `overreach`
+- `resume_stability`
+- `guardrail_posture`
+- per-check `observed_signal` alongside `expected_outcome`
+- aggregate `pass_count`, `warn_count`, `review_required_count`, `fail_count`, `not_run_count`
+- aggregate `blocked_by_resume` and `blocked_by_guardrail`
+
+Execute-mode `warn` is an expected soft signal class for checks such as context budget or governance advisory output. It should be reviewed, but it is not the same as `fail` unless the dataset row expected a clean pass or the command exits non-zero.
+
+This is still local-only. It does not judge model quality from hidden grader prompts or external telemetry, but it gives the harness a stable way to compare “workflow passed” against “task outcome passed”.
+
+When `--output <path>` is used, the runner now creates missing parent directories automatically so the first local artifact write does not fail on an empty runtime folder.
 
 ## Grading Outcomes
 
@@ -84,7 +126,17 @@ Browser and app smoke tests prove concrete slices still run. Skill eval samples 
 
 The dataset should stay small, readable, and dependency-free. New evals should prefer checks that are already documented in `docs/ai/tool-contracts/contracts.json`.
 
-Starter datasets may omit current-project trace cases that depend on project-specific runtime producers. Skill-harness cases still cover third-party skill catalog/proxy/lock handling, skill/tool output scanning, source quarantine, mixed-stack code-shape, changed-file follow-up routing, multi-surface context budget, and starter portability.
+`EVAL-005-stop-trace-evidence-contract` is the first trace-aware case. It connects the Stop trace producer, the `agent-trace/v1` schema checker, and the `stop_runtime_observation` tool contract while keeping runtime trace files local-only evidence.
+
+`EVAL-006` through `EVAL-020` cover skill-harness hardening: third-party skill catalog/proxy/lock handling, skill/tool output scanning, source quarantine, mixed-stack code-shape, changed-file follow-up routing, multi-surface context budget, and starter portability.
+
+`EVAL-027-runtime-token-budget-audit` covers the runtime token pressure layer: large tool output, last-input spikes, fresh-input/cache-miss spikes, and long-session warnings remain separate from static default-context budget.
+
+`EVAL-028-tool-output-artifact-summary` covers artifact-preserving compression: raw tool output stays in `.codex/runtime/tool-outputs/`, while the transcript receives bounded summaries and line windows.
+
+`EVAL-029-planner-executor-reviewer-sample` covers a minimal planner / executor / reviewer sample shape using the existing `agent-trace/v1`, `agent-run-provenance/v1`, and workflow eval schemas. It is explicitly unbound from current REQ / WS validation chains and is sample-only: no scheduler/runtime, hosted trace backend, external collector, A2A interoperability, cloud agent task support, or red-team evidence is claimed.
+
+`task-outcome-evals.jsonl` starts with nine benchmark groups: `simple-fix`, `cross-file`, `docs-sync`, `risk-judgment`, `tool-selection`, `resume-durability`, `trace-interop-boundary`, `warning-review-signal`, and `overreach-prevention`.
 
 ## Validation
 
@@ -94,6 +146,9 @@ Run:
 .codex/hooks/run_with_repo_python.sh scripts/check_agent_eval_dataset.py
 .codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --dry-run
 .codex/hooks/run_with_repo_python.sh scripts/run_agent_eval_dataset.py --id EVAL-005-stop-trace-evidence-contract
+.codex/hooks/run_with_repo_python.sh scripts/check_task_outcome_eval_dataset.py
+.codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run
 .codex/.venv/bin/python tests/test_agent_eval_dataset.py
 .codex/.venv/bin/python tests/test_agent_eval_runner.py
+python3 tests/test_task_outcome_eval_dataset.py
 ```

@@ -94,7 +94,7 @@ def build_additional_context(payload: dict[str, Any], root: Path = ROOT) -> str:
     lines.append(f"Finding codes: `{','.join(finding.code for finding in selected)}`")
     recommendations = dict.fromkeys(RECOMMENDATION_BY_FINDING.get(finding.code, "checkpoint") for finding in selected)
     lines.append(f"Recommended sample actions: `{','.join(recommendations)}`")
-    lines.append("Sample capture: keep bounded fields only; do not copy raw transcripts, secrets, or full tool output.")
+    lines.append("Sample capture: keep bounded fields only, then run `check_harness_placeholder_replacement.py <candidate-jsonl>`.")
     lines.append("Next turn: checkpoint, narrow the task, or inspect the repeated command before rerunning it.")
     return limit_additional_context("\n".join(lines))
 

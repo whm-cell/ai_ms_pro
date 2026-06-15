@@ -53,31 +53,27 @@ def is_doc_or_anchor_referenced(index_text: str, path: Path, anchor_tokens: tupl
     return any(token in index_text for token in anchor_tokens)
 
 
-def main() -> int:
-    errors: list[str] = []
-    warnings: list[str] = []
-
+def validate_document_roots() -> bool:
     if not AI_DIR.exists():
         print("ERROR: docs/ai directory does not exist.", file=sys.stderr)
-        return 1
+        return False
 
     if not INDEX_PATH.exists():
         print("ERROR: docs/ai/index.md does not exist.", file=sys.stderr)
-        return 1
+        return False
 
     if not REQ_DIR.exists():
         print("ERROR: docs/requirements directory does not exist.", file=sys.stderr)
-        return 1
+        return False
 
     if not REQ_INDEX_PATH.exists():
         print("ERROR: docs/requirements/index.md does not exist.", file=sys.stderr)
-        return 1
+        return False
 
-    index_text = load_text(INDEX_PATH)
-    req_index_text = load_text(REQ_INDEX_PATH)
-    targets = link_targets(index_text)
-    req_targets = link_targets(req_index_text)
+    return True
 
+
+def load_required_docs() -> tuple[list[Path], list[Path]] | None:
     try:
         harness_config = load_harness_config(ROOT)
         required_ai_docs = resolve_repo_paths(
@@ -93,8 +89,18 @@ def main() -> int:
     except HarnessConfigError as exc:
         print("AI docs governance check: FAILED")
         print(f"ERROR: {exc}")
-        return 1
+        return None
 
+    return required_ai_docs, required_req_docs
+
+
+def validate_required_docs(
+    errors: list[str],
+    index_text: str,
+    req_index_text: str,
+    required_ai_docs: list[Path],
+    required_req_docs: list[Path],
+) -> None:
     for path in required_ai_docs:
         if not path.exists():
             errors.append(f"Required document is missing: {path.relative_to(ROOT)}")
@@ -107,6 +113,8 @@ def main() -> int:
             continue
         add_missing_doc_error(errors, req_index_text, path, "Required document")
 
+
+def validate_index_targets(errors: list[str], targets: list[Path], req_targets: list[Path]) -> None:
     for target in targets:
         if str(target).startswith(str(ROOT)) and not target.exists():
             errors.append(f"Index links to missing path: {target}")
@@ -115,82 +123,82 @@ def main() -> int:
         if str(target).startswith(str(ROOT)) and not target.exists():
             errors.append(f"Requirements index links to missing path: {target}")
 
-    active_handoffs = iter_docs(AI_DIR / "handoffs" / "active")
-    status_docs = iter_docs(AI_DIR / "status")
-    changelog_docs = iter_docs(AI_DIR / "changelog")
-    adr_docs = iter_docs(AI_DIR / "adr")
-    source_docs = iter_docs(REQ_DIR / "source")
-    normalized_docs = iter_docs(REQ_DIR / "normalized")
-    workstream_docs = iter_docs(REQ_DIR / "workstreams")
 
-    if active_handoffs:
-        if "暂无活跃 `handoff`" in index_text:
-            errors.append("Index still says there are no active handoffs, but active handoff files exist.")
-        for path in active_handoffs:
-            if not is_doc_or_anchor_referenced(
-                index_text,
-                path,
-                anchor_tokens=("docs/ai/handoffs/active", "./handoffs/active", "docs/ai/working-context.md", "./working-context.md"),
-            ):
-                errors.append(f"Active handoff not referenced in index: {path.relative_to(ROOT)}")
+def validate_ai_collection(
+    index_text: str,
+    errors: list[str],
+    docs: list[Path],
+    empty_marker: str,
+    stale_empty_error: str,
+    label: str,
+    anchor_tokens: tuple[str, ...],
+) -> None:
+    if not docs:
+        return
 
-    if status_docs:
-        if "暂无阶段 `status`" in index_text:
-            errors.append("Index still says there is no status document, but status files exist.")
-        for path in status_docs:
-            if not is_doc_or_anchor_referenced(
-                index_text,
-                path,
-                anchor_tokens=("docs/ai/status", "./status"),
-            ):
-                errors.append(f"Status document not referenced in index: {path.relative_to(ROOT)}")
+    if empty_marker in index_text:
+        errors.append(stale_empty_error)
 
-    if changelog_docs:
-        if "暂无阶段 `changelog`" in index_text:
-            errors.append("Index still says there is no changelog, but changelog files exist.")
-        for path in changelog_docs:
-            if not is_doc_or_anchor_referenced(
-                index_text,
-                path,
-                anchor_tokens=("docs/ai/changelog", "./changelog"),
-            ):
-                errors.append(f"Changelog document not referenced in index: {path.relative_to(ROOT)}")
+    for path in docs:
+        if not is_doc_or_anchor_referenced(index_text, path, anchor_tokens=anchor_tokens):
+            errors.append(f"{label} not referenced in index: {path.relative_to(ROOT)}")
 
-    if adr_docs:
-        if "暂无正式 `adr`" in index_text:
-            errors.append("Index still says there is no ADR, but ADR files exist.")
-        for path in adr_docs:
-            if not is_doc_or_anchor_referenced(
-                index_text,
-                path,
-                anchor_tokens=("docs/ai/adr", "./adr"),
-            ):
-                errors.append(f"ADR document not referenced in index: {path.relative_to(ROOT)}")
 
-    if not active_handoffs and "暂无活跃 `handoff`" not in index_text:
-        warnings.append("No active handoffs found. Consider updating index wording if this is intentional.")
+def validate_ai_collections(index_text: str, errors: list[str], warnings: list[str]) -> None:
+    checks = [
+        (
+            iter_docs(AI_DIR / "handoffs" / "active"),
+            "暂无活跃 `handoff`",
+            "Index still says there are no active handoffs, but active handoff files exist.",
+            "Active handoff",
+            ("docs/ai/handoffs/active", "./handoffs/active", "docs/ai/working-context.md", "./working-context.md"),
+            "No active handoffs found. Consider updating index wording if this is intentional.",
+        ),
+        (
+            iter_docs(AI_DIR / "status"),
+            "暂无阶段 `status`",
+            "Index still says there is no status document, but status files exist.",
+            "Status document",
+            ("docs/ai/status", "./status"),
+            "No stage status files found. Consider updating index wording if this is intentional.",
+        ),
+        (
+            iter_docs(AI_DIR / "changelog"),
+            "暂无阶段 `changelog`",
+            "Index still says there is no changelog, but changelog files exist.",
+            "Changelog document",
+            ("docs/ai/changelog", "./changelog"),
+            "No stage changelog files found. Consider updating index wording if this is intentional.",
+        ),
+        (
+            iter_docs(AI_DIR / "adr"),
+            "暂无正式 `adr`",
+            "Index still says there is no ADR, but ADR files exist.",
+            "ADR document",
+            ("docs/ai/adr", "./adr"),
+            "No ADR files found. Consider updating index wording if this is intentional.",
+        ),
+    ]
 
-    if not status_docs and "暂无阶段 `status`" not in index_text:
-        warnings.append("No stage status files found. Consider updating index wording if this is intentional.")
+    for docs, marker, stale_error, label, anchor_tokens, missing_warning in checks:
+        validate_ai_collection(index_text, errors, docs, marker, stale_error, label, anchor_tokens)
+        if not docs and marker not in index_text:
+            warnings.append(missing_warning)
 
-    if not changelog_docs and "暂无阶段 `changelog`" not in index_text:
-        warnings.append("No stage changelog files found. Consider updating index wording if this is intentional.")
 
-    if not adr_docs and "暂无正式 `adr`" not in index_text:
-        warnings.append("No ADR files found. Consider updating index wording if this is intentional.")
+def validate_requirement_collections(errors: list[str], req_index_text: str) -> None:
+    checks = [
+        (iter_docs(REQ_DIR / "source"), "Source requirement document"),
+        (iter_docs(REQ_DIR / "normalized"), "Normalized requirement document"),
+        (iter_docs(REQ_DIR / "workstreams"), "Workstream document"),
+    ]
 
-    if source_docs:
-        for path in source_docs:
-            add_missing_doc_error(errors, req_index_text, path, "Source requirement document")
+    for docs, label in checks:
+        for path in docs:
+            add_missing_doc_error(errors, req_index_text, path, label)
 
-    if normalized_docs:
-        for path in normalized_docs:
-            add_missing_doc_error(errors, req_index_text, path, "Normalized requirement document")
 
-    if workstream_docs:
-        for path in workstream_docs:
-            add_missing_doc_error(errors, req_index_text, path, "Workstream document")
-
+def print_result(errors: list[str], warnings: list[str]) -> int:
     if errors:
         print("AI docs governance check: FAILED")
         for message in errors:
@@ -203,6 +211,27 @@ def main() -> int:
     for message in warnings:
         print(f"WARN: {message}")
     return 0
+
+
+def main() -> int:
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not validate_document_roots():
+        return 1
+
+    index_text = load_text(INDEX_PATH)
+    req_index_text = load_text(REQ_INDEX_PATH)
+    required_docs = load_required_docs()
+    if required_docs is None:
+        return 1
+
+    required_ai_docs, required_req_docs = required_docs
+    validate_required_docs(errors, index_text, req_index_text, required_ai_docs, required_req_docs)
+    validate_index_targets(errors, link_targets(index_text), link_targets(req_index_text))
+    validate_ai_collections(index_text, errors, warnings)
+    validate_requirement_collections(errors, req_index_text)
+    return print_result(errors, warnings)
 
 
 if __name__ == "__main__":

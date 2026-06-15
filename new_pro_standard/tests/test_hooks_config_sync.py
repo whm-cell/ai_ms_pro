@@ -10,48 +10,58 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import bootstrap_harness  # noqa: E402
+from hook_config_lib import render_hooks_config  # noqa: E402
 
 
 class HooksConfigRenderTest(unittest.TestCase):
-    def test_render_darwin_and_linux_use_python_launcher_path(self) -> None:
-        for system in ("Darwin", "Linux"):
+    def test_render_all_systems_use_portable_launcher_path(self) -> None:
+        for system in ("Darwin", "Linux", "Windows"):
             with self.subTest(system=system):
-                rendered = bootstrap_harness.render_hooks_config(system=system)
+                rendered = render_hooks_config(root=ROOT, system=system)
                 config = json.loads(rendered)
                 pre_tool_commands = [
                     hook["command"] for hook in config["hooks"]["PreToolUse"][0]["hooks"]
                 ]
+                session_start_commands = [
+                    hook["command"] for hook in config["hooks"]["SessionStart"][0]["hooks"]
+                ]
                 self.assertEqual(
                     pre_tool_commands,
-                    [".codex/hooks/run_hook.py pre_tool_use_preflight.py"],
+                    [".codex/hooks/run_hook.cmd pre_tool_use_preflight.py"],
+                )
+                self.assertEqual(
+                    session_start_commands,
+                    [
+                        ".codex/hooks/run_hook.cmd session_start_runtime_context.py",
+                        ".codex/hooks/run_hook.cmd session_start_env_template_sync.py",
+                    ],
                 )
                 commands = [hook["command"] for hook in config["hooks"]["Stop"][0]["hooks"]]
                 self.assertEqual(
                     commands,
                     [
-                        ".codex/hooks/run_hook.py stop_runtime_observation.py",
-                        ".codex/hooks/run_hook.py stop_runtime_session.py",
-                        ".codex/hooks/run_hook.py stop_runtime_token_pressure.py",
-                        ".codex/hooks/run_hook.py stop_loop_scope_monitor.py",
-                        ".codex/hooks/run_hook.py stop_ai_docs_check.py",
+                        ".codex/hooks/run_hook.cmd stop_runtime_observation.py",
+                        ".codex/hooks/run_hook.cmd stop_runtime_session.py",
+                        ".codex/hooks/run_hook.cmd stop_runtime_token_pressure.py",
+                        ".codex/hooks/run_hook.cmd stop_loop_scope_monitor.py",
+                        ".codex/hooks/run_hook.cmd stop_ai_docs_check.py",
                     ],
                 )
                 self.assertTrue(
-                    all("powershell" not in command.lower() for command in [*pre_tool_commands, *commands])
+                    all(
+                        "powershell" not in command.lower()
+                        for command in [*pre_tool_commands, *session_start_commands, *commands]
+                    )
                 )
 
-    def test_render_windows_uses_powershell_launcher(self) -> None:
-        rendered = bootstrap_harness.render_hooks_config(system="Windows")
-        config = json.loads(rendered)
-        command = config["hooks"]["Stop"][0]["hooks"][0]["command"]
-        self.assertIn("powershell -NoProfile -ExecutionPolicy Bypass -File", command)
-        self.assertIn("run_hook.ps1", command)
+    def test_render_output_is_system_independent(self) -> None:
+        rendered = render_hooks_config(root=ROOT, system="Windows")
+        self.assertEqual(rendered, render_hooks_config(root=ROOT, system="Darwin"))
+        self.assertEqual(rendered, render_hooks_config(root=ROOT, system="Linux"))
 
-    def test_checked_in_config_matches_posix_renderer(self) -> None:
-        rendered = bootstrap_harness.render_hooks_config(system="Darwin")
-        checked_in = (ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8")
-
-        self.assertEqual(json.loads(checked_in), json.loads(rendered))
+    def test_bootstrap_uses_shared_renderer(self) -> None:
+        rendered = bootstrap_harness.render_hooks_config()
+        self.assertEqual(rendered, render_hooks_config(root=ROOT))
 
 
 if __name__ == "__main__":

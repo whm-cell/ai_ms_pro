@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,6 @@ SCHEMA_VERSION = "agent-trace/v1"
 TRACE_DIR_NAME = "agent-traces"
 REQ_ID_RE = re.compile(r"^REQ-[0-9]{3}$")
 WS_ID_RE = re.compile(r"^WS-[0-9]{2}$")
-UTC = timezone.utc
 
 
 def try_emit_stop_trace(observation: dict[str, Any], observation_dir: Path) -> Path | None:

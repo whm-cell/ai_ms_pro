@@ -9,7 +9,6 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 - `docs/ai/working-context.md`
 - `docs/requirements/index.md` when the task is requirement-driven
 - `docs/requirements/traceability-matrix.md` when the task already carries `REQ/WS` bindings
-- relevant active `handoff`, `status`, or `ADR` when the change touches current stage truth
 
 ## Behavioral Snapshot
 
@@ -20,24 +19,57 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 
 ## Document Impact Check
 
-- Update or create `handoff` when a subtask completes, pauses, or changes implementation in a way the next agent must understand.
-- Update or create `status` when a stage ends, several handoffs need compression, or risks materially change.
-- Update or create `changelog` when a stage is ready for integration, behavior changed externally, or release-facing notes are needed.
-- Update or create `ADR` when a decision remains relevant beyond the current stage.
-- Always update `docs/ai/index.md` after changing `plan`, `handoff`, `status`, `changelog`, or `ADR`.
+- Update or create `handoff` when:
+  - a subtask is completed
+  - a task is paused but should be resumed later
+  - implementation changed in a way the next agent must understand
+- Update or create `status` when:
+  - a stage ends
+  - several handoffs have accumulated and need compression
+  - current risks or blockers materially changed
+- Update or create `changelog` when:
+  - a stage is ready for integration
+  - externally visible behavior changed
+  - release-facing notes are needed
+- Update or create `adr` when:
+  - a decision remains relevant beyond the current stage
+  - architecture, API shape, storage strategy, deployment strategy, or major constraints changed
+- Always update `docs/ai/index.md` after changing `plan`, `handoff`, `status`, `changelog`, or `adr`.
+
+## Next Best Work Review
+
+Run a lightweight next-work review after a meaningful `REQ/WS` completion, stage checkpoint, pause/resume boundary, or when new evidence suggests the planned next task may no longer fit the current stage.
+
+Answer these questions:
+
+- What was just completed, and what evidence proves completion?
+- What new evidence, blocker, risk, or changed assumption appeared?
+- Is the planned next task still the best current-stage work?
+- Which decision applies: `continue`, `re-scope`, `split`, `pivot`, `park`, `cancel`, or `ask-user`?
+- Which truth surfaces need updates: `handoff`, `status`, `ADR`, `traceability-matrix`, `working-context`, or `index`?
+
+Use `ask-user` before changing to a different `REQ/WS`, changing the stage goal, cancelling planned work, or starting a user-unconfirmed direction. Simple tasks may record `continue` inline or skip the review when there is no meaningful next-work decision.
 
 ## Traceability
 
 - Carry `Requirement IDs` and `Workstream IDs` in `handoff`, `status`, runtime session files, and reducer output when known.
 - Write `未绑定` when the mapping is not known.
 - Keep the canonical mapping in `docs/requirements/traceability-matrix.md`.
-- Update both AI-side artifacts and requirements-side mapping when a task becomes newly bound.
+- Update both the AI-side artifact and the requirements-side mapping in the same change when a task becomes newly bound.
 - Use `$requirements-traceability-maintenance` for PRD import, `REQDOC / REQ / WS` edits, matrix changes, or technical assumption checks.
 
 ## Primary Truth Surface
 
-- Primary truth surfaces: `working-context`, active `handoff`, `status`, `ADR`, normalized requirements, and `traceability-matrix.md`.
-- Projection surfaces: `plan` and workstream docs.
+- Primary truth surfaces:
+  - `docs/ai/working-context.md`
+  - active `handoff`
+  - `status`
+  - `adr`
+  - `docs/requirements/normalized/*.md`
+  - `docs/requirements/traceability-matrix.md`
+- Projection surfaces:
+  - `docs/ai/plan.md`
+  - `docs/requirements/workstreams/*.md`
 - Do not write fast-changing completion state, latest validation evidence, or duplicate status summaries into projection surfaces.
 
 ## Verification Finish Line
@@ -45,5 +77,6 @@ Use this checklist when `$repo-governed-coding` is active for a non-trivial chan
 - Run `.codex/hooks/run_with_repo_python.sh scripts/check_ai_governance.py`.
 - Run `.codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --staged` when implementation or harness code is staged.
 - Run any task-specific smoke or test commands needed for the request.
-- Confirm `docs/ai/working-context.md` sync metadata reflects changed active `handoff` or `status` files.
+- Confirm that new active docs are present in `docs/ai/index.md`.
+- Confirm that `docs/ai/working-context.md` sync metadata reflects new active `handoff` or `status` files when they changed.
 - Use `$harness-maintenance` `references/verification-commands.md` when selecting specialized harness checks.

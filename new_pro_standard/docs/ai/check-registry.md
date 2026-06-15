@@ -33,7 +33,7 @@
 | `check_context_budget.py` | `blocking` | manual; use `--warning-only` for non-blocking audits | 默认面、skill catalog、raw source、static task packet 达到 hard budget 或 90% compression trigger 时阻断；starter 默认 token budget 仍保持 6500 |
 | `check_archive_candidates.py` | `advisory` | manual | 不自动归档；保持主 Agent 语义判断 |
 | `check_skill_usage_samples.py` | `advisory` | manual | 只证明 skill 样本是否足够，不阻断业务 |
-| `collect_harness_sample_gaps.py` | `advisory` | manual / starter validation | 只列出 starter-safe 观察目录；新项目应替换 `GAP-STARTER-*` |
+| `collect_harness_sample_gaps.py` | `advisory` | manual / starter validation | 只列出 starter-safe generic `GAP-*` 观察目录；新项目可沿用或替换为项目 gap id |
 | `plan_harness_sample_collection.py` | `advisory` | manual / starter validation | 只生成采集计划或 pending candidate 模板；不写 ledger、不接受 evidence |
 | `check_harness_sample_gap_evidence.py` | `advisory` | manual / starter validation | 校验空账本或 candidate JSONL；拒绝 synthetic accepted evidence、raw runtime 和旧项目 ledger 迁移 |
 | `check_repo_skills.py` | `review-required` | manual / starter validation | skill 结构频繁变更后再考虑 CI |

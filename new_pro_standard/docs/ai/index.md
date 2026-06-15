@@ -45,7 +45,7 @@
 - `scripts/extract_requirement_source.py`：大型或 instruction-like raw PRD/source 先进入 `docs/requirements/source-raw/quarantine/`，并生成 bounded sanitized excerpt / REQDOC draft
 - `scripts/check_skill_catalog.py`：第三方 `.codex/skills`、catalog/lock、vendor/proxy metadata 或 skill/tool output scan policy 变化时手动运行；`--check-output <file>` 可扫描 bounded 输出
 - `scripts/check_skill_usage_samples.py`：检查 Candidate skill 对照实验样本数量时手动运行
-- `scripts/collect_harness_sample_gaps.py`：列出 starter-safe `GAP-STARTER-*` 真实样本观察目录；新项目应替换为项目 gap id
+- `scripts/collect_harness_sample_gaps.py`：列出 starter-safe generic `GAP-*` 真实样本观察目录；新项目可沿用或替换为项目 gap id
 - `scripts/plan_harness_sample_collection.py`：从观察目录生成采集计划或 pending candidate 模板；不写 ledger、不接受 evidence
 - `scripts/check_harness_sample_gap_evidence.py`：校验空账本或 candidate JSONL；拒绝 synthetic accepted evidence、raw runtime、旧项目 ledger 迁移
 - `scripts/check_change_triggered_followups.py`：根据 changed files 提示应补跑的专项检查和应打开的 skill/reference；CI / PR summary 可使用 `--markdown` 输出 check level / CI coverage，仍为 advisory

@@ -229,6 +229,8 @@ def has_runtime_only_changes(changed_paths: list[str]) -> bool:
     for path_text in changed_paths:
         if path_text.startswith(".codex/runtime/"):
             continue
+        if path_text.startswith("mysjzhishidian/"):
+            continue
         return False
     return True
 

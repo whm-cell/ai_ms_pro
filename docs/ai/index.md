@@ -44,7 +44,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Playwright Smoke npx Resolution](./changelog/2026-06-15-playwright-smoke-npx-resolution.md)
+- 最新 changelog：[new_pro_standard Starter Sync](./changelog/2026-06-15-new-pro-standard-starter-sync.md)
 
 ## 维护规则
 

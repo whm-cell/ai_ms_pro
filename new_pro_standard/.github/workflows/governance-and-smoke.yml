@@ -22,17 +22,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      - name: Install Python harness and lint dependencies
-        run: python3 -m pip install -r .codex/requirements.txt ruff==0.15.12
+      - name: Install Python harness dependencies
+        run: python3 -m pip install -r .codex/requirements.txt
 
       - name: Check whitespace errors
         env:
@@ -52,6 +52,9 @@ jobs:
 
       - name: Run Ruff checks
         run: python3 -m ruff check .codex/hooks scripts tests
+
+      - name: Check hook config sync
+        run: python3 scripts/sync_hooks_config.py --check
 
       - name: Add advisory follow-up summary for PR
         if: github.event_name == 'pull_request'
@@ -111,6 +114,23 @@ jobs:
       - name: Run code shape checks
         run: python3 scripts/check_code_shape.py --all
 
+      - name: Run requirements shape checks
+        run: python3 scripts/check_requirements_shape.py
+
+      - name: Run hook and config contract checks
+        run: |
+          python3 scripts/check_config_contract.py
+          python3 scripts/check_env_template_sync.py --warning-only
+
+      - name: Run agentic starter checks
+        run: |
+          python3 scripts/check_agent_trace_schema.py
+          python3 scripts/check_agent_eval_dataset.py
+          python3 scripts/check_task_outcome_eval_dataset.py
+          python3 scripts/run_task_outcome_eval_dataset.py --dry-run
+          python3 scripts/check_agent_productization_readiness.py
+          python3 scripts/check_tool_contracts.py
+
       - name: Run repo skill discoverability check
         run: python3 scripts/check_repo_skills.py
 
@@ -122,10 +142,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # actions/setup-python@v6
         with:
           python-version: "3.11"
 

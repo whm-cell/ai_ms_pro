@@ -19,6 +19,33 @@ max_open_codex_prs = 3
 max_open_dependabot_prs = 4
 max_failed_open_prs = 0
 
+[prototype_design_brief]
+enabled = false
+artifact_review_enabled = false
+brief_path = "docs/ai/prototypes/prototype-design-brief.md"
+artifact_dir = ""
+prototype_page_path = ""
+prototype_route = ""
+fixture_paths = []
+required_states = []
+
+[config_contracts]
+enabled = true
+env_template_paths = []
+local_env_paths = [
+  ".env",
+  ".env.local",
+]
+registry_paths = []
+scan_roots = [
+  "scripts",
+  ".codex/hooks",
+]
+allowed_literal_paths = []
+secret_key_patterns = []
+config_key_patterns = []
+literal_patterns = []
+
 [context_budget]
 default_surface_token_budget = 6500
 default_surface_warning_percent = 80

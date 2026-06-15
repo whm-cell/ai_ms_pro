@@ -1,13 +1,13 @@
 # Harness control-plane ownership.
-* @REPLACE_WITH_OWNER
+* @whm-cell
 
-AGENTS.md @REPLACE_WITH_OWNER
-.agents/** @REPLACE_WITH_OWNER
-.codex/** @REPLACE_WITH_OWNER
-.github/CODEOWNERS @REPLACE_WITH_OWNER
-.github/pull_request_template.md @REPLACE_WITH_OWNER
-.github/workflows/** @REPLACE_WITH_OWNER
-scripts/check_* @REPLACE_WITH_OWNER
-scripts/harness_config.py @REPLACE_WITH_OWNER
-docs/ai/** @REPLACE_WITH_OWNER
-docs/requirements/** @REPLACE_WITH_OWNER
+AGENTS.md @whm-cell
+.agents/** @whm-cell
+.codex/** @whm-cell
+.github/CODEOWNERS @whm-cell
+.github/pull_request_template.md @whm-cell
+.github/workflows/** @whm-cell
+scripts/check_* @whm-cell
+scripts/harness_config.py @whm-cell
+docs/ai/** @whm-cell
+docs/requirements/** @whm-cell

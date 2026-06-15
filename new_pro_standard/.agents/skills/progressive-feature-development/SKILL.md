@@ -11,7 +11,7 @@ Candidate
 
 ## Scope
 
-Use this skill for non-trivial feature work: new feature modules, cross-module behavior changes, API / storage / architecture changes, testing strategy changes, or tasks where the user explicitly asks for a technical plan before implementation.
+Use this skill for non-trivial feature work in this repository: new feature modules, cross-module behavior changes, API / storage / architecture changes, testing strategy changes, or tasks where the user explicitly asks for a technical plan before implementation.
 
 Do not use this skill for simple explanations, narrow one-file fixes, formatting, local typo edits, or single validation commands.
 
@@ -19,16 +19,16 @@ Do not use this skill for simple explanations, narrow one-file fixes, formatting
 
 1. Classify the task.
 - Confirm whether this is simple, non-trivial feature work, architecture-impacting work, or recovery / dispute work.
-- If the task is simple, state that this skill is not needed and continue through the repository default short path.
+- If the task is simple, state that this skill is not needed and continue through the default short path.
 
 2. Ground in minimum repo truth.
-- Read `AGENTS.md`, `docs/ai/index.md`, `docs/ai/working-context.md`, and the current status source when those files exist.
+- Read `AGENTS.md`, `docs/ai/index.md`, `docs/ai/working-context.md`, and the current status source.
 - Read `docs/requirements/index.md` and `docs/requirements/traceability-matrix.md` when requirements or `REQ/WS` bindings are involved.
 - Read only directly relevant source, tests, ADRs, handoffs, and workstream docs.
 
 3. Select the minimum skill set.
 - Use existing skills only when they directly reduce implementation risk.
-- Prefer the repo's governed coding skill for implementation discipline when present.
+- Prefer `repo-governed-coding` for implementation discipline after the plan is accepted.
 - Do not keep multiple overlapping workflow skills active without choosing which one owns the task method.
 
 4. Produce a technical plan before editing.

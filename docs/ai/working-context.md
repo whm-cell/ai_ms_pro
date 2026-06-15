@@ -27,7 +27,7 @@
 - 2026-06-14 已新增 `$enterprise-code-boundary-maintenance` Candidate skill 和三份 review-required 标准：logging/redaction、error contract、runtime side effect；只做规范索引与复核路由，不新增 checker、不升级 blocking。
 - 2026-06-06 至 06-08 已完成 bounded vnext 小切片、source-backed external decisions、default permission 和 opt-in Prototype Design Brief；均不声明外部运行面、生产原型或远端能力完成。
 - Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
-- `new_pro_standard` 只同步 starter-safe 机制，不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
+- 2026-06-15 `new_pro_standard` 已同步公共 harness 机制，并保持 starter-safe 边界：不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
 ## 当前活跃队列
 

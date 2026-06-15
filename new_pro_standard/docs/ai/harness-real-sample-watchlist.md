@@ -17,7 +17,7 @@ starter 附带一条最小可执行闭环：
 - no-write 复核：`scripts/check_harness_sample_gap_evidence.py`
 - candidate 说明：`docs/ai/templates/harness-sample-gap-evidence-record.md`
 
-这些文件只证明 starter 机制可跑通。新项目仍需根据自己的 check registry、风险、ADR 和真实事件重命名或替换 `GAP-STARTER-*`。
+这些文件只证明 starter 机制可跑通。新项目仍需根据自己的 check registry、风险、ADR 和真实事件沿用、重命名或替换 generic `GAP-*`。
 
 ## 执行规则
 
@@ -36,15 +36,15 @@ starter 附带一条最小可执行闭环：
 1. 从当前项目的 `docs/ai/check-registry.md` 找到 `advisory`、`review-required`、`blocking-candidate` 检查。
 2. 对每个暂时缺真实样本的检查，补一行触发器。
 3. 对已经达到讨论门槛但暂不升级的检查，补到 “Ready 但不升级” 表。
-4. 若项目保留 starter sample ledger / intake 脚本，把 `GAP-STARTER-*` 改成项目 gap id；否则把 `First review command` 改成 `人工复核：<文档或检查名>`。
+4. 若项目保留 starter sample ledger / intake 脚本，可沿用 generic `GAP-*` 或改成项目 gap id；否则把 `First review command` 改成 `人工复核：<文档或检查名>`。
 5. 保持本文件为观察入口，不把它变成当前状态总表。
 
 ## 当前快照
 
-- 来源：starter template registry, `scripts/collect_harness_sample_gaps.py --include-future --json`
-- tracked starter template gaps：8
-- actionable real-sample lanes：7
-- future-work / ADR-or-contract-first：1
+- 来源：starter template registry, `scripts/collect_harness_sample_gaps.py --json`
+- tracked starter template gaps：以命令输出为准
+- actionable real-sample lanes：以 `scripts/plan_harness_sample_collection.py --json` 为准
+- future-work / ADR-or-contract-first：以 `scripts/plan_harness_sample_collection.py --include-future --json` 为准
 - accepted real samples：0
 - pending samples：0
 - local-sample-only：0
@@ -55,14 +55,14 @@ starter 附带一条最小可执行闭环：
 
 | Trigger | Gap IDs | What qualifies | First review command |
 | --- | --- | --- | --- |
-| 显式用户确认的高影响动作 | `GAP-STARTER-HIGH-IMPACT-ACTION` | 真实 destructive、externally visible、permission-changing、secret/env、deploy/release 等动作，且用户明确确认或取消 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| 真实动作前风险 warning | `GAP-STARTER-PRETOOL-WARNING` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action taken / false-positive 结论 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| 真实长会话或 scope warning | `GAP-STARTER-STOP-WARNING` | 长 session、重复命令、重复失败、过度验证或 scope churn 真实触发 warning | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| 跨任务 resume | `GAP-STARTER-CROSS-TASK-RESUME` | 非 harness 维护任务中使用 checkpoint / handoff 恢复，并证明减少重复探索或避免遗漏验证 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| 真实 security workflow / dependency event | `GAP-STARTER-SECURITY-EVIDENCE` | scheduled/manual security evidence run、dependency PR、release、CodeQL、SBOM 或 dependency-review 真实事件 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| workflow skill 真实任务 | `GAP-STARTER-WORKFLOW-SKILL` | 跨 workstream 技能加载、简单任务明确跳过技能、多 Agent / 多人 PR touch overlap 的真实样本 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| PR overlap / 多人协作事件 | `GAP-STARTER-PR-OVERLAP` | 多人或多 AI PR touch-set overlap 的真实样本 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
-| 真实 remote interop probe | `GAP-STARTER-REMOTE-INTEROP` | 带真实 auth / endpoint / redaction / cost boundary 的 OpenAI、OTLP、MCP、A2A 或其他 remote interop probe；必须先有项目 ADR 或 contract | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 显式用户确认的高影响动作 | `GAP-GUARDRAIL-CONFIRMATION` | 真实 destructive、externally visible、permission-changing、secret/env、deploy/release 等动作，且用户明确确认或取消 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| 真实动作前风险 warning | `GAP-GUARDRAIL-PREFLIGHT-WARNING` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action taken / false-positive 结论 | `scripts/check_pre_tool_use_preflight_samples.py` |
+| 真实长会话或 scope warning | `GAP-RUNTIME-LOOP-SCOPE-WARNING` | 长 session、重复命令、重复失败、过度验证或 scope churn 真实触发 warning | `scripts/check_loop_scope_monitor_samples.py` |
+| 跨任务 resume | `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` | 非 harness 维护任务中使用 checkpoint / handoff 恢复，并证明减少重复探索或避免遗漏验证 | `scripts/check_stage_checkpoints.py` |
+| 真实 security workflow / dependency event | `GAP-SEC-SCHEDULED-RUN`, `GAP-SEC-PR-DEPENDENCY`, `GAP-SEC-CONTROL-MATRIX-BURNIN` | scheduled/manual security evidence run、dependency PR、release、CodeQL、SBOM 或 dependency-review 真实事件 | `scripts/check_harness_sample_gap_evidence.py --samples <candidate-jsonl>` |
+| workflow skill 真实任务 | `GAP-WORKFLOW-CROSS-WS`, `GAP-WORKFLOW-SIMPLE-SKIP`, `GAP-WORKFLOW-PR-OVERLAP`, `GAP-WORKFLOW-TASK-PROFILE-AUDIT` | 跨 workstream 技能加载、简单任务明确跳过技能、多 Agent / 多人 PR touch overlap 的真实样本 | `scripts/plan_harness_sample_collection.py --area workflow-skills` |
+| 本地 trace summary | `GAP-TRACE-LOCAL-SUMMARY-BURNIN` | 不外发的 local trace summary，且记录 promotion / redaction / warning 分类 | `scripts/check_local_trace_summary_samples.py` |
+| 真实 remote interop probe | `GAP-TRACE-REMOTE-INTEROP` | 带真实 auth / endpoint / redaction / cost boundary 的 OpenAI、OTLP、MCP、A2A 或其他 remote interop probe；必须先有项目 ADR 或 contract | `scripts/plan_harness_sample_collection.py --gap-id GAP-TRACE-REMOTE-INTEROP --include-future` |
 
 ## Ready 但不升级的缺口
 

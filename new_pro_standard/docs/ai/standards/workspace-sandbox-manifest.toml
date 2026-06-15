@@ -1,0 +1,45 @@
+version = 1
+
+[workspace]
+repo_root = "."
+current_cwd = "."
+intent = "Operate inside this repository with explicit runtime, output, and rehydration boundaries."
+
+[sandbox]
+writable_roots = ["."]
+network_default = "restricted"
+approval_policy = "never-auto-external-permission"
+subagent_isolation_rule = "Subagents receive compact task packets, declared file scopes, and no authority beyond the parent task."
+
+[runtime]
+dirs = [
+  ".codex/runtime",
+  ".codex/runtime/observations",
+  ".codex/runtime/observations/agent-traces",
+  ".codex/runtime/sessions",
+]
+
+[outputs]
+dirs = [
+  "output",
+  "docs/ai",
+  "docs/requirements",
+]
+
+[rehydration]
+inputs = [
+  "AGENTS.md",
+  "docs/ai/index.md",
+  "docs/ai/working-context.md",
+  "docs/requirements/index.md",
+  ".codex/runtime/sessions",
+  ".codex/runtime/observations",
+]
+
+[claims]
+forbidden = [
+  "Do not claim external OpenAI sandbox, trace, eval, or hosted interop from this local manifest.",
+  "Do not claim external MCP interop from this local manifest.",
+  "Do not claim external A2A interop from this local manifest.",
+  "Do not claim external OTLP interop from this local manifest.",
+]

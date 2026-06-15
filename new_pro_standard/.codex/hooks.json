@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py pre_tool_use_preflight.py",
+            "command": ".codex/hooks/run_hook.cmd pre_tool_use_preflight.py",
             "statusMessage": "Checking tool preflight risks",
             "timeout": 30
           }
@@ -18,8 +18,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py session_start_runtime_context.py",
+            "command": ".codex/hooks/run_hook.cmd session_start_runtime_context.py",
             "statusMessage": "Loading runtime session context",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": ".codex/hooks/run_hook.cmd session_start_env_template_sync.py",
+            "statusMessage": "Checking local env template drift",
             "timeout": 30
           }
         ]
@@ -30,31 +36,31 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py stop_runtime_observation.py",
+            "command": ".codex/hooks/run_hook.cmd stop_runtime_observation.py",
             "statusMessage": "Capturing runtime observations",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py stop_runtime_session.py",
+            "command": ".codex/hooks/run_hook.cmd stop_runtime_session.py",
             "statusMessage": "Persisting runtime session snapshot",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py stop_runtime_token_pressure.py",
+            "command": ".codex/hooks/run_hook.cmd stop_runtime_token_pressure.py",
             "statusMessage": "Checking runtime token pressure",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py stop_loop_scope_monitor.py",
+            "command": ".codex/hooks/run_hook.cmd stop_loop_scope_monitor.py",
             "statusMessage": "Checking loop and scope drift",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": ".codex/hooks/run_hook.py stop_ai_docs_check.py",
+            "command": ".codex/hooks/run_hook.cmd stop_ai_docs_check.py",
             "statusMessage": "Checking AI docs governance",
             "timeout": 30
           }

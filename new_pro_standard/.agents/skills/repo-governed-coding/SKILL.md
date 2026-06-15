@@ -1,60 +1,62 @@
 ---
 name: repo-governed-coding
-description: Optional coding guardrails for governed repo work. Use for non-trivial implementation, review, or refactor tasks needing assumptions, minimal diffs, doc sync, REQ/WS traceability, and verification.
+description: Optional governed coding guardrails. Use for non-trivial implementation, review, refactor, verification, doc sync, traceability, magic values/魔法值, complexity/复杂度, duplication/重复, naming/命名, or abstraction/抽象 boundaries.
 ---
 
 # Repo Governed Coding
 
 ## Overview
 
-This skill adapts the MIT-licensed `forrestchang/andrej-karpathy-skills` guidelines to the Codex-first harness. It is intentionally a task-level behavior layer: repository rules, shared docs, hooks, and verification scripts remain the control plane.
+Use this skill as a repo-local constraint layer for governed code changes in this repository. Keep the four Karpathy-style principles, then use the reference checklist for repo-specific document impact, traceability, verification, and primary truth surface details.
 
-Use it for non-trivial code, harness, or review work where the agent should slow down enough to make assumptions, scope, and verification explicit. Use the reference checklist for repo-specific document impact, traceability, verification, and primary truth surface details.
+Inspired by the MIT-licensed `forrestchang/andrej-karpathy-skills` project and adapted for this repo's Codex-first harness.
 
 ## Workflow
 
 1. Ground the task in repo truth first.
 - Read `AGENTS.md`, `docs/ai/index.md`, and `docs/ai/working-context.md` before editing.
 - Read `docs/requirements/index.md` and `docs/requirements/traceability-matrix.md` when the task is requirement-driven or already bound to `REQ/WS`.
-- Read the current stage `status`, relevant active `handoff`, and relevant `ADR` before deciding scope.
+- Read the current stage `status` and relevant active `handoff` before deciding what is in or out of scope.
 
 2. State assumptions and success criteria before editing.
 - State assumptions explicitly instead of silently choosing an interpretation.
 - Surface tradeoffs when there is a simpler or narrower path.
-- Convert the request into checkable success criteria before implementing.
+- Convert the request into verifiable checks before implementing.
+- State the scope boundary: what will be changed and what will be left alone.
 - If ambiguity would change the implementation, ask before writing code.
 
 3. Implement the smallest direct change.
 - Keep code simple and keep the diff narrow.
 - Touch only lines that trace back to the request.
-- Match local style instead of introducing a new abstraction style.
 - Avoid incidental refactors, comment rewrites, or cleanup outside the requested scope.
 
 4. Close the loop with governance.
 - Use `references/governance-checklist.md` for document impact, traceability, truth-surface, and verification closeout details.
+- Use `references/evidence-based-coding-checklist.md` when reviewing or implementing code-quality changes involving magic values, complexity, duplication, naming, or public abstraction boundaries.
 - Use `$requirements-traceability-maintenance` when changing PRD, `REQDOC`, `REQ`, `WS`, traceability matrix, or technical assumptions.
 - Use `$harness-maintenance` verification references when selecting repo checks.
 
-## Four Guardrails
+## Four Principles
 
 ### Think Before Coding
 
-- Name assumptions.
-- Ask when confusion would make the change unsafe.
-- Present meaningful tradeoffs.
-- Push back when the requested path is materially more complex than the goal requires.
+- State assumptions explicitly.
+- Ask instead of guessing when ambiguity would change the implementation.
+- Surface simpler alternatives and tradeoffs.
+- Stop when confusion would make the change unsafe.
 
 ### Simplicity First
 
 - Solve only the requested problem.
 - Avoid speculative abstraction, configurability, or impossible-case handling.
-- Prefer boring code that fits the current repo over broad new framework shape.
+- Rewrite if the solution is obviously more complex than needed.
 
 ### Surgical Changes
 
+- Match existing style.
 - Do not improve unrelated nearby code.
-- Clean up only artifacts introduced by the current change.
-- Mention unrelated dead code or risks instead of silently editing them.
+- Clean up only artifacts introduced by your own change.
+- Keep every changed line traceable to the request.
 
 ### Goal-Driven Execution
 
@@ -69,4 +71,5 @@ Detailed repo-specific rules live in `references/governance-checklist.md` so thi
 
 ## Reference
 
-- Read [governance-checklist.md](references/governance-checklist.md) when you need the closeout checklist.
+- Read [governance-checklist.md](references/governance-checklist.md) when you need the repo-specific update and closeout checklist.
+- Read [evidence-based-coding-checklist.md](references/evidence-based-coding-checklist.md) when code quality standards, refactors, or review findings are part of the task.

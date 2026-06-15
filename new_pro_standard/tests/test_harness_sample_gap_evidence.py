@@ -24,8 +24,8 @@ def write_jsonl(records: list[dict[str, object]]) -> Path:
 def valid_record(**overrides: object) -> dict[str, object]:
     record: dict[str, object] = {
         "schema_version": "harness-sample-gap-evidence/v1",
-        "id": "GAP-SAMPLE-2026-05-26-high-impact-action",
-        "gap_id": "GAP-STARTER-HIGH-IMPACT-ACTION",
+        "id": "GAP-SAMPLE-2026-05-26-guardrail-confirmation",
+        "gap_id": "GAP-GUARDRAIL-CONFIRMATION",
         "sampled_at": "2026-05-26",
         "source_type": "real-user-action",
         "outcome": "accepted",
@@ -47,7 +47,7 @@ def valid_record(**overrides: object) -> dict[str, object]:
 
 
 class HarnessSampleGapEvidenceTest(unittest.TestCase):
-    def test_default_starter_ledger_is_empty_and_valid(self) -> None:
+    def test_default_template_ledger_is_empty_and_valid(self) -> None:
         report = check_harness_sample_gap_evidence.build_report()
 
         self.assertEqual([], report.errors)
@@ -62,9 +62,9 @@ class HarnessSampleGapEvidenceTest(unittest.TestCase):
 
         self.assertEqual([], report.errors)
         self.assertEqual(1, report.accepted_real_sample_count)
-        self.assertEqual(1, report.accepted_real_by_gap["GAP-STARTER-HIGH-IMPACT-ACTION"])
+        self.assertEqual(1, report.accepted_real_by_gap["GAP-GUARDRAIL-CONFIRMATION"])
 
-    def test_rejects_synthetic_accepted_evidence(self) -> None:
+    def test_synthetic_accepted_evidence_warns_and_does_not_count(self) -> None:
         path = write_jsonl(
             [
                 valid_record(
@@ -76,7 +76,8 @@ class HarnessSampleGapEvidenceTest(unittest.TestCase):
 
         report = check_harness_sample_gap_evidence.build_report(path)
 
-        self.assertTrue(any("synthetic samples must not be accepted" in error for error in report.errors))
+        self.assertEqual([], report.errors)
+        self.assertTrue(any("synthetic samples do not count" in warning for warning in report.warnings))
         self.assertEqual(0, report.accepted_real_sample_count)
 
     def test_rejects_unknown_gap_id(self) -> None:

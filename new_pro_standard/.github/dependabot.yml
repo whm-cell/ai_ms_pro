@@ -20,6 +20,16 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "pip"
+    directory: "/new_pro_standard/.codex"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 1
+    groups:
+      starter-python-runtime:
+        patterns:
+          - "*"
+
   - package-ecosystem: "npm"
     directory: "/"
     schedule:

@@ -1,0 +1,279 @@
+{
+  "schema_version": "agent-productization-readiness/v1",
+  "id": "agent-productization-readiness",
+  "updated_at": "2026-06-12",
+  "status": "review-required",
+  "claim_boundary": {
+    "review_required_only": true,
+    "no_product_agent_platform_claim": true,
+    "no_hosted_runtime_claim": true,
+    "no_external_effect_claim": true,
+    "no_blocking_upgrade_without_real_samples": true
+  },
+  "capabilities": [
+    {
+      "id": "APR-01",
+      "slug": "runtime-orchestration",
+      "name": "Runtime orchestration",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "A product agent needs an explicit state machine, graph, or orchestrator instead of an unbounded prompt loop.",
+      "acceptance_signals": [
+        "Run state and step ownership are explicit.",
+        "Failure, retry, and stop conditions are defined.",
+        "The agent can explain the current step without reading raw transcript material."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/harness-capability-model.md",
+        "docs/ai/standards/runtime-execution-snapshot.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "current harness capability model"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-02",
+      "slug": "tool-mcp-boundary",
+      "name": "Tool and MCP boundary",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Tool use needs schemas, allowlists, side-effect metadata, and permission review before it can be trusted.",
+      "acceptance_signals": [
+        "Tools have typed inputs and declared side effects.",
+        "High-impact tools have confirmation and rollback notes.",
+        "MCP or external tool claims are separated from local contract shape."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/tool-contracts/README.md",
+        "docs/ai/tool-contracts/contracts.json"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "tool contract registry"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-03",
+      "slug": "memory-context-governance",
+      "name": "Memory and context governance",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Agent memory can poison future decisions unless source, scope, freshness, and promotion rules are explicit.",
+      "acceptance_signals": [
+        "Runtime memory is separated from canonical shared truth.",
+        "Long-lived memory has source and review boundaries.",
+        "External content is treated as evidence or data, not instruction."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/working-context.md",
+        "docs/ai/security/agentic-control-matrix.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "runtime/governance truth boundary"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-04",
+      "slug": "human-in-the-loop",
+      "name": "Human-in-the-loop checkpoints",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "High-impact actions need target-specific confirmation, resumable approval state, and audit evidence.",
+      "acceptance_signals": [
+        "Destructive, external, credential, permission, or deployment actions require explicit user confirmation.",
+        "Approval wording identifies the target and expected effect.",
+        "Rejected or paused actions leave a recoverable next step."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/security/agent-action-guardrails.md",
+        "docs/ai/security/agentic-control-matrix.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "high-impact action guardrails"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-05",
+      "slug": "durable-execution",
+      "name": "Durable execution and resume",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Long-running or side-effecting agents need checkpoints, idempotency, and recovery boundaries.",
+      "acceptance_signals": [
+        "Execution snapshots describe state, authority, and blockers.",
+        "Resume samples distinguish same-task and cross-task recovery.",
+        "Idempotency or compensation is defined before external effects."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/checkpoints/README.md",
+        "docs/ai/standards/runtime-execution-snapshot.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "runtime durability capability lane"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-06",
+      "slug": "observability-tracing",
+      "name": "Observability and tracing",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Agent runs need trace ids, tool spans, redaction state, and claim boundaries to be debuggable.",
+      "acceptance_signals": [
+        "Runs can be linked to local trace or provenance records.",
+        "Trace evidence has redaction and local/remote claim level.",
+        "Remote collector or hosted trace claims require explicit evidence."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/standards/agent-trace-schema.md",
+        "docs/ai/standards/trace-remote-interop-report.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "bounded observability/interop lane"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-07",
+      "slug": "eval-harness",
+      "name": "Eval harness",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Agent changes need deterministic regression checks before any model-assisted or hosted eval is meaningful.",
+      "acceptance_signals": [
+        "Golden tasks or outcome evals cover workflow, overreach, resume, and guardrail posture.",
+        "Eval output distinguishes pass, warn, review-required, and fail.",
+        "Hosted or model-graded eval claims are not inferred from local dry-runs."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/evals/README.md",
+        "docs/ai/skill-evals/README.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "task-quality eval lane"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-08",
+      "slug": "sandbox-permission",
+      "name": "Sandbox and permission model",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Code, browser, desktop, database, or deployment tools must default to least privilege and honest sandbox claims.",
+      "acceptance_signals": [
+        "Permission scope is declared before tool use.",
+        "Native sandbox, wrapper, and policy checks are not conflated.",
+        "External effects require explicit confirmation."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/standards/local-execution-policy-wrapper.md",
+        "docs/ai/security/agentic-control-matrix.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "local execution policy wrapper"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-09",
+      "slug": "multi-agent-handoff",
+      "name": "Multi-agent handoff",
+      "mvp_required": false,
+      "mature_required": true,
+      "why": "Multi-agent designs need authority, scope, input/output contracts, and stop conditions before delegation is useful.",
+      "acceptance_signals": [
+        "Each role has explicit authority and output contract.",
+        "Handoffs preserve source truth and do not create hidden canonical state.",
+        "Delegation has termination and budget limits."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/standards/agent-run-provenance.md",
+        "docs/ai/security/agentic-control-matrix.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "planner/executor/reviewer sample boundary"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-10",
+      "slug": "structured-output",
+      "name": "Structured output contracts",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Product agents need typed output that UI, storage, approval, and checks can validate.",
+      "acceptance_signals": [
+        "Machine-consumed outputs have schemas or deterministic validators.",
+        "Repair/fail-closed behavior is defined for invalid output.",
+        "Free text is not used as the sole integration contract."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/standards/agent-run-provenance.md",
+        "docs/ai/tool-contracts/README.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "structured harness artifacts"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-11",
+      "slug": "cost-latency-control",
+      "name": "Cost and latency control",
+      "mvp_required": true,
+      "mature_required": true,
+      "why": "Agent products need bounded context, model/tool budgets, and latency visibility to stay operable.",
+      "acceptance_signals": [
+        "Context budget and runtime token pressure are visible.",
+        "Expensive loops or repeated failures produce review signals.",
+        "Model/tool cost and latency claims are based on run evidence."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/working-context.md",
+        ".agents/skills/harness-maintenance/references/runtime-token-budget.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "context and runtime token budget checks"
+      ],
+      "level": "review-required"
+    },
+    {
+      "id": "APR-12",
+      "slug": "deployment-ops",
+      "name": "Deployment and operations",
+      "mvp_required": false,
+      "mature_required": true,
+      "why": "Commercial agents need environment separation, secrets, release, rollback, retention, alerting, and ownership.",
+      "acceptance_signals": [
+        "Deployment surfaces have owner, permissions, and rollback plan.",
+        "Operational logs and trace retention are defined.",
+        "GitHub remote enforcement is verified before being claimed."
+      ],
+      "recommended_surfaces": [
+        "docs/ai/security/remote-merge-gates.md",
+        "docs/ai/check-registry.md"
+      ],
+      "source_basis": [
+        "external agent productization survey 2026-06-12",
+        "GitHub and ops guardrails"
+      ],
+      "level": "review-required"
+    }
+  ]
+}
