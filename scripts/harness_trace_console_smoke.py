@@ -15,6 +15,8 @@ import time
 import urllib.request
 from pathlib import Path
 
+from playwright_smoke_utils import resolve_npx_command
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 APP_URL_PATH = "/apps/harness-trace-console/?smoke=1"
@@ -90,14 +92,12 @@ def run_command(cmd: list[str], *, env: dict[str, str]) -> subprocess.CompletedP
 
 
 def ensure_npx() -> None:
-    if shutil.which("npx"):
-        return
-    raise RuntimeError("npx is required to run this smoke test.")
+    resolve_npx_command()
 
 
 def run_pw(command: str, *args: str, env: dict[str, str]) -> None:
     cmd = [
-        "npx",
+        resolve_npx_command(),
         "--yes",
         "--package",
         f"@playwright/cli@{PLAYWRIGHT_CLI_VERSION}",

@@ -1,6 +1,6 @@
 # AI 文档入口索引
 
-更新时间：2026-06-14
+更新时间：2026-06-15
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前判断：harness 可用；stage-00 转向 bounded 增量；context budget 是 strict gate；active validation 仍只认 WS-01 / WS-02；外部能力、标准、prototype、code-shape、config 和 enterprise boundary claim 均按结构化 evidence / boundary 处理。
 
@@ -44,7 +44,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Enterprise Code Boundary Skill](./changelog/2026-06-14-enterprise-code-boundary-skill.md)
+- 最新 changelog：[Playwright Smoke npx Resolution](./changelog/2026-06-15-playwright-smoke-npx-resolution.md)
 
 ## 维护规则
 

@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-06-14
+更新时间：2026-06-15
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前模式：Codex-first harness + bounded runtime capability
 
@@ -16,7 +16,7 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
-- Last Synced At: 2026-06-14
+- Last Synced At: 2026-06-15
 
 ## 当前主目标
 
@@ -71,6 +71,7 @@
 - Enterprise Code Boundary skill is Candidate only; logging/redaction, error contract, and runtime side effect boundaries are review-required standards until real samples justify checkers or blocking-candidate promotion.
 - Code-shape now covers Next-style `app/`, `components/`, `lib/`, JS/MJS/JSX, SCSS, service SQL, tests, and PowerShell at file-level; Python keeps AST budgets.
 - `.codex/hooks.json` uses the portable `.codex/hooks/run_hook.cmd` launcher; Windows routes to PowerShell and macOS / Linux routes to POSIX shell without host-specific resync.
+- WS-01 / WS-02 Playwright smoke scripts resolve the `npx` launcher cross-platform: Windows prefers `.cmd/.exe/.bat`, while macOS / Linux continue using plain `npx`; smoke execution still uses argv-only `shell=False`.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
 ## 更新规则
