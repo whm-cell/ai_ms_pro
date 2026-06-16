@@ -156,6 +156,41 @@ class ToolContractValidationTest(unittest.TestCase):
         self.assertFalse(contract["externally_visible"])
         self.assertIn("tests/test_summarize_runtime_traces.py", "\n".join(contract["verification_commands"]))
 
+    def test_loop_triage_contract_is_no_write_assistive_summary(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "summarize_loop_triage")
+
+        self.assertEqual(contract["side_effects"], ["read_repo", "read_runtime"])
+        self.assertEqual(contract["automation_mode"], "assistive")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertIn("operator-reviewed next-action candidates", contract["outputs"])
+        self.assertIn("tests/test_summarize_loop_triage.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("bounded loop layer", contract["notes"])
+        self.assertIn("does not write ledgers", contract["notes"])
+        self.assertIn("does not", contract["notes"])
+
+    def test_mock_data_boundary_contract_is_review_required_no_write(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_mock_data_boundary")
+
+        self.assertEqual(contract["side_effects"], ["read_repo"])
+        self.assertEqual(contract["automation_mode"], "assistive")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertIn(".codex/harness.toml", contract["inputs"])
+        self.assertIn("mock data scenario manifests", contract["inputs"])
+        self.assertIn("suggested_layer", "\n".join(contract["outputs"]))
+        self.assertIn("--strict", contract["dangerous_flags"])
+        self.assertIn("tests/test_mock_data_boundary.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("review-required", contract["notes"])
+        self.assertIn("mock-data-scenario/v1", contract["notes"])
+        self.assertIn("unseeded fixture factories", contract["notes"])
+        self.assertIn("does not install MSW/Prism/Playwright", contract["notes"])
+        self.assertIn("does not auto-delete old code", contract["notes"])
+
     def test_burn_in_ledger_contract_is_shape_only(self) -> None:
         data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
         contracts = data["contracts"]

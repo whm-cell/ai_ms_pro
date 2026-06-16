@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-06-14
+更新时间：2026-06-16
 状态：已确认
 
 ## 作用
@@ -42,6 +42,7 @@
 | `check_agent_productization_readiness.py` | `review-required` | manual / follow-up summary | 校验 `agent-productization-readiness/v1` 模型和 `agent-productization-assessment/v1` 当前评估，固定 runtime orchestration、tool/MCP、memory、HITL、durability、trace、eval、sandbox、multi-agent、structured output、cost/latency、ops 12 个能力域；`partial` / `missing` / `deferred` 只输出 `REVIEW:`，不升级 blocking、不声明产品 agent 平台完成 |
 | `check_config_contract.py` | `review-required` | manual / follow-up summary | 校验 `[config_contracts]` 声明的 registry、allowed paths、env template、secret key pattern、config key pattern 和 literal pattern；当前只做 repo-local 配置契约边界，不提供配置中心、secret manager、远端部署验证或 provider-specific 硬编码 |
 | `check_env_template_sync.py` | `review-required` | manual; SessionStart hook warning-only | 只比较 env template 与本机 env 的 key 集合，不读取、不打印、不覆盖值；无 env template 配置时为 no-op；本机 `.env` 缺 key 只作为运行前提醒 |
+| `check_mock_data_boundary.py` | `review-required` | manual / follow-up summary | 校验 `[mock_data_boundary]` 声明的 frontend/runtime scan roots、fixture paths、allowed consumers、runtime import denied paths、scenario manifest 和 inline 阈值；默认只输出 `REVIEW:` 且退出 0，`--strict` 需 burn-in 后显式启用；不自动删除旧代码、不安装 MSW/Prism/Playwright、不移动 mock 数据、不创建 API、不证明生产数据集成 |
 | `run_sandboxed_command.py` | `advisory` | manual assistive wrapper | argv-only / `shell=false` / repo-root / reduced-env / timeout / runtime tool-output artifacts / preflight refusal；metadata 明示 `native_sandbox=false`，不能当作 OS sandbox、云端 execution engine 或完整 subprocess isolation |
 | `check_tool_contracts.py` | `blocking-candidate` | governance job | MCP-like tools 或高影响工具 contract 增多后，根据误报率和 automation mode 使用情况升级 |
 | `check_threejs_snake_contract.py` | `blocking` | governance job | 已强制；它是 WS-01 static contract gate，不替代 browser smoke |
@@ -80,6 +81,7 @@
 | `check_runtime_execution_snapshots.py` | `advisory` | governance job validates local execution snapshot artifacts | 校验 `runtime-execution-snapshot/v1` 的 state、authority、tool contract 绑定和 local-only claim；它只证明 bounded checkpoint / resume 原料存在，不等于通用 execution engine |
 | `summarize_runtime_traces.py` | `advisory` | governance job runs no-network summary smoke; unit tests cover local observation and agent-trace summaries; sample checker validates no-network report evidence | 只读 `.codex/runtime/observations/*.jsonl` 与 `agent-traces/*.agent-trace.jsonl`，输出本地 Markdown / JSON 摘要；不上传、不阻断、不声明 OpenAI / OTLP / MCP / A2A 互通；当前有 3 个 accepted real local JSON report 样本，但 accepted distinct task class 仍只有 1 个（`harness-hardening`），若未来考虑升级，必须先记录更多真实 task class、误报率、redaction 边界和治理 promotion 修复路径 |
 | `summarize_harness_capabilities.py` | `advisory` | governance job appends compact capability summary to the step summary | 只压缩 durability / interop / task-eval / high-impact guardrail coverage；不生成新证据，不升级 control level |
+| `summarize_loop_triage.py` | `advisory` | manual / follow-up summary | 只读 capability summary 与 sample collection queue，把现有信号排序成 operator-reviewed next-action candidates；不写 ledger、不收集样本、不升级 blocking、不执行修复、不声明 scheduler / MCP / A2A / hosted eval / native sandbox / CI agent runtime |
 | `check_local_trace_summary_samples.py` | `advisory` | governance job validates Local Trace Summary sample artifact; external interop remains future work | 校验 `local-trace-summary-sample/v1` JSONL 的 no-network/local-only、task_class、计数、redaction state、存在的 repo-relative `evidence_refs`（允许 selector）和 raw runtime 边界；accepted real task class 只证明本地 summary 对该类任务有用，不证明外部 tracing 互通 |
 | `summarize_tool_output.py` | `advisory` | supporting tool for `check_runtime_token_budget.py`; no standalone CI gate | raw artifact 留在 `.codex/runtime/tool-outputs/`，transcript 只进入摘要、错误匹配、tail 和行窗；不单独升级 blocking |
 | `check_task_profile_audit.py` | `advisory` | governance job validates sample artifact; real task audits remain manual / burn-in | 校验 task profile audit JSONL 中的 profile、实际读取面、改动文件、验证命令、traceability closure、real/synthetic 样本类型、存在的 repo-relative `evidence_refs`（允许 selector）、accepted real profile 计数和 raw runtime 边界；当前已有 accepted real simple / complex / 0-1-stage 样本各 1 个，达到升级讨论的 profile 覆盖门槛；升级前必须继续记录更多真实样本、误报率和流程税，并单独决策 |
@@ -92,6 +94,8 @@
 
 ## 最新口径补充
 
+- 2026-06-16：新增 Coding Agent / Browser Harness Selection 标准，并把 external eval/sandbox 与 MCP/A2A active decision 补充为 source-backed selection policy。当前 coding-agent comparator 默认优先 `mini-swe-agent`，SWE-agent 主仓库保留为历史 / SWE-bench / trajectory 参考；deterministic browser smoke、CI gate 和 local static checks 默认优先 repo script + CLI / skills，MCP 只在 persistent state、rich introspection 或显式 MCP interop 需要时评估。该标准只改变比较与 transport 默认选择，不新增依赖、不创建 MCP/A2A runtime、不声明 native sandbox、hosted eval/trace 或真实 CI agent workflow。
+- 2026-06-16：新增并增强 Mock Data Boundary 标准、`[mock_data_boundary]` 配置和 `check_mock_data_boundary.py`。该机制用于早期发现产品页面/组件中的超大 inline mock、生成式 mock、runtime mock/fixture import、未登记大型 fixture 和 unseeded fixture factory，并把大型样例数据收敛到声明的 scenario manifest / fixture / network-handler surface；默认 review-required / non-blocking，不自动清理旧代码或声明生产数据接入完成。
 - 2026-06-14：新增 Enterprise Code Boundary Candidate skill 与三份 review-required 标准，首批覆盖 logging/redaction、error contract 和 runtime side effect；它只做规范索引和复核路由，不新增 checker、不升级 blocking、不声明生产观测或远端副作用治理完成。
 - 2026-06-14：新增 Config Contract Boundary 标准、`check_config_contract.py`、`check_env_template_sync.py` 和 SessionStart env template drift warning。该机制只约束 repo 内配置 registry / template / scanned code 的边界，不读取或输出 env 值，不接生产配置中心、secret manager 或远端部署验证；provider-specific 规则必须进入 `[config_contracts]`，不得硬编码在通用 checker 中。
 - 2026-06-12：新增 Agent Productization Readiness 标准和 `check_agent_productization_readiness.py`。该检查把成熟产品 agent 的 12 个能力域固化为 review-required readiness model，并记录当前 `ai-ms-pro-harness-control-plane` 的 partial/deferred 短板；它只做缺口雷达，不新增外部依赖、不接 hosted trace/eval、不创建 MCP/A2A runtime 或 CI agent workflow，也不改变 Stage-00 local-first 边界。

@@ -107,6 +107,31 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertIn("config-contract-boundary", names)
 
+    def test_frontend_page_change_triggers_mock_data_boundary(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("app/dashboard/page.tsx",))
+        names = {item.name for item in followups}
+        mock_boundary = next(item for item in followups if item.name == "mock-data-boundary")
+
+        self.assertIn("mock-data-boundary", names)
+        self.assertIn("scripts/check_mock_data_boundary.py", "\n".join(mock_boundary.commands))
+        self.assertEqual(mock_boundary.level, "review-required")
+
+    def test_fixture_change_triggers_mock_data_boundary(self) -> None:
+        names = self.followup_names("fixtures/users.ts")
+
+        self.assertIn("mock-data-boundary", names)
+
+    def test_mock_boundary_helper_change_triggers_contract_and_boundary(self) -> None:
+        names = self.followup_names(
+            "scripts/mock_data_boundary_lib.py",
+            "scripts/mock_data_manifest.py",
+            "scripts/mock_data_fixture_checks.py",
+        )
+
+        self.assertIn("mock-data-boundary", names)
+        self.assertIn("tool-contract-registry", names)
+        self.assertIn("harness-code-shape", names)
+
     def test_deployment_env_template_change_triggers_config_contract(self) -> None:
         names = self.followup_names("services/internal_auth/deployment.env.example")
 

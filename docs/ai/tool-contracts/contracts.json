@@ -494,6 +494,53 @@
       "notes": "This summary compresses existing evidence surfaces including resume readiness, local/pilot/verified interop counts, endpoint failure mode, task-eval aggregate counts, and blocked resume/guardrail reasons; it does not create new evidence or upgrade advisory controls by itself."
     },
     {
+      "name": "summarize_loop_triage",
+      "purpose": "Summarize bounded loop-engineering triage candidates from capability signals and the current sample collection queue.",
+      "path": "scripts/summarize_loop_triage.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/summarize_loop_triage.py",
+      "inputs": ["harness capability summary", "sample collection queue", "docs/ai/standards/harness-sample-gap-evidence.jsonl", "docs/ai/security/agentic-red-team-samples.jsonl", ".codex/runtime/execution-snapshots/*.json", ".codex/runtime/trace-interop/*.json", ".codex/runtime/task-outcome-evals/*.json"],
+      "outputs": ["stdout markdown report", "optional stdout JSON report", "operator-reviewed next-action candidates"],
+      "side_effects": ["read_repo", "read_runtime"],
+      "permissions": ["read-repo", "read-runtime"],
+      "timeout_seconds": 45,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "assistive",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/summarize_loop_triage.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/summarize_loop_triage.py --json",
+        "python3 tests/test_summarize_loop_triage.py"
+      ],
+      "local_vs_remote": "local-control-plane-summary",
+      "trust_level": "triage-report",
+      "sandbox_requirement": "none",
+      "notes": "This is a bounded loop layer above the existing harness. It turns current evidence into ranked next-action candidates, but it does not write ledgers, edit code, collect samples, upgrade blocking levels, create MCP/A2A runtime, claim hosted trace/eval, or send external payloads."
+    },
+    {
+      "name": "check_mock_data_boundary",
+      "purpose": "Review frontend/runtime files for oversized inline mock data, generated mock collections, runtime imports from mock/fixture paths, and fixture scenario manifest drift.",
+      "path": "scripts/check_mock_data_boundary.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_mock_data_boundary.py",
+      "inputs": [".codex/harness.toml", "frontend/runtime source files", "mock data scenario manifests"],
+      "outputs": ["stdout review report", "optional stdout JSON report with suggested_layer, suggested_paths, and doc_ref", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "assistive",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_mock_data_boundary.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/check_mock_data_boundary.py --json",
+        "python3 tests/test_mock_data_boundary.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "review-required-boundary-check",
+      "sandbox_requirement": "none",
+      "dangerous_flags": ["--strict"],
+      "notes": "Default mode is no-write and review-required: findings emit REVIEW but do not fail. The checker keeps product/runtime paths pointed at adapters or network handlers, requires large fixture data to be bound to mock-data-scenario/v1 manifests, warns on unseeded fixture factories, allows tests and stories to consume mock-like modules, does not install MSW/Prism/Playwright, does not auto-delete old code, does not rewrite pages, does not create APIs, and does not prove production data integration."
+    },
+    {
       "name": "collect_harness_sample_gaps",
       "purpose": "List pending real-scenario sample gaps for security evidence, AI guardrails, workflow skills, and future trace interop, with current sample-checker and generic gap-ledger counts where available.",
       "path": "scripts/collect_harness_sample_gaps.py",

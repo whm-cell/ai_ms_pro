@@ -1,6 +1,6 @@
 # External Harness Decisions
 
-Updated: 2026-06-08
+Updated: 2026-06-16
 Status: active bounded decision ledger
 
 ## Purpose
@@ -27,6 +27,8 @@ upgrade scope and all no-claim boundaries remain true.
 
 - `external-harness-decisions.md`: human-readable standard.
 - `external-harness-decisions.jsonl`: current decision records.
+- `coding-agent-browser-harness-selection.md`: scoped coding-agent comparator
+  and browser harness transport selection rules.
 - `scripts/check_external_harness_decisions.py`: stdlib validator.
 - `tests/test_external_harness_decisions.py`: validator tests.
 
@@ -38,9 +40,13 @@ Current active decisions:
   operator confirmation exist; local/no-send reports remain valid evidence for
   shape only.
 - External eval / sandbox: run comparison-only research and local wrapper
-  checks first; do not add a new dependency or native sandbox claim.
+  checks first; use `mini-swe-agent` as the current lightweight coding-agent
+  comparator when relevant, while keeping SWE-agent main as historical /
+  SWE-bench context; do not add a new dependency or native sandbox claim.
 - MCP / A2A: stay contract-registry-only until a concrete runtime integration
-  proposal exists.
+  proposal exists. For deterministic coding-agent and browser smoke harnesses,
+  prefer repo-local CLI / skills before MCP; reserve MCP evaluation for
+  persistent state, rich introspection, or explicit client interop needs.
 - CI agent workflow: keep the CI agent contract advisory; do not create a real
   GitHub agent workflow in Stage-00.
 
