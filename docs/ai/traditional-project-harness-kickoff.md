@@ -59,6 +59,8 @@ python3 scripts/bootstrap_harness.py --project-name "你的项目名"
 git config core.hooksPath .githooks
 ```
 
+Python 运行时优先通过新仓库的 `.codex/.venv` 闭环。首次 bootstrap 时，可以在父级目录 `.env` 放 allowlisted Python selector（如 `CODEX_HARNESS_PYTHON`、`PYTHON_VERSION`、`PYENV_VERSION`），或使用 pyenv 当前版本；bootstrap 只读取这些 selector，不输出或导入任意 `.env` 值。
+
 然后确认仓库根已有：
 
 - `AGENTS.md`

@@ -6,6 +6,17 @@ import textwrap
 
 
 def render_harness_config() -> str:
+    return "".join(
+        (
+            render_base_harness_config(),
+            render_mock_data_boundary_config(),
+            render_data_activation_config(),
+            render_context_budget_config(),
+        )
+    )
+
+
+def render_base_harness_config() -> str:
     return textwrap.dedent(
         """\
         [checks]
@@ -39,7 +50,80 @@ def render_harness_config() -> str:
         secret_key_patterns = []
         config_key_patterns = []
         literal_patterns = []
+        """
+    )
 
+
+def render_mock_data_boundary_config() -> str:
+    return textwrap.dedent(
+        """\
+        [mock_data_boundary]
+        enabled = true
+        scan_roots = [
+          "app",
+          "apps",
+          "components",
+          "pages",
+          "src",
+        ]
+        fixture_paths = [
+          "__fixtures__/**",
+          "__mocks__/**",
+          "fixtures/**",
+          "mocks/**",
+          "mock-data/**",
+          "stories/fixtures/**",
+          "tests/fixtures/**",
+          "dev-seeds/**",
+        ]
+        allowed_mock_consumer_paths = [
+          "**/*.stories.*",
+          "**/*.test.*",
+          "**/*.spec.*",
+          "tests/**",
+        ]
+        manifest_required_paths = [
+          "fixtures/**",
+          "mocks/**",
+          "mock-data/**",
+          "dev-seeds/**",
+        ]
+        scenario_manifest_paths = [
+          "mock-data/scenarios.jsonl",
+          "mocks/scenarios.jsonl",
+        ]
+        runtime_import_denied_paths = [
+          "fixtures/**",
+          "mocks/**",
+          "mock-data/**",
+          "dev-seeds/**",
+          "__fixtures__/**",
+          "__mocks__/**",
+        ]
+        import_alias_prefixes = [
+          "@/",
+          "~/",
+        ]
+        max_inline_object_items = 3
+        max_inline_array_from_length = 12
+        max_inline_lines = 40
+        """
+    )
+
+
+def render_data_activation_config() -> str:
+    return textwrap.dedent(
+        """\
+        [data_activation]
+        enabled = true
+        mode = "smoke"
+        """
+    )
+
+
+def render_context_budget_config() -> str:
+    return textwrap.dedent(
+        """\
         [context_budget]
         default_surface_token_budget = 6500
         always_on_doc_line_budget = 300

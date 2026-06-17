@@ -191,6 +191,25 @@ class ToolContractValidationTest(unittest.TestCase):
         self.assertIn("does not install MSW/Prism/Playwright", contract["notes"])
         self.assertIn("does not auto-delete old code", contract["notes"])
 
+    def test_data_activation_contract_is_review_required_no_write(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_data_activation")
+
+        self.assertEqual(contract["side_effects"], ["read_repo"])
+        self.assertEqual(contract["automation_mode"], "assistive")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertIn(".codex/harness.toml", contract["inputs"])
+        self.assertIn("mock data scenario manifests", contract["inputs"])
+        self.assertIn("bounded evidence refs", contract["inputs"])
+        self.assertIn("--strict", contract["dangerous_flags"])
+        self.assertIn("tests/test_data_activation.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("review-required", contract["notes"])
+        self.assertIn("shadow-real", contract["notes"])
+        self.assertIn("real_adapter_path", contract["notes"])
+        self.assertIn("does not migrate data", contract["notes"])
+
     def test_burn_in_ledger_contract_is_shape_only(self) -> None:
         data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
         contracts = data["contracts"]

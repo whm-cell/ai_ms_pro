@@ -92,6 +92,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("governance-surface", names)
         self.assertIn("runtime-token-budget", names)
         self.assertIn("config-contract-boundary", names)
+        self.assertIn("mock-data-boundary", names)
 
     def test_env_template_change_triggers_config_contract(self) -> None:
         followups = check_change_triggered_followups.build_followups((".env.example",))
@@ -114,6 +115,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertIn("mock-data-boundary", names)
         self.assertIn("scripts/check_mock_data_boundary.py", "\n".join(mock_boundary.commands))
+        self.assertIn("scripts/check_data_activation.py", "\n".join(mock_boundary.commands))
         self.assertEqual(mock_boundary.level, "review-required")
 
     def test_fixture_change_triggers_mock_data_boundary(self) -> None:
@@ -126,6 +128,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
             "scripts/mock_data_boundary_lib.py",
             "scripts/mock_data_manifest.py",
             "scripts/mock_data_fixture_checks.py",
+            "scripts/check_data_activation.py",
         )
 
         self.assertIn("mock-data-boundary", names)

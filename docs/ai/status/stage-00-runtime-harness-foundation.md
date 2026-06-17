@@ -17,13 +17,15 @@
 
 ## 当前完成度
 
-- 2026-06-03 至 06-17 已完成 capability 聚合、bounded vnext、external decisions、productization/config/mock-data/coding-browser/loop triage 与 optimization defaults 等增量；这些只改善选择、证据、运行指标和 review-required 可见性，外部副作用与能力宣称仍由 activation gates 阻断。
+- 2026-06-03 至 06-17 已完成 capability 聚合、bounded vnext、external decisions、productization/config/mock-data/data-activation/coding-browser/loop triage 与 optimization defaults 等增量；这些只改善选择、证据、运行指标和 review-required 可见性，外部副作用与能力宣称仍由 activation gates 阻断。
 - 2026-06-15 已修复 WS-01 / WS-02 Playwright smoke 的跨平台 `npx` 解析，并把公共 harness 机制 starter-safe 同步到 `new_pro_standard`；不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
 ## 本阶段关键成果
 
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已跑通；CI blocking smoke 仍只覆盖 WS-01 / WS-02。
 - GitHub、agentic standards、tool contracts、sample gaps、runtime compression、context budget、code-shape、prototype/config/mock-data/enterprise/productization/optimization defaults 均已进入 bounded checks / references；细则不放回默认上下文。
+- Real Data Activation Gate 已把新项目 smoke/mock 退场固化为 `[data_activation].mode` 审计信号；`smoke`、`shadow-real`、`real` 只改变 review-required 检查强度，不迁移数据、不删除 fixture、不声明真实数据质量。
+- Starter bootstrap Python runtime 解析已支持父级 `.env` allowlisted Python selector 与 pyenv 版本回退，降低新项目 `.codex/.venv` 初始化落到系统 Python 3.9 的概率；该能力不复制 `.env`，不读取任意 secret，不提交 `.codex/.venv`。
 - Capability 聚合保持 local-first：runtime artifact 是本地恢复材料；verified remote、hosted trace/eval、MCP/A2A、native sandbox、外部 collector、真实 CI agent workflow 和生产原型能力均未声明完成。
 - External decisions、coding/browser selection、bounded loop triage、optimization defaults 与 execution wrapper 只覆盖 source-backed local/no-effect 改进；`native_sandbox=false`、`model_usage=none` 和 cost=0 都是边界元数据，不是平台能力证明。
 

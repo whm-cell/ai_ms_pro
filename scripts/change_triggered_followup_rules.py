@@ -101,10 +101,12 @@ RULES: tuple[Rule, ...] = (
         (
             ".codex/harness.toml",
             "docs/ai/standards/mock-data-boundary.md",
+            "scripts/check_data_activation.py",
             "scripts/check_mock_data_boundary.py",
             "scripts/mock_data_fixture_checks.py",
             "scripts/mock_data_manifest.py",
             "scripts/mock_data_boundary_lib.py",
+            "tests/test_data_activation.py",
             "tests/test_mock_data_boundary.py",
             "app/**",
             "apps/**",
@@ -121,8 +123,10 @@ RULES: tuple[Rule, ...] = (
             "dev-seeds/**",
         ),
         (
+            ".codex/hooks/run_with_repo_python.sh scripts/check_data_activation.py",
             ".codex/hooks/run_with_repo_python.sh scripts/check_mock_data_boundary.py",
             "python3 tests/test_mock_data_boundary.py",
+            "python3 tests/test_data_activation.py",
         ),
         ("docs/ai/standards/mock-data-boundary.md",),
         "Frontend mock data or fixture boundary may have changed.",

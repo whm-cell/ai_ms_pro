@@ -108,9 +108,9 @@ This starter keeps that shape by:
 ## First Use
 
 1. Copy the contents of this directory to the root of the new repository.
-2. Confirm a runnable Python 3.11+ is available, or set `CODEX_HARNESS_PYTHON` to the intended interpreter.
+2. Confirm a runnable Python 3.11+ is available. The starter can inherit an allowlisted Python selector from the parent directory `.env`, or use pyenv's selected Python version.
 3. Run `python3 scripts/bootstrap_harness.py --project-name "Your Project Name"` in the new repository root.
-4. The bootstrap step will create `.codex/.venv` from the current environment, an explicit override, or the best runnable Python 3.11+ candidate it can find.
+4. The bootstrap step will create `.codex/.venv` from the current environment, `CODEX_HARNESS_PYTHON`, parent `.env` Python keys, pyenv, or the best runnable Python 3.11+ candidate it can find.
 5. Dependency installation is best-effort by default, so offline bootstrap can still finish. If you need a strict dependency install, rerun with `--strict-python-deps`.
 6. Enable Git hooks with `git config core.hooksPath .githooks`.
 7. `scripts/bootstrap_harness.py` will refresh `.codex/hooks.json` for the current host shell.
@@ -126,9 +126,11 @@ After bootstrap, run the minimum local starter verification from the new reposit
 test -r .githooks/pre-commit && test -x .githooks/pre-commit
 .codex/hooks/run_with_repo_python.sh scripts/check_context_budget.py
 .codex/hooks/run_with_repo_python.sh scripts/check_code_shape.py --all
-python3 -m ruff check .codex/hooks scripts tests
+.codex/.venv/bin/python -m ruff check .codex/hooks scripts tests
 git diff --check
 ```
+
+When validating the copied starter before bootstrap, prefer `pyenv exec python -m unittest discover -s tests` or the interpreter named by the parent `.env`; do not assume bare `python3` resolves to pyenv on every host.
 
 If `ruff` is not installed locally yet, install it into the active environment or rerun bootstrap with strict dependency installation after adding the project's chosen lint dependency policy. CI installs the starter Ruff version before running the Ruff gate.
 
@@ -187,7 +189,9 @@ The starter treats large tool output as runtime pressure, not shared project tru
 - Codex hooks and Git hooks resolve Python through the repo-local hook runners in `.codex/hooks/`.
 - The starter includes both `.sh` and `.ps1` entrypoints so Windows and POSIX workspaces can share the same harness logic.
 - `scripts/bootstrap_harness.py` refreshes `.codex/hooks.json` for the current host shell during setup, so normal new-project bootstrap no longer needs manual hook entrypoint edits.
-- Resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then the best PATH Python candidate, then launcher/system fallback.
+- Bootstrap creates `.codex/.venv` from current `VIRTUAL_ENV`, `CONDA_PREFIX`, `CODEX_HARNESS_PYTHON`, allowlisted parent `.env` Python selectors, pyenv's selected Python, the best PATH Python candidate, or launcher/system fallback.
+- Hook runner resolution order is repo-local `.codex/.venv`, then current `VIRTUAL_ENV`, then `CONDA_PREFIX`, then `CODEX_HARNESS_PYTHON`, then the best PATH Python candidate, then launcher/system fallback.
+- Parent `.env` inheritance only reads Python selector keys: `CODEX_HARNESS_PYTHON`, `PYTHON`, `PYTHON3`, `PYTHON_BIN`, `PYTHON_EXECUTABLE`, `CODEX_HARNESS_PYTHON_VERSION`, `PYTHON_VERSION`, and `PYENV_VERSION`. Bootstrap does not print or import arbitrary `.env` values.
 - On POSIX/macOS, PATH fallback enumerates all visible `python3` / `python` candidates and prefers Python 3.11+ so `/usr/bin/python3` does not mask pyenv or another managed Python.
 - On Windows, the PowerShell runner compares `python3`, `python`, `py -3`, and common per-user Python installs with the same Python 3.11+ preference.
 - Python candidates are probed before use, and bootstrap can rebuild a broken repo-local `.codex/.venv` in place.

@@ -52,6 +52,7 @@
 - `scripts/check_agent_eval_dataset.py`：校验 `docs/ai/evals/agent-harness-evals.jsonl` 的 starter-safe eval 数据集
 - `scripts/run_agent_eval_dataset.py --dry-run`：列出 eval case 的本地检查，不调用模型 API 或外部服务
 - `scripts/check_agent_trace_schema.py` / `scripts/export_agent_trace.py` / `scripts/check_tool_contracts.py`：维护本地 trace schema、adapter sample 和 tool-contract registry 时运行
+- `scripts/check_mock_data_boundary.py` / `scripts/check_data_activation.py`：维护 mock/fixture 边界或切换 `smoke | shadow-real | real` 数据激活模式时运行
 - `scripts/check_github_guardrails.py`：确认本地/远端 GitHub guardrails 状态时手动运行
 - `scripts/check_branch_hygiene.py --strict`：控制 active PR 数量预算、failed open PR 和 stale branch，CI / PR summary 也会运行
 - `scripts/check_pr_touch_conflicts.py`：PR 上比较当前 changed files 与同 base open PR，阻断高风险文件 overlap

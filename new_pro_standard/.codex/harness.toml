@@ -46,6 +46,61 @@ secret_key_patterns = []
 config_key_patterns = []
 literal_patterns = []
 
+[mock_data_boundary]
+enabled = true
+scan_roots = [
+  "app",
+  "apps",
+  "components",
+  "pages",
+  "src",
+]
+fixture_paths = [
+  "__fixtures__/**",
+  "__mocks__/**",
+  "fixtures/**",
+  "mocks/**",
+  "mock-data/**",
+  "stories/fixtures/**",
+  "tests/fixtures/**",
+  "dev-seeds/**",
+]
+allowed_mock_consumer_paths = [
+  "**/*.stories.*",
+  "**/*.test.*",
+  "**/*.spec.*",
+  "tests/**",
+]
+manifest_required_paths = [
+  "fixtures/**",
+  "mocks/**",
+  "mock-data/**",
+  "dev-seeds/**",
+]
+scenario_manifest_paths = [
+  "mock-data/scenarios.jsonl",
+  "mocks/scenarios.jsonl",
+]
+runtime_import_denied_paths = [
+  "fixtures/**",
+  "mocks/**",
+  "mock-data/**",
+  "dev-seeds/**",
+  "__fixtures__/**",
+  "__mocks__/**",
+]
+import_alias_prefixes = [
+  "@/",
+  "~/",
+]
+max_inline_object_items = 3
+max_inline_array_from_length = 12
+max_inline_lines = 40
+
+[data_activation]
+enabled = true
+mode = "smoke"
+
 [context_budget]
 default_surface_token_budget = 6500
 default_surface_warning_percent = 80

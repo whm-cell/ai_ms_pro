@@ -21,8 +21,10 @@
 ## 当前主目标
 
 - Stage-00 从 harness closeout 转向 capability 增量建设，但三层边界不变：runtime 本地恢复、governance 共享真相、verification 漂移检测。
-- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、bounded loop triage、coding/config/mock-data/enterprise review-required standards 和 advisory guardrails。
+- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、bounded loop triage、coding/config/mock-data/data-activation/enterprise review-required standards 和 advisory guardrails。
 - 2026-06-17 已新增 Harness Optimization Decision Defaults 与 run metrics：默认不 pivot 到产品级 agent runtime，先补真实证据和可审计 model/cost/latency 边界；不新增外部发送、native sandbox、hosted eval/trace、MCP/A2A runtime 或真实 CI agent workflow。
+- 2026-06-17 已新增 Real Data Activation Gate：`[data_activation].mode = smoke | shadow-real | real` 只把 smoke/mock 退场变成 review-required 审计信号，不自动迁移真实数据、不删除 fixture、不声明生产数据集成。
+- 2026-06-17 已收紧 starter Python runtime 选择：bootstrap 可继承父级 `.env` allowlisted Python selector 或 pyenv 版本来创建 `.codex/.venv`，避免新项目默认落到系统 Python 3.9；不复制 `.env`、不输出 secret、不提交 `.codex/.venv`。
 - 2026-06-16 已新增 Coding Agent / Browser Harness Selection、Bounded Loop Triage 与 Mock Data Boundary；均只改变选择、排序或 review-required 可见性，不新增 runtime claim。
 - 2026-06-06 至 06-14 的 bounded vnext、external decisions、default permission、Prototype Design Brief、productization/config/enterprise standards 均保持 review-required / advisory 边界。
 - Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
@@ -67,6 +69,8 @@
 - Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
 - Evidence-based coding standards are review-required only; candidate Ruff / JS lint rules need real samples before any blocking upgrade.
 - Productization/config/mock-data/coding-browser/loop triage standards are review-required or advisory only; they improve routing and visibility, not runtime capability claims.
+- Real Data Activation Gate is review-required only; `real` mode checks adapter/evidence/fixture-retirement boundaries but does not prove production data quality.
+- Starter bootstrap now supports parent `.env` allowlisted selectors and pyenv version fallback before PATH / launcher fallback; this is a local harness setup convenience, not a dependency or secret-management system.
 - Enterprise Code Boundary skill is Candidate only; logging/redaction, error contract, and runtime side effect boundaries are review-required standards until real samples justify checkers or blocking-candidate promotion.
 - Code-shape covers mixed stacks at file level; Python keeps AST budgets.
 - `.codex/hooks.json` and WS-01 / WS-02 smoke scripts now use portable launchers; Windows resolves `.cmd/.exe/.bat`, macOS / Linux keep POSIX/plain `npx`, and smoke execution remains argv-only `shell=False`.

@@ -541,6 +541,30 @@
       "notes": "Default mode is no-write and review-required: findings emit REVIEW but do not fail. The checker keeps product/runtime paths pointed at adapters or network handlers, requires large fixture data to be bound to mock-data-scenario/v1 manifests, warns on unseeded fixture factories, allows tests and stories to consume mock-like modules, does not install MSW/Prism/Playwright, does not auto-delete old code, does not rewrite pages, does not create APIs, and does not prove production data integration."
     },
     {
+      "name": "check_data_activation",
+      "purpose": "Review the smoke-to-real data activation mode and ensure dev/demo scenarios have a real adapter retirement path before real mode.",
+      "path": "scripts/check_data_activation.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_data_activation.py",
+      "inputs": [".codex/harness.toml", "mock data scenario manifests", "frontend/runtime source files", "bounded evidence refs"],
+      "outputs": ["stdout review report", "optional stdout JSON report with mode, scenario counts, findings, and errors", "process exit code"],
+      "side_effects": ["read_repo"],
+      "permissions": ["read-repo"],
+      "timeout_seconds": 30,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "assistive",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_data_activation.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/check_data_activation.py --json",
+        "python3 tests/test_data_activation.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "review-required-boundary-check",
+      "sandbox_requirement": "none",
+      "dangerous_flags": ["--strict"],
+      "notes": "Default mode is no-write and review-required. The checker treats [data_activation].mode as an audit signal only: smoke summarizes, shadow-real requires real_adapter_path and retire_when for dev/demo scenarios, and real requires runtime code to avoid mock/fixture imports plus retired dev/demo scenarios with bounded evidence refs. It does not migrate data, delete fixture files, create APIs, call real providers, or prove production data quality."
+    },
+    {
       "name": "collect_harness_sample_gaps",
       "purpose": "List pending real-scenario sample gaps for security evidence, AI guardrails, workflow skills, and future trace interop, with current sample-checker and generic gap-ledger counts where available.",
       "path": "scripts/collect_harness_sample_gaps.py",

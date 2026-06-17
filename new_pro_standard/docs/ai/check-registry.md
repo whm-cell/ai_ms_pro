@@ -30,6 +30,8 @@
 | `check_agent_trace_schema.py` | `blocking-candidate` | manual / starter validation | trace schema 和 sample 扩大到真实 runtime batch 后再考虑升级 |
 | `export_agent_trace.py` | `advisory` | manual / starter validation | starter 只证明 local adapter；远端 exporter 需要项目级 ADR |
 | `check_tool_contracts.py` | `blocking-candidate` | manual / starter validation | MCP-like tools 或高影响工具 contract 增多后再考虑升级 |
+| `check_mock_data_boundary.py` | `review-required` | manual / starter validation | 校验 `[mock_data_boundary]` 的 fixture、manifest、runtime import 和 inline mock 边界；默认只输出 `REVIEW:`，不自动清理 mock、不创建 API、不证明真实数据集成 |
+| `check_data_activation.py` | `review-required` | manual / starter validation | 校验 `[data_activation]` 的 `smoke / shadow-real / real` 切换信号；只把 smoke/mock 退场变成审计提示，不自动迁移数据、不删除 fixture、不证明真实数据质量 |
 | `check_context_budget.py` | `blocking` | manual; use `--warning-only` for non-blocking audits | 默认面、skill catalog、raw source、static task packet 达到 hard budget 或 90% compression trigger 时阻断；starter 默认 token budget 仍保持 6500 |
 | `check_archive_candidates.py` | `advisory` | manual | 不自动归档；保持主 Agent 语义判断 |
 | `check_skill_usage_samples.py` | `advisory` | manual | 只证明 skill 样本是否足够，不阻断业务 |

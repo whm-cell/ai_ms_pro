@@ -22,6 +22,7 @@ from bootstrap_scaffold_files import (
     write_scaffold_files,
 )
 from hook_config_lib import render_hooks_config as render_platform_hooks_config
+from python_runtime_selector import parent_env_python_commands, pyenv_python_commands
 
 
 __all__ = [
@@ -48,12 +49,7 @@ def is_windows_host() -> bool:
 def python_candidates(prefix: Path) -> list[Path]:
     candidates: list[Path] = []
     if is_windows_host():
-        candidates.extend(
-            [
-                prefix / "Scripts" / "python.exe",
-                prefix / "Scripts" / "python",
-            ]
-        )
+        candidates.extend([prefix / "Scripts" / "python.exe", prefix / "Scripts" / "python"])
     candidates.extend(
         [
             prefix / "bin" / "python",
@@ -298,6 +294,10 @@ def resolve_bootstrap_python(explicit_python: str | None) -> list[str]:
     env_python = os.environ.get("CODEX_HARNESS_PYTHON", "").strip()
     if env_python:
         command = [env_python]
+        if is_runnable_python(command):
+            return command
+
+    for command in [*parent_env_python_commands(ROOT), *pyenv_python_commands(ROOT)]:
         if is_runnable_python(command):
             return command
 

@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / ".codex" / "hooks"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import bootstrap_harness  # noqa: E402
+import python_runtime_selector  # noqa: E402
 import run_hook  # noqa: E402
 
 
@@ -41,7 +42,7 @@ class PythonResolutionTest(unittest.TestCase):
     def test_run_hook_chooses_path_python_311_over_macos_system_39(self) -> None:
         versions = {
             ("/usr/bin/python3",): (3, 9, 6),
-            ("/opt/python311/bin/python3",): (3, 11, 13),
+            ("/Users/coolm/.pyenv/shims/python3",): (3, 11, 13),
         }
 
         def version_for(command: list[str]) -> tuple[int, int, int] | None:
@@ -55,18 +56,18 @@ class PythonResolutionTest(unittest.TestCase):
                         "all_commands_on_path",
                         return_value=[
                             "/usr/bin/python3",
-                            "/opt/python311/bin/python3",
+                            "/Users/coolm/.pyenv/shims/python3",
                         ],
                     ):
                         with mock.patch.object(run_hook, "python_version", side_effect=version_for):
                             command = run_hook.resolve_python_command()
 
-        self.assertEqual(command, ["/opt/python311/bin/python3"])
+        self.assertEqual(command, ["/Users/coolm/.pyenv/shims/python3"])
 
     def test_bootstrap_chooses_path_python_311_over_launcher_python(self) -> None:
         versions = {
             ("/usr/bin/python3",): (3, 9, 6),
-            ("/opt/python311/bin/python3",): (3, 11, 13),
+            ("/Users/coolm/.pyenv/shims/python3",): (3, 11, 13),
             (sys.executable,): (3, 9, 6),
         }
 
@@ -79,13 +80,87 @@ class PythonResolutionTest(unittest.TestCase):
                 "all_commands_on_path",
                 return_value=[
                     "/usr/bin/python3",
-                    "/opt/python311/bin/python3",
+                    "/Users/coolm/.pyenv/shims/python3",
                 ],
             ):
                 with mock.patch.object(bootstrap_harness, "python_version", side_effect=version_for):
                     command = bootstrap_harness.resolve_bootstrap_python(None)
 
-        self.assertEqual(command, ["/opt/python311/bin/python3"])
+        self.assertEqual(command, ["/Users/coolm/.pyenv/shims/python3"])
+
+    def test_bootstrap_uses_parent_env_python_before_path_python(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "project"
+            root.mkdir()
+            env_python = write_fake_python(parent, "python-from-env", "3.12.11")
+            (parent / ".env").write_text(
+                f"CODEX_HARNESS_PYTHON={env_python}\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with mock.patch.object(bootstrap_harness, "ROOT", root):
+                    with mock.patch.object(bootstrap_harness, "all_commands_on_path", return_value=[]):
+                        command = bootstrap_harness.resolve_bootstrap_python(None)
+
+        self.assertEqual(command, [str(env_python)])
+
+    def test_bootstrap_uses_parent_env_pyenv_version_before_system_python(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "project"
+            root.mkdir()
+            pyenv_python = write_fake_python(parent, "pyenv-python", "3.12.11")
+            (parent / ".env").write_text("PYENV_VERSION=3.12.11\n", encoding="utf-8")
+            versions = {
+                (str(pyenv_python),): (3, 12, 11),
+                ("/usr/bin/python3",): (3, 9, 6),
+            }
+
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with mock.patch.object(bootstrap_harness, "ROOT", root):
+                    with mock.patch.object(
+                        bootstrap_harness,
+                        "pyenv_python_commands",
+                        return_value=[[str(pyenv_python)]],
+                    ):
+                        with mock.patch.object(
+                            bootstrap_harness,
+                            "all_commands_on_path",
+                            return_value=["/usr/bin/python3"],
+                        ):
+                            with mock.patch.object(
+                                bootstrap_harness,
+                                "python_version",
+                                side_effect=lambda command: versions.get(tuple(command)),
+                            ):
+                                command = bootstrap_harness.resolve_bootstrap_python(None)
+
+        self.assertEqual(command, [str(pyenv_python)])
+
+    def test_runtime_selector_reads_parent_env_pyenv_version(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp)
+            root = parent / "project"
+            root.mkdir()
+            pyenv_python = write_fake_python(parent, "pyenv-python", "3.12.11")
+            (parent / ".env").write_text("PYENV_VERSION=3.12.11\n", encoding="utf-8")
+
+            def pyenv_for(root_arg: Path, version: str | None) -> list[str] | None:
+                self.assertEqual(root_arg, root)
+                if version == "3.12.11":
+                    return [str(pyenv_python)]
+                return None
+
+            with mock.patch.object(
+                python_runtime_selector,
+                "pyenv_python_command",
+                side_effect=pyenv_for,
+            ):
+                commands = python_runtime_selector.pyenv_python_commands(root)
+
+        self.assertEqual(commands, [[str(pyenv_python)]])
 
     def test_run_hook_windows_path_scans_python_exe_candidates(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -146,6 +221,9 @@ class PythonResolutionTest(unittest.TestCase):
         runner_paths = [
             ROOT / ".codex" / "hooks" / "run_with_repo_python.ps1",
         ]
+        starter_runner = ROOT / "new_pro_standard" / ".codex" / "hooks" / "run_with_repo_python.ps1"
+        if starter_runner.exists():
+            runner_paths.append(starter_runner)
 
         for path in runner_paths:
             with self.subTest(path=path):

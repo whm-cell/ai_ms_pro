@@ -8,7 +8,9 @@ Use this reference when editing `scripts/bootstrap_harness.py`, `.codex/hooks/*`
 - Git hooks and Codex hooks should resolve Python through `.codex/hooks/` runners instead of hardcoding a system Python path.
 - Runners must verify that a Python candidate is runnable before using it.
 - If `.codex/.venv` exists but is not runnable, bootstrap may rebuild it in place without touching `.codex/runtime/*`.
-- POSIX/macOS and Windows fallback discovery should prefer `.codex/.venv`, active envs, `CODEX_HARNESS_PYTHON`, then the best runnable Python 3.11+ candidate before falling back to the launcher Python.
+- POSIX/macOS and Windows hook fallback discovery should prefer `.codex/.venv`, active envs, `CODEX_HARNESS_PYTHON`, then the best runnable Python 3.11+ candidate before falling back to the launcher Python.
+- Bootstrap may inherit parent-directory `.env` Python selector keys or pyenv's selected Python when creating `.codex/.venv`.
+- Parent-directory `.env` inheritance is limited to allowlisted Python selector keys: `CODEX_HARNESS_PYTHON`, `PYTHON`, `PYTHON3`, `PYTHON_BIN`, `PYTHON_EXECUTABLE`, `CODEX_HARNESS_PYTHON_VERSION`, `PYTHON_VERSION`, and `PYENV_VERSION`. Bootstrap must not print or import arbitrary `.env` values.
 - Do not commit `.codex/.venv`.
 
 ## Checks

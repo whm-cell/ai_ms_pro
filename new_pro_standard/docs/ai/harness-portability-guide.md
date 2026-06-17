@@ -89,7 +89,7 @@
 
 - `AGENTS.md` 中的项目目标、文档职责和默认 workflow 偏好
 - `.codex/harness.toml` 中的 `required_ai_docs`、`required_requirements_docs`、`context_surface` 与 `context_budget` 预算阈值
-- `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`，POSIX/macOS 与 Windows PowerShell fallback 会枚举候选并优先 Python 3.11+
+- `.githooks/pre-commit` 与 `.codex/hooks/*` 依赖的 Python 入口；默认会优先使用 repo-local `.codex/.venv/bin/python`，再按 active env / `CODEX_HARNESS_PYTHON` / PATH 候选顺序解析，并优先 Python 3.11+
 - `.codex/hooks.json` 的 hook command entrypoint；bootstrap 会按当前宿主环境刷新为 `.ps1` 或 `.sh` 入口
 - `.github/CODEOWNERS` 中的 owner 占位符；把 `@REPLACE_WITH_OWNER` 改为新项目真实 owner/team
 - `.github/workflows/` 中的 smoke job；starter 默认只跑 harness context budget smoke，新项目应替换为真实业务 smoke
@@ -118,7 +118,7 @@
 
 1. 复制机制层文件，不复制当前项目真相和 runtime 原料。
 2. 在新仓库运行 `python3 scripts/bootstrap_harness.py --project-name "你的项目名"`；如果你希望 starter 自带的 `plan / working-context / requirements index / traceability-matrix` 立刻替换成新项目名，再追加一次 `--force`。
-3. bootstrap 会优先取当前 `VIRTUAL_ENV` / `CONDA_PREFIX`、显式 `CODEX_HARNESS_PYTHON` 或最佳 Python 3.11+ 候选来创建 repo-local `.codex/.venv`；如需指定解释器，用 `--python /path/to/python3`。
+3. bootstrap 会优先取当前 `VIRTUAL_ENV` / `CONDA_PREFIX`、显式 `CODEX_HARNESS_PYTHON`、父级 `.env` allowlisted Python selector、pyenv 当前版本或最佳 Python 3.11+ 候选来创建 repo-local `.codex/.venv`；如需指定解释器，用 `--python /path/to/python3`。
 4. Python 依赖安装默认是 best-effort；离线或受限网络下即使 `pip install` 失败，bootstrap 也应继续完成 venv 初始化。若你需要强制安装成功，可追加 `--strict-python-deps`。
 5. 执行 `git config core.hooksPath .githooks`，让 Git hook 与 Codex hook 统一通过 repo-local Python 入口运行；bootstrap 会同时按当前宿主环境刷新 `.codex/hooks.json`。
 6. 按新项目实际情况改写 `AGENTS.md` 与 `.codex/harness.toml`；`AGENTS.md` 不会由 bootstrap 自动项目化。
@@ -142,6 +142,8 @@
 
 - bootstrap 只解决最小控制面初始化，不会自动替你决定首个真实 workstream。
 - repo-local `.codex/.venv` 是 harness Python 的默认落点，但不会自动提交，也不应复制到别的仓库。
+- bootstrap 的父级 `.env` 继承只读取 Python selector key，不复制 `.env`，不打印 secret，也不提供通用配置管理。
+- 在 bootstrap 前验证 starter 目录本身时，使用 `pyenv exec python -m unittest discover -s tests` 或父级 `.env` 指定的解释器；不要假设裸 `python3` 一定解析到 pyenv。
 - `.codex/requirements.txt` 里的依赖目前按可选兼容层处理；离线时 bootstrap 完成不代表这些包一定已经安装。
 - `runtime` metadata 的自动携带仍依赖调用环境；新项目若要更强一致性，仍需后续补校验。
 - `check_ai_docs.py` 已改成“最小默认 + 可配置”，但 repo-specific 附加文档是否设为必需，仍需项目自己决定。
