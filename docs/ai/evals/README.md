@@ -1,6 +1,6 @@
 # Agent Harness Eval Protocol
 
-Updated: 2026-06-03
+Updated: 2026-06-17
 Status: standard lightweight dataset
 
 ## Purpose
@@ -93,6 +93,10 @@ It records:
 - `task_outcome`
 - `command_count`
 - `timeout_budget_seconds`
+- `latency_budget_seconds`
+- `model_usage`
+- `estimated_model_cost_usd`
+- `measurement_boundary`
 - `overreach`
 - `resume_stability`
 - `guardrail_posture`
@@ -103,6 +107,12 @@ It records:
 Execute-mode `warn` is an expected soft signal class for checks such as context budget or governance advisory output. It should be reviewed, but it is not the same as `fail` unless the dataset row expected a clean pass or the command exits non-zero.
 
 This is still local-only. It does not judge model quality from hidden grader prompts or external telemetry, but it gives the harness a stable way to compare “workflow passed” against “task outcome passed”.
+
+The default deterministic runner records `model_usage=none` and
+`estimated_model_cost_usd=0.0`, because it executes repo-local checks rather than
+calling a model API. `latency_budget_seconds` is timeout-derived and should be
+read as a bounded execution budget, not measured wall-clock latency or hosted
+service latency.
 
 When `--output <path>` is used, the runner now creates missing parent directories automatically so the first local artifact write does not fail on an empty runtime folder.
 

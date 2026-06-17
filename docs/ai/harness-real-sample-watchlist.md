@@ -1,6 +1,6 @@
 # Harness Real Sample Watchlist
 
-更新时间：2026-05-26
+更新时间：2026-06-17
 状态：event-driven watchlist
 
 ## 作用
@@ -21,10 +21,10 @@
 
 - 来源：`scripts/check_harness_burn_in_readiness.py --include-future --include-accepted`
 - tracked gaps：20
-- actionable real-sample lanes：14
+- actionable real-sample lanes：13
 - append-new-pending-slot：12
-- fill-existing-placeholder：2
-- ready-for-upgrade-discussion：5，全部 `keep-advisory`
+- fill-existing-placeholder：1
+- ready-for-upgrade-discussion：6，全部 `keep-advisory`
 - local-sample-only：1
 - contract / ADR blockers：0
 
@@ -34,7 +34,7 @@
 
 | Trigger | Gap IDs | What qualifies | First review command |
 | --- | --- | --- | --- |
-| 真实 PreToolUse warning | `GAP-GUARDRAIL-PREFLIGHT-WARNING` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action taken / false-positive 结论 | `scripts/check_harness_placeholder_replacement.py <candidate-jsonl>` |
+| 真实 PreToolUse warning | `GAP-GUARDRAIL-PREFLIGHT-WARNING` | 高风险、大输出、外发、破坏性或 remote-write 动作前真实触发 warning，并记录 operator decision / action_taken / false_positive；当前已有 2/2 accepted real warning samples 且决策为 `keep-advisory` | `scripts/check_harness_upgrade_decision_candidate.py <candidate-jsonl>` |
 | 真实 Stop loop/scope warning | `GAP-RUNTIME-LOOP-SCOPE-WARNING` | 长 session、重复命令、重复失败、过度验证或 scope churn 真实触发 Stop warning | `scripts/check_harness_placeholder_replacement.py <candidate-jsonl>` |
 | 跨任务 checkpoint resume | `GAP-RUNTIME-STAGE-CHECKPOINT-RESUME` | 非 harness-hardening 任务中使用 stage checkpoint 恢复，并证明减少重复探索或避免遗漏验证 | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
 | 不同 task class 的 local trace report | `GAP-TRACE-LOCAL-SUMMARY-BURNIN` | 非 `harness-hardening` 任务生成 no-network local trace summary，并带 bounded evidence | `scripts/check_harness_sample_append.py <candidate-jsonl>` |
@@ -50,6 +50,7 @@
 
 | Gap ID | Current decision | Reopen when |
 | --- | --- | --- |
+| `GAP-GUARDRAIL-PREFLIGHT-WARNING` | `keep-advisory` | 出现 destructive、external-send、long-output 等更多 warning 类型，或 bounded governance doc 上的 sensitive-output 误报复核与 operator cost 证据 |
 | `GAP-GUARDRAIL-SOURCE-BOUNDARY` | `keep-advisory` | 出现 PRD、issue、web、Slack、粘贴 source 等更多来源类型，或有 harmless source-priority correction 的 false-positive 复核 |
 | `GAP-SEC-CONTROL-MATRIX-BURNIN` | `keep-advisory` | 出现外部来源类型、多 control mapping 或 reviewer cost evidence |
 | `GAP-WORKFLOW-SIMPLE-SKIP` | `keep-advisory` | 出现 WS-01 之外的 simple-skip、使用 Candidate workflow skill 反而明显改善结果的 negative sample，或简单任务误触发重流程的 process-tax / false-positive 复核 |

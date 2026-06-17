@@ -58,6 +58,10 @@ class OutcomeResult:
     guardrail_posture: str
     command_count: int
     timeout_budget_seconds: int
+    latency_budget_seconds: int
+    model_usage: str
+    estimated_model_cost_usd: float
+    measurement_boundary: str
     checks: list[CheckResult]
 
 
@@ -173,6 +177,10 @@ def run_item(item: dict[str, Any], *, dry_run: bool, timeout: int) -> OutcomeRes
         guardrail_posture=str(scorecard.get("guardrail_posture", "not-expected")),
         command_count=len(checks),
         timeout_budget_seconds=len(checks) * timeout,
+        latency_budget_seconds=len(checks) * timeout,
+        model_usage="none",
+        estimated_model_cost_usd=0.0,
+        measurement_boundary="repo-local deterministic checks only; no model API call",
         checks=checks,
     )
 
@@ -208,6 +216,17 @@ def aggregate_counts(results: list[OutcomeResult]) -> dict[str, int]:
     return counts
 
 
+def aggregate_metrics(results: list[OutcomeResult]) -> dict[str, Any]:
+    usage_counts: dict[str, int] = {}
+    for result in results:
+        usage_counts[result.model_usage] = usage_counts.get(result.model_usage, 0) + 1
+    return {
+        "model_usage_counts": usage_counts,
+        "estimated_model_cost_usd_total": round(sum(result.estimated_model_cost_usd for result in results), 6),
+        "latency_budget_seconds_total": sum(result.latency_budget_seconds for result in results),
+    }
+
+
 def write_output(path_text: str, payload: dict[str, Any]) -> None:
     path = Path(path_text).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -233,6 +252,7 @@ def main() -> int:
         "dry_run": args.dry_run,
         "selected_count": len(results),
         **aggregate_counts(results),
+        **aggregate_metrics(results),
         "results": [asdict(item) for item in results],
     }
     if args.output:
@@ -241,7 +261,15 @@ def main() -> int:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
         for result in results:
-            print(f"{result.id}: {result.task_outcome} | commands={result.command_count} | timeout_budget_seconds={result.timeout_budget_seconds} | overreach={result.overreach} | resume={result.resume_stability} | guardrail={result.guardrail_posture}")
+            print(
+                f"{result.id}: {result.task_outcome} | commands={result.command_count} "
+                f"| timeout_budget_seconds={result.timeout_budget_seconds} "
+                f"| latency_budget_seconds={result.latency_budget_seconds} "
+                f"| model_usage={result.model_usage} "
+                f"| estimated_model_cost_usd={result.estimated_model_cost_usd:.6f} "
+                f"| overreach={result.overreach} | resume={result.resume_stability} "
+                f"| guardrail={result.guardrail_posture}"
+            )
     return 0
 
 

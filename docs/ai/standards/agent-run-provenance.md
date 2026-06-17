@@ -1,6 +1,6 @@
 # Agent Run Provenance Standard
 
-Updated: 2026-05-29
+Updated: 2026-06-17
 Status: local-first standard
 
 ## Purpose
@@ -14,6 +14,7 @@ It answers:
 - Which actor had authority to write canonical docs or only produce a draft.
 - Which files changed and which tool contracts governed the work.
 - Which validation commands were actually run.
+- Which model / token / cost / latency boundary applied to the run.
 - Which claims are verified locally, which remain plan-limited / unknown, and which are explicitly not claimed.
 
 ## Files
@@ -34,6 +35,8 @@ Required fields:
 - `task_summary`: bounded summary of the work.
 - `requirement_ids` / `workstream_ids`: either concrete `REQ-XXX` / `WS-XX` values or both set to `["unbound"]`.
 - `platform_boundary`: one of `local-only`, `local-with-ci-evidence`, or `manual-github-evidence`.
+- `run_metrics`: model usage, model name, estimated input / output tokens, estimated cost,
+  latency, and measurement boundary.
 - `authority`: actor, authority level, canonical-write flag, and allowed outputs.
 - `changed_files`: repo-relative files or directories touched by the run.
 - `tool_contracts`: names from `docs/ai/tool-contracts/contracts.json`.
@@ -51,6 +54,10 @@ Current project policy keeps this standard local-first:
 - GitHub Copilot cloud agent tasks and GitHub hosted agent task APIs are not first-class provenance sources for this repo.
 - `.codex/runtime/*` remains local recovery material and must not be referenced as canonical provenance evidence.
 - Hosted trace, MCP, A2A, OpenAI sandbox, and external OTLP claims require separate adopted ADRs and real evidence before they can move out of `not_claimed` or `future-work`.
+- Local deterministic checks should set `run_metrics.model_usage=none`,
+  `estimated_cost_usd=0`, and `latency_ms=0`. Real model-backed runs must state
+  the model class/name, estimated tokens, estimated cost, latency, and whether the
+  values are measured or bounded estimates.
 
 ## Validation
 

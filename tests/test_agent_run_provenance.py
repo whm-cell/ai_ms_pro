@@ -23,6 +23,15 @@ VALID_RECORD = {
     "requirement_ids": ["REQ-003"],
     "workstream_ids": ["WS-01"],
     "platform_boundary": "local-with-ci-evidence",
+    "run_metrics": {
+        "model_usage": "none",
+        "model_name": "not-used",
+        "estimated_input_tokens": 0,
+        "estimated_output_tokens": 0,
+        "estimated_cost_usd": 0.0,
+        "latency_ms": 0,
+        "measurement_boundary": "No model API call; repo-local deterministic checks only.",
+    },
     "authority": {
         "actor": "main-agent",
         "authority_level": "canonical-writer",
@@ -121,6 +130,26 @@ class AgentRunProvenanceTest(unittest.TestCase):
 
         self.assertTrue(any("platform_boundary must be one of" in error for error in report.errors))
 
+    def test_rejects_missing_run_metrics(self) -> None:
+        record = {key: value for key, value in VALID_RECORD.items() if key != "run_metrics"}
+
+        report = check_agent_run_provenance.build_report(write_records(record))
+
+        self.assertTrue(any("run_metrics must be an object" in error for error in report.errors))
+
+    def test_rejects_nonzero_cost_when_model_usage_none(self) -> None:
+        record = {
+            **VALID_RECORD,
+            "run_metrics": {
+                **VALID_RECORD["run_metrics"],
+                "estimated_cost_usd": 0.01,
+            },
+        }
+
+        report = check_agent_run_provenance.build_report(write_records(record))
+
+        self.assertTrue(any("estimated_cost_usd must be 0 when model_usage=none" in error for error in report.errors))
+
     def test_rejects_raw_runtime_material(self) -> None:
         record = {
             **VALID_RECORD,
@@ -159,6 +188,7 @@ class AgentRunProvenanceTest(unittest.TestCase):
 
         self.assertIn('"record_count"', result.stdout)
         self.assertIn('"referenced_tool_contracts"', result.stdout)
+        self.assertIn('"model_usage_counts"', result.stdout)
         self.assertIn('"errors": []', result.stdout)
 
 

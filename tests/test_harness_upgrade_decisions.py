@@ -63,6 +63,7 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         self.assertEqual(
             [
                 "GAP-AGENTIC-SANDBOX-HONESTY",
+                "GAP-GUARDRAIL-PREFLIGHT-WARNING",
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
                 "GAP-WORKFLOW-SIMPLE-SKIP",
@@ -73,6 +74,7 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         self.assertEqual(
             [
                 "GAP-AGENTIC-SANDBOX-HONESTY",
+                "GAP-GUARDRAIL-PREFLIGHT-WARNING",
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
                 "GAP-WORKFLOW-SIMPLE-SKIP",
@@ -80,7 +82,8 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
             ],
             report.decided_ready_gap_ids,
         )
-        self.assertEqual({"keep-advisory": 5}, report.decision_counts)
+        self.assertEqual({"keep-advisory": 6}, report.decision_counts)
+        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.next_evidence_needed_by_gap)
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.next_evidence_needed_by_gap)
         self.assertIn(
             "more real tasks outside the initial simple/complex/0-1-stage profile set",
@@ -95,6 +98,7 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         report = decisions.build_report(write_decisions())
 
         self.assertIn("missing upgrade decision for ready gap: GAP-AGENTIC-SANDBOX-HONESTY", report.errors)
+        self.assertIn("missing upgrade decision for ready gap: GAP-GUARDRAIL-PREFLIGHT-WARNING", report.errors)
         self.assertIn("missing upgrade decision for ready gap: GAP-GUARDRAIL-SOURCE-BOUNDARY", report.errors)
         self.assertIn("missing upgrade decision for ready gap: GAP-SEC-CONTROL-MATRIX-BURNIN", report.errors)
         self.assertIn("missing upgrade decision for ready gap: GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.errors)
@@ -107,7 +111,7 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         self.assertTrue(any("accepted_count is stale" in error for error in report.errors))
 
     def test_decision_for_non_ready_gap_fails(self) -> None:
-        record = {**VALID_RECORD, "id": "HUD-test-preflight", "gap_id": "GAP-GUARDRAIL-PREFLIGHT-WARNING"}
+        record = {**VALID_RECORD, "id": "HUD-test-stage-checkpoint", "gap_id": "GAP-RUNTIME-STAGE-CHECKPOINT-RESUME"}
 
         report = decisions.build_report(write_decisions(record))
 
@@ -181,8 +185,8 @@ class HarnessUpgradeDecisionTest(unittest.TestCase):
         payload = json.loads(result.stdout)
 
         self.assertEqual([], payload["errors"])
-        self.assertEqual(5, payload["ready_gap_count"])
-        self.assertEqual({"keep-advisory": 5}, payload["decision_counts"])
+        self.assertEqual(6, payload["ready_gap_count"])
+        self.assertEqual({"keep-advisory": 6}, payload["decision_counts"])
         self.assertIn("next_evidence_needed_by_gap", payload)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", payload["next_evidence_needed_by_gap"])
 

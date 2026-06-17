@@ -317,7 +317,7 @@
     },
     {
       "name": "run_task_outcome_eval_dataset",
-      "purpose": "Dry-run or execute the task outcome eval dataset with outcome, overreach, resume-stability, and cost proxies.",
+      "purpose": "Dry-run or execute the task outcome eval dataset with outcome, overreach, resume-stability, model/cost/latency metadata, and cost proxies.",
       "path": "scripts/run_task_outcome_eval_dataset.py",
       "command": ".codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run",
       "inputs": ["docs/ai/evals/task-outcome-evals.jsonl", "repository check scripts"],
@@ -335,7 +335,7 @@
       "local_vs_remote": "local-only",
       "trust_level": "repo-local-deterministic-eval-runner",
       "sandbox_requirement": "none",
-      "notes": "The default contract command is dry-run. Executing without --dry-run runs repo-local checks only and reports task outcome, aggregate pass/warn/review/fail counts, blocked resume/guardrail counts, and bounded cost proxies."
+      "notes": "The default contract command is dry-run. Executing without --dry-run runs repo-local checks only and reports task outcome, aggregate pass/warn/review/fail counts, blocked resume/guardrail counts, model_usage, zero estimated model cost for deterministic local checks, latency budget, and bounded cost proxies."
     },
     {
       "name": "export_agent_trace_local",
@@ -1354,7 +1354,7 @@
     },
     {
       "name": "check_agent_run_provenance",
-      "purpose": "Validate local-first agent-run provenance records, authority boundaries, validation evidence, and claim-honesty fields.",
+      "purpose": "Validate local-first agent-run provenance records, authority boundaries, validation evidence, run metrics, and claim-honesty fields.",
       "path": "scripts/check_agent_run_provenance.py",
       "command": ".codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py",
       "inputs": [

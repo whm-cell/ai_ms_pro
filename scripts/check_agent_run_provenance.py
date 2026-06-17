@@ -10,9 +10,8 @@ import re
 import sys
 from typing import Any
 
+import agent_run_metrics
 import evidence_ref_utils
-
-
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RECORDS = ROOT / "docs" / "ai" / "standards" / "agent-run-provenance-sample.jsonl"
 DEFAULT_CONTRACTS = ROOT / "docs" / "ai" / "tool-contracts" / "contracts.json"
@@ -29,19 +28,17 @@ CLAIM_STATES = {"verified-local", "ci-evidence", "manual-confirmed", "unknown-pl
 FORBIDDEN_KEYS = {"prompt", "prompt_preview", "raw_output", "rawOutput", "transcript", "transcript_path"}
 MAX_TEXT = 600
 MAX_LIST_ITEMS = 20
-
-
 @dataclass(frozen=True)
 class AgentRunProvenanceReport:
     record_path: str
     record_count: int
     canonical_write_count: int
     local_first_count: int
+    model_usage_counts: dict[str, int]
+    estimated_cost_usd_total: float
     referenced_tool_contracts: list[str]
     errors: list[str]
     warnings: list[str]
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate local agent-run provenance records.")
     parser.add_argument("--records", default=str(DEFAULT_RECORDS), help="agent-run-provenance/v1 JSONL path.")
@@ -63,7 +60,6 @@ def text_list(value: Any) -> list[str]:
         return []
     return [item.strip() for item in value if isinstance(item, str) and item.strip()]
 
-
 def build_report(records_path: Path = DEFAULT_RECORDS, contracts_path: Path = DEFAULT_CONTRACTS) -> AgentRunProvenanceReport:
     errors: list[str] = []
     warnings: list[str] = []
@@ -73,6 +69,8 @@ def build_report(records_path: Path = DEFAULT_RECORDS, contracts_path: Path = DE
     referenced_contracts: set[str] = set()
     canonical_count = 0
     local_first_count = 0
+    model_usage_counts: dict[str, int] = {}
+    estimated_cost_total = 0.0
     for line_no, record in records:
         validate_record(line_no, record, seen_ids, contract_names, referenced_contracts, errors, warnings)
         authority = record.get("authority", {})
@@ -80,6 +78,10 @@ def build_report(records_path: Path = DEFAULT_RECORDS, contracts_path: Path = DE
             canonical_count += 1
         if text(record.get("platform_boundary")) in {"local-only", "local-with-ci-evidence"}:
             local_first_count += 1
+        metrics = record.get("run_metrics")
+        usage = agent_run_metrics.model_usage(metrics)
+        model_usage_counts[usage] = model_usage_counts.get(usage, 0) + 1
+        estimated_cost_total += agent_run_metrics.estimated_cost(metrics)
     if not records:
         warnings.append("no agent-run provenance records found")
     return AgentRunProvenanceReport(
@@ -87,6 +89,8 @@ def build_report(records_path: Path = DEFAULT_RECORDS, contracts_path: Path = DE
         len(records),
         canonical_count,
         local_first_count,
+        dict(sorted(model_usage_counts.items())),
+        round(estimated_cost_total, 6),
         sorted(referenced_contracts),
         errors,
         warnings,
@@ -111,8 +115,6 @@ def load_records(path: Path, errors: list[str]) -> list[tuple[int, dict[str, Any
         else:
             errors.append(f"line {line_no}: record must be a JSON object")
     return records
-
-
 def load_contract_names(path: Path, errors: list[str]) -> set[str]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -155,6 +157,7 @@ def validate_record(
     validate_traceability(record, prefix, errors)
     validate_authority(record.get("authority"), prefix, errors)
     validate_validation(record.get("validation"), prefix, errors)
+    agent_run_metrics.validate_run_metrics(record.get("run_metrics"), prefix, errors)
     validate_tool_contracts(record, prefix, contract_names, referenced_contracts, errors)
     validate_claim_boundaries(record.get("claim_boundaries"), prefix, errors, warnings)
     for field in ("changed_files", "evidence_refs"):
@@ -168,27 +171,30 @@ def validate_record(
             allow_selectors=True,
         )
 
+
 def required_text(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> str:
     value = text(record.get(field))
     if not value:
         errors.append(f"{prefix}: {field} must be non-empty text")
     return value
 
+
 def validate_bounded_required_text(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> None:
     value = required_text(record, field, prefix, errors)
     if len(value) > MAX_TEXT:
         errors.append(f"{prefix}: {field} exceeds {MAX_TEXT} characters")
+
 
 def validate_date(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> None:
     value = required_text(record, field, prefix, errors)
     if value and not DATE_RE.match(value):
         errors.append(f"{prefix}: {field} must use YYYY-MM-DD")
 
+
 def validate_choice(record: dict[str, Any], field: str, choices: set[str], prefix: str, errors: list[str]) -> None:
     value = required_text(record, field, prefix, errors)
     if value and value not in choices:
         errors.append(f"{prefix}: {field} must be one of {sorted(choices)}")
-
 
 def validate_text_list(record: dict[str, Any], field: str, prefix: str, errors: list[str]) -> list[str]:
     values = text_list(record.get(field))
@@ -201,7 +207,6 @@ def validate_text_list(record: dict[str, Any], field: str, prefix: str, errors: 
         if len(value) > MAX_TEXT:
             errors.append(f"{prefix}: {field} item exceeds {MAX_TEXT} characters")
     return values
-
 
 def validate_traceability(record: dict[str, Any], prefix: str, errors: list[str]) -> None:
     req_ids = text_list(record.get("requirement_ids"))
@@ -221,7 +226,6 @@ def validate_traceability(record: dict[str, Any], prefix: str, errors: list[str]
     if (req_ids == ["unbound"]) != (ws_ids == ["unbound"]):
         errors.append(f"{prefix}: requirement_ids and workstream_ids must be bound or unbound together")
 
-
 def validate_authority(value: Any, prefix: str, errors: list[str]) -> None:
     if not isinstance(value, dict):
         errors.append(f"{prefix}: authority must be an object")
@@ -234,7 +238,6 @@ def validate_authority(value: Any, prefix: str, errors: list[str]) -> None:
     if value.get("authority_level") != "canonical-writer" and canonical_write is True:
         errors.append(f"{prefix}: only canonical-writer authority may set canonical_write=true")
     validate_text_list(value, "allowed_outputs", prefix, errors)
-
 
 def validate_validation(value: Any, prefix: str, errors: list[str]) -> None:
     if not isinstance(value, list) or not value:
@@ -258,7 +261,6 @@ def validate_validation(value: Any, prefix: str, errors: list[str]) -> None:
             errors.append(f"{label}.evidence_refs must be a non-empty list")
         evidence_ref_utils.validate_existing_repo_relative_refs(refs, ROOT, f"validation[{index}].evidence_refs", prefix, errors, allow_selectors=True)
 
-
 def validate_tool_contracts(
     record: dict[str, Any],
     prefix: str,
@@ -271,7 +273,6 @@ def validate_tool_contracts(
         if contract not in contract_names:
             errors.append(f"{prefix}: unknown tool contract: {contract}")
         referenced_contracts.add(contract)
-
 
 def validate_claim_boundaries(value: Any, prefix: str, errors: list[str], warnings: list[str]) -> None:
     if not isinstance(value, dict):
@@ -303,7 +304,6 @@ def validate_claim_boundaries(value: Any, prefix: str, errors: list[str], warnin
     if "cloud agent" not in combined and "github copilot" not in combined:
         warnings.append(f"{prefix}: claim boundaries should explicitly exclude hosted/cloud agent task claims when relevant")
 
-
 def scan_for_forbidden_runtime(prefix: str, value: Any, errors: list[str]) -> None:
     if isinstance(value, dict):
         for key, child in value.items():
@@ -317,13 +317,15 @@ def scan_for_forbidden_runtime(prefix: str, value: Any, errors: list[str]) -> No
     elif isinstance(value, str) and ".codex/runtime/" in value.replace("\\", "/"):
         errors.append(f"{prefix}: provenance records must not reference local runtime material")
 
-
 def emit_text(report: AgentRunProvenanceReport) -> None:
     print("Agent-run provenance audit:")
     print(f"- records: {report.record_path}")
     print(f"- record count: {report.record_count}")
     print(f"- canonical write records: {report.canonical_write_count}")
     print(f"- local-first records: {report.local_first_count}")
+    if report.model_usage_counts:
+        print(f"- model usage: {report.model_usage_counts}")
+    print(f"- estimated cost usd total: {report.estimated_cost_usd_total:.6f}")
     if report.referenced_tool_contracts:
         print(f"- referenced tool contracts: {', '.join(report.referenced_tool_contracts)}")
     for warning in report.warnings:
@@ -334,7 +336,6 @@ def emit_text(report: AgentRunProvenanceReport) -> None:
     else:
         print("ERRORS: none")
 
-
 def main() -> int:
     args = parse_args()
     report = build_report(Path(args.records).expanduser(), Path(args.contracts).expanduser())
@@ -343,7 +344,6 @@ def main() -> int:
     else:
         emit_text(report)
     return 1 if report.errors else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

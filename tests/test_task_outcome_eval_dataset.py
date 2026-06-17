@@ -32,6 +32,10 @@ class TaskOutcomeEvalDatasetTest(unittest.TestCase):
         self.assertEqual(result.task_outcome, "not-run")
         self.assertGreater(result.command_count, 0)
         self.assertEqual(result.timeout_budget_seconds, result.command_count * 30)
+        self.assertEqual(result.latency_budget_seconds, result.command_count * 30)
+        self.assertEqual(result.model_usage, "none")
+        self.assertEqual(result.estimated_model_cost_usd, 0.0)
+        self.assertIn("deterministic", result.measurement_boundary)
         self.assertEqual(result.overreach, "bounded")
         self.assertEqual(result.checks[0].observed_signal, "not-run")
         self.assertTrue(result.expected_changed_surface)
@@ -195,6 +199,10 @@ class TaskOutcomeEvalDatasetTest(unittest.TestCase):
                 guardrail_posture="not-expected",
                 command_count=1,
                 timeout_budget_seconds=30,
+                latency_budget_seconds=30,
+                model_usage="none",
+                estimated_model_cost_usd=0.0,
+                measurement_boundary="repo-local deterministic checks only; no model API call",
                 checks=[],
             ),
             run_task_outcome_eval_dataset.OutcomeResult(
@@ -209,16 +217,24 @@ class TaskOutcomeEvalDatasetTest(unittest.TestCase):
                 guardrail_posture="review-required",
                 command_count=1,
                 timeout_budget_seconds=30,
+                latency_budget_seconds=30,
+                model_usage="none",
+                estimated_model_cost_usd=0.0,
+                measurement_boundary="repo-local deterministic checks only; no model API call",
                 checks=[],
             ),
         ]
 
         counts = run_task_outcome_eval_dataset.aggregate_counts(results)
+        metrics = run_task_outcome_eval_dataset.aggregate_metrics(results)
 
         self.assertEqual(counts["pass_count"], 1)
         self.assertEqual(counts["review_required_count"], 1)
         self.assertEqual(counts["blocked_by_resume"], 1)
         self.assertEqual(counts["blocked_by_guardrail"], 1)
+        self.assertEqual(metrics["model_usage_counts"], {"none": 2})
+        self.assertEqual(metrics["estimated_model_cost_usd_total"], 0.0)
+        self.assertEqual(metrics["latency_budget_seconds_total"], 60)
 
 
 if __name__ == "__main__":

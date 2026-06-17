@@ -1,6 +1,6 @@
 # Harness Capability Model
 
-更新时间：2026-06-16
+更新时间：2026-06-17
 状态：active capability direction
 
 ## 定位
@@ -30,7 +30,7 @@
    - local-only / pilot-remote / verified-remote count and endpoint failure mode
 3. `task-quality eval`
    - workflow/guardrail/tooling eval 继续保留
-   - 新增 task outcome eval，衡量任务完成质量、过度行动、resume 稳定性和 guardrail posture
+   - 新增 task outcome eval，衡量任务完成质量、过度行动、resume 稳定性、guardrail posture 和本地 model / cost / latency metadata
    - task outcome aggregate counts and blocked reason summary
 
 ## Bounded Loop Layer
@@ -55,6 +55,7 @@
 2026-06-06 的五个反哺点只把支撑面补齐到 bounded evidence：
 
 - cross-task resume：已有 checkpoint / queue 入口，但 accepted cross-task sample 仍为 0。
+- PreToolUse preflight：已有 2/2 accepted real warning samples（含 1 个 false positive），升级讨论结论为 `keep-advisory`，只支持 warning tuning，不支持 blocking。
 - remote trace interop：loopback / localhost evidence 不能升级为 `verified-remote`。
 - execution policy：`run_sandboxed_command.py` 是 local wrapper，metadata 明示 `native_sandbox=false`。
 - multi-agent：planner / executor / reviewer 只作为 trace / provenance / eval 样例，不是 runtime scheduler。
@@ -75,10 +76,15 @@
 - 该机制不提供生产配置中心、secret manager、Kubernetes / CI secret 或远端部署验证；provider-specific 规则必须由项目配置输入，不写死在通用 checker。
 - Bounded Loop Triage 只提升“下一步该看什么”的选择质量；它不把任何 advisory / review-required signal 自动变成执行、修复、样本接受或 blocking 升级。
 - Mock Data Boundary 只提升产品页面/组件里大型 mock 数据的早期可见性；它不自动清理旧代码、不移动 fixture、不创建 API、不证明生产数据集成，也不默认阻断开发。
+- Harness Optimization Decision Defaults 把 2026-06-17 趋势对比后的人工决策转成 bounded 默认路线：保持 STAGE-00 local-first，优先补真实 cross-task resume、remote pilot 和 model/cost/latency metadata；sandbox、CI agent、hosted eval 与 MCP/A2A 默认仍是 comparison-only 或 task-shape gated。
+- `agent-run-provenance/v1` 的 `run_metrics` 和 task outcome runner 的 `model_usage` / `estimated_model_cost_usd` / `latency_budget_seconds` 只记录本地可审计边界；当前 deterministic 本地检查默认 `model_usage=none`，不声明 hosted eval、生产 SLO 或模型质量结论。
 
 对应审计命令：
 
 ```bash
+.codex/hooks/run_with_repo_python.sh scripts/check_task_outcome_eval_dataset.py
+.codex/hooks/run_with_repo_python.sh scripts/run_task_outcome_eval_dataset.py --dry-run
+.codex/hooks/run_with_repo_python.sh scripts/check_agent_run_provenance.py
 .codex/hooks/run_with_repo_python.sh scripts/check_external_harness_decisions.py
 .codex/hooks/run_with_repo_python.sh scripts/check_config_contract.py
 .codex/hooks/run_with_repo_python.sh scripts/check_env_template_sync.py --warning-only
