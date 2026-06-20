@@ -108,7 +108,12 @@ class PythonResolutionTest(unittest.TestCase):
                             "python_version",
                             side_effect=lambda command: versions.get(tuple(command)),
                         ):
-                            command = bootstrap_harness.resolve_bootstrap_python(None)
+                            with mock.patch.object(
+                                bootstrap_harness,
+                                "is_runnable_python",
+                                side_effect=lambda command: command == [str(env_python)],
+                            ):
+                                command = bootstrap_harness.resolve_bootstrap_python(None)
 
         self.assertEqual(command, [str(env_python)])
 
