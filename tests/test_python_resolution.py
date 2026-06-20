@@ -95,7 +95,7 @@ class PythonResolutionTest(unittest.TestCase):
             root.mkdir()
             env_python = write_fake_python(parent, "python-from-env", "3.12.11")
             (parent / ".env").write_text(
-                f"CODEX_HARNESS_PYTHON={env_python}\n",
+                f"CODEX_HARNESS_PYTHON={env_python.as_posix()}\n",
                 encoding="utf-8",
             )
             versions = {(str(env_python),): (3, 12, 11)}
