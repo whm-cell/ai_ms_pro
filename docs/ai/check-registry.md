@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-06-17
+更新时间：2026-06-20
 状态：已确认
 
 ## 作用
@@ -20,12 +20,14 @@
 | --- | --- | --- | --- |
 | `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / JS / CSS / SCSS / SQL / Rust / shell / PowerShell | 新增大文件误报可控后保持或收紧；Next-style source trees 已进入 file-level budget；tests 与 fixture/cases/mock data 使用 path-specific 单文件预算 |
-| Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; scope is `E9` plus Pyflakes `F` | 保持当前 blocking scope；`PLR2004`、`C901`、`PLR0912`、`PLR0915` 只能先作为 no-write / review-required 样本收集，误报率、修复路径和 CI 成本可控后再讨论升级 |
+| Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; pre-commit also runs `git diff --cached --check`; scope is `E9` plus Pyflakes `F` | 保持当前 blocking scope；`PLR2004`、`C901`、`PLR0912`、`PLR0915` 只能先作为 no-write / review-required 样本收集，误报率、修复路径和 CI 成本可控后再讨论升级 |
 | Evidence-based coding standards | `review-required` | manual / `$repo-governed-coding` checklist | 覆盖魔法值、复杂度、长函数/大类职责、重复代码风险、命名和公共抽象触发条件；后续若引入 Ruff 或 JS/TS lint，必须先进入 blocking-candidate burn-in |
 | Enterprise Code Boundary standards | `review-required` | manual / `$enterprise-code-boundary-maintenance` checklist | 覆盖 logging/redaction、error contract、runtime side effect 和 config contract routing；v1 只做规范索引和 changed-file follow-up，不新增 checker、不声明 SIEM/DLP、生产 observability、全局错误码平台、service mesh 或远端 side-effect 审计 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `review-required` | manual / PR review evidence | private Free 下只证明本地/CI evidence 与 plan-limited `UNKNOWN`；升级 plan 或改 public 后再考虑 required-check 阻断 |
 | `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs advisory markdown without `--strict`; manual cleanup commands remain explicit; Actions token 无法读取 check rollup 时 failed-open-PR 审计降级为 NOTE | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
+| `report_pr_checks.py` | `advisory` | manual / PR check status review | 只读 `gh pr view` check rollup，报告 failed / pending / unknown checks；不修改文件、不 push、不证明 required checks 已远端强制 |
+| `start_pr_repair_worktree.py` | `advisory` | manual / PR check repair setup | 创建或复用 sibling detached repair worktree 并打印 PR head push 命令；用于隔离修复，不证明 checks 通过、不自动 merge、不清理当前开发工作区 |
 | WS-01 / WS-02 active browser smoke | `blocking` | smoke job runs `threejs_snake_smoke.py`, `threejs_snake_blackbox_smoke.py`, `harness_trace_console_smoke.py`, and `harness_trace_console_blackbox_smoke.py` | 已强制；WS-01 Three.js Snake 是当前 harness capability validation sample；WS-02 Harness Trace Console 是当前 governance UI sample；Playwright browser install 与 CLI package 版本继续固定 |
 | `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入、raw evidence / source quarantine、`pending` source boundary 和 external-web / third-party / unknown 样本证明误报可控后升级；`source-evidence/raw-prd-evidence` 不作为 canonical REQDOC，缺 trust/instruction/sanitization metadata 为 review-required |
 | `check_agent_trace_schema.py` | `blocking-candidate` | governance job; runtime stop-hook tests validate producer output against the schema; local export adapter runs against the sample | Stop producer 与本地 adapter 已接入；后续若扩大到真实 trace-file batch validation，再根据误报率决定是否升级为 blocking |
@@ -96,6 +98,7 @@
 
 ## 最新口径补充
 
+- 2026-06-20：阶段提交 / PR-CI 流程拆分为 fast local gates、feature branch draft PR、只读 PR checks、独立 PR repair worktree、用户确认后合并 `main`、再按本地状态同步开发分支。新增 `scripts/report_pr_checks.py` 与 `scripts/start_pr_repair_worktree.py` 作为 advisory 操作辅助；pre-commit 增加 `git diff --cached --check`，但长 smoke、Windows runner、security evidence 和 remote enforcement 仍由 PR / GitHub evidence 面承接，不新增远端强制 claim。
 - 2026-06-18：新增 `docs/ai/harness-freeze-policy.md`，吸收 `demo_txt_t_proto/qqq` 暴露的“后期大小需求导致频繁修 harness 文档和编译/运行环境”问题；后期产品、UI、provider 或需求 refinement 默认冻结 harness，只有 blocking check、runner/bootstrap 损坏、traceability/ADR/production boundary 真实变化、secret/runtime artifact/overclaim 风险或用户明确要求时才改 harness。该文档是 policy route，不改变任何 check level。
 - 2026-06-18：新增 `docs/ai/verification-minimums.md` 作为最小验证集合路由，吸收 `demo_txt_t_proto/qqq` 暴露的“验证选择成本高”问题；该文档只帮助按改动面选择 focused checks，不改变任何 check level，也不替代本 registry 或 verification command matrix。
 - 2026-06-18：PreToolUse preflight catalog 调优：full-file `nl -ba`、过大 `sed` line window、dense governance doc window 和 shell glob read loop 现在按 `unbounded-large-output` 提醒并给出 bounded 替代；`token_budget` / `runtime_token_budget` 治理文档与脚本的 bounded read 不再计为 `sensitive-output`。该变化只降低误报和补齐大输出模式，等级仍保持 advisory。

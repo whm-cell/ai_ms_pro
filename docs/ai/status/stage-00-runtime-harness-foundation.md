@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-06-17
+更新时间：2026-06-20
 阶段：stage-00
 状态：进行中
 
@@ -24,6 +24,7 @@
 
 - `requirements -> implementation -> smoke -> runtime promotion -> status` 已跑通；CI blocking smoke 仍只覆盖 WS-01 / WS-02。
 - GitHub、agentic standards、tool contracts、sample gaps、runtime compression、context budget、code-shape、prototype/config/mock-data/data-activation/reuse-retirement/enterprise/productization/optimization defaults 均已进入 bounded checks / references；细则不放回默认上下文。
+- Commit / push 流程已拆成 fast local gates、feature branch / draft PR、只读 checks、独立 PR repair worktree、用户确认后合并 `main` 与安全本地同步；该流程只改善操作者边界，不声明远端 required checks 或禁直推已强制。
 - Real Data Activation Gate 与 Reuse And Retirement Gate 已固化为 `[data_activation]` / `[reuse_retirement]` 审计信号；默认 review-required / no-write，不迁移数据、不删除 fixture 或代码、不证明真实数据质量或死代码。
 - Starter bootstrap Python runtime 解析已支持父级 `.env` allowlisted selector 与 pyenv 版本回退；不复制 `.env`、不读取任意 secret、不提交 `.codex/.venv`。
 - Capability 聚合保持 local-first：runtime artifact 是本地恢复材料；verified remote、hosted trace/eval、MCP/A2A、native sandbox、外部 collector、真实 CI agent workflow 和生产原型能力均未声明完成。
