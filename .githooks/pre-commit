@@ -4,6 +4,9 @@ set -eu
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
+echo "Running staged whitespace check..."
+git diff --cached --check
+
 echo "Running AI docs governance check..."
 "$REPO_ROOT/.codex/hooks/run_with_repo_python.sh" scripts/check_ai_governance.py
 

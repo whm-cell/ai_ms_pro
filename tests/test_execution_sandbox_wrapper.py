@@ -134,14 +134,30 @@ class LocalExecutionPolicyWrapperTest(unittest.TestCase):
         self.assertEqual(["externally-visible-command"], [finding.code for finding in caught.exception.findings])
 
     def test_sensitive_command_can_run_with_human_confirmation_ref(self) -> None:
+        def fake_run_and_capture(
+            command: list[str],
+            *,
+            artifact_path: Path,
+            stdout_path: Path,
+            stderr_path: Path,
+            timeout_seconds: int,
+        ) -> tuple[int, bool]:
+            self.assertEqual(command, ["env"])
+            self.assertGreater(timeout_seconds, 0)
+            artifact_path.write_bytes(b"PATH=/usr/bin\n")
+            stdout_path.write_bytes(b"PATH=/usr/bin\n")
+            stderr_path.write_bytes(b"")
+            return 0, False
+
         with tempfile.TemporaryDirectory() as tmp:
             output_dir = Path(tmp) / "tool-outputs"
-            result = run_sandboxed_command.run_policy_command(
-                ["env"],
-                output_dir=output_dir,
-                slug="confirmed-env",
-                human_confirmation_ref="manual-review:TEST-123",
-            )
+            with mock.patch("run_sandboxed_command.run_and_capture", side_effect=fake_run_and_capture):
+                result = run_sandboxed_command.run_policy_command(
+                    ["env"],
+                    output_dir=output_dir,
+                    slug="confirmed-env",
+                    human_confirmation_ref="manual-review:TEST-123",
+                )
 
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(["sensitive-output"], result.blocking_findings)

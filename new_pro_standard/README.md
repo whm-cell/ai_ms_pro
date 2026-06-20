@@ -223,6 +223,7 @@ The starter treats large tool output as runtime pressure, not shared project tru
 
 The shipped Git hook runs:
 
+- `git diff --cached --check`
 - `scripts/check_ai_governance.py`
 - `scripts/check_context_budget.py`
 - `scripts/check_code_shape.py --staged`
