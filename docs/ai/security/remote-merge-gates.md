@@ -118,7 +118,7 @@ If the repository plan or visibility later supports remote enforcement, branch p
 - Do not claim remote required checks, review gates, conversation resolution, direct-push restrictions, or merge queue are enforced until `scripts/check_github_guardrails.py` or an administrator-provided screenshot / export proves the remote settings under a supported plan.
 - If the repository is upgraded or made public, re-run guardrails and revisit `Future Upgrade Gates`.
 - Do not delete open PR branches directly. Merge or close the PR first, then rely on `delete_branch_on_merge` or `check_branch_hygiene.py`.
-- CI blocks when active PR budgets are exceeded, other failed open PRs exist, or stale/unmanaged branches are detected; PR runs pass `--current-pr` so the branch hygiene gate does not self-block on the current PR's own check rollup. Explicit cleanup still requires `scripts/check_branch_hygiene.py --close-failed-dependabot-prs` or a human PR close action.
+- CI blocks PR runs when active PR budgets are exceeded, other failed open PRs exist, or stale/unmanaged branches are detected; PR runs pass `--current-pr` so the branch hygiene gate does not self-block on the current PR's own check rollup. Main-push branch hygiene is advisory markdown so unrelated remote branch cleanup does not block publishing the already-merged main state. Explicit cleanup still requires `scripts/check_branch_hygiene.py --close-failed-dependabot-prs` or a human PR close action.
 
 ## Verification
 

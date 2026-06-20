@@ -77,29 +77,29 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
         self.assertEqual("review-ready", report.replacement_review_state)
         return report
 
-    def test_preflight_replacement_candidate_targets_existing_placeholder(self) -> None:
-        report = self.assert_candidate_report(preflight_candidate())
+    def test_loop_replacement_candidate_exposes_review_context(self) -> None:
+        report = self.assert_candidate_report(loop_candidate())
 
-        self.assertEqual("PRE-SAMPLE-2026-05-24-real-tool-call-pending", report.sample_id)
-        self.assertEqual("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.gap_id)
-        self.assertEqual("docs/ai/standards/pre-tool-use-preflight-samples.jsonl", report.target_ledger)
+        self.assertEqual("LOOP-SAMPLE-2026-05-24-real-long-session-pending", report.sample_id)
+        self.assertEqual("GAP-RUNTIME-LOOP-SCOPE-WARNING", report.gap_id)
+        self.assertEqual("docs/ai/standards/loop-scope-monitor-samples.jsonl", report.target_ledger)
         self.assertEqual("fill-existing-placeholder", report.ledger_action)
         self.assertEqual("needs-first-real-sample", report.readiness)
-        self.assertEqual("accepted real preflight warning samples", report.source_metric)
+        self.assertEqual("accepted real loop/scope warning samples", report.source_metric)
         self.assertEqual("0/2", report.current_to_target)
         self.assertEqual("replace-placeholder-after-real-event", report.capture_gate)
         self.assertIn("matching real event", report.capture_gate_detail)
-        self.assertIn("finding code", report.evidence_needed)
-        self.assertIn("real PreToolUse warning", report.trigger)
+        self.assertIn("monitor recommendation", report.evidence_needed)
+        self.assertIn("real Stop loop/scope warning", report.trigger)
         self.assertIn("Bounded evidence only", report.boundary)
         self.assertEqual(
             ".codex/hooks/run_with_repo_python.sh scripts/plan_harness_sample_collection.py "
-            "--gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING --ledger-action fill-existing-placeholder --capture-card",
+            "--gap-id GAP-RUNTIME-LOOP-SCOPE-WARNING --ledger-action fill-existing-placeholder --capture-card",
             report.planner_command,
         )
         self.assertEqual(
             ".codex/hooks/run_with_repo_python.sh scripts/build_harness_sample_intake_bundle.py "
-            "--gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING --ledger-action fill-existing-placeholder --summary",
+            "--gap-id GAP-RUNTIME-LOOP-SCOPE-WARNING --ledger-action fill-existing-placeholder --summary",
             report.intake_command,
         )
         self.assertEqual(2, report.target_line)
@@ -124,7 +124,7 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
 
     def test_rejects_new_sample_id_that_would_append_duplicate_gap_work(self) -> None:
         path = write_candidate(
-            preflight_candidate(id="PRE-SAMPLE-2026-05-24-guardrail-preflight-warning")
+            loop_candidate(id="LOOP-SAMPLE-2026-05-24-new-real-long-session")
         )
         try:
             report = check_harness_placeholder_replacement.build_report(path)
@@ -138,7 +138,7 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
         )
 
     def test_rejects_candidate_that_skips_separate_acceptance_review(self) -> None:
-        path = write_candidate(preflight_candidate(outcome="accepted"))
+        path = write_candidate(loop_candidate(outcome="accepted"))
         try:
             report = check_harness_placeholder_replacement.build_report(path)
         finally:
@@ -149,7 +149,7 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
         self.assertIn("outcome must remain pending", "\n".join(report.errors))
 
     def test_rejects_candidate_that_is_still_placeholder(self) -> None:
-        path = write_candidate(preflight_candidate(action_taken=["none"]))
+        path = write_candidate(loop_candidate(action_taken=["none"]))
         try:
             report = check_harness_placeholder_replacement.build_report(path)
         finally:
@@ -161,7 +161,7 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
         self.assertIn("must be review-ready", "\n".join(report.errors))
 
     def test_cli_json_reports_replacement_allowed(self) -> None:
-        path = write_candidate(preflight_candidate())
+        path = write_candidate(loop_candidate())
         try:
             result = subprocess.run(
                 [sys.executable, "scripts/check_harness_placeholder_replacement.py", str(path), "--json"],
@@ -176,16 +176,16 @@ class HarnessPlaceholderReplacementTest(unittest.TestCase):
         data = json.loads(result.stdout)
         self.assertTrue(data["replacement_allowed"])
         self.assertEqual("review-ready", data["replacement_review_state"])
-        self.assertEqual("docs/ai/standards/pre-tool-use-preflight-samples.jsonl", data["target_ledger"])
+        self.assertEqual("docs/ai/standards/loop-scope-monitor-samples.jsonl", data["target_ledger"])
         self.assertEqual("needs-first-real-sample", data["readiness"])
-        self.assertEqual("accepted real preflight warning samples", data["source_metric"])
+        self.assertEqual("accepted real loop/scope warning samples", data["source_metric"])
         self.assertEqual("0/2", data["current_to_target"])
         self.assertEqual("replace-placeholder-after-real-event", data["capture_gate"])
-        self.assertIn("finding code", data["evidence_needed"])
+        self.assertIn("monitor recommendation", data["evidence_needed"])
         self.assertIn("real", data["trigger"].lower())
-        self.assertIn("plan_harness_sample_collection.py --gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING", data["planner_command"])
+        self.assertIn("plan_harness_sample_collection.py --gap-id GAP-RUNTIME-LOOP-SCOPE-WARNING", data["planner_command"])
         self.assertIn("--ledger-action fill-existing-placeholder", data["planner_command"])
-        self.assertIn("build_harness_sample_intake_bundle.py --gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING", data["intake_command"])
+        self.assertIn("build_harness_sample_intake_bundle.py --gap-id GAP-RUNTIME-LOOP-SCOPE-WARNING", data["intake_command"])
         self.assertIn("--ledger-action fill-existing-placeholder", data["intake_command"])
         self.assertIn("check_harness_sample_outcome.py", data["next_outcome_review_command"])
 

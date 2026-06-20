@@ -22,7 +22,7 @@
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged` | 新增大文件误报可控后保持或收紧 |
 | `check_pr_touch_conflicts.py` | `blocking-candidate` | PR job blocks confirmed high-risk overlap; GitHub API `UNKNOWN` stays visible but non-blocking during burn-in | 两次真实多人 PR 样本证明收益后收紧 |
 | `check_github_guardrails.py` | `blocking-candidate` | manual / PR review evidence | 远端 branch protection / rulesets 可读取后再考虑阻断 |
-| `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
+| `check_branch_hygiene.py` | `blocking` | PR summary runs `--strict --current-pr`; main push summary runs advisory markdown without `--strict`; manual cleanup commands remain explicit | active PR 预算、failed open PR、stale branch 持续稳定后再考虑调整阈值 |
 | `check_requirements_shape.py` | `blocking-candidate` | manual / follow-up summary | PRD 导入、raw evidence / source quarantine、`pending` source boundary 和 external-web / third-party / unknown 样本证明误报可控后升级；`source-evidence/raw-prd-evidence` 不作为 canonical REQDOC |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary | 不直接升级；只驱动其他 checks |
 | `check_agent_eval_dataset.py` | `advisory` | manual / starter validation | starter eval dataset 积累真实样本后再评估升级 |

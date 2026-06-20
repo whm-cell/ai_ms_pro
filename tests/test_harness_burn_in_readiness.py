@@ -22,26 +22,26 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
     def gap(self, gap_id: str) -> collect_harness_sample_gaps.SampleGap:
         return next(gap for gap in collect_harness_sample_gaps.GAPS if gap.id == gap_id)
 
-    def test_preflight_and_loop_need_first_real_warning_sample(self) -> None:
+    def test_preflight_is_ready_for_upgrade_and_loop_needs_first_warning_sample(self) -> None:
         by_gap = self.by_gap()
 
-        self.assertEqual("needs-first-real-sample", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].readiness)
-        self.assertEqual(0, by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].accepted_count)
-        self.assertEqual("replace-placeholder-after-real-event", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate)
-        self.assertIn("matching real event", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate_detail)
-        self.assertEqual("fill-existing-placeholder", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].ledger_action)
+        self.assertEqual("ready-for-upgrade-discussion", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].readiness)
+        self.assertEqual(2, by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].accepted_count)
+        self.assertEqual("upgrade-decision-review", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate)
+        self.assertIn("bounded keep/promote/defer", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate_detail)
+        self.assertEqual("review-upgrade-decision", by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].ledger_action)
         self.assertIn(
             "scripts/plan_harness_sample_collection.py --gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING "
-            "--ledger-action fill-existing-placeholder --capture-card",
+            "--ledger-action review-upgrade-decision --capture-card",
             by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].planner_command,
         )
         self.assertIn(
             "scripts/build_harness_sample_intake_bundle.py --gap-id GAP-GUARDRAIL-PREFLIGHT-WARNING "
-            "--ledger-action fill-existing-placeholder --summary",
+            "--ledger-action review-upgrade-decision --summary",
             by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].intake_command,
         )
         self.assertIn(
-            "scripts/check_harness_placeholder_replacement.py <candidate-jsonl>",
+            "scripts/check_harness_upgrade_decision_candidate.py <candidate-jsonl>",
             by_gap["GAP-GUARDRAIL-PREFLIGHT-WARNING"].lane_review_command,
         )
         self.assertEqual("needs-first-real-sample", by_gap["GAP-RUNTIME-LOOP-SCOPE-WARNING"].readiness)
@@ -180,11 +180,11 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
 
         self.assertGreater(report.needs_first_real_sample, 0)
         self.assertGreater(report.needs_more_real_samples, 0)
-        self.assertEqual(5, report.ready_for_upgrade_discussion)
-        self.assertEqual({"keep-advisory": 5}, report.upgrade_decision_counts)
+        self.assertEqual(6, report.ready_for_upgrade_discussion)
+        self.assertEqual({"keep-advisory": 6}, report.upgrade_decision_counts)
         self.assertEqual(report.item_count, sum(report.capture_gate_counts.values()))
-        self.assertEqual(2, report.capture_gate_counts["replace-placeholder-after-real-event"])
-        self.assertEqual(5, report.capture_gate_counts["upgrade-decision-review"])
+        self.assertEqual(1, report.capture_gate_counts["replace-placeholder-after-real-event"])
+        self.assertEqual(6, report.capture_gate_counts["upgrade-decision-review"])
         self.assertEqual(
             {
                 "GAP-RUNTIME-STAGE-CHECKPOINT-RESUME": (
@@ -196,14 +196,14 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
             },
             report.accepted_real_readiness_metric_deltas,
         )
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.readiness_gap_ids["needs-first-real-sample"])
+        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.readiness_gap_ids["ready-for-upgrade-discussion"])
         self.assertEqual(
             ["GAP-GUARDRAIL-CONFIRMATION", "GAP-TRACE-LOCAL-SUMMARY-BURNIN"],
             report.readiness_gap_ids["needs-more-real-samples"],
         )
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.readiness_gap_ids["ready-for-upgrade-discussion"])
         self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", report.readiness_gap_ids["ready-for-upgrade-discussion"])
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.capture_gate_gap_ids["replace-placeholder-after-real-event"])
+        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", report.capture_gate_gap_ids["upgrade-decision-review"])
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", report.capture_gate_gap_ids["replace-placeholder-after-real-event"])
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.capture_gate_gap_ids["upgrade-decision-review"])
         self.assertIn("GAP-WORKFLOW-TASK-PROFILE-AUDIT", report.ready_next_evidence_needed_by_gap)
@@ -212,7 +212,7 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
             "\n".join(report.ready_next_evidence_needed_by_gap["GAP-WORKFLOW-TASK-PROFILE-AUDIT"]),
         )
         self.assertEqual([], report.ready_without_upgrade_decision)
-        self.assertTrue(any("GAP-GUARDRAIL-PREFLIGHT-WARNING" in warning for warning in report.warnings))
+        self.assertTrue(any("GAP-RUNTIME-LOOP-SCOPE-WARNING" in warning for warning in report.warnings))
 
     def test_capture_gate_filter_limits_readiness_items(self) -> None:
         report = readiness.build_report(
@@ -242,7 +242,7 @@ class HarnessBurnInReadinessTest(unittest.TestCase):
         self.assertEqual([], report.errors)
         self.assertEqual(("needs-first-real-sample",), report.readiness_filter)
         self.assertEqual(report.item_count, report.needs_first_real_sample)
-        self.assertEqual(12, report.item_count)
+        self.assertEqual(11, report.item_count)
         self.assertEqual(0, report.ready_for_upgrade_discussion)
         self.assertEqual(0, report.needs_more_real_samples)
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in report.items))

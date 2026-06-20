@@ -77,6 +77,26 @@ def preflight_outcome_candidate(**overrides: object) -> dict[str, object]:
     return payload
 
 
+def loop_outcome_candidate(**overrides: object) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "schema_version": "loop-scope-monitor-sample/v1",
+        "id": "LOOP-SAMPLE-2026-05-24-real-long-session-pending",
+        "gap_id": "GAP-RUNTIME-LOOP-SCOPE-WARNING",
+        "sampled_at": "2026-05-24",
+        "source_type": "real-session",
+        "task_summary": "Bounded real long-session Stop warning review after repeated validation.",
+        "triggered_findings": ["validation-loop"],
+        "monitor_recommendations": ["shrink-validation"],
+        "outcome": "accepted",
+        "false_positive": False,
+        "action_taken": ["Accepted bounded loop warning evidence after owner review."],
+        "evidence_refs": ["docs/ai/standards/loop-scope-monitor.md"],
+        "note": "Outcome candidate only; no raw prompt or transcript stored.",
+    }
+    payload.update(overrides)
+    return payload
+
+
 def review_ready_slot() -> harness_sample_slots.SampleSlot:
     return harness_sample_slots.SampleSlot(
         gap_id="GAP-SEC-SCHEDULED-RUN",
@@ -176,7 +196,7 @@ class HarnessSampleOutcomeTest(unittest.TestCase):
         self.assertFalse(report.burn_in_counted)
 
     def test_rejects_direct_outcome_change_from_placeholder_row(self) -> None:
-        path = write_candidate(preflight_outcome_candidate())
+        path = write_candidate(loop_outcome_candidate())
         try:
             report = check_harness_sample_outcome.build_report(path)
         finally:

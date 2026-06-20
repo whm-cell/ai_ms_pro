@@ -213,7 +213,7 @@ class HarnessSampleAppendTest(unittest.TestCase):
             path.unlink(missing_ok=True)
 
         self.assertFalse(report.append_allowed)
-        self.assertIn("ledger_action=fill-existing-placeholder", "\n".join(report.errors))
+        self.assertIn("ledger_action=review-upgrade-decision", "\n".join(report.errors))
 
     def test_rejects_candidate_that_is_still_placeholder(self) -> None:
         path = write_candidate(generic_candidate(sample_summary="TBD: bounded sample summary.", action_taken=["none"]))

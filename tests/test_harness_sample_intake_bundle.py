@@ -35,15 +35,15 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         targets = {target.target_artifact: target.entry_count for target in report.targets}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(14, report.item_count)
-        self.assertEqual(6, report.target_count)
-        self.assertEqual({"P0": 1, "P1": 6, "P2": 6, "P3": 1}, report.priority_counts)
-        self.assertEqual({"none": 12, "placeholder": 2}, report.pending_slot_status_counts)
-        self.assertEqual({"append-new-pending-slot": 12, "fill-existing-placeholder": 2}, report.ledger_action_counts)
-        self.assertEqual({"needs-first-real-sample": 12, "needs-more-real-samples": 2}, report.readiness_counts)
+        self.assertEqual(13, report.item_count)
+        self.assertEqual(5, report.target_count)
+        self.assertEqual({"P1": 6, "P2": 6, "P3": 1}, report.priority_counts)
+        self.assertEqual({"none": 12, "placeholder": 1}, report.pending_slot_status_counts)
+        self.assertEqual({"append-new-pending-slot": 12, "fill-existing-placeholder": 1}, report.ledger_action_counts)
+        self.assertEqual({"needs-first-real-sample": 11, "needs-more-real-samples": 2}, report.readiness_counts)
         self.assertEqual(
             {
-                "replace-placeholder-after-real-event": 2,
+                "replace-placeholder-after-real-event": 1,
                 "requires-approved-bounded-incident": 1,
                 "requires-approved-remote-interop": 1,
                 "requires-bounded-real-incident": 3,
@@ -55,21 +55,19 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             },
             report.capture_gate_counts,
         )
-        self.assertEqual({"placeholder": 14}, report.template_review_state_counts)
+        self.assertEqual({"placeholder": 13}, report.template_review_state_counts)
         self.assertEqual(6, report.schema_counts["harness-sample-gap-evidence/v1"])
         self.assertEqual(4, report.schema_counts["agentic-red-team-sample/v1"])
         self.assertEqual(1, report.schema_counts["local-trace-summary-sample/v1"])
-        self.assertEqual(1, report.schema_counts["pre-tool-use-preflight-sample/v1"])
         self.assertEqual(1, report.schema_counts["loop-scope-monitor-sample/v1"])
         self.assertEqual(1, report.schema_counts["stage-checkpoint-resume-sample/v1"])
         self.assertEqual(6, targets["docs/ai/standards/harness-sample-gap-evidence.jsonl"])
         self.assertEqual(4, targets["docs/ai/security/agentic-red-team-samples.jsonl"])
-        self.assertEqual(1, targets["docs/ai/standards/pre-tool-use-preflight-samples.jsonl"])
         self.assertEqual(1, targets["docs/ai/standards/loop-scope-monitor-samples.jsonl"])
         self.assertEqual(1, targets["docs/ai/standards/local-trace-summary-samples.jsonl"])
         self.assertEqual(1, targets["docs/ai/checkpoints/resume-samples.jsonl"])
         self.assertNotIn("docs/ai/standards/task-profile-audit-sample.jsonl", targets)
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
+        self.assertNotIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", ids)
         self.assertIn("GAP-AGENTIC-CASCADE-STOP", ids)
@@ -79,37 +77,6 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         self.assertNotIn("GAP-WORKFLOW-SIMPLE-SKIP", ids)
         self.assertNotIn("GAP-TRACE-OTLP-PILOT-BURNIN", ids)
         entries = {entry.gap_id: entry for target in report.targets for entry in target.entries}
-        self.assertEqual("placeholder", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slot_status)
-        self.assertEqual("", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].readiness_metric_delta)
-        self.assertEqual("accepted real preflight warning samples", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].source_metric)
-        self.assertEqual(0, entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].accepted_count)
-        self.assertEqual(2, entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].upgrade_discussion_target)
-        self.assertEqual("0/2", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].current_to_target)
-        self.assertEqual("replace-placeholder-after-real-event", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate)
-        self.assertIn("matching real event", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].capture_gate_detail)
-        self.assertEqual("fill-existing-placeholder", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].ledger_action)
-        self.assertEqual(1, entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slot_count)
-        self.assertIn("check_pre_tool_use_preflight_samples.py", entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].review_command)
-        self.assertIn(
-            "check_harness_placeholder_replacement.py <candidate-jsonl>",
-            entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].replacement_review_command,
-        )
-        self.assertEqual(
-            "PRE-SAMPLE-2026-05-24-real-tool-call-pending",
-            entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slots[0].sample_id,
-        )
-        self.assertEqual(
-            "PRE-SAMPLE-2026-05-24-real-tool-call-pending",
-            entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].template["id"],
-        )
-        self.assertEqual(
-            "docs/ai/standards/pre-tool-use-preflight-samples.jsonl:2",
-            entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slots[0].ledger_ref,
-        )
-        self.assertIn(
-            "triggered_findings must include a meaningful value",
-            entries["GAP-GUARDRAIL-PREFLIGHT-WARNING"].pending_slots[0].review_blockers,
-        )
         self.assertEqual("placeholder", entries["GAP-RUNTIME-LOOP-SCOPE-WARNING"].pending_slot_status)
         self.assertIn(
             "check_harness_placeholder_replacement.py <candidate-jsonl>",
@@ -224,10 +191,10 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         ids = {entry.gap_id for target in report.targets for entry in target.entries}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(2, report.item_count)
-        self.assertEqual({"GAP-GUARDRAIL-PREFLIGHT-WARNING", "GAP-RUNTIME-LOOP-SCOPE-WARNING"}, ids)
-        self.assertEqual({"fill-existing-placeholder": 2}, report.ledger_action_counts)
-        self.assertEqual({"placeholder": 2}, report.template_review_state_counts)
+        self.assertEqual(1, report.item_count)
+        self.assertEqual({"GAP-RUNTIME-LOOP-SCOPE-WARNING"}, ids)
+        self.assertEqual({"fill-existing-placeholder": 1}, report.ledger_action_counts)
+        self.assertEqual({"placeholder": 1}, report.template_review_state_counts)
         self.assertTrue(
             all(
                 entry.pending_slot_status == "placeholder"
@@ -260,14 +227,15 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         entries = {entry.gap_id: entry for target in report.targets for entry in target.entries}
 
         self.assertEqual([], report.errors)
-        self.assertEqual(5, report.item_count)
+        self.assertEqual(6, report.item_count)
         self.assertEqual(1, report.target_count)
-        self.assertEqual({"P1": 2, "P2": 3}, report.priority_counts)
-        self.assertEqual({"none": 5}, report.pending_slot_status_counts)
-        self.assertEqual({"review-upgrade-decision": 5}, report.ledger_action_counts)
-        self.assertEqual({"upgrade-decision-review": 5}, report.capture_gate_counts)
-        self.assertEqual({"harness-upgrade-decision/v1": 5}, report.schema_counts)
-        self.assertEqual({"not-applicable": 5}, report.template_review_state_counts)
+        self.assertEqual({"P0": 1, "P1": 2, "P2": 3}, report.priority_counts)
+        self.assertEqual({"none": 6}, report.pending_slot_status_counts)
+        self.assertEqual({"review-upgrade-decision": 6}, report.ledger_action_counts)
+        self.assertEqual({"upgrade-decision-review": 6}, report.capture_gate_counts)
+        self.assertEqual({"harness-upgrade-decision/v1": 6}, report.schema_counts)
+        self.assertEqual({"not-applicable": 6}, report.template_review_state_counts)
+        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", entries)
         self.assertIn("GAP-AGENTIC-SANDBOX-HONESTY", entries)
         self.assertIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", entries)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", entries)
@@ -299,11 +267,11 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         )
 
         self.assertEqual([], report.errors)
-        self.assertEqual(5, report.item_count)
-        self.assertEqual({"ready-for-upgrade-discussion": 5}, report.readiness_counts)
-        self.assertEqual({"review-upgrade-decision": 5}, report.ledger_action_counts)
-        self.assertEqual({"upgrade-decision-review": 5}, report.capture_gate_counts)
-        self.assertEqual({"harness-upgrade-decision/v1": 5}, report.schema_counts)
+        self.assertEqual(6, report.item_count)
+        self.assertEqual({"ready-for-upgrade-discussion": 6}, report.readiness_counts)
+        self.assertEqual({"review-upgrade-decision": 6}, report.ledger_action_counts)
+        self.assertEqual({"upgrade-decision-review": 6}, report.capture_gate_counts)
+        self.assertEqual({"harness-upgrade-decision/v1": 6}, report.schema_counts)
 
     def test_text_output_declares_stdout_only_and_no_ledger_writes(self) -> None:
         report = build_harness_sample_intake_bundle.build_report(
@@ -370,7 +338,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
     def test_text_output_marks_placeholder_fill_templates_as_replacements(self) -> None:
         report = build_harness_sample_intake_bundle.build_report(
             "2026-05-24",
-            {"GAP-GUARDRAIL-PREFLIGHT-WARNING"},
+            {"GAP-RUNTIME-LOOP-SCOPE-WARNING"},
         )
         output = io.StringIO()
 
@@ -383,7 +351,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         self.assertIn("do not append duplicate", text)
         self.assertIn("replacement review command", text)
         self.assertIn("check_harness_placeholder_replacement.py <candidate-jsonl>", text)
-        self.assertIn('"id":"PRE-SAMPLE-2026-05-24-real-tool-call-pending"', text)
+        self.assertIn('"id":"LOOP-SAMPLE-2026-05-24-real-long-session-pending"', text)
 
     def test_cli_json_emits_machine_readable_report(self) -> None:
         result = subprocess.run(
@@ -391,9 +359,11 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
                 sys.executable,
                 "scripts/build_harness_sample_intake_bundle.py",
                 "--area",
-                "ai-guardrail",
+                "runtime-durability",
                 "--priority",
-                "P0",
+                "P1",
+                "--ledger-action",
+                "fill-existing-placeholder",
                 "--json",
             ],
             cwd=ROOT,
@@ -405,42 +375,41 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
 
         self.assertEqual(1, data["item_count"])
         self.assertEqual(1, data["target_count"])
-        self.assertEqual({"P0": 1}, data["priority_counts"])
+        self.assertEqual({"P1": 1}, data["priority_counts"])
         self.assertEqual({"placeholder": 1}, data["pending_slot_status_counts"])
         self.assertEqual({"fill-existing-placeholder": 1}, data["ledger_action_counts"])
         self.assertEqual({"needs-first-real-sample": 1}, data["readiness_counts"])
         self.assertEqual({"replace-placeholder-after-real-event": 1}, data["capture_gate_counts"])
         self.assertEqual({"placeholder": 1}, data["template_review_state_counts"])
         self.assertEqual([], data["errors"])
-        preflight = next(
+        loop = next(
             entry
             for target in data["targets"]
             for entry in target["entries"]
-            if entry["gap_id"] == "GAP-GUARDRAIL-PREFLIGHT-WARNING"
+            if entry["gap_id"] == "GAP-RUNTIME-LOOP-SCOPE-WARNING"
         )
-        self.assertEqual("placeholder", preflight["pending_slot_status"])
-        self.assertEqual("fill-existing-placeholder", preflight["ledger_action"])
-        self.assertEqual(1, preflight["pending_slot_count"])
-        self.assertEqual("GAP-GUARDRAIL-PREFLIGHT-WARNING", preflight["template"]["gap_id"])
-        self.assertEqual("accepted real preflight warning samples", preflight["source_metric"])
-        self.assertEqual(0, preflight["accepted_count"])
-        self.assertEqual(2, preflight["upgrade_discussion_target"])
-        self.assertEqual("0/2", preflight["current_to_target"])
-        self.assertEqual("", preflight["readiness_metric_delta"])
-        self.assertEqual("replace-placeholder-after-real-event", preflight["capture_gate"])
-        self.assertIn("matching real event", preflight["capture_gate_detail"])
-        self.assertIn("check_pre_tool_use_preflight_samples.py", preflight["review_command"])
-        self.assertIn("check_harness_placeholder_replacement.py", preflight["replacement_review_command"])
-        self.assertEqual("not-applicable", preflight["append_review_command"])
-        self.assertEqual("not-applicable", preflight["outcome_review_command"])
-        self.assertEqual("not-applicable", preflight["upgrade_decision_review_command"])
-        self.assertEqual("not-applicable", preflight["contract_precondition_review_command"])
-        self.assertEqual("placeholder", preflight["template_review_state"])
-        self.assertIn("action_taken must include a meaningful value", preflight["template_review_blockers"])
-        self.assertIn("finding code", preflight["evidence_needed"])
-        self.assertIn("operator decision", preflight["evidence_needed"])
-        self.assertEqual("placeholder", preflight["pending_slots"][0]["review_state"])
-        self.assertIn("review_blockers", preflight["pending_slots"][0])
+        self.assertEqual("placeholder", loop["pending_slot_status"])
+        self.assertEqual("fill-existing-placeholder", loop["ledger_action"])
+        self.assertEqual(1, loop["pending_slot_count"])
+        self.assertEqual("GAP-RUNTIME-LOOP-SCOPE-WARNING", loop["template"]["gap_id"])
+        self.assertEqual("accepted real loop/scope warning samples", loop["source_metric"])
+        self.assertEqual(0, loop["accepted_count"])
+        self.assertEqual(2, loop["upgrade_discussion_target"])
+        self.assertEqual("0/2", loop["current_to_target"])
+        self.assertEqual("", loop["readiness_metric_delta"])
+        self.assertEqual("replace-placeholder-after-real-event", loop["capture_gate"])
+        self.assertIn("matching real event", loop["capture_gate_detail"])
+        self.assertIn("check_loop_scope_monitor_samples.py", loop["review_command"])
+        self.assertIn("check_harness_placeholder_replacement.py", loop["replacement_review_command"])
+        self.assertEqual("not-applicable", loop["append_review_command"])
+        self.assertEqual("not-applicable", loop["outcome_review_command"])
+        self.assertEqual("not-applicable", loop["upgrade_decision_review_command"])
+        self.assertEqual("not-applicable", loop["contract_precondition_review_command"])
+        self.assertEqual("placeholder", loop["template_review_state"])
+        self.assertIn("action_taken must include a meaningful value", loop["template_review_blockers"])
+        self.assertIn("monitor recommendation", loop["evidence_needed"])
+        self.assertEqual("placeholder", loop["pending_slots"][0]["review_state"])
+        self.assertIn("review_blockers", loop["pending_slots"][0])
 
     def test_cli_json_reports_empty_contract_precondition_lane_after_approval(self) -> None:
         result = subprocess.run(
@@ -494,7 +463,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
     def test_summary_renders_outcome_review_lane_when_present(self) -> None:
         base_report = build_harness_sample_intake_bundle.build_report(
             "2026-05-24",
-            {"GAP-GUARDRAIL-PREFLIGHT-WARNING"},
+            {"GAP-RUNTIME-LOOP-SCOPE-WARNING"},
         )
         base_target = base_report.targets[0]
         base_entry = base_target.entries[0]
@@ -524,14 +493,14 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
 
         text = output.getvalue()
         self.assertIn("Pending Outcome Review", text)
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", text)
-        self.assertIn("PRE-SAMPLE-2026-05-24-real-tool-call-pending", text)
+        self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", text)
+        self.assertIn("LOOP-SAMPLE-2026-05-24-real-long-session-pending", text)
         self.assertIn("check_harness_sample_outcome.py <candidate-jsonl>", text)
 
     def test_text_output_marks_outcome_templates_as_existing_row_candidates(self) -> None:
         base_report = build_harness_sample_intake_bundle.build_report(
             "2026-05-24",
-            {"GAP-GUARDRAIL-PREFLIGHT-WARNING"},
+            {"GAP-RUNTIME-LOOP-SCOPE-WARNING"},
         )
         base_target = base_report.targets[0]
         base_entry = base_target.entries[0]
@@ -593,7 +562,7 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             "accepted real local trace summary task classes | 1/3 | ledger accepted real=3; accepted real local trace summary task classes=1/3",
             result.stdout,
         )
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", result.stdout)
+        self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", result.stdout)
         self.assertIn("fill-existing-placeholder", result.stdout)
         self.assertIn("placeholder (1)", result.stdout)
         self.assertIn("Pending Slot Blockers", result.stdout)
@@ -604,14 +573,14 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
         self.assertIn("requires-cross-task-resume", result.stdout)
         self.assertIn("replace-placeholder-after-real-event", result.stdout)
         self.assertIn("Capture Checklist", result.stdout)
-        self.assertIn("finding code; operator decision", result.stdout)
+        self.assertIn("finding code; monitor recommendation", result.stdout)
         self.assertIn("summary format; promotion count", result.stdout)
         self.assertIn("Placeholder Replacement Review", result.stdout)
         self.assertIn("check_harness_placeholder_replacement.py <candidate-jsonl>", result.stdout)
         self.assertIn("Pending Append Review", result.stdout)
         self.assertIn("check_harness_sample_append.py <candidate-jsonl>", result.stdout)
         self.assertIn("Review command", result.stdout)
-        self.assertIn("check_pre_tool_use_preflight_samples.py", result.stdout)
+        self.assertIn("check_loop_scope_monitor_samples.py", result.stdout)
         self.assertNotIn("```json", result.stdout)
 
     def test_summary_output_can_filter_by_readiness(self) -> None:
@@ -675,9 +644,10 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             check=True,
         )
 
-        self.assertIn("- draft templates: 5", result.stdout)
+        self.assertIn("- draft templates: 6", result.stdout)
         self.assertIn("review-upgrade-decision", result.stdout)
         self.assertIn("GAP-GUARDRAIL-SOURCE-BOUNDARY", result.stdout)
+        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", result.stdout)
         self.assertIn("GAP-SEC-CONTROL-MATRIX-BURNIN", result.stdout)
         self.assertIn("GAP-AGENTIC-SANDBOX-HONESTY", result.stdout)
         self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", result.stdout)
@@ -705,8 +675,8 @@ class HarnessSampleIntakeBundleTest(unittest.TestCase):
             check=True,
         )
 
-        self.assertIn("- draft templates: 5", result.stdout)
-        self.assertIn("readiness counts: {'ready-for-upgrade-discussion': 5}", result.stdout)
+        self.assertIn("- draft templates: 6", result.stdout)
+        self.assertIn("readiness counts: {'ready-for-upgrade-discussion': 6}", result.stdout)
         self.assertIn("Upgrade Decision Review", result.stdout)
         self.assertIn("check_harness_upgrade_decision_candidate.py <candidate-jsonl>", result.stdout)
         self.assertIn("GAP-WORKFLOW-SIMPLE-SKIP", result.stdout)

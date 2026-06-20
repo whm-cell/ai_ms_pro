@@ -26,7 +26,7 @@ class HarnessCollectionConfigTest(unittest.TestCase):
         self.assertGreaterEqual(report.active_capture_gate_count, 9)
         self.assertGreaterEqual(report.real_sample_capture_gate_count, 8)
         self.assertEqual(report.real_sample_area_count, 6)
-        self.assertEqual(report.real_sample_priority_count, 4)
+        self.assertEqual(report.real_sample_priority_count, 3)
         self.assertEqual(report.real_sample_ledger_action_count, 2)
         self.assertEqual(report.real_sample_readiness_count, 2)
         self.assertFalse(

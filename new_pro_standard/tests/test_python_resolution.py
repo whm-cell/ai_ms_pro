@@ -98,11 +98,17 @@ class PythonResolutionTest(unittest.TestCase):
                 f"CODEX_HARNESS_PYTHON={env_python}\n",
                 encoding="utf-8",
             )
+            versions = {(str(env_python),): (3, 12, 11)}
 
             with mock.patch.dict(os.environ, {}, clear=True):
                 with mock.patch.object(bootstrap_harness, "ROOT", root):
                     with mock.patch.object(bootstrap_harness, "all_commands_on_path", return_value=[]):
-                        command = bootstrap_harness.resolve_bootstrap_python(None)
+                        with mock.patch.object(
+                            bootstrap_harness,
+                            "python_version",
+                            side_effect=lambda command: versions.get(tuple(command)),
+                        ):
+                            command = bootstrap_harness.resolve_bootstrap_python(None)
 
         self.assertEqual(command, [str(env_python)])
 

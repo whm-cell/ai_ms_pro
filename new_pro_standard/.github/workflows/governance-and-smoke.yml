@@ -80,7 +80,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -o pipefail
-          python3 scripts/check_branch_hygiene.py --markdown --strict | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 scripts/check_branch_hygiene.py --markdown | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Add advisory follow-up note for merge queue
         if: github.event_name == 'merge_group'

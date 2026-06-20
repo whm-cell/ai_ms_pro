@@ -50,34 +50,29 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         )
 
         self.assertEqual(item.priority, "P0")
-        self.assertEqual(item.readiness, "needs-first-real-sample")
+        self.assertEqual(item.readiness, "ready-for-upgrade-discussion")
         self.assertEqual(item.source_metric, "accepted real preflight warning samples")
-        self.assertEqual(item.accepted_count, 0)
+        self.assertEqual(item.accepted_count, 2)
         self.assertEqual(item.upgrade_discussion_target, 2)
         self.assertEqual("", item.readiness_metric_delta)
-        self.assertEqual(item.target_artifact, "docs/ai/standards/pre-tool-use-preflight-samples.jsonl")
-        self.assertIn("check_pre_tool_use_preflight_samples.py", item.review_command)
-        self.assertIn("check_harness_placeholder_replacement.py", item.replacement_review_command)
+        self.assertEqual(item.target_artifact, "docs/ai/standards/harness-upgrade-decisions.jsonl")
+        self.assertIn("check_harness_upgrade_decisions.py", item.review_command)
+        self.assertEqual("not-applicable", item.replacement_review_command)
         self.assertEqual("not-applicable", item.append_review_command)
         self.assertEqual("not-applicable", item.outcome_review_command)
-        self.assertEqual("not-applicable", item.upgrade_decision_review_command)
+        self.assertIn("check_harness_upgrade_decision_candidate.py", item.upgrade_decision_review_command)
         self.assertEqual("not-applicable", item.contract_precondition_review_command)
         self.assertIsNone(item.contract_blocker_state)
-        self.assertEqual(item.pending_slot_status, "placeholder")
-        self.assertEqual(item.pending_slot_count, 1)
-        self.assertIn("placeholder", item.pending_review_states)
-        self.assertIn(
-            "PRE-SAMPLE-2026-05-24-real-tool-call-pending @ docs/ai/standards/pre-tool-use-preflight-samples.jsonl:2",
-            item.pending_slot_refs,
-        )
-        self.assertIn("triggered_findings must include a meaningful value", item.pending_review_blockers)
-        self.assertIn("operator_decisions must include a meaningful value", item.pending_review_blockers)
-        self.assertIn("action_taken must include a meaningful value", item.pending_review_blockers)
-        self.assertEqual("fill-existing-placeholder", item.ledger_action)
-        self.assertEqual(item.source_type_needed, "real-tool-call")
-        self.assertEqual("replace-placeholder-after-real-event", item.capture_gate)
-        self.assertIn("matching real event", item.capture_gate_detail)
-        self.assertIn("accepted real warning samples: 0", item.current_evidence)
+        self.assertEqual(item.pending_slot_status, "none")
+        self.assertEqual(item.pending_slot_count, 0)
+        self.assertEqual((), item.pending_review_states)
+        self.assertEqual((), item.pending_slot_refs)
+        self.assertEqual((), item.pending_review_blockers)
+        self.assertEqual("review-upgrade-decision", item.ledger_action)
+        self.assertEqual(item.source_type_needed, "upgrade-decision")
+        self.assertEqual("upgrade-decision-review", item.capture_gate)
+        self.assertIn("bounded keep/promote/defer", item.capture_gate_detail)
+        self.assertIn("accepted real warning samples: 2", item.current_evidence)
 
     def test_include_all_shows_local_and_future_boundaries(self) -> None:
         items = plan_harness_sample_collection.build_queue(include_future=True, include_accepted=True)
@@ -190,7 +185,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             pending_state="without-review-ready-pending",
         )
 
-        self.assertEqual(["GAP-GUARDRAIL-PREFLIGHT-WARNING"], [item.gap_id for item in items])
+        self.assertEqual([], [item.gap_id for item in items])
         self.assertTrue(all(item.priority == "P0" for item in items))
 
     def test_ledger_action_filter_targets_placeholder_fill_lane(self) -> None:
@@ -200,7 +195,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            ["GAP-GUARDRAIL-PREFLIGHT-WARNING", "GAP-RUNTIME-LOOP-SCOPE-WARNING"],
+            ["GAP-RUNTIME-LOOP-SCOPE-WARNING"],
             [item.gap_id for item in items],
         )
         self.assertTrue(all(item.ledger_action == "fill-existing-placeholder" for item in items))
@@ -232,6 +227,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
 
         self.assertEqual(
             [
+                "GAP-GUARDRAIL-PREFLIGHT-WARNING",
                 "GAP-GUARDRAIL-SOURCE-BOUNDARY",
                 "GAP-SEC-CONTROL-MATRIX-BURNIN",
                 "GAP-AGENTIC-SANDBOX-HONESTY",
@@ -270,7 +266,7 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             readinesses={"needs-first-real-sample"},
         )
 
-        self.assertEqual(12, len(items))
+        self.assertEqual(11, len(items))
         self.assertTrue(all(item.readiness == "needs-first-real-sample" for item in items))
         self.assertIn("GAP-TRACE-REMOTE-INTEROP", {item.gap_id for item in items})
         self.assertNotIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", {item.gap_id for item in items})
@@ -391,8 +387,8 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         )
         ids = {item.gap_id for item in items}
 
-        self.assertEqual(14, len(items))
-        self.assertIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
+        self.assertEqual(13, len(items))
+        self.assertNotIn("GAP-GUARDRAIL-PREFLIGHT-WARNING", ids)
         self.assertIn("GAP-RUNTIME-LOOP-SCOPE-WARNING", ids)
         self.assertIn("GAP-RUNTIME-STAGE-CHECKPOINT-RESUME", ids)
         self.assertIn("GAP-TRACE-LOCAL-SUMMARY-BURNIN", ids)
@@ -414,7 +410,6 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
 
         self.assertEqual(
             [
-                "GAP-GUARDRAIL-PREFLIGHT-WARNING",
                 "GAP-RUNTIME-LOOP-SCOPE-WARNING",
             ],
             [item.gap_id for item in items],
@@ -432,22 +427,22 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
 
         self.assertEqual([], [item.gap_id for item in review_ready_items])
         self.assertEqual(
-            ["GAP-GUARDRAIL-PREFLIGHT-WARNING", "GAP-RUNTIME-LOOP-SCOPE-WARNING"],
+            ["GAP-RUNTIME-LOOP-SCOPE-WARNING"],
             [item.gap_id for item in placeholder_items],
         )
 
     def test_capture_card_expands_evidence_and_boundary(self) -> None:
-        items = plan_harness_sample_collection.build_queue(gap_ids={"GAP-GUARDRAIL-PREFLIGHT-WARNING"})
+        items = plan_harness_sample_collection.build_queue(gap_ids={"GAP-RUNTIME-LOOP-SCOPE-WARNING"})
 
         with mock.patch("sys.stdout", new=StringIO()) as output:
             plan_harness_sample_collection.emit_capture_cards(items)
 
         text = output.getvalue()
         self.assertIn("# Harness Sample Capture Cards", text)
-        self.assertIn("Metric: accepted real preflight warning samples", text)
+        self.assertIn("Metric: accepted real loop/scope warning samples", text)
         self.assertIn("Current / upgrade target: 0/2", text)
-        self.assertIn("Target artifact: `docs/ai/standards/pre-tool-use-preflight-samples.jsonl`", text)
-        self.assertIn("Review command: `.codex/hooks/run_with_repo_python.sh scripts/check_pre_tool_use_preflight_samples.py`", text)
+        self.assertIn("Target artifact: `docs/ai/standards/loop-scope-monitor-samples.jsonl`", text)
+        self.assertIn("Review command: `.codex/hooks/run_with_repo_python.sh scripts/check_loop_scope_monitor_samples.py`", text)
         self.assertIn(
             "Lane review command: `.codex/hooks/run_with_repo_python.sh "
             "scripts/check_harness_placeholder_replacement.py <candidate-jsonl>`",
@@ -456,14 +451,14 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertIn("Pending slots: `placeholder` (1)", text)
         self.assertIn("Ledger action: `fill-existing-placeholder`", text)
         self.assertIn(
-            "Pending slot refs: PRE-SAMPLE-2026-05-24-real-tool-call-pending @ "
-            "docs/ai/standards/pre-tool-use-preflight-samples.jsonl:2",
+            "Pending slot refs: LOOP-SAMPLE-2026-05-24-real-long-session-pending @ "
+            "docs/ai/standards/loop-scope-monitor-samples.jsonl:2",
             text,
         )
         self.assertIn("Pending review blockers: triggered_findings must include a meaningful value", text)
         self.assertIn("Capture gate: `replace-placeholder-after-real-event`", text)
         self.assertIn("matching real event", text)
-        self.assertIn("finding code", text)
+        self.assertIn("monitor recommendation", text)
         self.assertIn("no raw runtime paths", text)
 
     def test_upgrade_decision_capture_card_expands_next_evidence(self) -> None:
@@ -492,18 +487,18 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         text = output.getvalue()
         self.assertIn("- queued gaps: 1", text)
         self.assertIn("- priority counts: P0=1", text)
-        self.assertIn("- readiness counts: needs-first-real-sample=1", text)
-        self.assertIn("- pending slot status counts: placeholder=1", text)
-        self.assertIn("- ledger action counts: fill-existing-placeholder=1", text)
-        self.assertIn("- capture gate counts: replace-placeholder-after-real-event=1", text)
+        self.assertIn("- readiness counts: ready-for-upgrade-discussion=1", text)
+        self.assertIn("- pending slot status counts: none=1", text)
+        self.assertIn("- ledger action counts: review-upgrade-decision=1", text)
+        self.assertIn("- capture gate counts: upgrade-decision-review=1", text)
         self.assertIn("Review command", text)
         self.assertIn("Lane review command", text)
         self.assertIn("Metric delta", text)
         self.assertIn("Pending slots", text)
         self.assertIn("Ledger action", text)
-        self.assertIn("placeholder (1)", text)
-        self.assertIn("check_pre_tool_use_preflight_samples.py", text)
-        self.assertIn("check_harness_placeholder_replacement.py <candidate-jsonl>", text)
+        self.assertIn("none (0)", text)
+        self.assertIn("check_harness_upgrade_decisions.py", text)
+        self.assertIn("check_harness_upgrade_decision_candidate.py <candidate-jsonl>", text)
 
     def test_markdown_queue_summary_counts_default_lanes(self) -> None:
         items = plan_harness_sample_collection.build_queue()
@@ -515,16 +510,16 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
         self.assertIn("- queued gaps: 19", text)
         self.assertIn("- priority counts: P0=1, P1=8, P2=9, P3=1", text)
         self.assertIn(
-            "- readiness counts: needs-first-real-sample=12, needs-more-real-samples=2, ready-for-upgrade-discussion=5",
+            "- readiness counts: needs-first-real-sample=11, needs-more-real-samples=2, ready-for-upgrade-discussion=6",
             text,
         )
-        self.assertIn("- pending slot status counts: none=17, placeholder=2", text)
+        self.assertIn("- pending slot status counts: none=18, placeholder=1", text)
         self.assertIn(
-            "- ledger action counts: append-new-pending-slot=12, fill-existing-placeholder=2, review-upgrade-decision=5",
+            "- ledger action counts: append-new-pending-slot=12, fill-existing-placeholder=1, review-upgrade-decision=6",
             text,
         )
-        self.assertIn("replace-placeholder-after-real-event=2", text)
-        self.assertIn("upgrade-decision-review=5", text)
+        self.assertIn("replace-placeholder-after-real-event=1", text)
+        self.assertIn("upgrade-decision-review=6", text)
 
     def test_empty_filtered_capture_card_reports_empty_state(self) -> None:
         result = subprocess.run(
@@ -636,19 +631,18 @@ class HarnessSampleCollectionPlanTest(unittest.TestCase):
             data[0]["readiness_metric_delta"],
         )
 
-    def test_preflight_sample_template_is_pending_real_warning_draft(self) -> None:
+    def test_preflight_sample_template_is_upgrade_decision_draft(self) -> None:
         item = plan_harness_sample_collection.build_queue(gap_ids={"GAP-GUARDRAIL-PREFLIGHT-WARNING"})[0]
 
         template = harness_sample_templates.sample_template(item, "2026-05-24")
 
-        self.assertEqual("pre-tool-use-preflight-sample/v1", template["schema_version"])
-        self.assertEqual("PRE-SAMPLE-2026-05-24-real-tool-call-pending", template["id"])
+        self.assertEqual("harness-upgrade-decision/v1", template["schema_version"])
+        self.assertEqual("HUD-2026-06-17-preflight-warning-keep-advisory", template["id"])
         self.assertEqual("GAP-GUARDRAIL-PREFLIGHT-WARNING", template["gap_id"])
-        self.assertEqual("pending", template["outcome"])
-        self.assertEqual("real-tool-call", template["source_type"])
-        self.assertEqual("warned", template["hook_result"])
-        self.assertIn("Fill existing pending placeholder row", template["note"])
-        self.assertIn("do not append a duplicate row", template["note"])
+        self.assertEqual("defer-until-more-evidence", template["decision"])
+        self.assertEqual("ready-for-upgrade-discussion", template["readiness_at_decision"])
+        self.assertEqual(2, template["accepted_count"])
+        self.assertEqual(2, template["upgrade_discussion_target"])
 
     def test_loop_scope_sample_template_reuses_existing_placeholder_id(self) -> None:
         item = plan_harness_sample_collection.build_queue(gap_ids={"GAP-RUNTIME-LOOP-SCOPE-WARNING"})[0]
