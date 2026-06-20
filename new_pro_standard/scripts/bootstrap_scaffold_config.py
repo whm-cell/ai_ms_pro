@@ -11,6 +11,7 @@ def render_harness_config() -> str:
             render_base_harness_config(),
             render_mock_data_boundary_config(),
             render_data_activation_config(),
+            render_reuse_retirement_config(),
             render_context_budget_config(),
         )
     )
@@ -117,6 +118,41 @@ def render_data_activation_config() -> str:
         [data_activation]
         enabled = true
         mode = "smoke"
+        """
+    )
+
+
+def render_reuse_retirement_config() -> str:
+    return textwrap.dedent(
+        """\
+        [reuse_retirement]
+        enabled = true
+        scan_roots = [
+          ".codex/hooks",
+          "app",
+          "apps",
+          "components",
+          "lib",
+          "packages",
+          "pages",
+          "scripts",
+          "src",
+        ]
+        new_file_min_lines = 80
+        reuse_score_threshold = 4
+        max_candidates = 5
+        retirement_markers = [
+          "demo",
+          "deprecated",
+          "dev",
+          "fixture",
+          "legacy",
+          "mock",
+          "old",
+          "seed",
+          "smoke",
+          "v1",
+        ]
         """
     )
 

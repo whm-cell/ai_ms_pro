@@ -39,6 +39,7 @@
 - `scripts/check_archive_candidates.py`
 - `scripts/check_context_budget.py`
 - `scripts/check_change_triggered_followups.py`
+- `scripts/check_reuse_retirement.py`
 - `scripts/check_repo_skills.py`
 - `scripts/check_requirements_shape.py`
 - `scripts/check_skill_usage_samples.py`
@@ -50,6 +51,7 @@
 - `docs/ai/handoffs/active/_template.md`
 - `docs/ai/status/_template.md`
 - `docs/ai/changelog/_template.md`
+- `docs/ai/standards/reuse-retirement-boundary.md`
 - `docs/ai/adr/_template.md`
 - `docs/ai/templates/project-skill-lifecycle.md`
 - `docs/ai/skill-evals/README.md`（eval 机制说明；不带当前项目样本）

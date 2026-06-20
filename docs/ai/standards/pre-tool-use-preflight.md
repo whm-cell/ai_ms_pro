@@ -22,7 +22,7 @@
 - `task_summary`：任务摘要，不记录 prompt、raw command 或 transcript。
 - `risk_summary`：风险摘要，只写类别和处理方式。
 - `hook_result`：`warned` 或 `silent`。
-- `triggered_findings`：`unbounded-large-output`、`destructive-command`、`externally-visible-command`、`external-tool-send` 或 `none`。
+- `triggered_findings`：`unbounded-large-output`、`long-running-output`、`sensitive-output`、`destructive-command`、`externally-visible-command`、`external-tool-send` 或 `none`。
 - `operator_decisions`：`bounded-output`、`explicit-confirmation`、`draft-prepared`、`cancelled`、`proceeded-as-is`、`no-action` 或 `none`。
 - `outcome`：`accepted`、`pending` 或 `rejected`。
 - `false_positive`：该 warning 是否被判为误报。
@@ -33,6 +33,9 @@
 ## 当前规则
 
 - raw command、prompt、cwd、完整工具输出、transcript 和 `.codex/runtime/*` 路径不得进入共享样本。
+- full-file `nl -ba`、过大的 `sed` line window、跨文件 glob read loop 输出按 large-output 风险处理；需要行号时优先使用 bounded line window。
+- 普通文件 line window 上限按约 `120` 行处理；dense governance docs（如 traceability matrix / check registry）优先使用更小窗口。
+- 含 `token_budget` / `runtime_token_budget` 的治理文档或脚本不是 secret-token 文件；不要把这类 bounded read 计为 sensitive-output。
 - synthetic 样本只证明 schema 和 regression 覆盖，不计入真实 burn-in。
 - accepted real warning sample 才能作为后续阈值、误报率或升级决策证据。
 - `silent` 样本必须使用 `triggered_findings: ["none"]`。

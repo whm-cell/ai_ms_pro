@@ -21,12 +21,9 @@
 ## 当前主目标
 
 - Stage-00 从 harness closeout 转向 capability 增量建设，但三层边界不变：runtime 本地恢复、governance 共享真相、verification 漂移检测。
-- 当前新增能力只限 `runtime durability`、`bounded observability / interop`、`task-quality eval`、bounded loop triage、coding/config/mock-data/data-activation/enterprise review-required standards 和 advisory guardrails。
-- 2026-06-17 已新增 Harness Optimization Decision Defaults 与 run metrics：默认不 pivot 到产品级 agent runtime，先补真实证据和可审计 model/cost/latency 边界；不新增外部发送、native sandbox、hosted eval/trace、MCP/A2A runtime 或真实 CI agent workflow。
-- 2026-06-17 已新增 Real Data Activation Gate：`[data_activation].mode = smoke | shadow-real | real` 只把 smoke/mock 退场变成 review-required 审计信号，不自动迁移真实数据、不删除 fixture、不声明生产数据集成。
-- 2026-06-17 已收紧 starter Python runtime 选择：bootstrap 可继承父级 `.env` allowlisted Python selector 或 pyenv 版本来创建 `.codex/.venv`，避免新项目默认落到系统 Python 3.9；不复制 `.env`、不输出 secret、不提交 `.codex/.venv`。
-- 2026-06-16 已新增 Coding Agent / Browser Harness Selection、Bounded Loop Triage 与 Mock Data Boundary；均只改变选择、排序或 review-required 可见性，不新增 runtime claim。
-- 2026-06-06 至 06-14 的 bounded vnext、external decisions、default permission、Prototype Design Brief、productization/config/enterprise standards 均保持 review-required / advisory 边界。
+- 当前新增能力只限 local-first durability、bounded observability/eval、loop triage、coding/config/mock-data/data-activation/reuse-retirement/enterprise review-required standards 和 advisory guardrails。
+- 2026-06-17 已固化 optimization defaults、run metrics、Real Data Activation Gate、Reuse And Retirement Gate 与 starter Python runtime 选择；均只增加审计/初始化信号，不新增外部发送、native sandbox、hosted eval/trace、MCP/A2A、真实 CI agent workflow、生产数据集成或自动删代码能力。
+- 2026-06-06 至 06-16 的 bounded vnext、external decisions、Prototype Design Brief、productization/config/coding-browser/loop/mock-data/enterprise standards 均保持 review-required / advisory 边界。
 - Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
 - 2026-06-15 `new_pro_standard` 已同步公共 harness 机制，并保持 starter-safe 边界：不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
@@ -65,11 +62,10 @@
 - Capability summary 是 artifact-backed local summary，只支持后续决策，不自动升级 blocking、remote 或 hosted capability claim。
 - Task outcome eval command validation treats repo-local `.codex/.venv/bin/python` as optional; CI must still validate referenced repo scripts/tests.
 - External harness decisions are source-backed and default-permitted only for local/no-effect improvements; external effects still need explicit per-run confirmation.
-- Harness optimization defaults keep STAGE-00 evidence-first: task outcome eval reports local model/cost/latency metadata, and provenance records `run_metrics`; sandbox / CI agent / hosted eval / MCP-A2A remain comparison-only or task-shape gated unless separately approved.
+- Harness optimization defaults keep STAGE-00 evidence-first: local model/cost/latency and `run_metrics` are metadata; sandbox / CI agent / hosted eval / MCP-A2A stay comparison-only or task-shape gated unless separately approved.
 - Prototype Design Brief validation is a disabled-by-default design projection gate; only enabled projects or slices get brief and artifact child checks in `check_ai_governance.py`.
 - Evidence-based coding standards are review-required only; candidate Ruff / JS lint rules need real samples before any blocking upgrade.
-- Productization/config/mock-data/coding-browser/loop triage standards are review-required or advisory only; they improve routing and visibility, not runtime capability claims.
-- Real Data Activation Gate is review-required only; `real` mode checks adapter/evidence/fixture-retirement boundaries but does not prove production data quality.
+- Productization/config/mock-data/data-activation/reuse-retirement/coding-browser/loop triage standards are review-required or advisory only; they improve routing and visibility, not runtime capability claims, production data quality, auto deletion, or dead-code proof.
 - Starter bootstrap now supports parent `.env` allowlisted selectors and pyenv version fallback before PATH / launcher fallback; this is a local harness setup convenience, not a dependency or secret-management system.
 - Enterprise Code Boundary skill is Candidate only; logging/redaction, error contract, and runtime side effect boundaries are review-required standards until real samples justify checkers or blocking-candidate promotion.
 - Code-shape covers mixed stacks at file level; Python keeps AST budgets.

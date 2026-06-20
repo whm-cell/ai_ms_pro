@@ -101,6 +101,35 @@ max_inline_lines = 40
 enabled = true
 mode = "smoke"
 
+[reuse_retirement]
+enabled = true
+scan_roots = [
+  ".codex/hooks",
+  "app",
+  "apps",
+  "components",
+  "lib",
+  "packages",
+  "pages",
+  "scripts",
+  "src",
+]
+new_file_min_lines = 80
+reuse_score_threshold = 4
+max_candidates = 5
+retirement_markers = [
+  "demo",
+  "deprecated",
+  "dev",
+  "fixture",
+  "legacy",
+  "mock",
+  "old",
+  "seed",
+  "smoke",
+  "v1",
+]
+
 [context_budget]
 default_surface_token_budget = 6500
 default_surface_warning_percent = 80

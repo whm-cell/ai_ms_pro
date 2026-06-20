@@ -565,6 +565,30 @@
       "notes": "Default mode is no-write and review-required. The checker treats [data_activation].mode as an audit signal only: smoke summarizes, shadow-real requires real_adapter_path and retire_when for dev/demo scenarios, and real requires runtime code to avoid mock/fixture imports plus retired dev/demo scenarios with bounded evidence refs. It does not migrate data, delete fixture files, create APIs, call real providers, or prove production data quality."
     },
     {
+      "name": "check_reuse_retirement",
+      "purpose": "Review changed code for existing implementation reuse candidates and older mock/smoke/legacy path retirement candidates.",
+      "path": "scripts/check_reuse_retirement.py",
+      "command": ".codex/hooks/run_with_repo_python.sh scripts/check_reuse_retirement.py",
+      "inputs": [".codex/harness.toml", "git diff changed files", "repository source files"],
+      "outputs": ["stdout review report", "optional stdout JSON report with candidate paths and finding codes", "process exit code"],
+      "side_effects": ["read_repo", "git_read"],
+      "permissions": ["read-repo", "git-read"],
+      "timeout_seconds": 45,
+      "destructive": false,
+      "externally_visible": false,
+      "automation_mode": "assistive",
+      "verification_commands": [
+        ".codex/hooks/run_with_repo_python.sh scripts/check_reuse_retirement.py",
+        ".codex/hooks/run_with_repo_python.sh scripts/check_reuse_retirement.py --json",
+        "python3 tests/test_reuse_retirement.py"
+      ],
+      "local_vs_remote": "local-only",
+      "trust_level": "review-required-boundary-check",
+      "sandbox_requirement": "none",
+      "dangerous_flags": ["--strict"],
+      "notes": "Default mode is no-write and review-required. The checker reports reuse-review-candidate and retirement-review-candidate findings from changed-file names, repo tokens, and top-level symbols. It does not delete code, prove dead code, rewrite imports, or replace reviewer judgment for dynamic entrypoints, hooks, CLIs, tests, fixtures, or generated code."
+    },
+    {
       "name": "collect_harness_sample_gaps",
       "purpose": "List pending real-scenario sample gaps for security evidence, AI guardrails, workflow skills, and future trace interop, with current sample-checker and generic gap-ledger counts where available.",
       "path": "scripts/collect_harness_sample_gaps.py",

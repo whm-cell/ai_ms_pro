@@ -46,9 +46,11 @@ Primary evidence:
   `tree`, `ls -R`), logs (`docker logs`, `kubectl logs`, `journalctl`), full diffs, secret/env
   exposure (`env`, `.env`, `kubectl get secret`, cloud auth/env commands), project search tools
   (`fd`, `ag`, `ack`, `gh api --paginate`), and long-running test/build/install output.
-- Avoid broad `rg`, full `ps`, full logs, full diffs, full `SKILL.md`, complete screenshots/base64,
-  or complete transcript/runtime JSONL in prompt context. Filter first, write large raw output to
-  `.codex/runtime/tool-outputs/<timestamp>-<slug>.log`, then summarize the bounded evidence.
+- Avoid broad `rg`, full `ps`, full logs, full diffs, full `nl -ba` file dumps, large `sed`
+  windows, shell glob read loops, full `SKILL.md`,
+  complete screenshots/base64, or complete transcript/runtime JSONL in prompt context. Filter first,
+  write large raw output to `.codex/runtime/tool-outputs/<timestamp>-<slug>.log`, then summarize the
+  bounded evidence.
 - Use `scripts/capture_tool_output.py --slug <name> -- <command>` when a high-risk command needs
   full raw output preserved but only a bounded summary should enter the transcript. The wrapper
   writes `.log` and `.meta.json` artifacts, returns the wrapped command exit code, and prints only
@@ -84,7 +86,10 @@ Use these controls in order; each is implementable with repo-local scripts and h
    - `docker logs --tail 200 <container>`
    - `kubectl logs --tail=200 <pod>`
    - `journalctl -n 200 --no-pager`
-   - `sed -n '1,160p' path`
+   - `sed -n '1,120p' path`
+   - `nl -ba path | sed -n '1,120p'`
+   - use smaller windows, around `60` lines, for dense governance files such as traceability
+     matrices and check registries
 2. For raw output that may exceed `5000` estimated tokens, run:
    `python3 scripts/capture_tool_output.py --slug <name> -- <command>`.
    This writes `.codex/runtime/tool-outputs/<timestamp>-<slug>.log`, records metadata, and

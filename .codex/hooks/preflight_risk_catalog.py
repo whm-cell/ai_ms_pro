@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from typing import Any
 
 BOUNDED_OUTPUT_TOKENS = 4000
+SED_LINE_WINDOW_LIMIT = 120
+DENSE_DOC_SED_LINE_WINDOW_LIMIT = 60
 
 
 @dataclass(frozen=True)
@@ -100,10 +102,25 @@ def is_sensitive_output_command(command: str) -> bool:
         r"^(env|printenv)\b(?!\s+[A-Za-z_][A-Za-z0-9_]*$)",
         r"\b(gh\s+auth\s+token|gh\s+auth\s+status\b)",
         r"\bkubectl\s+get\s+secret\b",
-        r"\b(cat|sed|less|more|tail|head)\b.*(\.env\b|id_rsa\b|\.pem\b|credential|secret|token|kubeconfig)",
         r"\b(aws|gcloud|vercel|heroku)\b.*\b(auth|credential|config|env|secret|token|whoami|sts)\b",
     )
-    return matches_any(command, sensitive_patterns)
+    return matches_any(command, sensitive_patterns) or is_sensitive_file_read_command(command)
+
+
+def is_sensitive_file_read_command(command: str) -> bool:
+    if not matches_any(command, (r"\b(cat|sed|less|more|tail|head)\b",)):
+        return False
+    if matches_any(command, (r"\.env\b", r"id_rsa\b", r"\.pem\b", r"credential", r"secret", r"kubeconfig")):
+        return True
+    return matches_any(command, (r"(^|[/._-])token(s)?($|[/._-])",)) and not is_benign_token_policy_read(command)
+
+
+def is_benign_token_policy_read(command: str) -> bool:
+    benign_patterns = (
+        r"runtime[-_]?token[-_]?(budget|pressure|core)?",
+        r"token[-_]?(budget|pressure|count|snapshot|usage)",
+    )
+    return matches_any(command, benign_patterns)
 
 
 def is_likely_large_output_command(command: str) -> bool:
@@ -112,6 +129,9 @@ def is_likely_large_output_command(command: str) -> bool:
         r"\bgit\s+diff\b(?!.*\s(--check|--stat|--name-only|--name-status)\b)",
         r"\bgit\s+show\b(?!.*\s(--stat|--name-only|--name-status)\b)",
         r"\bcat\s+.*\.(log|jsonl|trace|out)\b",
+        r"\bsed\s+-n\s+['\"]?\d+,\d+p['\"]?",
+        r"\bnl\s+-[A-Za-z]*b[A-Za-z]*\b",
+        r"\bfor\s+\w+\s+in\s+.*[*].*;\s*do\b",
         r"\brg\b(?!.*\s(--files|--max-count|-m)\b)",
         r"\b(e?grep|fgrep)\b.*\s(-r|-R|--recursive)\b(?!.*\s(-m|--max-count)\s+\d+)",
         r"\bfind\s+(\.|\S+)\b(?!.*\s-maxdepth\s+\d+)",
@@ -149,20 +169,45 @@ def has_bounded_output(tool_input: dict[str, Any], command: str) -> bool:
         return True
     if "scripts/capture_tool_output.py" in command:
         return True
+    if is_shell_glob_loop(command):
+        return False
     return has_inline_bound(command)
 
 
 def has_inline_bound(command: str) -> bool:
-    return matches_any(
+    return sed_line_window_is_bounded(command) or matches_any(
         command,
         (
             r"\bhead\s+(-n\s*)?\d+\b",
-            r"\bsed\s+-n\s+['\"]?1,\d+p['\"]?",
             r"\b(tail|journalctl)\b.*\s(-n|--lines)\s*\d+",
             r"\bdocker\s+logs\b.*\s(--tail|-n)\s*\d+",
             r"\bkubectl\s+logs\b.*\s--tail[=\s]\d+",
         ),
     )
+
+
+def sed_line_window_is_bounded(command: str) -> bool:
+    limit = sed_line_window_limit(command)
+    for match in re.finditer(r"\bsed\s+-n\s+['\"]?(\d+),(\d+)p['\"]?", command):
+        start = int(match.group(1))
+        end = int(match.group(2))
+        if start <= end and (end - start + 1) <= limit:
+            return True
+    return False
+
+
+def sed_line_window_limit(command: str) -> int:
+    dense_doc_patterns = (
+        "docs/requirements/traceability-matrix.md",
+        "docs/ai/check-registry.md",
+    )
+    if any(pattern in command for pattern in dense_doc_patterns):
+        return DENSE_DOC_SED_LINE_WINDOW_LIMIT
+    return SED_LINE_WINDOW_LIMIT
+
+
+def is_shell_glob_loop(command: str) -> bool:
+    return matches_any(command, (r"\bfor\s+\w+\s+in\s+.*[*].*;\s*do\b",))
 
 
 def max_output_tokens(tool_input: dict[str, Any]) -> int:
@@ -196,6 +241,14 @@ def bounded_command_suggestions(command: str) -> list[str]:
         return [capture_tool_command(parts, "git-show"), "git show --stat", "git show --name-only"]
     if parts[:2] == ["gh", "api"]:
         return [capture_tool_command(parts, "gh-api")]
+    if head in {"env", "printenv"} or is_sensitive_output_command(command):
+        return ["printenv PATH", "env | sed -E 's/(TOKEN|SECRET|KEY|PASSWORD)=.*/\\1=[REDACTED]/'"]
+    if head == "sed":
+        return [capture_tool_command(parts, "sed-output"), "sed -n '1,120p' <target-file>"]
+    if head == "nl":
+        return [capture_tool_command(parts, "numbered-output"), "nl -ba <target-file> | sed -n '1,120p'"]
+    if head == "for":
+        return [capture_tool_command(parts, "loop-output"), "find <dir> -maxdepth 1 -name '<pattern>' -print | head -20"]
     if head in {"find", "tree", "ls"}:
         return [capture_tool_command(parts, "listing-output"), "find . -maxdepth 3 -print | head -200", "rg --files | head -200"]
     if parts[:2] == ["docker", "logs"]:
@@ -210,8 +263,6 @@ def bounded_command_suggestions(command: str) -> list[str]:
         return ["sed -n '1,160p' <target-file>", "python3 scripts/summarize_tool_output.py --input .codex/runtime/tool-outputs/<artifact>.log"]
     if head == "ps":
         return [capture_tool_command(parts, "ps-output")]
-    if head in {"env", "printenv"} or is_sensitive_output_command(command):
-        return ["printenv PATH", "env | sed -E 's/(TOKEN|SECRET|KEY|PASSWORD)=.*/\\1=[REDACTED]/'"]
     if is_long_running_output_command(command):
         return [capture_tool_command(parts, "command-output")]
     return []

@@ -85,6 +85,7 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("runtime-token-budget", names)
         self.assertIn("config-contract-boundary", names)
         self.assertIn("mock-data-boundary", names)
+        self.assertIn("reuse-retirement-boundary", names)
 
     def test_frontend_page_change_triggers_mock_data_boundary(self) -> None:
         followups = check_change_triggered_followups.build_followups(("app/dashboard/page.tsx",))
@@ -95,6 +96,29 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("scripts/check_data_activation.py", "\n".join(mock_boundary.commands))
         self.assertIn("scripts/check_mock_data_boundary.py", "\n".join(mock_boundary.commands))
         self.assertEqual(mock_boundary.level, "review-required")
+
+    def test_code_change_triggers_reuse_retirement_review(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("scripts/new_checker.py",))
+        names = {item.name for item in followups}
+        reuse = next(item for item in followups if item.name == "reuse-retirement-boundary")
+
+        self.assertIn("reuse-retirement-boundary", names)
+        self.assertIn("scripts/check_reuse_retirement.py", "\n".join(reuse.commands))
+        self.assertEqual(reuse.level, "review-required")
+
+    def test_reuse_retirement_checker_change_triggers_contract(self) -> None:
+        names = self.followup_names("scripts/check_reuse_retirement.py")
+
+        self.assertIn("reuse-retirement-boundary", names)
+        self.assertIn("tool-contract-registry", names)
+        self.assertIn("harness-code-shape", names)
+
+    def test_reuse_retirement_core_change_triggers_contract(self) -> None:
+        names = self.followup_names("scripts/reuse_retirement_core.py")
+
+        self.assertIn("reuse-retirement-boundary", names)
+        self.assertIn("tool-contract-registry", names)
+        self.assertIn("harness-code-shape", names)
 
     def test_harness_python_triggers_code_shape(self) -> None:
         names = self.followup_names("scripts/check_github_guardrails.py")

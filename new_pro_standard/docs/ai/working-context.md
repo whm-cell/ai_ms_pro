@@ -67,6 +67,7 @@
 - `.github/pull_request_template.md`、CODEOWNERS、portable workflows、advisory follow-up summary、security evidence workflow 与 `scripts/check_pr_touch_conflicts.py` 是 starter 机制层；PR touch conflict 默认只阻断已确认 high-risk overlap，GitHub API `UNKNOWN` 在 burn-in 阶段保持可见但不阻断。
 - `scripts/check_github_guardrails.py` 是薄 CLI；`scripts/github_guardrails/` 承接本地 workflow、remote GitHub、orphan gitlink 与 supply-chain evidence 结构检查。新项目仍必须在 GitHub 远端单独确认 branch protection、rulesets 和 merge queue。
 - Python runtime 选择优先 repo-local `.codex/.venv`；首次 bootstrap 可读取父级 `.env` 的 allowlisted Python selector 或 pyenv 版本来创建 venv，但不复制 `.env`、不输出 secret、不替代项目配置管理。
+- `[reuse_retirement]` 默认开启 review-required 审计；`scripts/check_reuse_retirement.py` 只提示复用候选和旧 mock/smoke/legacy 路径退场候选，不自动删除代码、不证明死代码。
 
 ## 更新规则
 

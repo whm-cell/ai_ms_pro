@@ -14,6 +14,15 @@ sys.path.insert(0, str(ROOT / ".codex" / "hooks"))
 import pre_tool_use_preflight  # noqa: E402
 
 
+def command_context(command: str) -> str:
+    return pre_tool_use_preflight.build_additional_context(
+        {
+            "tool_name": "functions.exec_command",
+            "tool_input": {"cmd": command},
+        }
+    )
+
+
 class PreToolUsePreflightTest(unittest.TestCase):
     def test_flags_unbounded_large_output_command(self) -> None:
         context = pre_tool_use_preflight.build_additional_context(
@@ -139,6 +148,22 @@ class PreToolUsePreflightTest(unittest.TestCase):
         self.assertIn("sensitive-output", context)
         self.assertIn("printenv PATH", context)
 
+    def test_token_budget_docs_do_not_trigger_sensitive_output(self) -> None:
+        context = command_context("sed -n '1,260p' scripts/runtime_token_budget_core.py")
+
+        self.assertIn("unbounded-large-output", context)
+        self.assertNotIn("sensitive-output", context)
+        self.assertEqual(
+            command_context("sed -n '1,120p' .agents/skills/harness-maintenance/references/runtime-token-budget.md"),
+            "",
+        )
+
+    def test_sensitive_token_file_read_still_warns(self) -> None:
+        context = command_context("sed -n '1,20p' github-token.txt")
+
+        self.assertIn("sensitive-output", context)
+        self.assertIn("printenv PATH", context)
+
     def test_log_commands_warn_unless_bounded(self) -> None:
         context = pre_tool_use_preflight.build_additional_context(
             {
@@ -169,6 +194,32 @@ class PreToolUsePreflightTest(unittest.TestCase):
 
         self.assertIn("long-running-output", context)
         self.assertIn("scripts/capture_tool_output.py", context)
+
+    def test_numbered_full_file_read_warns_as_large_output(self) -> None:
+        context = command_context("nl -ba docs/ai/handoffs/active/stage-04-profile-dev-published-writeback-sync.md")
+
+        self.assertIn("unbounded-large-output", context)
+        self.assertIn("numbered-output", context)
+        self.assertIn("nl -ba <target-file> | sed -n '1,120p'", context)
+        self.assertEqual(command_context("nl -ba docs/ai/plan.md | sed -n '90,160p'"), "")
+
+    def test_large_sed_windows_and_dense_docs_warn(self) -> None:
+        contexts = [
+            command_context("sed -n '1,220p' docs/ai/plan.md"),
+            command_context("sed -n '42,130p' docs/requirements/traceability-matrix.md"),
+        ]
+
+        for context in contexts:
+            self.assertIn("unbounded-large-output", context)
+            self.assertIn("sed -n '1,120p' <target-file>", context)
+
+        self.assertEqual(command_context("sed -n '1,60p' docs/requirements/traceability-matrix.md"), "")
+
+    def test_shell_glob_loop_warns_as_large_output(self) -> None:
+        context = command_context("for f in docs/ai/adr/ADR-*.md; do sed -n '1,20p' \"$f\"; done")
+
+        self.assertIn("unbounded-large-output", context)
+        self.assertIn("loop-output", context)
 
     def test_common_project_large_output_commands_warn(self) -> None:
         commands = [

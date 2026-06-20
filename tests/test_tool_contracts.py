@@ -210,6 +210,24 @@ class ToolContractValidationTest(unittest.TestCase):
         self.assertIn("real_adapter_path", contract["notes"])
         self.assertIn("does not migrate data", contract["notes"])
 
+    def test_reuse_retirement_contract_is_review_required_no_write(self) -> None:
+        data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
+        contracts = data["contracts"]
+        contract = next(item for item in contracts if item["name"] == "check_reuse_retirement")
+
+        self.assertEqual(contract["side_effects"], ["read_repo", "git_read"])
+        self.assertEqual(contract["permissions"], ["read-repo", "git-read"])
+        self.assertEqual(contract["automation_mode"], "assistive")
+        self.assertFalse(contract["destructive"])
+        self.assertFalse(contract["externally_visible"])
+        self.assertIn(".codex/harness.toml", contract["inputs"])
+        self.assertIn("repository source files", contract["inputs"])
+        self.assertIn("--strict", contract["dangerous_flags"])
+        self.assertIn("tests/test_reuse_retirement.py", "\n".join(contract["verification_commands"]))
+        self.assertIn("review-required", contract["notes"])
+        self.assertIn("does not delete code", contract["notes"])
+        self.assertIn("prove dead code", contract["notes"])
+
     def test_burn_in_ledger_contract_is_shape_only(self) -> None:
         data = check_tool_contracts.load_registry(check_tool_contracts.DEFAULT_REGISTRY)
         contracts = data["contracts"]
