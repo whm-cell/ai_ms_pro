@@ -32,6 +32,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - `$repo-governed-coding`：非平凡实现、review、refactor 或涉及魔法值、复杂度、重复、命名、公共抽象边界的代码质量任务。
 - `$enterprise-code-boundary-maintenance`：logging/redaction、error contract、runtime side effect、config 或企业编码边界 guardrails。
 - `$team-pr-conflict-control`：多人或多 AI 并行 PR、touch-set overlap、CODEOWNERS、merge queue / `merge_group` readiness。
+- `$stacked-cigo-workflow`：CIGO-style PR 生命周期、stacked follow-up branch、独立 PR repair worktree 与安全 `main` 同步。
 
 ## 常用检查
 
@@ -44,7 +45,7 @@ requirements、handoff、ADR、archive、skills、runtime JSONL 和完整 diff �
 - 当前 status：[Stage-00 Runtime Harness Foundation Status](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/status/stage-00-runtime-harness-foundation.md)
 - 当前 burn-in closeout：[Stage-00 Harness Burn-in Closeout Handoff](/Volumes/usd/codes/go_projects/ai_ms_pro/docs/ai/handoffs/active/stage-00-harness-burn-in-closeout.md)
 - 最新 ADR：[ADR-017 Trace Remote Interop Boundary](./adr/ADR-017-trace-remote-interop-boundary.md)
-- 最新 changelog：[Commit / Push Workflow Optimization](./changelog/2026-06-20-commit-push-workflow-optimization.md)
+- 最新 changelog：[Stacked CIGO Workflow Skill](./changelog/2026-06-21-stacked-cigo-workflow-skill.md)
 
 ## 维护规则
 

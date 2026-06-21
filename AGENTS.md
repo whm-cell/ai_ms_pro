@@ -92,6 +92,7 @@ Skills are on-demand execution guidance, not hidden canonical truth. Use `docs/a
 - `progressive-feature-development`: non-trivial feature, API, storage, architecture, or testing strategy work.
 - `repo-governed-coding`: governed coding quality, review, refactor, or implementation guardrails when requested or task-triggered.
 - `team-pr-conflict-control`: multi-person or multi-AI PR overlap, ownership, PR template, or merge readiness.
+- `stacked-cigo-workflow`: CIGO-style PR lifecycle, stacked follow-up branches, isolated PR repair worktrees, and safe `main` sync.
 - `prd-to-project-skills`: reusable project-skill candidates from requirements, workstreams, ADRs, or implementation samples.
 - `enterprise-code-boundary-maintenance`: logging/redaction, error contract, runtime side effect, config, or enterprise boundary guardrails.
 

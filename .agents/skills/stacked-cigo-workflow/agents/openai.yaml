@@ -1,0 +1,7 @@
+interface:
+  display_name: "Stacked CIGO Workflow"
+  short_description: "Guide stacked PRs and safe main sync"
+  default_prompt: "Use $stacked-cigo-workflow to manage CIGO-style PR submission, stacked branch follow-up, repair worktrees, and safe main sync."
+
+policy:
+  allow_implicit_invocation: false

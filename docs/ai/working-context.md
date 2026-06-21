@@ -1,6 +1,6 @@
 # 当前工作上下文
 
-更新时间：2026-06-20
+更新时间：2026-06-21
 当前阶段：STAGE-00 Runtime Harness Foundation
 当前模式：Codex-first harness + bounded runtime capability
 
@@ -16,7 +16,7 @@
 - Requirement IDs: REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
-- Last Synced At: 2026-06-20
+- Last Synced At: 2026-06-21
 
 ## 当前主目标
 
@@ -74,6 +74,7 @@
 - `.codex/hooks.json` and WS-01 / WS-02 smoke scripts now use portable launchers; Windows resolves `.cmd/.exe/.bat`, macOS / Linux keep POSIX/plain `npx`, and smoke execution remains argv-only `shell=False`.
 - Main-push branch hygiene is advisory-only; PR branch hygiene remains strict. Unmanaged remote branches still need owner review, but this does not prove branch protection or ruleset health.
 - Commit / push workflow helpers are local/advisory only: `scripts/report_pr_checks.py` is read-only, `scripts/start_pr_repair_worktree.py` isolates PR repair in a sibling worktree, and neither proves remote enforcement or PR check success.
+- `$stacked-cigo-workflow` is the repo-local skill entry for CIGO-style PR lifecycle, stacked follow-up branches, isolated PR repair worktrees, safe `main` sync, and runtime cleanup; it keeps the same local/advisory boundaries as the commit / push helpers.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
 ## 更新规则

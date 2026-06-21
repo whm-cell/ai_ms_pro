@@ -6,6 +6,8 @@
 
 这份手册用于把阶段性开发收口到 GitHub PR，同时避免把本地提交、PR 修复、合并 `main` 和同步开发分支混成一个高风险动作。
 
+当前可复用执行入口已沉淀到 `.agents/skills/stacked-cigo-workflow/`。本手册保留为中文提示词与阶段说明；新流程维护优先更新 skill，再按需同步本手册。
+
 推荐总流程：
 
 `fast local gates -> feature branch -> commit -> push -> draft PR -> PR CI -> isolated repair worktree -> user-confirmed merge -> safe local sync`
