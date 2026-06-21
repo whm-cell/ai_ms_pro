@@ -165,6 +165,41 @@ description: this description is intentionally too long
         self.assertGreaterEqual(usages["raw source"].used_tokens, 100)
         self.assertGreaterEqual(usages["static task packet"].used_tokens, 100)
 
+    def test_blocks_dense_default_surface_lines(self) -> None:
+        report = check_context_budget.ContextBudgetReport(
+            default_surface_tokens=10,
+            default_surface_budget=100,
+            default_surface_warning_percent=80,
+            default_surface_high_warning_percent=90,
+            always_on_doc_line_budget=300,
+            default_surface=[
+                check_context_budget.SurfaceItem(
+                    path="docs/ai/working-context.md",
+                    lines=10,
+                    estimated_tokens=10,
+                    max_line_chars=check_context_budget.DEFAULT_SURFACE_LINE_CHAR_BUDGET + 1,
+                    max_line_number=4,
+                )
+            ],
+            active_handoff_count=0,
+            active_handoff_budget=5,
+            adr_count=0,
+            adr_budget=15,
+            stage_status_line_budget=120,
+            skill_count=0,
+            mcp_server_count=0,
+            mcp_server_budget=10,
+            budget_usages=[],
+            warnings=[],
+            duplicate_instructions=[],
+            skills=[],
+        )
+
+        blocking_text = "\n".join(check_context_budget.blocking_findings(report))
+
+        self.assertIn("line density budget", blocking_text)
+        self.assertIn("docs/ai/working-context.md line 4", blocking_text)
+
 
 if __name__ == "__main__":
     unittest.main()

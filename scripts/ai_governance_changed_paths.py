@@ -9,10 +9,12 @@ from ai_governance_metadata import AI_DOC_ROOT, REQ_DOC_ROOT, ROOT, is_under_roo
 
 ADR_DIR = AI_DOC_ROOT / "adr"
 WORKING_CONTEXT_PATH = AI_DOC_ROOT / "working-context.md"
+RUNTIME_ROOT = ROOT / ".codex" / "runtime"
 RUNTIME_SESSION_DIR = ROOT / ".codex" / "runtime" / "sessions"
 RUNTIME_OBSERVATION_DIR = ROOT / ".codex" / "runtime" / "observations"
 RUNTIME_TOOL_OUTPUT_DIR = ROOT / ".codex" / "runtime" / "tool-outputs"
 RUNTIME_STATE_ROOTS = (RUNTIME_SESSION_DIR, RUNTIME_OBSERVATION_DIR, RUNTIME_TOOL_OUTPUT_DIR)
+RUNTIME_TRACKED_ALLOWED_NAMES = {"README.md", "_template.md", ".gitkeep"}
 GOVERNANCE_IMPLEMENTATION_ROOTS = (
     ROOT / "scripts",
     ROOT / ".codex" / "hooks",
@@ -72,14 +74,17 @@ def validate_changed_path_governance_sync(
 
 def validate_staged_runtime_state(errors: list[str]) -> None:
     staged_runtime_state_files = [
-        path for path in load_staged_paths() if is_runtime_state_file(path)
+        path
+        for status, path in load_staged_entries()
+        if is_blocking_staged_runtime_change(status, path)
     ]
     if not staged_runtime_state_files:
         return
 
     rendered = ", ".join(str(path.relative_to(ROOT)) for path in staged_runtime_state_files)
     errors.append(
-        "Runtime session/observation files must not be staged. "
+        "Generated runtime files under .codex/runtime must not be staged. "
+        "Only README.md, _template.md, and .gitkeep are shareable. "
         f"Remove these from the index: {rendered}"
     )
 
@@ -147,10 +152,37 @@ def load_staged_paths() -> list[Path]:
     return [(ROOT / entry).resolve() for entry in result.stdout.splitlines() if entry.strip()]
 
 
+def load_staged_entries() -> list[tuple[str, Path]]:
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--name-status", "--relative"],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return []
+
+    entries: list[tuple[str, Path]] = []
+    for raw_line in result.stdout.splitlines():
+        if not raw_line.strip():
+            continue
+        parts = raw_line.split("\t")
+        if len(parts) < 2:
+            continue
+        entries.append((parts[0], (ROOT / parts[-1]).resolve()))
+    return entries
+
+
 def is_runtime_state_file(path: Path) -> bool:
-    if not is_under_root(path, RUNTIME_STATE_ROOTS):
+    if not is_under_root(path, (RUNTIME_ROOT,)):
         return False
-    return path.name != "README.md" and not path.name.startswith("_")
+    return path.name not in RUNTIME_TRACKED_ALLOWED_NAMES
+
+
+def is_blocking_staged_runtime_change(status: str, path: Path) -> bool:
+    return not status.startswith("D") and is_runtime_state_file(path)
 
 
 def is_governance_implementation_path(path: Path) -> bool:

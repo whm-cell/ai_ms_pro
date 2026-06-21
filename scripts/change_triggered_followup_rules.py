@@ -18,8 +18,8 @@ RULES: tuple[Rule, ...] = (
     ),
     rule(
         "default-context-budget",
-        "advisory",
-        "manual check only",
+        "blocking",
+        "included by check_ai_governance; direct script available for focused audits",
         (
             "AGENTS.md",
             "docs/ai/index.md",
@@ -59,6 +59,40 @@ RULES: tuple[Rule, ...] = (
         ),
         (".agents/skills/harness-maintenance/references/runtime-token-budget.md",),
         "Runtime transcript or token-budget policy changed.",
+    ),
+    rule(
+        "quality-supervisor-protocol",
+        "review-required",
+        "governance job runs the checker; disabled config makes no subagent claim",
+        (
+            ".codex/harness.toml",
+            "AGENTS.md",
+            "docs/ai/standards/quality-supervisor-protocol.md",
+            "scripts/check_quality_supervisor_protocol.py",
+            "tests/test_quality_supervisor_protocol.py",
+        ),
+        (
+            ".codex/hooks/run_with_repo_python.sh scripts/check_quality_supervisor_protocol.py",
+            "python3 tests/test_quality_supervisor_protocol.py",
+        ),
+        ("docs/ai/standards/quality-supervisor-protocol.md",),
+        "Quality supervisor protocol config, docs, or checker changed.",
+    ),
+    rule(
+        "async-verification",
+        "advisory",
+        "manual local runner; runtime logs do not prove pass until inspected",
+        (
+            "scripts/start_async_verification.py",
+            "tests/test_async_verification.py",
+            "docs/ai/verification-minimums.md",
+        ),
+        (
+            ".codex/hooks/run_with_repo_python.sh scripts/start_async_verification.py --list",
+            "python3 tests/test_async_verification.py",
+        ),
+        ("docs/ai/verification-minimums.md",),
+        "Async verification preset or routing guidance changed.",
     ),
     rule(
         "config-contract-boundary",

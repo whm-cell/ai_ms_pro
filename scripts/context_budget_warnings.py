@@ -10,6 +10,7 @@ from harness_config import ContextBudgetConfig
 DEFAULT_SKILL_CATALOG_TOKEN_BUDGET = 2000
 DEFAULT_RAW_SOURCE_TOKEN_BUDGET = 30000
 DEFAULT_STATIC_PACKET_TOKEN_BUDGET = 32000
+DEFAULT_SURFACE_LINE_CHAR_BUDGET = 1200
 
 
 @dataclass(frozen=True)
@@ -136,6 +137,15 @@ def build_warnings(
                 f"Always-on document {item.path} is long "
                 f"({item.lines} lines > {config.always_on_doc_line_budget})."
             )
+        max_line_chars = getattr(item, "max_line_chars", 0)
+        if max_line_chars > DEFAULT_SURFACE_LINE_CHAR_BUDGET:
+            line_number = getattr(item, "max_line_number", 0)
+            location = f" line {line_number}" if line_number else ""
+            warnings.append(
+                f"Default surface document {item.path}{location} is dense "
+                f"({max_line_chars} chars > {DEFAULT_SURFACE_LINE_CHAR_BUDGET}). "
+                "Split fast-changing detail into bounded bullets or an on-demand doc."
+            )
         if item.path.startswith("docs/ai/status/") and item.lines >= config.stage_status_line_budget:
             warnings.append(
                 f"Stage status {item.path} reached compression line budget "
@@ -217,6 +227,15 @@ def blocking_findings(report: Any) -> list[str]:
         )
 
     for item in report.default_surface:
+        max_line_chars = getattr(item, "max_line_chars", 0)
+        if max_line_chars > DEFAULT_SURFACE_LINE_CHAR_BUDGET:
+            line_number = getattr(item, "max_line_number", 0)
+            location = f" line {line_number}" if line_number else ""
+            failures.append(
+                f"Default surface document {item.path}{location} exceeds line density budget "
+                f"({max_line_chars} chars > {DEFAULT_SURFACE_LINE_CHAR_BUDGET}). "
+                "Compress the line before continuing."
+            )
         if item.path.startswith("docs/ai/status/"):
             if item.lines >= report.stage_status_line_budget:
                 failures.append(

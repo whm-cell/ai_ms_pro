@@ -94,6 +94,7 @@ from harness_config import HarnessConfigError, PrototypeDesignBriefConfig, load_
 CHECKS = [
     ("structure", ROOT / "scripts" / "check_ai_docs.py"),
     ("quality", ROOT / "scripts" / "check_ai_doc_quality.py"),
+    ("quality-supervisor", ROOT / "scripts" / "check_quality_supervisor_protocol.py"),
 ]
 PROTOTYPE_BRIEF_CHECK = ("prototype-brief", ROOT / "scripts" / "check_prototype_design_brief.py")
 PROTOTYPE_ARTIFACT_CHECK = (

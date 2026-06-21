@@ -1,6 +1,6 @@
 # Check Registry
 
-更新时间：2026-06-20
+更新时间：2026-06-21
 状态：已确认
 
 ## 作用
@@ -18,7 +18,7 @@
 
 | Check | Level | CI coverage | 升级条件 |
 | --- | --- | --- | --- |
-| `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制，继续保持 |
+| `check_ai_governance.py` | `blocking` | governance job / Stop hook | 已强制；继承 context budget blocking findings，并拦截 staged generated `.codex/runtime` artifacts |
 | `check_code_shape.py` | `blocking-candidate` | governance job uses `--all`; hooks use `--staged`; scope includes Python / TS / JS / CSS / SCSS / SQL / Rust / shell / PowerShell | 新增大文件误报可控后保持或收紧；Next-style source trees 已进入 file-level budget；tests 与 fixture/cases/mock data 使用 path-specific 单文件预算 |
 | Ruff Python linter / whitespace | `blocking` | governance job installs `.codex/requirements.txt`, runs `git diff --check`, then runs `python3 -m ruff check .codex/hooks scripts tests`; pre-commit also runs `git diff --cached --check`; scope is `E9` plus Pyflakes `F` | 保持当前 blocking scope；`PLR2004`、`C901`、`PLR0912`、`PLR0915` 只能先作为 no-write / review-required 样本收集，误报率、修复路径和 CI 成本可控后再讨论升级 |
 | Evidence-based coding standards | `review-required` | manual / `$repo-governed-coding` checklist | 覆盖魔法值、复杂度、长函数/大类职责、重复代码风险、命名和公共抽象触发条件；后续若引入 Ruff 或 JS/TS lint，必须先进入 blocking-candidate burn-in |
@@ -42,6 +42,8 @@
 | `check_ci_agent_contract.py` | `advisory` | manual / follow-up summary | 校验 `ci-agent-contract/v1` 的 PR-only trigger、read-only/default-minimal permissions、禁用 pull_request_target / secrets / OIDC / repo write / PR comment / label / merge / release / deploy / external-send，并要求 hosted/cloud-agent 与 remote-enforcement no-claim；不创建真实 CI agent workflow |
 | `check_external_harness_decisions.py` | `advisory` | manual / follow-up summary | 校验 `external-harness-decision/v1` 中 remote trace pilot、external eval/sandbox、MCP/A2A 与 CI agent workflow 四类 active decision 是否齐全，并强制 no hosted trace/eval、no verified remote without operator review、no native sandbox、no MCP/A2A runtime、no real CI agent workflow、no external effect without explicit confirmation；不发送网络 probe、不安装 eval 工具、不创建 MCP/A2A runtime、不创建 GitHub agent workflow |
 | `check_agent_productization_readiness.py` | `review-required` | manual / follow-up summary | 校验 `agent-productization-readiness/v1` 模型和 `agent-productization-assessment/v1` 当前评估，固定 runtime orchestration、tool/MCP、memory、HITL、durability、trace、eval、sandbox、multi-agent、structured output、cost/latency、ops 12 个能力域；`partial` / `missing` / `deferred` 只输出 `REVIEW:`，不升级 blocking、不声明产品 agent 平台完成 |
+| `check_quality_supervisor_protocol.py` | `review-required` | governance job runs checker; disabled config exits OK | 校验 `[quality_supervisor]` 配置和启用时的协议文档闭环；当前默认 disabled，只吸收质量监督子代理模式为候选机制，不证明 hooks 可 spawn subagents、不自动启动 subagent、不改变主 Agent canonical 写入责任 |
+| `start_async_verification.py` | `advisory` | manual local runner | 启动长本地验证 preset 并把 status/log 写入 `.codex/runtime/async-verification/`；runtime 日志是本地恢复材料，只有 status 为 `passed` 且日志已人工检查后才能宣称通过；不进入提交前 blocking gate |
 | `check_config_contract.py` | `review-required` | manual / follow-up summary | 校验 `[config_contracts]` 声明的 registry、allowed paths、env template、secret key pattern、config key pattern 和 literal pattern；当前只做 repo-local 配置契约边界，不提供配置中心、secret manager、远端部署验证或 provider-specific 硬编码 |
 | `check_env_template_sync.py` | `review-required` | manual; SessionStart hook warning-only | 只比较 env template 与本机 env 的 key 集合，不读取、不打印、不覆盖值；无 env template 配置时为 no-op；本机 `.env` 缺 key 只作为运行前提醒 |
 | `check_mock_data_boundary.py` | `review-required` | manual / follow-up summary | 校验 `[mock_data_boundary]` 声明的 frontend/runtime scan roots、fixture paths、allowed consumers、runtime import denied paths、scenario manifest 和 inline 阈值；默认只输出 `REVIEW:` 且退出 0，`--strict` 需 burn-in 后显式启用；不自动删除旧代码、不安装 MSW/Prism/Playwright、不移动 mock 数据、不创建 API、不证明生产数据集成 |
@@ -72,7 +74,7 @@
 | `check_burn_in_upgrade_decisions.py` | `advisory` | governance job validates check-level upgrade decision ledger | 校验 `docs/ai/standards/check-burn-in-upgrade-decisions.jsonl` 是否覆盖所有 `upgrade_review_needed_checks`，并防止 stale accepted sample / target / current decision snapshot、duplicate check、缺 next evidence、不可审计 evidence refs 或引用 `.codex/runtime` 原始材料；`evidence_refs` 允许 markdown anchor、pytest node id 或 JSONL 行号 selector 但底层路径必须存在；当前 `check_code_shape.py` 与 `check_tool_contracts.py` 均已有 keep-candidate 决策记录；该检查只审计决策，不改 check level、不写 ADR、不采集样本、不升级 blocking |
 | `check_warning_sample_code_alignment.py` | `advisory` | governance job validates hook/checker warning-code alignment | 校验 PreToolUse preflight 和 Stop loop/scope hook 实际 emitted finding codes、导出的 code 清单、样本 checker `FINDING_CODES` 对齐，并确认 Stop recommendation mapping 覆盖所有 finding 且 action code 被样本 checker 接受；只防 code/schema 漂移，不生成 evidence、不接受 pending 样本、不升级 blocking |
 | `check_change_triggered_followups.py` | `advisory` | PR / main push summary；包含 high-impact-agent-actions review-required advisory | 不直接升级；只驱动其他 checks 与人工确认 |
-| `check_context_budget.py` | `blocking` | governance job / pre-commit / `check_ai_governance.py`; Stop hook inherits through governance check | 默认面、skill catalog、raw source、static task packet 达到 90% 压缩触发线或硬预算超限时阻断；`--warning-only` 仅保留人工审计输出 |
+| `check_context_budget.py` | `blocking` | governance job / pre-commit / `check_ai_governance.py`; Stop hook inherits through governance check | 默认面、line density、skill catalog、raw source、static task packet 达到 90% 压缩触发线或硬预算超限时阻断；`--warning-only` 仅保留人工审计输出 |
 | `check_prototype_design_brief.py` | `blocking` when enabled | `check_ai_governance.py` only when `[prototype_design_brief].enabled = true`; manual otherwise | Prototype Design Brief 是受控设计投影面；开启后缺必填章节、关键语义门槛、Source Truth 未绑定或 REQ/WS/ADR/link 漂移时阻断 |
 | `check_prototype_artifact_review.py` | `blocking` when enabled | `check_ai_governance.py` only when `[prototype_design_brief].artifact_review_enabled = true`; manual otherwise | Prototype artifact package 和配置的静态原型缺审查包、route、关键状态、truth boundary、surface identity、non-production boundary 或工具无关性时阻断 |
 | `check_runtime_token_budget.py` | `blocking-candidate` | governance job validates no-transcript wiring; manual transcript audit uses `--transcript <rollout-jsonl>` and optional `--strict`; Stop token-pressure hook reuses the thresholds for warning-only current-transcript summaries | 两次以上真实长会话样本证明阈值、误报率和修复路径可控后，才考虑是否把 runtime transcript audit 升级为阻断；不得把本机历史 transcript 作为默认阻断输入 |
@@ -99,6 +101,7 @@
 ## 最新口径补充
 
 - 2026-06-20：阶段提交 / PR-CI 流程拆分为 fast local gates、feature branch draft PR、只读 PR checks、独立 PR repair worktree、用户确认后合并 `main`、再按本地状态同步开发分支。新增 `scripts/report_pr_checks.py` 与 `scripts/start_pr_repair_worktree.py` 作为 advisory 操作辅助；pre-commit 增加 `git diff --cached --check`，但长 smoke、Windows runner、security evidence 和 remote enforcement 仍由 PR / GitHub evidence 面承接，不新增远端强制 claim。
+- 2026-06-21：从 `demo_txt_t_proto` 本轮治理清理吸收 context line-density gate 与泛化 runtime Git 边界；`check_context_budget.py` 现在报告默认面的最长行并阻断超密行，`.codex/runtime/**` 默认 ignore 且 governance 拦截 staged generated runtime 文件，允许 `git rm --cached` deletion 作为索引清理。
 - 2026-06-18：新增 `docs/ai/harness-freeze-policy.md`，吸收 `demo_txt_t_proto/qqq` 暴露的“后期大小需求导致频繁修 harness 文档和编译/运行环境”问题；后期产品、UI、provider 或需求 refinement 默认冻结 harness，只有 blocking check、runner/bootstrap 损坏、traceability/ADR/production boundary 真实变化、secret/runtime artifact/overclaim 风险或用户明确要求时才改 harness。该文档是 policy route，不改变任何 check level。
 - 2026-06-18：新增 `docs/ai/verification-minimums.md` 作为最小验证集合路由，吸收 `demo_txt_t_proto/qqq` 暴露的“验证选择成本高”问题；该文档只帮助按改动面选择 focused checks，不改变任何 check level，也不替代本 registry 或 verification command matrix。
 - 2026-06-18：PreToolUse preflight catalog 调优：full-file `nl -ba`、过大 `sed` line window、dense governance doc window 和 shell glob read loop 现在按 `unbounded-large-output` 提醒并给出 bounded 替代；`token_budget` / `runtime_token_budget` 治理文档与脚本的 bounded read 不再计为 `sensitive-output`。该变化只降低误报和补齐大输出模式，等级仍保持 advisory。

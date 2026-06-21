@@ -17,6 +17,7 @@
 - Workstream IDs: WS-01, WS-02
 - Last Synced From: status,handoff,manual
 - Last Synced At: 2026-06-21
+- Last Sync Detail: Synced after borrowed harness controls added default-off quality supervisor protocol, manual async verification runner, default context line-density gate, and generalized runtime artifact staging boundary.
 
 ## 当前主目标
 
@@ -25,13 +26,14 @@
 - 2026-06-17 已固化 optimization defaults、run metrics、Real Data Activation Gate、Reuse And Retirement Gate 与 starter Python runtime 选择；均只增加审计/初始化信号，不新增外部发送、native sandbox、hosted eval/trace、MCP/A2A、真实 CI agent workflow、生产数据集成或自动删代码能力。
 - 2026-06-20 主分支推送 CI follow-up 已固化：PR branch hygiene 仍 strict，main push branch hygiene 只写 advisory summary，避免无关远端分支清理阻断主分支发布；Windows Python resolution 单测使用版本探针 mock，不依赖 POSIX fake executable。
 - 2026-06-20 commit / push 流程已拆分：本地 commit 只跑 fast gates，PR checks 失败用独立 repair worktree，合并 `main` 和同步本地开发分支保持独立确认；新增 PR checks 只读报告和 PR repair worktree helper，均为 advisory 操作辅助。
+- 2026-06-21 从 `demo_txt_t_proto` 吸收 bounded harness controls：`quality_supervisor` 默认关闭并由 review-required checker 审计；`start_async_verification.py` 仅写本地 runtime 恢复材料；context budget 增加默认面 line-density gate；governance 泛化拦截 staged generated `.codex/runtime` artifacts。
 - 2026-06-06 至 06-16 的 bounded vnext、external decisions、Prototype Design Brief、productization/config/coding-browser/loop/mock-data/enterprise standards 均保持 review-required / advisory 边界。
 - Active validation 仍只有 WS-01 Three.js Snake 与 WS-02 Harness Trace Console。
 - 2026-06-15 `new_pro_standard` 已同步公共 harness 机制，并保持 starter-safe 边界：不复制本 repo 的 REQ/WS、accepted samples、runtime artifacts 或 demo apps。
 
 ## 当前活跃队列
 
-1. 收敛 canonical change surface，避免 `.codex/runtime/*` 被当成共享 truth。
+1. 收敛 canonical change surface，避免 `.codex/runtime/*` 被跟踪或当成共享 truth。
 2. 压缩 context / ADR 预算，保持默认阅读链路短。
 3. 只用真实 bounded evidence 补 cross-task resume、remote interop、高影响动作和 guardrail 样本；不能用 schema sample 或 local-only artifact 补数。
 4. 独立处理 legacy code-shape 大文件，不扩大 harness 产品边界。
@@ -75,6 +77,8 @@
 - Main-push branch hygiene is advisory-only; PR branch hygiene remains strict. Unmanaged remote branches still need owner review, but this does not prove branch protection or ruleset health.
 - Commit / push workflow helpers are local/advisory only: `scripts/report_pr_checks.py` is read-only, `scripts/start_pr_repair_worktree.py` isolates PR repair in a sibling worktree, and neither proves remote enforcement or PR check success.
 - `$stacked-cigo-workflow` is the repo-local skill entry for CIGO-style PR lifecycle, stacked follow-up branches, isolated PR repair worktrees, safe `main` sync, and runtime cleanup; it keeps the same local/advisory boundaries as the commit / push helpers.
+- Quality supervisor protocol remains disabled by default; enabling it must preserve hooks-cannot-spawn-subagents and main-agent canonical-write boundaries.
+- Async verification status/log artifacts are local recovery evidence only; a run is not a pass claim until `status.json` says `passed` and the log has been inspected.
 - 2026-06-01 至 2026-06-06 已完成 capability bootstrap、tightening、state/evidence/aggregate 与 vnext advisory slices；边界仍是 local-first。
 
 ## 更新规则
