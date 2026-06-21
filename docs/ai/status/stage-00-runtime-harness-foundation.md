@@ -1,6 +1,6 @@
 # Stage-00 Runtime Harness Foundation Status
 
-更新时间：2026-06-20
+更新时间：2026-06-21
 阶段：stage-00
 状态：进行中
 
@@ -29,6 +29,7 @@
 - Starter bootstrap Python runtime 解析已支持父级 `.env` allowlisted selector 与 pyenv 版本回退；不复制 `.env`、不读取任意 secret、不提交 `.codex/.venv`。
 - Capability 聚合保持 local-first：runtime artifact 是本地恢复材料；verified remote、hosted trace/eval、MCP/A2A、native sandbox、外部 collector、真实 CI agent workflow 和生产原型能力均未声明完成。
 - External decisions、coding/browser selection、bounded loop triage、optimization defaults 与 execution wrapper 只覆盖 source-backed local/no-effect 改进；`native_sandbox=false`、`model_usage=none` 和 cost=0 都是边界元数据，不是平台能力证明。
+- 2026-06-21 从 `demo_txt_t_proto` 吸收可复用机制：质量监督子代理协议作为默认关闭的 review-required 配置 / checker，异步长验证作为手动本地 runner，默认上下文 line-density gate 和泛化 runtime artifact staging boundary 进入治理门禁；这些都不证明自动 subagent 编排、CI agent workflow、hosted eval 或远端 enforcement。
 
 ## 风险与阻塞
 
@@ -40,7 +41,7 @@
 
 ## 本轮收敛
 
-- `.codex/runtime/*` tracked verification artifacts 已从 canonical change surface 移除，生成目录改为 ignore。
+- `.codex/runtime/*` tracked verification artifacts 已从 canonical change surface 移除，生成目录改为默认 ignore；governance 会拦截 staged generated runtime artifacts，并允许 `git rm --cached` deletion 做历史索引清理。
 - Default context surface 降到预算线以下；ADR-002/003 已归档，当前 ADR 数低于预算。
 - 记录 1 条 bounded high-impact confirmation real sample；PreToolUse 已收集 2/2 accepted real warning samples（含 1 个 sensitive-output false positive）并记录 `keep-advisory` 决策；cross-task resume 仍因缺真实非 harness 任务样本保持 open。
 - `.codex/hooks.json` 已改为 portable hook launcher，Windows 进入 PowerShell runner，macOS / Linux 进入 POSIX runner，避免 `.py` 文件关联弹窗并消除跨宿主同步漂移。
@@ -53,6 +54,7 @@
 - 下一轮优先补真实 cross-task resume sample、ADR-017 允许的 remote endpoint pilot，以及 code-quality / product-agent / high-impact guardrail 的真实样本；所有升级仍按 check registry 的样本、误报率、修复路径、CI 成本和 owner 要求执行。
 - 后续产品级 agent、sandbox、CI coding-agent、hosted eval 或 MCP/A2A 方向先走 Harness Optimization Decision Defaults：comparison-only / task-shape gated / explicit confirmation，不从趋势报告直接升级 runtime。
 - 后续 coding-agent/browser、provider/model/endpoint、mock-data/reuse-retirement 或 product-agent 方向分别按对应 standard / config route 处理；偏离默认口径时写明 source-backed reason，不把 finding 当成删除许可或 capability claim。
+- 若后续启用 `quality_supervisor`，需先同步 AGENTS / standard / registry / index，并保留 main-agent canonical write 责任；若使用 async verification，必须检查 `.codex/runtime/async-verification/*/status.json` 与日志后再写验证结论。
 - 压缩完成型 handoff / status 细节，合并或 supersede 旧 ADR，避免默认面超过 context gate。
 - legacy code-shape 大文件按独立维护小切片拆分，避免和 capability schema 改动混合。
 

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from context_budget_warnings import (
     BudgetUsage,
+    DEFAULT_SURFACE_LINE_CHAR_BUDGET,
     blocking_findings,
     budget_usages,
     build_warnings,
@@ -36,6 +37,8 @@ class SurfaceItem:
     path: str
     lines: int
     estimated_tokens: int
+    max_line_chars: int = 0
+    max_line_number: int = 0
 
 
 @dataclass(frozen=True)
@@ -65,6 +68,7 @@ class ContextBudgetReport:
     warnings: list[str]
     duplicate_instructions: list[str]
     skills: list[SkillItem]
+    default_surface_line_char_budget: int = DEFAULT_SURFACE_LINE_CHAR_BUDGET
 
 
 def parse_args() -> argparse.Namespace:
@@ -114,6 +118,17 @@ def estimate_tokens(text: str) -> int:
     return max(1, round(len(text) / 4)) if text else 0
 
 
+def max_line_info(text: str) -> tuple[int, int]:
+    max_line_chars = 0
+    max_line_number = 0
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        line_chars = len(line)
+        if line_chars > max_line_chars:
+            max_line_chars = line_chars
+            max_line_number = line_number
+    return max_line_chars, max_line_number
+
+
 def extract_active_status(root: Path) -> Path | None:
     text = read_text(root / "docs" / "ai" / "working-context.md")
     match = re.search(r"^- Active Status Source:\s*(.+?)\s*$", text, re.MULTILINE)
@@ -143,11 +158,14 @@ def scan_default_surface(root: Path) -> list[SurfaceItem]:
     items: list[SurfaceItem] = []
     for path in default_surface_paths(root):
         text = read_text(path)
+        max_line_chars, max_line_number = max_line_info(text)
         items.append(
             SurfaceItem(
                 path=relative(path, root),
                 lines=len(text.splitlines()) if text else 0,
                 estimated_tokens=estimate_tokens(text),
+                max_line_chars=max_line_chars,
+                max_line_number=max_line_number,
             )
         )
     return items
@@ -294,6 +312,7 @@ def render_report(
         f"{report.default_surface_warning_percent}% / "
         f"{report.default_surface_high_warning_percent}%",
         f"- always-on document line budget: {report.always_on_doc_line_budget}",
+        f"- default surface line density budget: {report.default_surface_line_char_budget} chars",
         f"- active handoffs: {report.active_handoff_count} / budget {report.active_handoff_budget}",
         f"- ADR count: {report.adr_count} / budget {report.adr_budget}",
         f"- stage status line budget: {report.stage_status_line_budget}",
@@ -307,7 +326,10 @@ def render_report(
         )
     lines.extend(["", "Default surface:"])
     for item in report.default_surface:
-        lines.append(f"- {item.path}: {item.lines} lines, ~{item.estimated_tokens} tokens")
+        lines.append(
+            f"- {item.path}: {item.lines} lines, ~{item.estimated_tokens} tokens, "
+            f"max line {item.max_line_number}={item.max_line_chars} chars"
+        )
 
     if report.warnings:
         lines.extend(["", "Warnings:"])

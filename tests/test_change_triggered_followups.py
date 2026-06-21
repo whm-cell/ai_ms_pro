@@ -31,6 +31,13 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
         self.assertIn("governance-surface", names)
         self.assertIn("default-context-budget", names)
 
+    def test_default_context_budget_followup_is_blocking(self) -> None:
+        followups = check_change_triggered_followups.build_followups(("docs/ai/working-context.md",))
+        budget = next(item for item in followups if item.name == "default-context-budget")
+
+        self.assertEqual(budget.level, "blocking")
+        self.assertIn("check_ai_governance", budget.ci_coverage)
+
     def test_github_change_triggers_guardrails(self) -> None:
         names = self.followup_names(".github/workflows/governance-and-smoke.yml")
 
@@ -91,9 +98,33 @@ class ChangeTriggeredFollowupsTest(unittest.TestCase):
 
         self.assertIn("governance-surface", names)
         self.assertIn("runtime-token-budget", names)
+        self.assertIn("quality-supervisor-protocol", names)
         self.assertIn("config-contract-boundary", names)
         self.assertIn("mock-data-boundary", names)
         self.assertIn("reuse-retirement-boundary", names)
+
+    def test_quality_supervisor_protocol_change_triggers_checker(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            ("docs/ai/standards/quality-supervisor-protocol.md",)
+        )
+        names = {item.name for item in followups}
+        quality = next(item for item in followups if item.name == "quality-supervisor-protocol")
+
+        self.assertIn("governance-surface", names)
+        self.assertIn("quality-supervisor-protocol", names)
+        self.assertIn("scripts/check_quality_supervisor_protocol.py", "\n".join(quality.commands))
+        self.assertEqual(quality.level, "review-required")
+
+    def test_async_verification_script_change_triggers_async_followup(self) -> None:
+        followups = check_change_triggered_followups.build_followups(
+            ("scripts/start_async_verification.py",)
+        )
+        names = {item.name for item in followups}
+        async_followup = next(item for item in followups if item.name == "async-verification")
+
+        self.assertIn("async-verification", names)
+        self.assertIn("harness-code-shape", names)
+        self.assertIn("scripts/start_async_verification.py --list", "\n".join(async_followup.commands))
 
     def test_env_template_change_triggers_config_contract(self) -> None:
         followups = check_change_triggered_followups.build_followups((".env.example",))

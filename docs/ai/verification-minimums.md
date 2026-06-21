@@ -1,6 +1,6 @@
 # Verification Minimums
 
-更新时间：2026-06-20
+更新时间：2026-06-21
 状态：active routing aid
 
 ## 作用
@@ -26,7 +26,8 @@
 | `scripts/check_*`、verification router、sample-gap planner/checker | 相关 unit test、changed-file follow-up command、相关 checker no-write audit、`check_code_shape.py --all` |
 | `.codex/harness.toml`、config schema、prototype/design flags、mock/data/reuse settings | 对应 checker、`check_ai_governance.py`、`check_context_budget.py` |
 | Product/demo validation surfaces WS-01 / WS-02 | 直接相关 smoke/static contract；不要把 unrelated harness sample-gap checks 当成功能验证 |
-| `.codex/runtime/*` | 默认不作为 canonical doc 输入；只允许 README/templates 被跟踪，必要时用 `git ls-files .codex/runtime` 复核 |
+| Long local WS-01 / WS-02 smoke after fast gates | 可用 `scripts/start_async_verification.py active-browser-smoke` 放入本地 async runtime；只有 status 为 `passed` 且日志已检查后才能声明通过 |
+| `.codex/runtime/*` | 默认不作为 canonical doc 输入；`check_ai_governance.py` 拦截 staged generated runtime artifacts，README/templates/.gitkeep 可跟踪，必要时用 `git ls-files .codex/runtime` 复核 |
 | Commit 前 staged 收口 | `git diff --cached --check`、`check_code_shape.py --staged`、必要的 focused check；不跑长 smoke，除非改动面直接要求 |
 | Push feature branch / draft PR | 先确认不在直接推 `main`；push `codex/...` 或业务分支后交给 PR CI 跑远端 smoke / Windows / security evidence |
 | 只查看 PR checks | `scripts/report_pr_checks.py <PR>`；只报告 PR 状态、draft、branch、failed / pending checks，不修改文件、不 push |
@@ -41,6 +42,13 @@
 - PR checks 失败时，优先用独立 repair worktree 修复，避免污染当前开发工作区。
 - PR 合并、`main` 更新、本地开发分支同步是独立阶段；合并前确认 PR open、非 draft、head SHA 未变且 checks 通过，合并后不要自动 rebase / pull 当前开发分支。
 - 当前 private GitHub Free 下 branch protection / required checks / 禁直推仍是 remote `UNKNOWN`；不要把本地流程写成远端已强制。
+
+## Async Checks
+
+- `scripts/start_async_verification.py --list` 列出本地长验证 preset。
+- `scripts/start_async_verification.py active-browser-smoke` 会启动 detached 本地 worker，并把 `status.json` 与 `verification.log` 写到 `.codex/runtime/async-verification/`。
+- `scripts/start_async_verification.py active-browser-smoke --foreground` 可同步运行并显示输出。
+- Async runtime 文件仍是 local recovery evidence；未检查 status/log 前，不得把 async run 写成验证通过。
 
 ## 详细矩阵
 
