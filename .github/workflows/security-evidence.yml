@@ -26,14 +26,14 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Run OpenSSF Scorecard
         continue-on-error: true
         timeout-minutes: 10
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # ossf/scorecard-action@v2.4.3
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # ossf/scorecard-action@v2.4.4
         with:
           results_file: scorecard-results.sarif
           results_format: sarif
@@ -42,7 +42,7 @@ jobs:
       - name: Upload Scorecard results
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # actions/upload-artifact@v7
         with:
           name: scorecard-results
           path: scorecard-results.sarif
@@ -67,7 +67,7 @@ jobs:
       - name: Upload CodeQL results
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # actions/upload-artifact@v7
         with:
           name: codeql-results
           path: codeql-results
@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate SBOM
         continue-on-error: true
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # anchore/sbom-action@v0
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # anchore/sbom-action@v0.24.3
         with:
           path: .
           format: cyclonedx-json
@@ -84,7 +84,7 @@ jobs:
       - name: Upload SBOM
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # actions/upload-artifact@v7
         with:
           name: sbom-cyclonedx
           path: sbom.cyclonedx.json
